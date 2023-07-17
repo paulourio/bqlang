@@ -1,0 +1,260 @@
+/* Lexical Part */
+
+/* String and bytes literals */
+string_literal: [_raw_string_prefix](_sqtext|_sq3text|_dqtext|_dq3text) ;
+bytes_literal:  (_bytes_prefix|_raw_bytes_prefix)(_sqtext|_sq3text|_dqtext|_dq3text) ;
+
+/*
+    The abbreviations here:
+      sq = single quote
+      dq = double quote
+      bq = backtick quote
+      3  = triple quote
+      _0 = unterminated versions.  They are used to return better error
+            messages for unterminated strings and bytes.
+
+    Here we accept arbitrary escapes instead of trying to narrowing it
+    down just the valid set.  The actual validation of the escapes, and
+    of things like UTF-8 structure, is done in the parser.
+ */
+_sqtext:      _sqtext_0 _sq ;
+_sqtext_0:    _sq{(_no_backslash_sq_newline|_any_escape)} ;
+_dqtext:      _dqtext_0 _dq ;
+_dqtext_0:    _dq{(_no_backslash_dq_newline|_any_escape)} ;
+_sq3text:     _sq3text_0 _sq3 ;
+_sq3text_0:   _sq3{[(_sq|(_sq _sq))](_no_backslash_sq|_any_escape)} ;
+_dq3text:     _dq3text_0 _dq3 ;
+_dq3text_0:   _dq3{[(_dq|(_dq _dq))](_no_backslash_dq|_any_escape)} ;
+
+_any_escape:              '\\'(_ascii_char|'"'|'\''|'\\'|'\n'|'\r');
+_raw_string_prefix:       ('r'|'R') ;
+_raw_bytes_prefix:        (('r'|'R')('b'|'B')) | (('b'|'B')('r'|'R')) ;
+_bytes_prefix:            ('b'|'B') ;
+_no_backslash_sq_newline: _char|'"' ;
+_no_backslash_dq_newline: _char|'\'' ;
+_no_backslash_sq:         _char|_dq|'\n' ;
+_no_backslash_dq:         _char|_sq|'\n' ;
+_sq3:                     _sq _sq _sq ;
+_dq3:                     _dq _dq _dq ;
+_sq:                      '\'' ;
+_dq:                      '"' ;
+
+
+_char:            _ascii_char|_unicode_byte ;
+_ascii_char:      '\x01'-'\x09' /* skip null (0x00) */
+                | '\x0B'-'\x21' /* skip line feed (0x0A) */
+                | '\x23'-'\x26' /* skip double quote (0x22) */
+                | '\x28'-'\x5B' /* skip single quote (0x27) */
+                | '\x5D'-'\x7F' /* skip backslash (0x5C) */
+                ;
+_unicode_byte:  '\u0080'-'\uFFFC'|'\uFFFE'-'\U0010FFFF' ;
+
+comment: '-''-'{_single_line_comment_char}['\n']
+       | '#'{_single_line_comment_char}['\n']
+       | '/''/'{_single_line_comment_char}['\n']
+       | _cs_comment
+       ;
+
+/* C-style comments using slash+star */
+_cs_comment:        _cs_comment_begin'*'{'*'}'/' ;
+_cs_comment_begin:  '/''*'{(.|'*')} ;
+
+_single_line_comment_char:
+      '\x01'-'\x09'         /* skip null (0x00) */
+    | '\x0B'-'\x7F'         /* skip line feed (0x0A) */
+    | '\u0080'-'\uFFFC'
+    | '\uFFFE'-'\U0010FFFF' /* skip invalid code point (\uFFFD) */
+    ;
+
+!whitespace: ' '|'\t'|'\r'|'\u00a0'|'\u2000'|'\u2001'|'\u2003'|'\u2004' ;
+
+newline: '\n' ;
+
+template_block_start: '{''%'['-'] ;
+template_block_end:   ['-']'%''}' ;
+
+template_comment:        _template_comment_start{.}['-']'#''}' ;
+_template_comment_start: '{''#'['-'] ;
+_template_comment_end:   ['-']'#''}' ;
+
+template_variable_start: '{''{'['-'] ;
+template_variable_end:   ['-']'}''}' ;
+
+identifier: _unquoted_identifier|_bqtext ;
+
+_unquoted_identifier: _id_0{(_id_0|'0'-'9'|'.')} ;
+_id_0:      'a'-'z'|'A'-'Z'|'_' ;
+_bqtext_0:  _bq{(_id_char|_any_escape)} ;
+_bqtext:    _bqtext_0 _bq ;
+_bq:        '`' ;
+_id_char:   '\x01'-'\x09' /* skip null (0x00) */
+          | '\x0B'-'\x5B' /* skip line feed (0x0A) */
+          | '\x5D'-'\x5F' /* skip backslash (0x5C) */
+          | '\x61'-'\x7F' /* skip backtick (0x60) */
+          ;
+
+/* Integer literals */
+integer_literal: (_decimal_literal|_hex_literal) ;
+
+/* Floating-point literals */
+floating_point_literal: _float_literal ;
+
+_float_literal:     _decimals'.'[_decimals][_exponent]
+                  | _decimals _exponent
+                  | '.'_decimals[_exponent]
+                  ;
+_decimals:        _decimal_digit{_decimal_digit} ;
+_exponent:        ('e'|'E')['+'|'-']_decimals ;
+_decimal_literal: _decimal_digit{_decimal_digit} ;
+_decimal_digit:   '0'-'9' ;
+_hex_literal:     '0'('x'|'X')_hex_digit{_hex_digit} ;
+_hex_digit:       _decimal_digit|'a'-'f'|'A'-'F' ;
+
+/* Syntax Part */
+
+Script:
+      Element
+      << NewScript($0) >>
+    | Script Element
+      << WithExtraChild($0, $1) >>
+    | Script TemplateComment
+      << WithExtraChild($0, $1) >>
+    | Script TemplateForBlock
+      << WithExtraChild($0, $1) >>
+    | Script TemplateIfBlock
+      << WithExtraChild($0, $1) >>
+    | Script TemplateSetBlock
+      << WithExtraChild($0, $1) >>
+    | Script TemplateVariable
+      << WithExtraChild($0, $1) >>
+    ;
+
+Element:
+      TemplateForBlock
+    | TemplateIfBlock
+    | TemplateSetBlock
+    | TemplateComment
+    | TemplateVariable
+    | Element2
+    ;
+
+Element2:
+      Comment
+    | identifier
+    | bytes_literal
+    | string_literal
+    | integer_literal
+    | floating_point_literal
+    /* | whitespace */
+    | newline
+    | "*" | "<" | ">" | "[" | "]" | "(" | ")" | "," | "."
+    | "|" | "^" | "&" | "<<" | ">>" | "=>" | "/"
+    | "+" | "-" | "||" | "<>" | "!=" | "=" | "<" | "<=" | ">" | ">="
+    | ";" | "." | "@" | "{" | "}" | "~" | "else" | "if" | "for"
+    | "endfor" | "elif" | "endif" | "set" | "?"
+    ;
+
+Comment:
+      comment
+      << NewComment($0) >>
+    ;
+
+TemplateSetBlock:
+      TemplateSetBlockPrefix template_block_end
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateSetBlockPrefix:
+      template_block_start "set" "="
+      << NewTemplateSetBlock($0) >>
+    | TemplateSetBlockPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateIfBlock:
+      TemplateIfBlockPrefix TemplateIfEnd
+      << UpdateLoc($0, $1) >>
+    | TemplateIfBlockPrefix TemplateElse Element TemplateIfEnd
+      <<
+      func() (Attrib, error) {
+          n, err := WithExtraChild($0, $2)
+          if err != nil { return nil, err }
+
+          return UpdateLoc(n, $3)
+      }()
+      >>
+    | TemplateIfBlockPrefix TemplateElse TemplateIfEnd
+      << UpdateLoc($0, $2) >>
+    ;
+
+TemplateIfBlockPrefix:
+      TemplateIfBegin
+    | TemplateIfBlockPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateIfBegin:
+      TemplateIfBeginPrefix template_block_end
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateIfBeginPrefix:
+      template_block_start "if"
+      << NewTemplateIfBlock($0) >>
+    | TemplateIfBeginPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateIfEnd:
+      template_block_start "endif" template_block_end
+      << $2, nil >>
+    ;
+
+TemplateElse:
+      template_block_start "else" template_block_end
+      << $2, nil >>
+    ;
+
+TemplateForBlock:
+      TemplateForBlockPrefix TemplateForEnd
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateForBlockPrefix:
+      TemplateForBegin Element
+      << WithExtraChild($0, $1) >>
+    | TemplateForBlockPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateForBegin:
+      TemplateForBeginPrefix template_block_end
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateForBeginPrefix:
+      template_block_start "for"
+      << NewTemplateForBlock($0) >>
+    | TemplateForBeginPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateForEnd:
+      template_block_start "endfor" template_block_end
+      << $2, nil >>
+    ;
+
+TemplateComment:
+      template_comment
+      << NewTemplateComment($0) >>
+    ;
+
+TemplateVariable:
+      TemplateVariablePrefix template_variable_end
+      << NewTemplateVariable($0, $1) >>
+    ;
+
+TemplateVariablePrefix:
+      template_variable_start
+    | TemplateVariablePrefix Element
+    ;

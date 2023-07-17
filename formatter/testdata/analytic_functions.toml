@@ -1,0 +1,500 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select f() over () from T
+"""
+formatted = """
+SELECT F() OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(a, b+1, sum(c)) over () from T
+"""
+formatted = """
+SELECT F(a, b + 1, SUM(c)) OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(distinct a, b) over () from T
+"""
+formatted = """
+SELECT F(DISTINCT a, b) OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (partition by a, b+1, 1, sum(c)) from T
+"""
+formatted = """
+SELECT F() OVER (PARTITION BY a, b + 1, 1, SUM(c))
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (order by a, b+1, 1, sum(c)) from T
+"""
+formatted = """
+SELECT F() OVER (ORDER BY a, b + 1, 1, SUM(c))
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (partition by a order by a)
+"""
+formatted = """
+SELECT F() OVER (
+         PARTITION BY a
+             ORDER BY a
+       )
+"""
+
+[[cases]]
+input = """
+select f() over (rows unbounded preceding)
+"""
+formatted = """
+SELECT F() OVER (ROWS UNBOUNDED PRECEDING)
+"""
+
+[[cases]]
+input = """
+select f() over (range unbounded preceding)
+"""
+formatted = """
+SELECT F() OVER (RANGE UNBOUNDED PRECEDING)
+"""
+
+[[cases]]
+input = """
+select f() over (rows 5+5 preceding)
+"""
+formatted = """
+SELECT F() OVER (ROWS 5 + 5 PRECEDING)
+"""
+
+[[cases]]
+input = """
+select f() over (range 5+5 preceding)
+"""
+formatted = """
+SELECT F() OVER (RANGE 5 + 5 PRECEDING)
+"""
+
+[[cases]]
+input = """
+select f() over (rows current row)
+"""
+formatted = """
+SELECT F() OVER (ROWS CURRENT ROW)
+"""
+
+[[cases]]
+input = """
+select f() over (range current row)
+"""
+formatted = """
+SELECT F() OVER (RANGE CURRENT ROW)
+"""
+
+[[cases]]
+input = """
+select f() over (rows between 5+5 preceding and unbounded preceding)
+from T
+"""
+formatted = """
+SELECT F() OVER (ROWS BETWEEN 5 + 5 PRECEDING AND UNBOUNDED PRECEDING)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (range between 5+5 preceding and unbounded preceding)
+from T
+"""
+formatted = """
+SELECT F() OVER (RANGE BETWEEN 5 + 5 PRECEDING AND UNBOUNDED PRECEDING)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (rows between 5+5 preceding and 5+5 preceding)
+from T
+"""
+formatted = """
+SELECT F() OVER (ROWS BETWEEN 5 + 5 PRECEDING AND 5 + 5 PRECEDING)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (range between 5+5 preceding and current row)
+from T
+"""
+formatted = """
+SELECT F() OVER (RANGE BETWEEN 5 + 5 PRECEDING AND CURRENT ROW)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (rows between 5+5 preceding and 5+5 following)
+from T
+"""
+formatted = """
+SELECT F() OVER (ROWS BETWEEN 5 + 5 PRECEDING AND 5 + 5 FOLLOWING)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (range between 5+5 preceding and unbounded following)
+from T
+"""
+formatted = """
+SELECT F() OVER (RANGE BETWEEN 5 + 5 PRECEDING AND UNBOUNDED FOLLOWING)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (partition by a order by b rows current row) from T
+"""
+formatted = """
+SELECT F() OVER (
+         PARTITION BY a
+             ORDER BY b
+              ROWS CURRENT ROW
+       )
+  FROM T
+"""
+
+[[cases]]
+description = "partition by, order by and framing are all optional."
+input = """
+select f() over (partition by a rows current row) from T
+"""
+formatted = """
+SELECT F() OVER (
+         PARTITION BY a
+              ROWS CURRENT ROW
+       )
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (order by a  rows current row) from T
+"""
+formatted = """
+SELECT F() OVER (
+         ORDER BY a
+          ROWS CURRENT ROW
+       )
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (partition by a order by a) from T
+"""
+formatted = """
+SELECT F() OVER (
+         PARTITION BY a
+             ORDER BY a
+       )
+  FROM T
+"""
+
+[[cases]]
+description = "Window clauses."
+input = """
+select * from T
+window w1 as (),
+       w2 as (partition by a order by b rows current row),
+       w3 as (w1),
+       w4 as (w1 partition by a order by b rows current row)
+"""
+formatted = """
+SELECT *
+  FROM T
+WINDOW w1 AS (),
+       w2 AS (
+         PARTITION BY a
+             ORDER BY b
+              ROWS CURRENT ROW
+       ),
+       w3 AS (
+         w1
+       ),
+       w4 AS (
+         w1
+         PARTITION BY a
+             ORDER BY b
+              ROWS CURRENT ROW
+       )
+"""
+
+[[cases]]
+input = """
+select f() over (w) from T
+"""
+formatted = """
+SELECT F() OVER w
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (w partition by a, b order by a, b rows current row) from T
+"""
+formatted = """
+SELECT F() OVER (
+         w
+         PARTITION BY a, b
+             ORDER BY a, b
+              ROWS CURRENT ROW
+       )
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over w from T
+"""
+formatted = """
+SELECT F() OVER w
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over w from T
+"""
+formatted = """
+SELECT F() OVER w
+  FROM T
+"""
+
+[[cases]]
+description = "Analytic function call ends after OVER <identifier>, so OVER a.b gets parsed as (... OVER a).b."
+input = """
+select f() over a.b
+from T
+window a as ()
+"""
+formatted = """
+SELECT F() OVER a.b
+  FROM T
+WINDOW a AS ()
+"""
+
+[[cases]]
+description = "Analytic function call ends after OVER <identifier>, so OVER a.b gets parsed as (... OVER a).b."
+input = """
+select f() over (a).b
+from T
+window a as ()
+"""
+formatted = """
+SELECT F() OVER a.b
+  FROM T
+WINDOW a AS ()
+"""
+
+[[cases]]
+description = "Analytic function call ends after OVER <identifier>, so OVER a.b gets parsed as (... OVER a).b."
+input = """
+select (f() over (a)).b
+from T
+window a as ()
+"""
+formatted = """
+SELECT (F() OVER a).b
+  FROM T
+WINDOW a AS ()
+"""
+
+[[cases]]
+description = "Analytic function call ends after OVER <identifier>, so OVER a+b gets parsed as (... OVER a)+b."
+input = """
+select f() over a+b
+from T
+window a as ()
+"""
+formatted = """
+SELECT F() OVER a + b
+  FROM T
+WINDOW a AS ()
+"""
+
+[[cases]]
+description = "Analytic function call ends after OVER <identifier>, so OVER a+b gets parsed as (... OVER a)+b."
+input = """
+select f() over (a)+b
+from T
+window a as ()
+"""
+formatted = """
+SELECT F() OVER a + b
+  FROM T
+WINDOW a AS ()
+"""
+
+[[cases]]
+description = "Analytic function call ends after OVER <identifier>, so OVER a+b gets parsed as (... OVER a)+b."
+input = """
+select (f() over a)+b
+from T
+window a as ()
+"""
+formatted = """
+SELECT (F() OVER a) + b
+  FROM T
+WINDOW a AS ()
+"""
+
+[[cases]]
+description = "The parser allows analytic functions to appear in any places that admit an expression."
+input = """
+select f() over (), (f() over ())+1,
+       f(f() over ()) over (partition by f() over () order by f() over ()
+                            rows f() over () preceding)
+from T
+where f() over () and (f() over ())+1
+group by f() over (), (f() over ())+1
+having f() over () and (f() over ())+1
+order by f() over (), (f() over ())+1
+"""
+formatted = """
+SELECT F() OVER (),
+       (F() OVER ()) + 1,
+       F(
+         F() OVER ()
+       ) OVER (
+         PARTITION BY F() OVER ()
+             ORDER BY F() OVER ()
+              ROWS F() OVER () PRECEDING
+       )
+  FROM T
+ WHERE F() OVER ()
+   AND (F() OVER ()) + 1
+ GROUP BY F() OVER (), (F() OVER ()) + 1
+HAVING F() OVER ()
+   AND (F() OVER ()) + 1
+ ORDER BY F() OVER (), (F() OVER ()) + 1
+"""
+
+[[cases]]
+description = "Analytic functions in order by after union all."
+input = """
+select * from T
+union all
+select * from T
+order by f() over (), (f() over ())+1
+"""
+formatted = """
+SELECT *
+  FROM T
+ UNION ALL
+SELECT *
+  FROM T
+ ORDER BY F() OVER (), (F() OVER ()) + 1
+"""
+
+[[cases]]
+input = """
+select f() over (order by k collate "latin1_german2_ci") from T
+"""
+formatted = """
+SELECT F() OVER (ORDER BY k COLLATE "latin1_german2_ci")
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(a ignore nulls) over () from T
+"""
+formatted = """
+SELECT F(a IGNORE NULLS) OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(a,b respect nulls) over () from T
+"""
+formatted = """
+SELECT F(a, b RESPECT NULLS) OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(a, b ignore nulls) over () from T
+"""
+formatted = """
+SELECT F(a, b IGNORE NULLS) OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(a, b respect nulls) over () from T
+"""
+formatted = """
+SELECT F(a, b RESPECT NULLS) OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(a, b ignore nulls) over () from T
+"""
+formatted = """
+SELECT F(a, b IGNORE NULLS) OVER ()
+  FROM T
+"""
+
+[[cases]]
+input = """
+select
+f(distinct a, b ignore nulls order by c limit 1) over ()
+from T
+"""
+formatted = """
+SELECT F(
+         DISTINCT
+         a,
+         b
+         IGNORE NULLS
+         ORDER BY c
+         LIMIT 1
+       ) OVER ()
+  FROM T
+"""

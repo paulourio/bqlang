@@ -1,0 +1,154 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+set a=3
+"""
+formatted = """
+SET a = 3
+"""
+
+[[cases]]
+input = """
+set a=(SELECT x from T WHERE y=100);
+"""
+formatted = """
+SET a = (
+  SELECT x
+    FROM T
+   WHERE y = 100
+)
+"""
+
+[[cases]]
+input = """
+set a=ARRAY(SELECT x from T WHERE y=100);
+"""
+formatted = """
+SET a = ARRAY(
+  SELECT x
+    FROM T
+   WHERE y = 100
+)
+"""
+
+[[cases]]
+input = """
+set (a,b)=(ARRAY(SELECT x from T WHERE y=100), STRUCT());
+"""
+formatted = """
+SET (a, b) = (
+  ARRAY(
+    SELECT x
+      FROM T
+     WHERE y = 100
+  ),
+  STRUCT()
+)
+"""
+
+[[cases]]
+description = "Equals sign in expression, in addition to separator token"
+input = """
+set a = b = c;
+"""
+formatted = """
+SET a = b = c
+"""
+
+[[cases]]
+description = """
+Struct assignment (one field)
+"""
+input = """
+SET (a) = y;
+"""
+formatted = """
+SET (a) = y
+"""
+
+[[cases]]
+description = """
+Struct assignment (multiple fields)
+"""
+input = """
+SET (a,b) = y;
+"""
+formatted = """
+SET (a, b) = y
+"""
+
+[[cases]]
+description = """
+Struct assignment to struct expression
+"""
+input = """
+SET (a,b) = (1 + 3, 'foo');
+"""
+formatted = """
+SET (a, b) = (1 + 3, 'foo')
+"""
+
+[[cases]]
+description = """
+Base case - set a parameter to an integer literal.
+"""
+input = """
+SET @value = 1
+"""
+formatted = """
+SET @value = 1
+"""
+
+[[cases]]
+description = """
+Base case - set a parameter to an integer literal.
+"""
+input = """
+SET @@value = 1
+"""
+formatted = """
+SET @@value = 1
+"""
+
+[[cases]]
+description = """
+Use a parameter name that is a reserved keyword.
+"""
+input = """
+SET @AND="something"
+"""
+formatted = """
+SET @AND = "something"
+"""
+
+[[cases]]
+description = """
+Set a parameter to an expression with a SELECT statment
+"""
+input = """
+SET @VAL = (SELECT * FROM t)
+"""
+formatted = """
+SET @VAL = (
+  SELECT *
+    FROM t
+)
+"""

@@ -1,0 +1,778 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+align_trailing_comments = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select 1
+"""
+formatted = """
+SELECT 1
+"""
+
+[[cases]]
+input = """
+select 1; # NBSP
+"""
+formatted = """
+SELECT 1  # NBSP
+"""
+
+[[cases]]
+input = """
+select
+# full line comment
+/* block
+   comment */
+-- full line comment
+1# partial line comment
++-- partial line comment
+2/*partial line block comment*/+3;
+"""
+formatted = """
+SELECT # full line comment
+       /* block
+   comment */
+       -- full line comment
+       1  # partial line comment
+       +  -- partial line comment
+       2  /*partial line block comment*/ + 3
+"""
+
+[[cases]]
+input = """
+select /* block comment */
+/* contiguous block comment */ 1
+"""
+formatted = """
+SELECT /* block comment */
+       /* contiguous block comment */ 1
+"""
+
+[[cases]]
+input = """
+select--comment
+--comment
+1 -- comment
++--
+2--comment
+"""
+formatted = """
+SELECT --comment
+       --comment
+       1  -- comment
+       +  --
+       2  --comment
+"""
+
+[[cases]]
+input = """
+select--comment
+--comment
+1 -- comment
++--
+2--2
+"""
+formatted = """
+SELECT --comment
+       --comment
+       1  -- comment
+       +  --
+       2  --2
+"""
+
+[[cases]]
+input = """
+select--comment
+--comment
+1 -- comment
++--
+2 /* comment */ FROM t
+"""
+formatted = """
+SELECT --comment
+       --comment
+       1  -- comment
+       +  --
+       2  /* comment */
+  FROM t
+"""
+
+[[cases]]
+input = """
+select --
+5
+"""
+formatted = """
+SELECT --
+       5
+"""
+
+[[cases]]
+input = """
+select - - - - - - - 1
+"""
+formatted = """
+SELECT - - - - - - -1
+"""
+
+[[cases]]
+input = """
+select "abc -- def",
+       "abc # def",
+       "abc /* def */ ghi"
+"""
+formatted = """
+SELECT "abc -- def", "abc # def", "abc /* def */ ghi"
+"""
+
+[[cases]]
+input = """
+select /* no nested comments # -- /* */ 1;
+"""
+formatted = """
+SELECT /* no nested comments # -- /* */ 1
+"""
+
+[[cases]]
+input = """
+select f1, `f 2` from T where b;
+"""
+formatted = """
+SELECT f1, `f 2`
+  FROM T
+ WHERE b
+"""
+
+[[cases]]
+input = """
+select f1, f2 from (select 1 f1, "b" f2);
+"""
+formatted = """
+SELECT f1, f2
+  FROM (
+         SELECT 1   AS f1,
+                "b" AS f2
+       )
+"""
+
+[[cases]]
+input = """
+select f1 from (select 1 f1) AS subquery_alias_1, (select 1 f1) subquery_alias_2
+"""
+formatted = """
+SELECT f1
+  FROM (
+         SELECT 1 AS f1
+       ) AS subquery_alias_1,
+       (
+         SELECT 1 AS f1
+       ) AS subquery_alias_2
+"""
+
+[[cases]]
+input = """
+select hll_count.extract(hll_count.merge(foo)) from bar;
+"""
+formatted = """
+SELECT HLL_COUNT.EXTRACT(HLL_COUNT.MERGE(foo))
+  FROM bar
+"""
+
+[[cases]]
+input = """
+select a AND b from T;
+"""
+formatted = """
+SELECT a AND b
+  FROM T
+"""
+
+[[cases]]
+input = """
+select F(x + y) from A;
+"""
+formatted = """
+SELECT F(x + y)
+  FROM A
+"""
+
+[[cases]]
+input = """
+select count(abc.def), count(*), anon_count(*, 0, 1) from T;
+"""
+formatted = """
+SELECT COUNT(abc.def),
+       COUNT(*),
+       ANON_COUNT(*, 0, 1)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select a.b.f(x.y) from T;
+"""
+formatted = """
+SELECT A.B.F(x.y)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select *, a.b.f(x.y) from T;
+"""
+formatted = """
+SELECT *, A.B.F(x.y)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(g(x)), f(1), h() AS foo from T;
+"""
+formatted = """
+SELECT F(G(x)),
+       F(1),
+       H() AS foo
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f(1, x, "a", true, g(y)) AS bar from T;
+"""
+formatted = """
+SELECT F(
+         1,
+         x,
+         "a",
+         TRUE,
+         G(y)
+       ) AS bar
+  FROM T
+"""
+
+[[cases]]
+input = """
+select -1, +2, NOT a from T;
+"""
+formatted = """
+SELECT -1, +2, NOT a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select cast(x as string(10));
+"""
+formatted = """
+SELECT CAST(x AS STRING(10))
+"""
+
+[[cases]]
+input = """
+select cast(x as string collate 'und:ci');
+"""
+formatted = """
+SELECT CAST(x AS STRING COLLATE 'und:ci')
+"""
+
+[[cases]]
+input = """
+select cast(x as double collate 'und:ci');
+"""
+formatted = """
+SELECT CAST(x AS DOUBLE COLLATE 'und:ci')
+"""
+
+[[cases]]
+input = """
+select cast(x as struct<x string collate 'und:ci'>);
+"""
+formatted = """
+SELECT CAST(x AS STRUCT<x STRING COLLATE 'und:ci'>)
+"""
+
+[[cases]]
+input = """
+select cast(x as struct<x string> collate 'und:ci');
+"""
+formatted = """
+SELECT CAST(x AS STRUCT<x STRING> COLLATE 'und:ci')
+"""
+
+[[cases]]
+input = """
+select cast(x as array<string collate 'und:ci'>);
+"""
+formatted = """
+SELECT CAST(x AS ARRAY<STRING COLLATE 'und:ci'>)
+"""
+
+[[cases]]
+input = """
+select cast(x as array<string> collate 'und:ci');
+"""
+formatted = """
+SELECT CAST(x AS ARRAY<STRING> COLLATE 'und:ci')
+"""
+
+[[cases]]
+input = """
+select cast(`date` as date) from A;
+"""
+formatted = """
+SELECT CAST(`date` AS DATE)
+  FROM A
+"""
+
+[[cases]]
+input = """
+select safe_cast(`date` as date) from A;
+"""
+formatted = """
+SELECT SAFE_CAST(`date` AS DATE)
+  FROM A
+"""
+
+[[cases]]
+input = """
+select safe_cast([1,2,3] as array<string>)
+"""
+formatted = """
+SELECT SAFE_CAST([1, 2, 3] AS ARRAY<STRING>)
+"""
+
+[[cases]]
+input = """
+select cast("1" as int32), cast(1 as string),
+       cast(t as TimeStamp_Millis),
+       cast(u as TimeStamp_Micros),
+       cast(v as TimeStamp_seconds),
+       cast(w as TimeStamp_nanos),
+       cast(x as `mypackage.myproto`),
+       cast(y as `mypackage.myenum`) from T;
+"""
+formatted = """
+SELECT CAST("1" AS INT32),
+       CAST(1 AS STRING),
+       CAST(t AS TIMESTAMP_MILLIS),
+       CAST(u AS TIMESTAMP_MICROS),
+       CAST(v AS TIMESTAMP_SECONDS),
+       CAST(w AS TIMESTAMP_NANOS),
+       CAST(x AS `mypackage.myproto`),
+       CAST(y AS `mypackage.myenum`)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select safe_cast("1" as int32), safe_cast(1 as string),
+       safe_cast(t as TimeStamp_Millis),
+       safe_cast(u as TimeStamp_Micros),
+       safe_cast(v as TimeStamp_seconds),
+       safe_cast(w as TimeStamp_nanos),
+       safe_cast(x as `mypackage.myproto`),
+       safe_cast(y as `mypackage.myenum`) from T;
+"""
+formatted = """
+SELECT SAFE_CAST("1" AS INT32),
+       SAFE_CAST(1 AS STRING),
+       SAFE_CAST(t AS TIMESTAMP_MILLIS),
+       SAFE_CAST(u AS TIMESTAMP_MICROS),
+       SAFE_CAST(v AS TIMESTAMP_SECONDS),
+       SAFE_CAST(w AS TIMESTAMP_NANOS),
+       SAFE_CAST(x AS `mypackage.myproto`),
+       SAFE_CAST(y AS `mypackage.myenum`)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select cast(x as foo),
+       cast(x as a.b),
+       cast(x > 5 as timestamp_seconds),
+       cast("1" as `int64`) as cast_1_as_int64,
+       cast(x < 10 as b),
+       cast(x as struct<x int, y double>),
+       cast(x as struct<int, double>),
+       cast(x as struct<x int, y double, string, bytes>)
+from T;
+"""
+formatted = """
+SELECT CAST(x AS FOO),
+       CAST(x AS A.B),
+       CAST(x > 5 AS TIMESTAMP_SECONDS),
+       CAST("1" AS `int64`) AS cast_1_as_int64,
+       CAST(x < 10 AS B),
+       CAST(x AS STRUCT<x INT, y DOUBLE>),
+       CAST(x AS STRUCT<INT, DOUBLE>),
+       CAST(x AS STRUCT<x INT, y DOUBLE, STRING, BYTES>)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select safe_cast(x as foo),
+       safe_cast(x as a.b),
+       safe_cast(x > 5 as timestamp_seconds),
+       safe_cast("1" as `int64`) as cast_1_as_int64,
+       safe_cast(x < 10 as b),
+       safe_cast(x as struct<x int, y double>),
+       safe_cast(x as struct<int, double>),
+       safe_cast(x as struct<x int, y double, string, bytes>)
+from T;
+"""
+formatted = """
+SELECT SAFE_CAST(x AS FOO),
+       SAFE_CAST(x AS A.B),
+       SAFE_CAST(x > 5 AS TIMESTAMP_SECONDS),
+       SAFE_CAST("1" AS `int64`) AS cast_1_as_int64,
+       SAFE_CAST(x < 10 AS B),
+       SAFE_CAST(x AS STRUCT<x INT, y DOUBLE>),
+       SAFE_CAST(x AS STRUCT<INT, DOUBLE>),
+       SAFE_CAST(x AS STRUCT<x INT, y DOUBLE, STRING, BYTES>)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select cast(expr as string format format_string) from t;
+"""
+formatted = """
+SELECT CAST(expr AS STRING FORMAT format_string)
+  FROM t
+"""
+
+[[cases]]
+input = """
+select safe_cast(expr as string format format_string) from t;
+"""
+formatted = """
+SELECT SAFE_CAST(expr AS STRING FORMAT format_string)
+  FROM t
+"""
+
+[[cases]]
+input = """
+select cast(expr AS date FORMAT format_string At tImE ZoNe hour || ':' || minute) from t;
+"""
+formatted = """
+SELECT CAST(expr AS DATE FORMAT format_string AT TIME ZONE hour || ':' || minute)
+  FROM t
+"""
+
+[[cases]]
+input = """
+select safe_cast(expr AS date FORMAT format_string At tImE ZoNe hour || ':' || minute) from t;
+"""
+formatted = """
+SELECT SAFE_CAST(expr AS DATE FORMAT format_string AT TIME ZONE hour || ':' || minute)
+  FROM t
+"""
+
+[[cases]]
+input = """
+select count(*), anon_count(*, 0, 1), count(distinct x), sum(x),
+       sum(distinct x), group_concat(distinct x, '|')
+from T;
+"""
+formatted = """
+SELECT COUNT(*),
+       ANON_COUNT(*, 0, 1),
+       COUNT(DISTINCT x),
+       SUM(x),
+       SUM(DISTINCT x),
+       GROUP_CONCAT(DISTINCT x, '|')
+  FROM T
+"""
+
+[[cases]]
+input = """
+select count(distinct);
+"""
+formatted = """
+SELECT COUNT(DISTINCT )
+"""
+
+[[cases]]
+description = "WITH reserved word works in a path expression."
+input = """
+select nested1.field1, field2 from table1.with.dots
+"""
+formatted = """
+SELECT nested1.field1, field2
+  FROM table1.with.dots
+"""
+
+[[cases]]
+description = "PROTO reserved word works in a path expression."
+input = """
+select nested1.proto
+"""
+formatted = """
+SELECT nested1.proto
+"""
+
+[[cases]]
+description = "Table name with backticks"
+input = """
+select nested1.field1, field2 from `table.with.dots`
+"""
+formatted = """
+SELECT nested1.field1, field2
+  FROM `table.with.dots`
+"""
+
+[[cases]]
+input = """
+select f(column.field_name) like 'pattern%';
+"""
+formatted = """
+SELECT F(column.field_name) LIKE 'pattern%'
+"""
+
+[[cases]]
+input = """
+select a NOT LIKE b;
+"""
+formatted = """
+SELECT a NOT LIKE b
+"""
+
+[[cases]]
+input = """
+select 1 is null
+"""
+formatted = """
+SELECT 1 IS NULL
+"""
+
+[[cases]]
+input = """
+select a from t where (f(a) + b[c]) IS NOT NULL
+"""
+formatted = """
+SELECT a
+  FROM t
+ WHERE (F(a) + b[c]) IS NOT NULL
+"""
+
+[[cases]]
+input = """
+select null Is null
+"""
+formatted = """
+SELECT NULL IS NULL
+"""
+
+[[cases]]
+input = """
+select not null Is NOT null
+"""
+formatted = """
+SELECT NOT NULL IS NOT NULL
+"""
+
+[[cases]]
+input = """
+select 1 from T where TRUE IS NOT TRUE
+"""
+formatted = """
+SELECT 1
+  FROM T
+ WHERE TRUE IS NOT TRUE
+"""
+
+[[cases]]
+input = """
+select 1 from T where TRUE IS NOT false
+"""
+formatted = """
+SELECT 1
+  FROM T
+ WHERE TRUE IS NOT FALSE
+"""
+
+[[cases]]
+input = """
+select * from Table1 where col BETWEEN value1 AND value2;
+"""
+formatted = """
+SELECT *
+  FROM Table1
+ WHERE col BETWEEN value1 AND value2
+"""
+
+[[cases]]
+input = """
+select key, kv.key, kv, (kv).key from KeyValue kv;
+"""
+formatted = """
+SELECT key,
+       kv.key,
+       kv,
+       (kv).key
+  FROM KeyValue AS kv
+"""
+
+[[cases]]
+input = """
+select 1 NOTIN
+"""
+formatted = """
+SELECT 1 AS NOTIN
+"""
+
+[[cases]]
+input = """
+select 1 NOTBETWEEN
+"""
+formatted = """
+SELECT 1 AS NOTBETWEEN
+"""
+
+[[cases]]
+input = """
+select 1 NOTLIKE
+"""
+formatted = """
+SELECT 1 AS NOTLIKE
+"""
+
+[[cases]]
+input = """
+SELECT 1 <> 1, 1 != 1
+"""
+formatted = """
+SELECT 1 <> 1, 1 != 1
+"""
+
+[[cases]]
+input = """
+/* C-style comment with * in the middle*/
+SELECT foo;
+"""
+formatted = """
+/* C-style comment with * in the middle*/
+SELECT foo
+"""
+
+[[cases]]
+input = """
+/* C-style comment with / in the middle*/
+SELECT foo;
+"""
+formatted = """
+/* C-style comment with / in the middle*/
+SELECT foo
+"""
+
+[[cases]]
+input = """
+/* C-style comment with trailing **/
+SELECT foo;
+"""
+formatted = """
+/* C-style comment with trailing **/
+SELECT foo
+"""
+
+[[cases]]
+input = """
+/* C-style comment with trailing***/
+SELECT foo;
+"""
+formatted = """
+/* C-style comment with trailing***/
+SELECT foo
+"""
+
+[[cases]]
+description = "Parenthesized ANDs should not be merged."
+input = """
+SELECT (TRUE AND FALSE) AND (FALSE AND TRUE)
+"""
+formatted = """
+SELECT     (TRUE AND FALSE)
+       AND (FALSE AND TRUE)
+"""
+
+[[cases]]
+description = "Parenthesized ORs should not be merged."
+input = """
+SELECT (TRUE OR FALSE) OR (FALSE OR TRUE)
+"""
+formatted = """
+SELECT (TRUE OR FALSE) OR (FALSE OR TRUE)
+"""
+
+[[cases]]
+description = "Parenthesized ORs should not be merged."
+input = """
+SELECT (TRUE OR FALSE) OR EXISTS(select 1) OR (FALSE OR TRUE)
+"""
+formatted = """
+SELECT    (TRUE OR FALSE)
+       OR EXISTS(
+            SELECT 1
+          )
+       OR (FALSE OR TRUE)
+"""
+
+[[cases]]
+input = """
+SELECT 1 # End of line comment
+"""
+formatted = """
+SELECT 1  # End of line comment
+"""
+
+[[cases]]
+description = "Table names"
+input = """
+-- Valid table path.
+SELECT * FROM myproject.mydatabase.mytable287;
+
+-- Valid table path.
+SELECT * FROM myproject287.mydatabase.mytable;
+
+-- Valid table path.
+SELECT * FROM my-project.mydataset.mytable;
+
+-- Valid table name.
+SELECT * FROM my-table;
+"""
+formatted = """
+-- Valid table path.
+SELECT *
+  FROM myproject.mydatabase.mytable287;
+
+-- Valid table path.
+SELECT *
+  FROM myproject287.mydatabase.mytable;
+
+-- Valid table path.
+SELECT *
+  FROM my-project.mydataset.mytable;
+
+-- Valid table name.
+SELECT *
+  FROM my-table;
+"""

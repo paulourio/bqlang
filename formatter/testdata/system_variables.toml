@@ -1,0 +1,43 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+indent_case_when = true
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select @@foo.bar.baz;
+"""
+formatted = """
+SELECT @@foo.bar.baz
+"""
+
+[[cases]]
+input = """
+select (@@foo.bar).baz;
+"""
+formatted = """
+SELECT (@@foo.bar).baz
+"""
+
+[[cases]]
+input = """
+select @@foo[OFFSET(0)]
+"""
+formatted = """
+SELECT @@foo[OFFSET(0)]
+"""

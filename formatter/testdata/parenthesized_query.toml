@@ -1,0 +1,346 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+(select 1)
+"""
+formatted = """
+(
+  SELECT 1
+)
+"""
+
+[[cases]]
+input = """
+((((select 1))))
+"""
+formatted = """
+(
+  (
+    (
+      (
+        SELECT 1
+      )
+    )
+  )
+)
+"""
+
+[[cases]]
+input = """
+(select 1) limit 1
+"""
+formatted = """
+(
+  SELECT 1
+)
+LIMIT 1
+"""
+
+[[cases]]
+input = """
+(((select 1) limit 3) order by 1 desc)
+"""
+formatted = """
+(
+  (
+    (
+      SELECT 1
+    )
+    LIMIT 3
+  )
+  ORDER BY 1 DESC
+)
+"""
+
+[[cases]]
+input = """
+((select 1) union all (select 2 union all (select 3 union all select 4)))
+"""
+formatted = """
+(
+  (
+    SELECT 1
+  )
+  UNION ALL
+  (
+    SELECT 2
+     UNION ALL
+    (
+      SELECT 3
+       UNION ALL
+      SELECT 4
+    )
+  )
+)
+"""
+
+[[cases]]
+input = """
+(select 1 from x limit 1) union all (select 2 from y order by 1)
+order by 1
+limit 10
+"""
+formatted = """
+(
+  SELECT 1
+    FROM x
+   LIMIT 1
+)
+UNION ALL
+(
+  SELECT 2
+    FROM y
+   ORDER BY 1
+)
+ORDER BY 1
+LIMIT 10
+"""
+
+[[cases]]
+input = """
+select ((select 1)), ((((select 2))))
+"""
+formatted = """
+SELECT (
+         SELECT 1
+       ),
+       (
+         SELECT 2
+       )
+"""
+
+[[cases]]
+input = """
+select ((select 1) + (select 2))
+"""
+formatted = """
+SELECT ((
+         SELECT 1
+       ) + (
+         SELECT 2
+       ))
+"""
+
+[[cases]]
+input = """
+select ((select 1), (select 2))
+"""
+formatted = """
+SELECT (
+         (
+           SELECT 1
+         ),
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select ((select 1) union all (select 2))
+"""
+formatted = """
+SELECT (
+         (
+           SELECT 1
+         )
+         UNION ALL
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select ARRAY((select 1) union all (select 2))
+"""
+formatted = """
+SELECT ARRAY(
+         (
+           SELECT 1
+         )
+         UNION ALL
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select ARRAY(((select 1) ) union all (select 2))
+"""
+formatted = """
+SELECT ARRAY(
+         (
+           (
+             SELECT 1
+           )
+         )
+         UNION ALL
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select (((1+1)) + (1 + 1))
+"""
+formatted = """
+SELECT ((1 + 1) + (1 + 1))
+"""
+
+[[cases]]
+input = """
+select ((SELECT 1) + 1)
+"""
+formatted = """
+SELECT ((
+         SELECT 1
+       ) + 1)
+"""
+
+[[cases]]
+input = """
+select ifnull((SELECT 1) + 1, /*default=*/0)
+"""
+formatted = """
+SELECT IFNULL(
+         (
+           SELECT 1
+         ) + 1,
+         /*default=*/ 0
+       )
+"""
+
+[[cases]]
+input = """
+select (((SELECT 1)) + 1)
+"""
+formatted = """
+SELECT ((
+         SELECT 1
+       ) + 1)
+"""
+
+[[cases]]
+input = """
+SELECT ((SELECT count(distinct x)));
+"""
+formatted = """
+SELECT (
+         SELECT COUNT(DISTINCT x)
+       )
+"""
+
+[[cases]]
+input = """
+SELECT 1+((count(*)))
+"""
+formatted = """
+SELECT 1 + (COUNT(*))
+"""
+
+[[cases]]
+input = """
+SELECT a, 1+((count(*)))
+"""
+formatted = """
+SELECT a,
+       1 + (COUNT(*))
+"""
+
+[[cases]]
+input = """
+SELECT a, count(*) AS foo, count(*) / ((count(*) * 1) * 1)
+FROM (SELECT 1 AS a) GROUP BY 1;
+"""
+formatted = """
+SELECT a,
+       COUNT(*) AS foo,
+       COUNT(*) / ((COUNT(*) * 1) * 1)
+  FROM (
+         SELECT 1 AS a
+       )
+ GROUP BY 1
+"""
+
+[[cases]]
+input = """
+select *
+from (((select 1)) union all (select 2))
+"""
+formatted = """
+SELECT *
+  FROM (
+         (
+           (
+             SELECT 1
+           )
+         )
+         UNION ALL
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select *
+from (((select 1) limit 3) order by 1)
+"""
+formatted = """
+SELECT *
+  FROM (
+         (
+           (
+             SELECT 1
+           )
+           LIMIT 3
+         )
+         ORDER BY 1
+       )
+"""
+
+[[cases]]
+input = """
+select *
+from a join ((select 1 x) join (select 2 x) using (x))
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       (
+         (
+           SELECT 1 AS x
+         )
+         JOIN
+         (
+           SELECT 2 AS x
+         )
+         USING (x)
+       )
+"""

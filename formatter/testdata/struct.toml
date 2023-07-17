@@ -1,0 +1,296 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+indent_case_when = true
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select (1, 2, 3), ((1, 2, 3)), (((1, 2, 3)))
+"""
+formatted = """
+SELECT (1, 2, 3),
+       (
+         (1, 2, 3)
+       ),
+       (
+         (1, 2, 3)
+       )
+"""
+
+[[cases]]
+input = """
+select (1, 'abc')
+"""
+formatted = """
+SELECT (1, 'abc')
+"""
+
+[[cases]]
+input = """
+select (key, value)
+from KeyValue
+"""
+formatted = """
+SELECT (key, value)
+  FROM KeyValue
+"""
+
+[[cases]]
+input = """
+select ((1, 2), (1, 2))
+"""
+formatted = """
+SELECT (
+         (1, 2),
+         (1, 2)
+       )
+"""
+
+[[cases]]
+input = """
+select key, value
+from KeyValue
+where (key, value) in ((1, 'abc'), (2, 'abc'), (key, value))
+"""
+formatted = """
+SELECT key, value
+  FROM KeyValue
+ WHERE (key, value) IN (
+         (1, 'abc'),
+         (2, 'abc'),
+         (key, value)
+       )
+"""
+
+[[cases]]
+input = """
+select ((1, 2), ('abc', 'def'))
+"""
+formatted = """
+SELECT (
+         (1, 2),
+         ('abc', 'def')
+       )
+"""
+
+[[cases]]
+input = """
+select ((1), (2))
+"""
+formatted = """
+SELECT (1, 2)
+"""
+
+[[cases]]
+input = """
+select (1, (2), ((3)), (((4))), ((((5)))))
+"""
+formatted = """
+SELECT (1, 2, 3, 4, 5)
+"""
+
+[[cases]]
+input = """
+select ((1, ((2, (3))), ((((2), ((3)))))))
+"""
+formatted = """
+SELECT (
+         (
+           1,
+           (
+             (2, 3)
+           ),
+           (
+             (2, 3)
+           )
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select (1+2+3, 4+5+6), (fn(a+b), c+d), ((fn1(a+b), fn2(c+d)))
+"""
+formatted = """
+SELECT (
+         1 + 2 + 3,
+         4 + 5 + 6
+       ),
+       (FN(a + b), c + d),
+       (
+         (FN1(a + b), FN2(c + d))
+       )
+"""
+
+[[cases]]
+input = """
+select ( (1, 2), (4, 5, 6), ( (7, 8), (9, 10, 11) ) )
+"""
+formatted = """
+SELECT (
+         (1, 2),
+         (4, 5, 6),
+         (
+           (7, 8),
+           (9, 10, 11)
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select [1, (2), (3, 4), (5, 6, 7) ],
+       ( [1], [2, 3], [4, 5, 6])
+"""
+formatted = """
+SELECT [
+         1,
+         2,
+         (3, 4),
+         (5, 6, 7)
+       ],
+       (
+         [1],
+         [2, 3],
+         [4, 5, 6]
+       )
+"""
+
+[[cases]]
+input = """
+select [1, ((SELECT 1 FROM T)), (3, 4), (5, 6, 7) ],
+       ( [1], [2, 3], [4, (SELECT x FROM t), 6])
+"""
+formatted = """
+SELECT [
+         1,
+         (
+           SELECT 1
+             FROM T
+         ),
+         (3, 4),
+         (5, 6, 7)
+       ],
+       (
+         [1],
+         [2, 3],
+         [
+           4,
+           (
+             SELECT x
+               FROM t
+           ),
+           6
+         ]
+       )
+"""
+
+[[cases]]
+input = """
+select struct(1,2)
+"""
+formatted = """
+SELECT STRUCT(1, 2)
+"""
+
+[[cases]]
+input = """
+select struct<int32, int32>(1,2)
+"""
+formatted = """
+SELECT STRUCT<INT32, INT32>(1, 2)
+"""
+
+[[cases]]
+input = """
+select struct(), struct<>()
+"""
+formatted = """
+SELECT STRUCT(),
+       STRUCT<>()
+"""
+
+[[cases]]
+input = """
+select struct(1+2 as x)
+where struct(a,b,c as d)
+"""
+formatted = """
+SELECT STRUCT(1 + 2 AS x)
+ WHERE STRUCT(a, b, c AS d)
+"""
+
+[[cases]]
+input = """
+select struct<int32>(5)
+"""
+formatted = """
+SELECT STRUCT<INT32>(5)
+"""
+
+[[cases]]
+input = """
+select struct<f int32, y string>(x, y as def, 77)
+"""
+formatted = """
+SELECT STRUCT<f INT32, y STRING>(x, y AS def, 77)
+"""
+
+[[cases]]
+input = """
+select struct<f int32, y string>(x, (select 1) as def, 77)
+"""
+formatted = """
+SELECT STRUCT<f INT32, y STRING>(
+         x,
+         (
+           SELECT 1
+         ) AS def,
+         77
+       )
+"""
+
+[[cases]]
+input = """
+select struct<
+         key string, bar date,
+         elems struct<
+           cod string
+           , values array<
+              struct< key string, amount numeric(19,2) >
+           >
+         >           ,
+         lo date
+       >()
+"""
+formatted = """
+SELECT STRUCT<
+         key   STRING,
+         bar   DATE,
+         elems STRUCT<
+                 cod    STRING,
+                 values ARRAY<
+                          STRUCT<
+                            key    STRING,
+                            amount NUMERIC(19, 2)
+                          >
+                        >
+               >,
+         lo    DATE
+       >()
+"""

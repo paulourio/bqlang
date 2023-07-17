@@ -1,0 +1,511 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+align_trailing_comments = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "String and bytes literals"
+input = """
+SELECT "abc";
+SELECT "it's";
+SELECT 'it\\'s';
+SELECT 'Title: "Boy"';
+SELECT \"""abc\""";
+SELECT '''it's''';
+SELECT '''Title:"Boy"''';
+SELECT '''two;
+SELECT lines''';
+SELECT '''why\\?''';
+SELECT R'ABC';
+SELECT r"abc+";
+SELECT r'''abc+''';
+SELECT r\"""abc+\""";
+SELECT r'f\\(abc,(.*),def\\)';
+SELECT B"abc";
+SELECT B'''abc''';
+SELECT b\"""abc\""";
+SELECT br'abc+';
+SELECT RB"abc+";
+SELECT RB'''abc''';
+"""
+formatted = """
+SELECT 'abc';
+
+SELECT "it's";
+
+SELECT 'it\\'s';
+
+SELECT 'Title: "Boy"';
+
+SELECT '''abc''';
+
+SELECT '''it's''';
+
+SELECT '''Title:"Boy"''';
+
+SELECT '''two;
+SELECT lines''';
+
+SELECT '''why\\?''';
+
+SELECT r'ABC';
+
+SELECT r'abc+';
+
+SELECT r'''abc+''';
+
+SELECT r'''abc+''';
+
+SELECT r'f\\(abc,(.*),def\\)';
+
+SELECT b'abc';
+
+SELECT b'''abc''';
+
+SELECT b'''abc''';
+
+SELECT rb'abc+';
+
+SELECT rb'abc+';
+
+SELECT rb'''abc''';
+"""
+
+[[cases]]
+description = "Integer literals"
+input = """
+SELECT
+123,
+0xAbc,
+-123,
+0XABC
+;
+"""
+formatted = """
+SELECT 123, 0xAbc, -123, 0xABC
+"""
+
+[[cases]]
+description = "NUMERIC literals"
+input = """
+SELECT NUMERIC '0';
+SELECT NUMERIC '123456';
+SELECT NUMERIC '-3.14';
+SELECT NUMERIC '-0.54321';
+SELECT NUMERIC '1.23456E05';
+SELECT NUMERIC '-9.876e-3';
+"""
+formatted = """
+SELECT NUMERIC '0';
+
+SELECT NUMERIC '123456';
+
+SELECT NUMERIC '-3.14';
+
+SELECT NUMERIC '-0.54321';
+
+SELECT NUMERIC '1.23456e05';
+
+SELECT NUMERIC '-9.876e-3';
+"""
+
+[[cases]]
+description = "BIGNUMERIC literals"
+input = """
+SELECT BIGNUMERIC '0';
+SELECT BIGNUMERIC '123456';
+SELECT BIGNUMERIC '-3.14';
+SELECT BIGNUMERIC '-0.54321';
+SELECT BIGNUMERIC '1.23456e05';
+SELECT BIGNUMERIC '-9.876e-3'
+"""
+formatted = """
+SELECT BIGNUMERIC '0';
+
+SELECT BIGNUMERIC '123456';
+
+SELECT BIGNUMERIC '-3.14';
+
+SELECT BIGNUMERIC '-0.54321';
+
+SELECT BIGNUMERIC '1.23456e05';
+
+SELECT BIGNUMERIC '-9.876e-3';
+"""
+
+[[cases]]
+description = "FLOAT literals"
+input = """
+select
+123.456e-67,
+.1E4,
+58.,
+4e2
+"""
+formatted = """
+SELECT 123.456e-67, .1e4, 58., 4e2
+"""
+
+[[cases]]
+description = "STRUCT literals"
+input = """
+select
+(1, 2, 3), -- STRUCT<INT64, INT64, INT64>
+(1, 'abc'), -- STRUCT<INT64, STRING>
+STRUCT(1 AS foo, 'abc' AS bar), 	-- STRUCT<foo INT64, bar STRING>
+STRUCT<INT64, STRING>(1, 'abc'), -- STRUCT<INT64, STRING>
+STRUCT(1), 	-- STRUCT<INT64>
+STRUCT<INT64>(1) -- STRUCT<INT64>
+"""
+formatted = """
+SELECT (1, 2, 3),                        -- STRUCT<INT64, INT64, INT64>
+       (1, 'abc'),                       -- STRUCT<INT64, STRING>
+       STRUCT(1 AS foo, 'abc' AS bar),   -- STRUCT<foo INT64, bar STRING>
+       STRUCT<INT64, STRING>(1, 'abc'),  -- STRUCT<INT64, STRING>
+       STRUCT(1),                        -- STRUCT<INT64>
+       STRUCT<INT64>(1)                  -- STRUCT<INT64>
+"""
+
+[[cases]]
+description = "DATE literals"
+input = """
+SELECT DATE '2014-09-27';
+SELECT * FROM foo WHERE date_col = "2014-09-27";
+"""
+formatted = """
+SELECT DATE '2014-09-27';
+
+SELECT *
+  FROM foo
+ WHERE date_col = '2014-09-27';
+"""
+
+[[cases]]
+description = "TIME literals"
+input = """
+select TIME '12:30:00.45';
+"""
+formatted = """
+SELECT TIME '12:30:00.45'
+"""
+
+[[cases]]
+description = "DATETIME literals"
+input = """
+select DATETIME '2014-09-27 12:30:00.45';
+SELECT * FROM foo
+WHERE datetime_col = "2014-09-27 12:30:00.45"
+"""
+formatted = """
+SELECT DATETIME '2014-09-27 12:30:00.45';
+
+SELECT *
+  FROM foo
+ WHERE datetime_col = '2014-09-27 12:30:00.45';
+"""
+
+[[cases]]
+description = "TIMESTAMP literals"
+input = """
+select TIMESTAMP '2014-09-27 12:30:00.45-08',
+TIMESTAMP '2014-09-27 12:30:00.45';
+SELECT * FROM foo
+WHERE timestamp_col = "2014-09-27 12:30:00.45 America/Los_Angeles";
+select
+TIMESTAMP '2017-01-18T12:34:56.123456Z',
+TIMESTAMP '2017-01-18t12:34:56.123456',
+TIMESTAMP '2017-01-18 12:34:56.123456z',
+TIMESTAMP '2017-01-18 12:34:56.123456Z',
+TIMESTAMP '2014-09-27 12:30:00 America/Los_Angeles',
+TIMESTAMP '2014-09-27 12:30:00 America/Argentina/Buenos_Aires'
+"""
+formatted = """
+SELECT TIMESTAMP '2014-09-27 12:30:00.45-08', TIMESTAMP '2014-09-27 12:30:00.45';
+
+SELECT *
+  FROM foo
+ WHERE timestamp_col = '2014-09-27 12:30:00.45 America/Los_Angeles';
+
+SELECT TIMESTAMP '2017-01-18T12:34:56.123456Z',
+       TIMESTAMP '2017-01-18t12:34:56.123456',
+       TIMESTAMP '2017-01-18 12:34:56.123456z',
+       TIMESTAMP '2017-01-18 12:34:56.123456Z',
+       TIMESTAMP '2014-09-27 12:30:00 America/Los_Angeles',
+       TIMESTAMP '2014-09-27 12:30:00 America/Argentina/Buenos_Aires';
+"""
+
+[[cases]]
+description = "INTERVAL literals"
+input = """
+select
+-- 0 years, 0 months, 5 days, 0 hours, 0 minutes, 0 seconds (0-0 5 0:0:0)
+INTERVAL 5 DAY,
+
+-- 0 years, 0 months, -5 days, 0 hours, 0 minutes, 0 seconds (0-0 -5 0:0:0)
+INTERVAL -5 DAY,
+
+-- 0 years, 0 months, 0 days, 0 hours, 0 minutes, 1 seconds (0-0 0 0:0:1)
+INTERVAL 1 SECOND,
+
+-- -2 years, -1 months, 0 days, 0 hours, 0 minutes, and 0 seconds (-2-1 0 0:0:0)
+INTERVAL -25 MONTH,
+
+-- 0 years, 0 months, 0 days, -1 hours, -30 minutes, and 0 seconds (0-0 0 -1:30:0)
+INTERVAL -90 MINUTE,
+
+-- 0 years, 0 months, 0 days, 10 hours, 20 minutes, 30 seconds (0-0 0 10:20:30.520)
+INTERVAL '10:20:30.52' HOUR TO SECOND,
+
+-- 1 year, 2 months, 0 days, 0 hours, 0 minutes, 0 seconds (1-2 0 0:0:0)
+INTERVAL '1-2' YEAR TO MONTH,
+
+-- 0 years, 1 month, -15 days, 0 hours, 0 minutes, 0 seconds (0-1 -15 0:0:0)
+INTERVAL '1 -15' MONTH TO DAY,
+
+-- 0 years, 0 months, 1 day, 5 hours, 30 minutes, 0 seconds (0-0 1 5:30:0)
+INTERVAL '1 5:30' DAY TO MINUTE,
+
+-- -23 years, -2 months, 10 days, -12 hours, -30 minutes, and 0 seconds (-23-2 10 -12:30:0)
+INTERVAL '-23-2 10 -12:30' YEAR TO MINUTE,
+
+-- -23 years, -2 months, 10 days, 0 hours, -30 minutes, and 0 seconds (-23-2 10 -0:30:0)
+INTERVAL '-23-2 10 -0:30' YEAR TO MINUTE,
+
+-- Produces an error because the negative sign for minutes must come before the hour.
+INTERVAL '-23-2 10 0:-30' YEAR TO MINUTE,
+
+-- Produces an error because the negative sign for months must come before the year.
+INTERVAL '23--2 10 0:30' YEAR TO MINUTE,
+
+-- 0 years, -2 months, 10 days, 0 hours, 30 minutes, and 0 seconds (-0-2 10 0:30:0)
+INTERVAL '-2 10 0:30' MONTH TO MINUTE,
+
+-- 0 years, 0 months, 0 days, 0 hours, -30 minutes, and -10 seconds (0-0 0 -0:30:10)
+INTERVAL '-30:10' MINUTE TO SECOND
+"""
+formatted = """
+SELECT -- 0 years, 0 months, 5 days, 0 hours, 0 minutes, 0 seconds (0-0 5 0:0:0)
+       INTERVAL 5 DAY,
+       -- 0 years, 0 months, -5 days, 0 hours, 0 minutes, 0 seconds (0-0 -5 0:0:0)
+       INTERVAL -5 DAY,
+       -- 0 years, 0 months, 0 days, 0 hours, 0 minutes, 1 seconds (0-0 0 0:0:1)
+       INTERVAL 1 SECOND,
+       -- -2 years, -1 months, 0 days, 0 hours, 0 minutes, and 0 seconds (-2-1 0 0:0:0)
+       INTERVAL -25 MONTH,
+       -- 0 years, 0 months, 0 days, -1 hours, -30 minutes, and 0 seconds (0-0 0 -1:30:0)
+       INTERVAL -90 MINUTE,
+       -- 0 years, 0 months, 0 days, 10 hours, 20 minutes, 30 seconds (0-0 0 10:20:30.520)
+       INTERVAL '10:20:30.52' HOUR TO SECOND,
+       -- 1 year, 2 months, 0 days, 0 hours, 0 minutes, 0 seconds (1-2 0 0:0:0)
+       INTERVAL '1-2' YEAR TO MONTH,
+       -- 0 years, 1 month, -15 days, 0 hours, 0 minutes, 0 seconds (0-1 -15 0:0:0)
+       INTERVAL '1 -15' MONTH TO DAY,
+       -- 0 years, 0 months, 1 day, 5 hours, 30 minutes, 0 seconds (0-0 1 5:30:0)
+       INTERVAL '1 5:30' DAY TO MINUTE,
+       -- -23 years, -2 months, 10 days, -12 hours, -30 minutes, and 0 seconds (-23-2 10 -12:30:0)
+       INTERVAL '-23-2 10 -12:30' YEAR TO MINUTE,
+       -- -23 years, -2 months, 10 days, 0 hours, -30 minutes, and 0 seconds (-23-2 10 -0:30:0)
+       INTERVAL '-23-2 10 -0:30' YEAR TO MINUTE,
+       -- Produces an error because the negative sign for minutes must come before the hour.
+       INTERVAL '-23-2 10 0:-30' YEAR TO MINUTE,
+       -- Produces an error because the negative sign for months must come before the year.
+       INTERVAL '23--2 10 0:30' YEAR TO MINUTE,
+       -- 0 years, -2 months, 10 days, 0 hours, 30 minutes, and 0 seconds (-0-2 10 0:30:0)
+       INTERVAL '-2 10 0:30' MONTH TO MINUTE,
+       -- 0 years, 0 months, 0 days, 0 hours, -30 minutes, and -10 seconds (0-0 0 -0:30:10)
+       INTERVAL '-30:10' MINUTE TO SECOND
+"""
+
+[[cases]]
+description = "JSON literals"
+input = """
+SELECT JSON '''
+{
+  "id": 10,
+  "type": "fruit",
+  "name": "apple",
+  "on_menu": true,
+  "recipes":
+    {
+      "salads":
+      [
+        { "id": 2001, "type": "Walnut Apple Salad" },
+        { "id": 2002, "type": "Apple Spinach Salad" }
+      ],
+      "desserts":
+      [
+        { "id": 3001, "type": "Apple Pie" },
+        { "id": 3002, "type": "Apple Scones" },
+        { "id": 3003, "type": "Apple Crumble" }
+      ]
+    }
+}
+'''
+"""
+formatted = """
+SELECT JSON '''
+{
+  "id": 10,
+  "type": "fruit",
+  "name": "apple",
+  "on_menu": true,
+  "recipes":
+    {
+      "salads":
+      [
+        { "id": 2001, "type": "Walnut Apple Salad" },
+        { "id": 2002, "type": "Apple Spinach Salad" }
+      ],
+      "desserts":
+      [
+        { "id": 3001, "type": "Apple Pie" },
+        { "id": 3002, "type": "Apple Scones" },
+        { "id": 3003, "type": "Apple Crumble" }
+      ]
+    }
+}
+'''
+"""
+
+[[cases]]
+description = "Trailing commas"
+input = """
+SELECT name, release_date, FROM Books
+"""
+formatted = """
+SELECT name, release_date
+  FROM Books
+"""
+
+[[cases]]
+description = "Query parameters: named parameters"
+input = """
+SELECT * FROM Roster WHERE LastName = @myparam
+"""
+formatted = """
+SELECT *
+  FROM Roster
+ WHERE LastName = @myparam
+"""
+
+[[cases]]
+description = "Query parameters: positional parameters"
+input = """
+SELECT * FROM Roster WHERE FirstName = ? and LastName = ?
+"""
+formatted = """
+SELECT *
+  FROM Roster
+ WHERE FirstName = ?
+   AND LastName  = ?
+"""
+
+[[cases]]
+description = "Comments: single line comments"
+input = """
+# this is a single-line comment
+SELECT book FROM library;
+
+-- this is a single-line comment
+SELECT book FROM library;
+
+/* this is a single-line comment */
+SELECT book FROM library;
+
+SELECT book FROM library
+/* this is a single-line comment */
+WHERE book = "Ulysses";
+"""
+formatted = """
+# this is a single-line comment
+SELECT book
+  FROM library;
+
+-- this is a single-line comment
+SELECT book
+  FROM library;
+
+/* this is a single-line comment */
+SELECT book
+  FROM library;
+
+SELECT book
+  FROM library
+       /* this is a single-line comment */
+ WHERE book = 'Ulysses';
+"""
+
+[[cases]]
+description = "Comments: inline comments"
+input = """
+SELECT book FROM library; # this is an inline comment
+
+SELECT book FROM library; -- this is an inline comment
+
+SELECT book FROM library; /* this is an inline comment */
+
+SELECT book FROM library /* this is an inline comment */ WHERE book = "Ulysses";
+"""
+formatted = """
+SELECT book
+  FROM library;  # this is an inline comment
+
+SELECT book
+  FROM library;  -- this is an inline comment
+
+SELECT book
+  FROM library;  /* this is an inline comment */
+
+SELECT book
+  FROM library  /* this is an inline comment */
+ WHERE book = 'Ulysses';
+"""
+
+[[cases]]
+description = "Comments: multiline comments"
+input = """
+SELECT book FROM library
+/*
+  This is a multiline comment
+  on multiple lines
+*/
+WHERE book = "Ulysses";
+
+SELECT book FROM library
+/* this is a multiline comment
+on two lines */
+WHERE book = "Ulysses";
+"""
+formatted = """
+SELECT book
+  FROM library
+       /*
+  This is a multiline comment
+  on multiple lines
+*/
+ WHERE book = 'Ulysses';
+
+SELECT book
+  FROM library
+       /* this is a multiline comment
+on two lines */
+ WHERE book = 'Ulysses';
+"""

@@ -1,0 +1,396 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "The OVER clause"
+input = """
+SELECT book, LAST_VALUE(item)
+  OVER (ORDER BY year)
+FROM Library
+"""
+formatted = """
+SELECT book,
+       LAST_VALUE(item) OVER (ORDER BY year)
+  FROM Library
+"""
+
+[[cases]]
+description = """
+The OVER clause
+"""
+input = """
+SELECT book, LAST_VALUE(item)
+  OVER (
+    ORDER BY year
+    RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+FROM Library
+"""
+formatted = """
+SELECT book,
+       LAST_VALUE(item) OVER (
+         ORDER BY year
+         RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+       )
+  FROM Library
+"""
+
+[[cases]]
+description = """
+PARTITION BY must come first
+"""
+input = """
+--this works:
+SELECT item, purchases, LAST_VALUE(item)
+  OVER (item_window ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING) AS most_popular
+FROM Produce
+WINDOW item_window AS (ORDER BY purchases)
+"""
+formatted = """
+--this works:
+SELECT item,
+       purchases,
+       LAST_VALUE(item) OVER (
+         item_window
+         ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+       ) AS most_popular
+  FROM Produce
+WINDOW item_window AS (
+         ORDER BY purchases
+       )
+"""
+
+[[cases]]
+description = "Compute grand total"
+input = """
+SELECT item, purchases, category, SUM(purchases)
+  OVER () AS total_purchases
+FROM Produce
+"""
+formatted = """
+SELECT item,
+       purchases,
+       category,
+       SUM(purchases) OVER () AS total_purchases
+  FROM Produce
+"""
+
+[[cases]]
+description = "Compute subtotal"
+input = """
+SELECT item, purchases, category, SUM(purchases)
+  OVER (
+    PARTITION BY category
+    ORDER BY purchases
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  ) AS total_purchases
+FROM Produce
+"""
+formatted = """
+SELECT item,
+       purchases,
+       category,
+       SUM(purchases) OVER (
+         PARTITION BY category
+             ORDER BY purchases
+              ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) AS total_purchases
+  FROM Produce
+"""
+
+[[cases]]
+description = "Compute cumulative sum"
+input = """
+SELECT item, purchases, category, SUM(purchases)
+  OVER (
+    PARTITION BY category
+    ORDER BY purchases
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS total_purchases
+FROM Produce;
+
+SELECT item, purchases, category, SUM(purchases)
+  OVER (
+    PARTITION BY category
+    ORDER BY purchases
+    ROWS UNBOUNDED PRECEDING
+  ) AS total_purchases
+FROM Produce
+"""
+formatted = """
+SELECT item,
+       purchases,
+       category,
+       SUM(purchases) OVER (
+         PARTITION BY category
+             ORDER BY purchases
+              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+       ) AS total_purchases
+  FROM Produce;
+
+SELECT item,
+       purchases,
+       category,
+       SUM(purchases) OVER (
+         PARTITION BY category
+             ORDER BY purchases
+              ROWS UNBOUNDED PRECEDING
+       ) AS total_purchases
+  FROM Produce;
+"""
+
+[[cases]]
+description = "Compute a moving average"
+input = """
+SELECT item, purchases, category, AVG(purchases)
+  OVER (
+    ORDER BY purchases
+    ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+  ) AS avg_purchases
+FROM Produce
+"""
+formatted = """
+SELECT item,
+       purchases,
+       category,
+       AVG(purchases) OVER (
+         ORDER BY purchases
+          ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+       ) AS avg_purchases
+  FROM Produce
+"""
+
+[[cases]]
+description = "Compute the number of items within a range"
+input = """
+SELECT animal, population, category, COUNT(*)
+  OVER (
+    ORDER BY population
+    RANGE BETWEEN 1 PRECEDING AND 1 FOLLOWING
+  ) AS similar_population
+FROM Farm;
+"""
+formatted = """
+SELECT animal,
+       population,
+       category,
+       COUNT(*) OVER (
+         ORDER BY population
+         RANGE BETWEEN 1 PRECEDING AND 1 FOLLOWING
+       ) AS similar_population
+  FROM Farm
+"""
+
+[[cases]]
+description = "Get the most popular item in each category"
+input = """
+SELECT item, purchases, category, LAST_VALUE(item)
+  OVER (
+    PARTITION BY category
+    ORDER BY purchases
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  ) AS most_popular
+FROM Produce
+"""
+formatted = """
+SELECT item,
+       purchases,
+       category,
+       LAST_VALUE(item) OVER (
+         PARTITION BY category
+             ORDER BY purchases
+              ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) AS most_popular
+  FROM Produce
+"""
+
+[[cases]]
+description = "Get the last value in a range"
+input = """
+SELECT item, purchases, category, LAST_VALUE(item)
+  OVER (
+    PARTITION BY category
+    ORDER BY purchases
+    ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+  ) AS most_popular
+FROM Produce;
+
+SELECT item, purchases, category, LAST_VALUE(item)
+  OVER (
+    item_window
+    ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+  ) AS most_popular
+FROM Produce
+WINDOW item_window AS (
+  PARTITION BY category
+  ORDER BY purchases)
+"""
+formatted = """
+SELECT item,
+       purchases,
+       category,
+       LAST_VALUE(item) OVER (
+         PARTITION BY category
+             ORDER BY purchases
+              ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+       ) AS most_popular
+  FROM Produce;
+
+SELECT item,
+       purchases,
+       category,
+       LAST_VALUE(item) OVER (
+         item_window
+         ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+       ) AS most_popular
+  FROM Produce
+WINDOW item_window AS (
+         PARTITION BY category
+             ORDER BY purchases
+       );
+"""
+
+[[cases]]
+description = "Compute rank"
+input = """
+SELECT name, department, start_date,
+  RANK() OVER (PARTITION BY department ORDER BY start_date) AS rank
+FROM Employees;
+"""
+formatted = """
+SELECT name,
+       department,
+       start_date,
+       RANK() OVER (
+         PARTITION BY department
+             ORDER BY start_date
+       ) AS rank
+  FROM Employees
+"""
+
+[[cases]]
+description = "Use a named window in a window frame clause"
+input = """
+SELECT item, purchases, category, LAST_VALUE(item)
+  OVER (item_window) AS most_popular
+FROM Produce
+WINDOW item_window AS (
+  PARTITION BY category
+  ORDER BY purchases
+  ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING);
+
+-- You can also get the previous results with these examples:
+
+SELECT item, purchases, category, LAST_VALUE(item)
+  OVER (item_window) AS most_popular
+FROM Produce
+WINDOW
+  a AS (PARTITION BY category),
+  b AS (a ORDER BY purchases),
+  c AS (b ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING),
+  item_window AS (c);
+
+SELECT item, purchases, category, LAST_VALUE(item)
+  OVER (item_window ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING) AS most_popular
+FROM Produce
+WINDOW
+  a AS (PARTITION BY category),
+  b AS (a ORDER BY purchases),
+  item_window AS (b);
+
+-- The following example produces an error because a window frame clause has been defined twice:
+
+SELECT item, purchases, category, LAST_VALUE(item)
+  OVER (
+    item_window
+    ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+    ) AS most_popular
+FROM Produce
+WINDOW item_window AS (
+  ORDER BY purchases
+  ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING)
+"""
+formatted = """
+SELECT item,
+       purchases,
+       category,
+       LAST_VALUE(item) OVER item_window AS most_popular
+  FROM Produce
+WINDOW item_window AS (
+         PARTITION BY category
+             ORDER BY purchases
+              ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+       );
+
+-- You can also get the previous results with these examples:
+SELECT item,
+       purchases,
+       category,
+       LAST_VALUE(item) OVER item_window AS most_popular
+  FROM Produce
+WINDOW a AS (
+         PARTITION BY category
+       ),
+       b AS (
+         a
+         ORDER BY purchases
+       ),
+       c AS (
+         b
+         ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+       ),
+       item_window AS (
+         c
+       );
+
+SELECT item,
+       purchases,
+       category,
+       LAST_VALUE(item) OVER (
+         item_window
+         ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+       ) AS most_popular
+  FROM Produce
+WINDOW a AS (
+         PARTITION BY category
+       ),
+       b AS (
+         a
+         ORDER BY purchases
+       ),
+       item_window AS (
+         b
+       );
+
+-- The following example produces an error because a window frame clause has been defined twice:
+SELECT item,
+       purchases,
+       category,
+       LAST_VALUE(item) OVER (
+         item_window
+         ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+       ) AS most_popular
+  FROM Produce
+WINDOW item_window AS (
+         ORDER BY purchases
+          ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+       );
+"""

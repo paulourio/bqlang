@@ -1,0 +1,429 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select f1, f2 from T where f1=f2 group by f1
+"""
+formatted = """
+SELECT f1, f2
+  FROM T
+ WHERE f1 = f2
+ GROUP BY f1
+"""
+
+[[cases]]
+input = """
+select f1, f2 from T group by f1, f2, 1, 2
+"""
+formatted = """
+SELECT f1, f2
+  FROM T
+ GROUP BY f1, f2, 1, 2
+"""
+
+[[cases]]
+input = """
+select f1 from T group by f1 having f1 < 5;
+"""
+formatted = """
+SELECT f1
+  FROM T
+ GROUP BY f1
+HAVING f1 < 5
+"""
+
+[[cases]]
+input = """
+select f1, sum(f2) from T group by f1 having f1 = 3 and sum(f2) > 5;
+"""
+formatted = """
+SELECT f1, SUM(f2)
+  FROM T
+ GROUP BY f1
+HAVING f1 = 3
+   AND SUM(f2) > 5
+"""
+
+[[cases]]
+input = """
+select max(true) as a from T having a;
+"""
+formatted = """
+SELECT MAX(TRUE) AS a
+  FROM T
+HAVING a
+"""
+
+[[cases]]
+input = """
+select sum(true) as a from T having a;
+"""
+formatted = """
+SELECT SUM(TRUE) AS a
+  FROM T
+HAVING a
+"""
+
+[[cases]]
+input = """
+select * from (select a from T having a > 5);
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT a
+           FROM T
+         HAVING a > 5
+       )
+"""
+
+[[cases]]
+input = """
+select array_agg(x order by x) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(x ORDER BY x) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x order by x, y nulls last, z) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(x ORDER BY x, y NULLS LAST, z) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(distinct x order by x) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(DISTINCT x ORDER BY x) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x order by x + 1, y + z) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(x ORDER BY x + 1, y + z) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select x, array_agg(distinct y order by y) from T group by x
+"""
+formatted = """
+SELECT x, ARRAY_AGG(DISTINCT y ORDER BY y)
+  FROM T
+ GROUP BY x
+"""
+
+[[cases]]
+input = """
+select x, array_agg(y order by x desc, z desc) from T group by x
+"""
+formatted = """
+SELECT x, ARRAY_AGG(y ORDER BY x DESC, z DESC)
+  FROM T
+ GROUP BY x
+"""
+
+[[cases]]
+input = """
+select x, string_agg(y order by y collate "en_US" desc) from T group by x
+"""
+formatted = """
+SELECT x, STRING_AGG(y ORDER BY y COLLATE "en_US" DESC)
+  FROM T
+ GROUP BY x
+"""
+
+[[cases]]
+input = """
+select count(* order by x) from T;
+"""
+formatted = """
+SELECT COUNT(* ORDER BY x)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select anon_count(*, 0, 1 order by x) from T;
+"""
+formatted = """
+SELECT ANON_COUNT(*, 0, 1 ORDER BY x)
+  FROM T
+"""
+
+[[cases]]
+input = """
+select x, array_agg(y order@1 by y) from T group by x
+"""
+formatted = """
+SELECT x, ARRAY_AGG(y ORDER @1 BY y)
+  FROM T
+ GROUP BY x
+"""
+
+[[cases]]
+input = """
+select count(distinct) from T
+"""
+formatted = """
+SELECT COUNT(DISTINCT )
+  FROM T
+"""
+
+[[cases]]
+input = """
+select anon_count(distinct) from T
+"""
+formatted = """
+SELECT ANON_COUNT(DISTINCT )
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(Key order by 1)
+from TestTable
+"""
+formatted = """
+SELECT ARRAY_AGG(Key ORDER BY 1)
+  FROM TestTable
+"""
+
+[[cases]]
+input = """
+select array_agg(x order by x limit 5) as a from T
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         x
+         ORDER BY x
+         LIMIT 5
+       ) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x order by x limit 5 offset 2) as a from T
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         x
+         ORDER BY x
+         LIMIT 5 OFFSET 2
+       ) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x limit 5) as a from T
+"""
+formatted = """
+SELECT ARRAY_AGG(x LIMIT 5) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select x, array_agg(y order by x desc, z desc limit 10) from T group by x
+"""
+formatted = """
+SELECT x,
+       ARRAY_AGG(
+         y
+         ORDER BY x DESC, z DESC
+         LIMIT 10
+       )
+  FROM T
+ GROUP BY x
+"""
+
+[[cases]]
+input = """
+select COUNT(* having max 1) as a from T having a;
+"""
+formatted = """
+SELECT COUNT(* HAVING MAX 1) AS a
+  FROM T
+HAVING a
+"""
+
+[[cases]]
+description = "HAVING for aggregation function with *."
+input = """
+select ANON_COUNT(*, 0, 1 having max 1) as a from T having a;
+"""
+formatted = """
+SELECT ANON_COUNT(*, 0, 1 HAVING MAX 1) AS a
+  FROM T
+HAVING a
+"""
+
+[[cases]]
+description = "HAVING for aggregation function with no arguments."
+input = """
+select SUM(having max 1) as a from T having a;
+"""
+formatted = """
+SELECT SUM(HAVING MAX 1) AS a
+  FROM T
+HAVING a
+"""
+
+[[cases]]
+input = """
+select max(max having min max) as a from T having a;
+"""
+formatted = """
+SELECT MAX(max HAVING MIN max) AS a
+  FROM T
+HAVING a
+"""
+
+[[cases]]
+input = """
+select array_agg(x having min y order by z limit 1 offset 2) as a from T having a;
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         x
+         HAVING MIN y
+         ORDER BY z
+         LIMIT 1 OFFSET 2
+       ) AS a
+  FROM T
+HAVING a
+"""
+
+[[cases]]
+input = """
+select array_agg(* clamped between 1 and 2) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(* CLAMPED BETWEEN 1 AND 2) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(*, y clamped between 1 and 2) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(*, y CLAMPED BETWEEN 1 AND 2) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x clamped between 1 and 2) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(x CLAMPED BETWEEN 1 AND 2) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(clamped between 1 and 2) as clamped from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         clamped BETWEEN 1 AND 2
+       ) AS clamped
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(clamped between 1 and 2 clamped between 3 and 4) as clamped from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         clamped BETWEEN 1 AND 2
+         CLAMPED BETWEEN 3 AND 4
+       ) AS clamped
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x having min y clamped between 1 and 2) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         x
+         HAVING MIN y
+         CLAMPED BETWEEN 1 AND 2
+       ) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x having min y clamped between 1 and 2 order by z) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         x
+         HAVING MIN y
+         CLAMPED BETWEEN 1 AND 2
+         ORDER BY z
+       ) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x having min y clamped between 1 and 2 limit 1 offset 2) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         x
+         HAVING MIN y
+         CLAMPED BETWEEN 1 AND 2
+         LIMIT 1 OFFSET 2
+       ) AS a
+  FROM T
+"""
+
+[[cases]]
+input = """
+select array_agg(x having min y clamped between 1 and 2 limit 1 offset 2) as a from T;
+"""
+formatted = """
+SELECT ARRAY_AGG(
+         x
+         HAVING MIN y
+         CLAMPED BETWEEN 1 AND 2
+         LIMIT 1 OFFSET 2
+       ) AS a
+  FROM T
+"""

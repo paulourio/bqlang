@@ -1,0 +1,318 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select uId from Users tablesample reservoir (100 rows) repeatable(10)
+"""
+formatted = """
+SELECT uId
+  FROM Users
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+input = """
+select uId from Users TABLESAMPLE RESERVOIR (cast(100 as int32) ROWS)
+                                            REPEATABLE(cast(10 as int32))
+"""
+formatted = """
+SELECT uId
+  FROM Users
+       TABLESAMPLE RESERVOIR (CAST(100 AS INT32) ROWS) REPEATABLE(CAST(10 AS INT32))
+"""
+
+[[cases]]
+input = """
+select uId from Users TABLESAMPLE RESERVOIR (@param1 ROWS) REPEATABLE(@param2)
+"""
+formatted = """
+SELECT uId
+  FROM Users
+       TABLESAMPLE RESERVOIR (@param1 ROWS) REPEATABLE(@param2)
+"""
+
+[[cases]]
+input = """
+select uId from Users TABLESAMPLE RESERVOIR (cast(@param1 as int32) ROWS)
+                                            REPEATABLE(cast(@param2 as string))
+"""
+formatted = """
+SELECT uId
+  FROM Users
+       TABLESAMPLE RESERVOIR (CAST(@param1 AS INT32) ROWS) REPEATABLE(CAST(@param2 AS STRING))
+"""
+
+[[cases]]
+input = """
+select uId from Users TABLESAMPLE RESERVOIR (@@sysvar1 ROWS) REPEATABLE(@@sysvar2)
+"""
+formatted = """
+SELECT uId
+  FROM Users
+       TABLESAMPLE RESERVOIR (@@sysvar1 ROWS) REPEATABLE(@@sysvar2)
+"""
+
+[[cases]]
+input = """
+select uId from Users Reservoir TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+formatted = """
+SELECT uId
+  FROM Users AS Reservoir
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+input = """
+SELECT * FROM Users TABLESAMPLE RESERVOIR (10 ROWS PARTITION BY state, zipcode)
+"""
+formatted = """
+SELECT *
+  FROM Users
+       TABLESAMPLE RESERVOIR (10 ROWS PARTITION BY state, zipcode)
+"""
+
+[[cases]]
+input = """
+select uId from Users TABLESAMPLE System(100 ROWS)
+"""
+formatted = """
+SELECT uId
+  FROM Users
+       TABLESAMPLE SYSTEM (100 ROWS)
+"""
+
+[[cases]]
+input = """
+select uId from Users TABLESAMPLE system(0.1 Percent) repeatable (10)
+"""
+formatted = """
+SELECT uId
+  FROM Users
+       TABLESAMPLE SYSTEM (0.1 PERCENT) REPEATABLE(10)
+"""
+
+[[cases]]
+input = """
+select *
+from (select uId from Users) TABLESAMPLE BERNOULLI (100 ROWS) REPEATABLE(10)
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT uId
+           FROM Users
+       )
+       TABLESAMPLE BERNOULLI (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+input = """
+select * from (a JOIN (select * from Users)) TABLESAMPLE random (100 ROWS)
+"""
+formatted = """
+SELECT *
+  FROM (
+         a
+         JOIN
+         (
+           SELECT *
+             FROM Users
+         )
+       )
+       TABLESAMPLE RANDOM (100 ROWS)
+"""
+
+[[cases]]
+input = """
+select * from a, (select * from Users) TABLESAMPLE RESERVOIR (5 ROWS) where true
+"""
+formatted = """
+SELECT *
+  FROM a,
+       (
+         SELECT *
+           FROM Users
+       )
+       TABLESAMPLE RESERVOIR (5 ROWS)
+ WHERE TRUE
+"""
+
+[[cases]]
+decription = "PERCENT, REPEATABLE are non-reserved keywords and can be used as identifiers."
+input = """
+select 4 Percent, 5 Repeatable
+from Users TABLESAMPLE RESERVOIR (0 PERCENT) REPEATABLE(1)
+"""
+formatted = """
+SELECT 4 AS Percent,
+       5 AS Repeatable
+  FROM Users
+       TABLESAMPLE RESERVOIR (0 PERCENT) REPEATABLE(1)
+"""
+
+[[cases]]
+input = """
+select * from a, b TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+formatted = """
+SELECT *
+  FROM a,
+       b
+       TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+
+[[cases]]
+input = """
+select * from a JOIN b TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+
+[[cases]]
+input = """
+select * from (a JOIN b) TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+formatted = """
+SELECT *
+  FROM (
+         a
+         JOIN
+         b
+       )
+       TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+
+[[cases]]
+input = """
+SELECT * FROM Users TABLESAMPLE RESERVOIR (1 ROWS)
+WITH WEIGHT
+"""
+formatted = """
+SELECT *
+  FROM Users
+       TABLESAMPLE RESERVOIR (1 ROWS) WITH WEIGHT
+"""
+
+[[cases]]
+input = """
+SELECT * FROM Users TABLESAMPLE RESERVOIR (1 ROWS)
+WITH WEIGHT REPEATABLE(1)
+"""
+formatted = """
+SELECT *
+  FROM Users
+       TABLESAMPLE RESERVOIR (1 ROWS) WITH WEIGHT REPEATABLE(1)
+"""
+
+[[cases]]
+input = """
+SELECT * FROM Users TABLESAMPLE RESERVOIR (1 ROWS)
+WITH WEIGHT weight
+"""
+formatted = """
+SELECT *
+  FROM Users
+       TABLESAMPLE RESERVOIR (1 ROWS) WITH WEIGHT AS weight
+"""
+
+[[cases]]
+input = """
+SELECT * FROM Users TABLESAMPLE RESERVOIR (1 ROWS)
+WITH WEIGHT weight REPEATABLE(1)
+"""
+formatted = """
+SELECT *
+  FROM Users
+       TABLESAMPLE RESERVOIR (1 ROWS) WITH WEIGHT AS weight REPEATABLE(1)
+"""
+
+[[cases]]
+input = """
+SELECT * FROM Users TABLESAMPLE RESERVOIR (1 ROWS)
+WITH WEIGHT AS weight REPEATABLE(1)
+"""
+formatted = """
+SELECT *
+  FROM Users
+       TABLESAMPLE RESERVOIR (1 ROWS) WITH WEIGHT AS weight REPEATABLE(1)
+"""
+
+[[cases]]
+input = """
+select * from UNNEST(array_expr) TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+formatted = """
+SELECT *
+  FROM UNNEST(array_expr)
+       TABLESAMPLE RESERVOIR (1 ROWS)
+"""
+
+[[cases]]
+input = """
+select * from Users
+where a IN (select * from a_s TABLESAMPLE RESERVOIR (1 ROWS))
+"""
+formatted = """
+SELECT *
+  FROM Users
+ WHERE a IN (
+         SELECT *
+           FROM a_s
+                TABLESAMPLE RESERVOIR (1 ROWS)
+       )
+"""
+
+[[cases]]
+input = """
+select uId
+from ( a TABLESAMPLE RESERVOIR (1 ROWS) JOIN
+       (select * from b) TABLESAMPLE RESERVOIR (1 ROWS) JOIN
+       (c TABLESAMPLE RESERVOIR (1 PERCENT) JOIN
+        d TABLESAMPLE RESERVOIR (1 ROWS)) TABLESAMPLE SYSTEM (1 ROWS)
+     ) TABLESAMPLE RESERVOIR (5.0 PERCENT)
+"""
+formatted = """
+SELECT uId
+  FROM (
+         a
+         TABLESAMPLE RESERVOIR (1 ROWS)
+         JOIN
+         (
+           SELECT *
+             FROM b
+         )
+         TABLESAMPLE RESERVOIR (1 ROWS)
+         JOIN
+         (
+           c
+           TABLESAMPLE RESERVOIR (1 PERCENT)
+           JOIN
+           d
+           TABLESAMPLE RESERVOIR (1 ROWS)
+         )
+         TABLESAMPLE SYSTEM (1 ROWS)
+       )
+       TABLESAMPLE RESERVOIR (5.0 PERCENT)
+"""

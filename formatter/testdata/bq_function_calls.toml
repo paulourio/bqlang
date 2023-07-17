@@ -1,0 +1,184 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_catalog = "BIGQUERY"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Function calls: named arguments"
+input = """
+SELECT token, count
+FROM CountTokensInText(
+  'Would you prefer softball, baseball, or tennis? There is also swimming.',
+  ['baseball', 'football', 'tennis'],
+  ' .,!?()');
+
+  SELECT token, count
+FROM CountTokensInText(
+  paragraph => 'Would you prefer softball, baseball, or tennis? There is also swimming.',
+  tokens => ['baseball', 'football', 'tennis'],
+  delimiters => ' .,!?()');
+
+SELECT token, count
+FROM CountTokensInText(
+  tokens => ['baseball', 'football', 'tennis'],
+  delimiters => ' .,!?()',
+  paragraph => 'Would you prefer softball, baseball, or tennis? There is also swimming.');
+
+SELECT token, count
+FROM CountTokensInText(
+  'Would you prefer softball, baseball, or tennis? There is also swimming.',
+  tokens => ['baseball', 'football', 'tennis'],
+  delimiters => ' .,!?()');
+
+-- This works.
+SELECT token, count
+FROM CountTokensInText(
+  'Would you prefer softball, baseball, or tennis? There is also swimming.',
+  ['baseball', 'football', 'tennis'],
+  delimiters => ' .,!?()')
+"""
+formatted = """
+SELECT token, count
+  FROM CountTokensInText(
+         'Would you prefer softball, baseball, or tennis? There is also swimming.',
+         ['baseball', 'football', 'tennis'],
+         ' .,!?()'
+       );
+
+SELECT token, count
+  FROM CountTokensInText(
+         paragraph => 'Would you prefer softball, baseball, or tennis? There is also swimming.',
+         tokens =>
+           ['baseball', 'football', 'tennis']
+         ,
+         delimiters => ' .,!?()'
+       );
+
+SELECT token, count
+  FROM CountTokensInText(
+         tokens =>
+           ['baseball', 'football', 'tennis']
+         ,
+         delimiters => ' .,!?()',
+         paragraph => 'Would you prefer softball, baseball, or tennis? There is also swimming.'
+       );
+
+SELECT token, count
+  FROM CountTokensInText(
+         'Would you prefer softball, baseball, or tennis? There is also swimming.',
+         tokens =>
+           ['baseball', 'football', 'tennis']
+         ,
+         delimiters => ' .,!?()'
+       );
+
+-- This works.
+SELECT token, count
+  FROM CountTokensInText(
+         'Would you prefer softball, baseball, or tennis? There is also swimming.',
+         ['baseball', 'football', 'tennis'],
+         delimiters => ' .,!?()'
+       );
+"""
+
+[[cases]]
+description = "SAFE. prefix"
+input = """
+SELECT SAFE.SUBSTR('foo', 0, -2) AS safe_output UNION ALL
+SELECT SAFE.SUBSTR('bar', 0, 2) AS safe_output;
+"""
+formatted = """
+SELECT SAFE.SUBSTR('foo', 0, -2) AS safe_output
+ UNION ALL
+SELECT SAFE.SUBSTR('bar', 0, 2) AS safe_output
+"""
+
+[[cases]]
+description = "Creates a UDF named multiply_by_three and calls it from the same project."
+input = """
+CREATE FUNCTION my_dataset.multiply_by_three(x INT64) AS (x * 3);
+
+SELECT my_dataset.multiply_by_three(5) AS result; -- returns 15
+"""
+formatted = """
+CREATE FUNCTION my_dataset.multiply_by_three(x INT64)
+AS (
+  x * 3
+);
+
+SELECT my_dataset.multiply_by_three(5) AS result;
+-- returns 15
+"""
+
+[[cases]]
+description = "The following example calls a persistent UDF from a different project."
+input = """
+CREATE FUNCTION `other_project`.other_dataset.other_function(x INT64, y INT64)
+  AS (x * y * 2);
+
+SELECT `other_project`.other_dataset.other_function(3, 4); --returns 24
+
+"""
+formatted = """
+CREATE FUNCTION `other_project`.other_dataset.other_function(x INT64, y INT64)
+AS (
+  x * y * 2
+);
+
+SELECT `other_project`.other_dataset.other_function(3, 4);
+--returns 24
+"""
+
+[[cases]]
+description = "HAVING MAX clause"
+input = """
+WITH
+  Precipitation AS (
+    SELECT 2009 AS year, 'spring' AS season, 3 AS inches
+    UNION ALL
+    SELECT 2001, 'winter', 4
+    UNION ALL
+    SELECT 2003, 'fall', 1
+    UNION ALL
+    SELECT 2002, 'spring', 4
+    UNION ALL
+    SELECT 2005, 'summer', 1
+  )
+SELECT ANY_VALUE(year HAVING MAX inches) AS any_year_with_max_inches FROM Precipitation;
+"""
+formatted = """
+WITH
+  Precipitation AS (
+    SELECT 2009     AS year,
+           'spring' AS season,
+           3        AS inches
+     UNION ALL
+    SELECT 2001, 'winter', 4
+     UNION ALL
+    SELECT 2003, 'fall', 1
+     UNION ALL
+    SELECT 2002, 'spring', 4
+     UNION ALL
+    SELECT 2005, 'summer', 1
+  )
+SELECT ANY_VALUE(year HAVING MAX inches) AS any_year_with_max_inches
+  FROM Precipitation
+"""

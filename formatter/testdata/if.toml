@@ -1,0 +1,499 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = false
+column_list_trailing_comma = "NEVER"
+indentation = 1
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+if x > y then
+  select 1;
+end if;
+"""
+formatted = """
+IF x > y THEN
+  SELECT 1;
+END IF
+"""
+
+[[cases]]
+description = "if with different case and formatting"
+input = """
+If
+x > y   THEN select
+
+1; EnD
+
+iF
+"""
+formatted = """
+IF x > y THEN
+  SELECT 1;
+END IF
+"""
+
+[[cases]]
+description = "if with multiple statements"
+input = """
+if x > y then
+  select 1;
+  create table t as select a, b from t2;
+  drop table t;
+end if;
+"""
+formatted = """
+IF x > y THEN
+  SELECT 1;
+
+  CREATE TABLE t
+  AS
+  SELECT a, b
+    FROM t2;
+
+  DROP TABLE t;
+END IF
+"""
+
+[[cases]]
+description = "if with nested if"
+input = """
+if x > y then
+  select 1;
+  create table t as select a, b from t2;
+  if (select count(*) from t) = 0 then
+    drop table t;
+  end if;
+end if;
+"""
+formatted = """
+IF x > y THEN
+  SELECT 1;
+
+  CREATE TABLE t
+  AS
+  SELECT a, b
+    FROM t2;
+
+  IF
+    (
+      SELECT COUNT(*)
+        FROM t
+    ) = 0
+  THEN
+    DROP TABLE t;
+  END IF;
+END IF
+"""
+
+[[cases]]
+description = "if with else"
+input = """
+if x > y then
+  select 1;
+else
+  select 2;
+end if;
+"""
+formatted = """
+IF x > y THEN
+  SELECT 1;
+ELSE
+  SELECT 2;
+END IF
+"""
+
+[[cases]]
+description = "multiple levels of if/else"
+input = """
+if x > y then
+  select 1;
+  if true then
+    create table t (x int64, y string);
+    if false then
+      drop table t;
+    else
+      drop table t2;
+      create view v as select 1 as x;
+    end if;
+  end if;
+else
+  if true then
+    if false then
+      if b then
+        select 2;
+        select 3;
+      else
+        select 4;
+        select 5;
+        select 6;
+      end if;
+    end if;
+  end if;
+end if
+"""
+formatted = """
+IF x > y THEN
+  SELECT 1;
+
+  IF TRUE THEN
+    CREATE TABLE t
+    (
+      x INT64,
+      y STRING
+    );
+
+    IF FALSE THEN
+      DROP TABLE t;
+    ELSE
+      DROP TABLE t2;
+
+      CREATE VIEW v
+      AS
+      SELECT 1 AS x;
+    END IF;
+  END IF;
+ELSE
+  IF TRUE THEN
+    IF FALSE THEN
+      IF b THEN
+        SELECT 2;
+
+        SELECT 3;
+      ELSE
+        SELECT 4;
+
+        SELECT 5;
+
+        SELECT 6;
+      END IF;
+    END IF;
+  END IF;
+END IF
+"""
+
+[[cases]]
+description = "if with if inside condition"
+input = """
+if if(cond, x, y) then
+  select 1;
+else
+  select 2;
+end if;
+"""
+formatted = """
+IF IF(cond, x, y) THEN
+  SELECT 1;
+ELSE
+  SELECT 2;
+END IF
+"""
+
+[[cases]]
+description = "if with case/when inside condition"
+input = """
+if case when x then y end then
+  select 1;
+  if true then
+    create table t (x int64, y string);
+    if false then
+      drop table t;
+    else
+      drop table t2;
+      create view v as select 1 as x;
+    end if;
+  end if;
+else
+  select 2;
+end if;
+"""
+formatted = """
+IF
+  CASE
+    WHEN x THEN y
+  END
+THEN
+  SELECT 1;
+
+  IF TRUE THEN
+    CREATE TABLE t
+    (
+      x INT64,
+      y STRING
+    );
+
+    IF FALSE THEN
+      DROP TABLE t;
+    ELSE
+      DROP TABLE t2;
+
+      CREATE VIEW v
+      AS
+      SELECT 1 AS x;
+    END IF;
+  END IF;
+ELSE
+  SELECT 2;
+END IF
+"""
+
+[[cases]]
+description = "if with various expressions"
+input = """
+if if(a, b, c) then
+  select 1;
+end if
+"""
+formatted = """
+IF IF(a, b, c) THEN
+  SELECT 1;
+END IF
+"""
+
+[[cases]]
+description = "if with various expressions"
+input = """
+if exists ( select 1)  then
+  select 1;
+end if
+"""
+formatted = """
+IF
+  EXISTS(
+    SELECT 1
+  )
+THEN
+  SELECT 1;
+END IF
+"""
+
+[[cases]]
+description = "if with various expressions"
+input = """
+if extract ( date from  ts)  then
+  select 1;
+end if
+"""
+formatted = """
+IF EXTRACT(DATE FROM ts) THEN
+  SELECT 1;
+END IF
+"""
+
+[[cases]]
+description = "if with hint on inner statement"
+input = """
+if true then
+  @{hint_name=5} select 1;
+end if
+"""
+formatted = """
+IF TRUE THEN
+  @{hint_name=5}
+  SELECT 1;
+END IF
+"""
+
+[[cases]]
+description = "if with empty statement list"
+input = """
+if x < y then
+end if
+"""
+formatted = """
+IF x < y THEN
+END IF
+"""
+
+[[cases]]
+description = "else with empty statement list"
+input = """
+if x < y then
+  select 1;
+else
+end if
+"""
+formatted = """
+IF x < y THEN
+  SELECT 1;
+ELSE
+END IF
+"""
+
+[[cases]]
+description = "then and else with empty statement list"
+input = """
+if x < y then
+else
+end if
+"""
+formatted = """
+IF x < y THEN
+ELSE
+END IF
+"""
+
+[[cases]]
+description = "Simple if/elseif/elseif"
+input = """
+IF x = 2 THEN
+  SELECT 1;
+  SELECT 2;
+ELSEIF x = 3 THEN
+  SELECT 3;
+  SELECT 4;
+ELSEIF x = 4 THEN
+  SELECT 5;
+  SELECT 6;
+END IF;
+"""
+formatted = """
+IF x = 2 THEN
+  SELECT 1;
+
+  SELECT 2;
+ELSEIF x = 3 THEN
+  SELECT 3;
+
+  SELECT 4;
+ELSEIF x = 4 THEN
+  SELECT 5;
+
+  SELECT 6;
+END IF
+"""
+
+[[cases]]
+description = "Simple if/elseif/elseif"
+input = """
+IF x = 2 THEN
+  SELECT 1;
+  SELECT 2;
+ELSEIF x = 3 THEN
+  SELECT 3;
+  SELECT 4;
+ELSE
+  SELECT 5;
+  SELECT 6;
+END IF;
+"""
+formatted = """
+IF x = 2 THEN
+  SELECT 1;
+
+  SELECT 2;
+ELSEIF x = 3 THEN
+  SELECT 3;
+
+  SELECT 4;
+ELSE
+  SELECT 5;
+
+  SELECT 6;
+END IF
+"""
+
+[[cases]]
+description = "elseif with empty body"
+input = """
+IF x = 2 THEN
+  SELECT 1;
+  SELECT 2;
+ELSEIF x = 3 THEN
+ELSE
+  SELECT 5;
+  SELECT 6;
+END IF;
+"""
+formatted = """
+IF x = 2 THEN
+  SELECT 1;
+
+  SELECT 2;
+ELSEIF x = 3 THEN
+ELSE
+  SELECT 5;
+
+  SELECT 6;
+END IF
+"""
+
+[[cases]]
+description = "elseif, then, and else, all with empty body"
+input = """
+IF x = 2 THEN
+ELSEIF x = 3 THEN
+ELSE
+END IF;
+"""
+formatted = """
+IF x = 2 THEN
+ELSEIF x = 3 THEN
+ELSE
+END IF
+"""
+
+[[cases]]
+description = "Nested if/elseif statements"
+input = """
+IF x = 2 THEN
+ELSEIF x = 3 THEN
+  IF y = 3 THEN
+  ELSEIF y = 4 THEN
+  ELSEIF y = 5 THEN
+    IF z = 6 THEN SELECT 6;
+    ELSEIF z = 7 THEN SELECT 7;
+    ELSEIF z = 8 THEN SELECT 8;
+    END IF;
+  END IF;
+END IF;
+"""
+formatted = """
+IF x = 2 THEN
+ELSEIF x = 3 THEN
+  IF y = 3 THEN
+  ELSEIF y = 4 THEN
+  ELSEIF y = 5 THEN
+    IF z = 6 THEN
+      SELECT 6;
+    ELSEIF z = 7 THEN
+      SELECT 7;
+    ELSEIF z = 8 THEN
+      SELECT 8;
+    END IF;
+  END IF;
+END IF
+"""
+
+[[cases]]
+description = "Use of elseif as normal identifier"
+input = """
+declare ElseIf int64 default 3;
+if ElseIf then select 1;
+elseif ElseIf then select 2;
+else select ElseIf;
+end if;
+"""
+formatted = """
+DECLARE ElseIf INT64 DEFAULT 3;
+
+IF ElseIf THEN
+  SELECT 1;
+ELSEIF ElseIf THEN
+  SELECT 2;
+ELSE
+  SELECT ElseIf;
+END IF;
+"""

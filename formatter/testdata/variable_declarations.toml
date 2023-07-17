@@ -1,0 +1,91 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = false
+column_list_trailing_comma = "NEVER"
+indentation = 1
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "AS_IS"
+null_style = "AS_IS"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = "Single declaration"
+input = """
+declare x string
+"""
+formatted = """
+DECLARE x STRING
+"""
+
+[[cases]]
+description = "Multiple declarations"
+input = """
+DECLARE x STRING;
+DECLARE y INT32
+"""
+formatted = """
+DECLARE x STRING;
+DECLARE y INT32;
+"""
+
+[[cases]]
+description = "Declaration of multiple variables in one statement."
+input = """
+DECLARE x,y INT32;
+"""
+formatted = """
+DECLARE x, y INT32
+"""
+
+[[cases]]
+description = "Single variable with default value"
+input = """
+DECLARE x INT32 DEFAULT 5;
+"""
+formatted = """
+DECLARE x INT32 DEFAULT 5
+"""
+
+[[cases]]
+description = "Multiple declarations statements with default value"
+input = """
+DECLARE x INT32 DEFAULT 5;
+DECLARE y INT32 DEFAULT x + 23;
+"""
+formatted = """
+DECLARE x INT32 DEFAULT 5;
+DECLARE y INT32 DEFAULT x + 23;
+"""
+
+[[cases]]
+description = "Declaration followed by other statement"
+input = """
+DECLARE x INT32;
+SELECT x;
+"""
+formatted = """
+DECLARE x INT32;
+
+SELECT x;
+"""
+
+[[cases]]
+description = "Declaration of parameterized data type"
+input = """
+DECLARE x STRING(10);
+SELECT x;
+"""
+formatted = """
+DECLARE x STRING(10);
+
+SELECT x;
+"""

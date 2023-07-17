@@ -1,0 +1,60 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select 1 from unnest(5)
+"""
+formatted = """
+SELECT 1
+  FROM UNNEST(5)
+"""
+
+[[cases]]
+input = """
+select x from unnest(y+z) as k with offset pos
+"""
+formatted = """
+SELECT x
+  FROM UNNEST(y + z) AS k WITH OFFSET pos
+"""
+
+[[cases]]
+input = """
+select x from unnest(@param) join unnest(null) using (k)
+"""
+formatted = """
+SELECT x
+  FROM UNNEST(@param)
+       JOIN
+       UNNEST(NULL)
+       USING (k)
+"""
+
+[[cases]]
+input = """
+select x from unnest(@@sysvar) join unnest(null) using (k)
+"""
+formatted = """
+SELECT x
+  FROM UNNEST(@@sysvar)
+       JOIN
+       UNNEST(NULL)
+       USING (k)
+"""

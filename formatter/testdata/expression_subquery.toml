@@ -1,0 +1,163 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select (select 1), EXISTS(select 2), ARRAY(select 3)
+from T
+"""
+formatted = """
+SELECT (
+         SELECT 1
+       ),
+       EXISTS(
+         SELECT 2
+       ),
+       ARRAY(
+         SELECT 3
+       )
+  FROM T
+"""
+
+[[cases]]
+input = """
+select (((select 3) + (select x.y from z) + (select (1+2) from z)))
+"""
+formatted = """
+SELECT ((
+         SELECT 3
+       ) + (
+         SELECT x.y
+           FROM z
+       ) + (
+         SELECT (1 + 2)
+           FROM z
+       ))
+"""
+
+[[cases]]
+input = """
+select (select (select 1))
+"""
+formatted = """
+SELECT (
+         SELECT (
+                  SELECT 1
+                )
+       )
+"""
+
+[[cases]]
+input = """
+select (select 1), ARRAY(select 2)
+from T
+where (select 3) = (select 4)
+group by (select 5), EXISTS(select 6)
+"""
+formatted = """
+SELECT (
+         SELECT 1
+       ),
+       ARRAY(
+         SELECT 2
+       )
+  FROM T
+ WHERE (
+         SELECT 3
+       ) = (
+         SELECT 4
+       )
+ GROUP BY (
+            SELECT 5
+          ), EXISTS(
+            SELECT 6
+          )
+"""
+
+[[cases]]
+input = """
+select EXISTS(select 1 union all select 2)
+"""
+formatted = """
+SELECT EXISTS(
+         SELECT 1
+          UNION ALL
+         SELECT 2
+       )
+"""
+
+[[cases]]
+input = """
+select *
+from (SELECT 1) AS singlerowscan_1
+WHERE
+  exists(
+    select
+      cast(- 90.21638073702843 as float64) as a_3
+    from (select 1) as singlerowscan_2
+    where false
+  ) IN (exists(SELECT 1));
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT 1
+       ) AS singlerowscan_1
+ WHERE EXISTS(
+         SELECT CAST(-90.21638073702843 AS FLOAT64) AS a_3
+           FROM (
+                  SELECT 1
+                ) AS singlerowscan_2
+          WHERE FALSE
+       ) IN (
+         EXISTS(
+           SELECT 1
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select *
+from (SELECT 1) AS singlerowscan_1
+WHERE
+  exists(
+    select
+      cast(- 90.21638073702843 as float64) as a_3
+    from (select 1) as singlerowscan_2
+    where false
+  ) IN (array(SELECT 1));
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT 1
+       ) AS singlerowscan_1
+ WHERE EXISTS(
+         SELECT CAST(-90.21638073702843 AS FLOAT64) AS a_3
+           FROM (
+                  SELECT 1
+                ) AS singlerowscan_2
+          WHERE FALSE
+       ) IN (
+         ARRAY(
+           SELECT 1
+         )
+       )
+"""

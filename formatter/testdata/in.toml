@@ -1,0 +1,255 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select 'a' IN ('a', 'b', 'c')
+"""
+formatted = """
+SELECT 'a' IN ('a', 'b', 'c')
+"""
+
+[[cases]]
+input = """
+select true IN ('a')
+"""
+formatted = """
+SELECT TRUE IN ('a')
+"""
+
+[[cases]]
+input = """
+select 5 IN ('a', 4 + 5, f(b.a))
+"""
+formatted = """
+SELECT 5 IN ('a', 4 + 5, F(b.a))
+"""
+
+[[cases]]
+input = """
+select a NOT IN (a, f(b), c.d, (a[b.c]).d)
+"""
+formatted = """
+SELECT a NOT IN (
+         a,
+         F(b),
+         c.d,
+         (a[b.c]).d
+       )
+"""
+
+[[cases]]
+input = """
+select col IN ('a')
+and col not between x+y AND f(x,y)
+"""
+formatted = """
+SELECT     col IN ('a')
+       AND col NOT BETWEEN x + y AND F(x, y)
+"""
+
+[[cases]]
+input = """
+select * from T where @Id IN (@ValidIds)
+"""
+formatted = """
+SELECT *
+  FROM T
+ WHERE @Id IN (@ValidIds)
+"""
+
+[[cases]]
+input = """
+select * from T where @@sysvar1 IN (@@sysvar2)
+"""
+formatted = """
+SELECT *
+  FROM T
+ WHERE @@sysvar1 IN (@@sysvar2)
+"""
+
+[[cases]]
+input = """
+select 1 NOT IN (select 123)
+"""
+formatted = """
+SELECT 1 NOT IN (
+         SELECT 123
+       )
+"""
+
+[[cases]]
+input = """
+select true
+from T
+where (select 1) IN (select (select 1))
+"""
+formatted = """
+SELECT TRUE
+  FROM T
+ WHERE (
+         SELECT 1
+       ) IN (
+         SELECT (
+                  SELECT 1
+                )
+       )
+"""
+
+[[cases]]
+input = """
+select 1 IN UNNEST([1, 2, 3])
+"""
+formatted = """
+SELECT 1 IN UNNEST([1, 2, 3])
+"""
+
+[[cases]]
+input = """
+select 1 in( (select 1) )
+"""
+formatted = """
+SELECT 1 IN (
+         (
+           SELECT 1
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select 1 IN ( (select 1) UNION ALL (select 2) )
+"""
+formatted = """
+SELECT 1 IN (
+         (
+           SELECT 1
+         )
+         UNION ALL
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select (select 1, 2) IN ( (select 1, 2) )
+"""
+formatted = """
+SELECT (
+         SELECT 1,
+                2
+       ) IN (
+         (
+           SELECT 1,
+                  2
+         )
+       )
+"""
+
+[[cases]]
+description = "ExprSubquery in RHS of InList"
+input = """
+select 1 IN ( (select 1), (select 2) )
+"""
+formatted = """
+SELECT 1 IN (
+         (
+           SELECT 1
+         ),
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select 1 IN ( ( (select 1) UNION ALL (select 2) ), (select 3) )
+"""
+formatted = """
+SELECT 1 IN (
+         (
+           (
+             SELECT 1
+           )
+           UNION ALL
+           (
+             SELECT 2
+           )
+         ),
+         (
+           SELECT 3
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select 1 IN ( ( (select 1) UNION ALL (select 2 x) ), (select 3) )
+"""
+formatted = """
+SELECT 1 IN (
+         (
+           (
+             SELECT 1
+           )
+           UNION ALL
+           (
+             SELECT 2 AS x
+           )
+         ),
+         (
+           SELECT 3
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select 1 IN ((1+1)&(2), (1) + (2), 1 < 2, 1 IS TRUE)
+"""
+formatted = """
+SELECT 1 IN (
+         (1 + 1) & 2,
+         1 + 2,
+         1 < 2,
+         1 IS TRUE
+       )
+"""
+
+[[cases]]
+input = """
+select x from T where x IN UNNEST( (select 1) )
+"""
+formatted = """
+SELECT x
+  FROM T
+ WHERE x IN UNNEST((
+         SELECT 1
+       ))
+"""
+
+[[cases]]
+input = """
+select x IN UNNEST(x + y)
+"""
+formatted = """
+SELECT x IN UNNEST(x + y)
+"""

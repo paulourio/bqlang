@@ -1,0 +1,299 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select * from a join b join c join d on cond1 on cond2 on cond3;
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       JOIN
+       c
+       JOIN
+       d
+       ON cond1
+       ON cond2
+       ON cond3
+"""
+
+[[cases]]
+input = """
+select * from a HASH join @{h1=v1} b join c on cond1 on cond2;
+"""
+formatted = """
+SELECT *
+  FROM a
+       HASH JOIN @{h1=v1}
+       b
+       JOIN
+       c
+       ON cond1
+       ON cond2
+"""
+
+[[cases]]
+input = """
+select * from a join b cross join c join d on cond1 on cond2
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       CROSS JOIN
+       c
+       JOIN
+       d
+       ON cond1
+       ON cond2
+"""
+
+[[cases]]
+input = """
+select * from a join b cross join c cross join d join e on cond1 on cond2
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       CROSS JOIN
+       c
+       CROSS JOIN
+       d
+       JOIN
+       e
+       ON cond1
+       ON cond2
+"""
+
+[[cases]]
+input = """
+select * from a join b natural join c join d on cond1 on cond2
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       NATURAL JOIN
+       c
+       JOIN
+       d
+       ON cond1
+       ON cond2
+"""
+
+[[cases]]
+input = """
+select * from a join b cross hash join @{h1=v1} c join d on cond1 on cond2
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       CROSS HASH JOIN @{h1=v1}
+       c
+       JOIN
+       d
+       ON cond1
+       ON cond2
+"""
+
+[[cases]]
+input = """
+select * from (a JOIN b) JOIN c JOIN d ON cond1 ON cond2;
+"""
+formatted = """
+SELECT *
+  FROM (
+         a
+         JOIN
+         b
+       )
+       JOIN
+       c
+       JOIN
+       d
+       ON cond1
+       ON cond2
+"""
+
+[[cases]]
+input = """
+select * from t1 JOIN (t2 JOIN t3 JOIN t4 ON cond1 ON cond2) JOIN t5 ON cond3 ON cond4;
+"""
+formatted = """
+SELECT *
+  FROM t1
+       JOIN
+       (
+         t2
+         JOIN
+         t3
+         JOIN
+         t4
+         ON cond1
+         ON cond2
+       )
+       JOIN
+       t5
+       ON cond3
+       ON cond4
+"""
+
+[[cases]]
+input = """
+select * from a JOIN b JOIN c JOIN d ON cond1 ON cond2 JOIN e on cond3 ON cond4;
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       JOIN
+       c
+       JOIN
+       d
+       ON cond1
+       ON cond2
+       JOIN
+       e
+       ON cond3
+       ON cond4
+"""
+
+[[cases]]
+input = """
+select * from (t1 join t2 join t3 join t4 on c1 on c2 join t5 on c3 on c4)
+"""
+formatted = """
+SELECT *
+  FROM (
+         t1
+         JOIN
+         t2
+         JOIN
+         t3
+         JOIN
+         t4
+         ON c1
+         ON c2
+         JOIN
+         t5
+         ON c3
+         ON c4
+       )
+"""
+
+[[cases]]
+input = """
+select * from a join b join c join d using (cond1) on cond2 using (cond3);
+"""
+formatted = """
+SELECT *
+  FROM a
+       JOIN
+       b
+       JOIN
+       c
+       JOIN
+       d
+       USING (cond1)
+       ON cond2
+       USING (cond3)
+"""
+
+[[cases]]
+input = """
+select * from a join b using (cond1) join c join d on cond1 on cond2;
+"""
+formatted = """
+SELECT *
+  FROM a
+
+       JOIN
+       b
+       USING (cond1)
+
+       JOIN
+       c
+
+       JOIN
+       d
+       ON cond1
+       ON cond2
+"""
+
+[[cases]]
+input = """
+select * from (a join b join c on cond1 on cond2)
+"""
+formatted = """
+SELECT *
+  FROM (
+         a
+         JOIN
+         b
+         JOIN
+         c
+         ON cond1
+         ON cond2
+       )
+"""
+
+# [[cases]]
+# input = """
+# call tvf((SELECT * FROM a join b join c on cond1 on cond2));
+# """
+# formatted = """
+# CALL tvf(
+#   (
+#     SELECT *
+#       FROM a
+#            JOIN
+#            b
+#            JOIN
+#            c
+#            ON cond1
+#            ON cond2
+#   )
+# )
+# """
+
+[[cases]]
+input = """
+select * from a join b, c join d on cond1
+"""
+formatted = """
+SELECT *
+  FROM a
+
+       JOIN
+       b,
+       c
+
+       JOIN
+       d
+       ON cond1
+"""

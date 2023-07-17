@@ -1,0 +1,361 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+WITH a as (select 1)
+select * from a;
+"""
+formatted = """
+WITH
+a AS (
+SELECT 1
+)
+SELECT *
+  FROM a
+"""
+
+[[cases]]
+input = """
+with a as (select 1),
+     b as (select * from a)
+select * from b
+"""
+formatted = """
+WITH
+a AS (
+SELECT 1
+),
+b AS (
+SELECT *
+  FROM a
+)
+SELECT *
+  FROM b
+"""
+
+[[cases]]
+input = """
+with /* comment */
+a as (select 1 as a),
+--
+-- Comment line 1
+--
+     b as (select a as b from a),
+     /* Comment line 2 */
+     c as (select b as c from b)
+     # final comment
+select *
+from b join c on (c.c = b.b)
+"""
+formatted = """
+WITH
+/* comment */
+a AS (
+SELECT 1 AS a
+),
+--
+-- Comment line 1
+--
+b AS (
+SELECT a AS b
+  FROM a
+),
+/* Comment line 2 */
+c AS (
+SELECT b AS c
+  FROM b
+)
+# final comment
+SELECT *
+  FROM b
+       JOIN
+       c
+       ON (c.c = b.b)
+"""
+
+[[cases]]
+input = """
+SELECT *
+ FROM (
+with /* comment */
+a as (select 1 as a),
+--
+-- Comment line 1
+--
+     b as (select a as b from a),
+     /* Comment line 2 */
+     c as (select b as c from b)
+     # final comment
+select *
+from b join c on (c.c = b.b))
+"""
+formatted = """
+SELECT *
+  FROM (
+         WITH
+         /* comment */
+         a AS (
+         SELECT 1 AS a
+         ),
+         --
+         -- Comment line 1
+         --
+         b AS (
+         SELECT a AS b
+           FROM a
+         ),
+         /* Comment line 2 */
+         c AS (
+         SELECT b AS c
+           FROM b
+         )
+         # final comment
+         SELECT *
+           FROM b
+                JOIN
+                c
+                ON (c.c = b.b)
+       )
+"""
+
+[[cases]]
+description = "WITH in table subquery."
+input = """
+select * from (
+  WITH a as (select 1)
+  select * from a);
+"""
+formatted = """
+SELECT *
+  FROM (
+         WITH
+         a AS (
+         SELECT 1
+         )
+         SELECT *
+           FROM a
+       )
+"""
+
+[[cases]]
+description = "WITH in expression subquery."
+input = """
+select (select 1), (with a as (select 2) select 3)
+"""
+formatted = """
+SELECT (
+         SELECT 1
+       ),
+       (
+         WITH
+         a AS (
+         SELECT 2
+         )
+         SELECT 3
+       )
+"""
+
+[[cases]]
+description = "WITH in expression subquery."
+input = """
+select (select 1), (select 2)
+from foo
+where exists(with x as (select 3) select * from x)
+"""
+formatted = """
+SELECT (
+         SELECT 1
+       ),
+       (
+         SELECT 2
+       )
+  FROM foo
+ WHERE EXISTS(
+         WITH
+         x AS (
+         SELECT 3
+         )
+         SELECT *
+           FROM x
+       )
+"""
+
+[[cases]]
+description = "WITH in expression subquery."
+input = """
+select 5 = (with x as (select 3) select * from x)
+"""
+formatted = """
+SELECT 5 = (
+         WITH
+         x AS (
+         SELECT 3
+         )
+         SELECT *
+           FROM x
+       )
+"""
+
+[[cases]]
+description = "WITH RECURSIVE (single entry)"
+input = """
+WITH recursive a as (select * from a)
+select * from a;
+"""
+formatted = """
+WITH RECURSIVE
+a AS (
+SELECT *
+  FROM a
+)
+SELECT *
+  FROM a
+"""
+
+[[cases]]
+description = "WITH RECURSIVE (multiple entries)"
+input = """
+WITH RECURSIVE
+  a AS (SELECT * FROM a),
+  b AS (SELECT * FROM b)
+select * from a, b;
+"""
+formatted = """
+WITH RECURSIVE
+a AS (
+SELECT *
+  FROM a
+),
+b AS (
+SELECT *
+  FROM b
+)
+SELECT *
+  FROM a,
+       b
+"""
+
+[[cases]]
+description = "WITH mixed with UNION ALL."
+input = """
+WITH q1 AS (select 5 UNION ALL select 6)
+select * from q1
+UNION ALL
+select * from q1
+"""
+formatted = """
+WITH
+q1 AS (
+SELECT 5
+ UNION ALL
+SELECT 6
+)
+SELECT *
+  FROM q1
+ UNION ALL
+SELECT *
+  FROM q1
+"""
+
+[[cases]]
+description = "WITH inside the elements of a UNION ALL; allowed with parentheses."
+input = """
+select * from q1
+UNION ALL
+(WITH q1 as (select * from q3) select * from q1)
+"""
+formatted = """
+SELECT *
+  FROM q1
+ UNION ALL
+(
+  WITH
+  q1 AS (
+  SELECT *
+    FROM q3
+  )
+  SELECT *
+    FROM q1
+)
+"""
+
+[[cases]]
+description = """
+WITH allowed inside WITH.
+The nested with is forced to have be deeper.
+"""
+input = """
+with q1 as (with q2 as (select 5) select * from q2) select * from q1
+"""
+formatted = """
+WITH
+q1 AS (
+  WITH
+  q2 AS (
+  SELECT 5
+  )
+  SELECT *
+    FROM q2
+)
+SELECT *
+  FROM q1
+"""
+
+[[cases]]
+description = """
+WITH allowed in subqueries.
+NOTE: This case used to crash without the STOP_ON_FIRST_ERROR option,
+but that is no longer relevant now that this parses successfully.
+"""
+input = """
+select 1
+from foo
+where 5 = (with x as (select 3) select * from x)
+"""
+formatted = """
+SELECT 1
+  FROM foo
+ WHERE 5 = (
+         WITH
+         x AS (
+         SELECT 3
+         )
+         SELECT *
+           FROM x
+       )
+"""
+
+[[cases]]
+description = """
+Query starting with "(With" (b/70510110)
+"""
+input = """
+( WITH d AS ( SELECT 1 as x ) SELECT d.x as y FROM d )
+"""
+formatted = """
+(
+  WITH
+  d AS (
+  SELECT 1 AS x
+  )
+  SELECT d.x AS y
+    FROM d
+)
+"""

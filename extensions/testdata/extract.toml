@@ -1,0 +1,352 @@
+[[cases]]
+input = "// comment"
+erased = "~~~~~~~~~~"
+
+[[cases.comments]]
+image = "// comment"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases]]
+input = "#"
+erased = "~"
+
+[[cases.comments]]
+image = "#"
+kind = "POUND"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases]]
+input = "// comment\n"
+erased = "~~~~~~~~~~\n"
+
+[[cases.comments]]
+image = "// comment\n"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases]]
+input = "// comment"
+erased = "~~~~~~~~~~"
+
+[[cases.comments]]
+image = "// comment"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases]]
+input = "\n\n// comment\n\n"
+erased = "\n\n~~~~~~~~~~\n\n"
+
+[[cases.comments]]
+image = "// comment\n"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases]]
+input = """a\nb\n// comment\n"""
+erased = """
+a
+b
+~~~~~~~~~~
+"""
+
+[[cases.comments]]
+image = "// comment\n"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases]]
+input = """a\nb\nc// comment\n"""
+erased = """
+a
+b
+c~~~~~~~~~~
+"""
+
+[[cases.comments]]
+image = "// comment\n"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases]]
+input = """
+-- comment
+/* multiline
+comment */
+abc /* inline comment */ def
+foo /* inline comment 2 */
+#
+/* aaa */# bbb
+/* ccc *///ddd
+# comment /* not a nested comment */
+"""
+erased = """
+~~~~~~~~~~
+~~~~~~~~~~~~
+~~~~~~~~~~
+abc~~~~~~~~~~~~~~~~~~~~~~def
+foo~~~~~~~~~~~~~~~~~~~~~~~
+~
+~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
+[[cases.comments]]
+image = "-- comment\n"
+kind = "DOUBLE_DASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "/* multiline\ncomment */"
+kind = "SLASH_STAR"
+multiline = true
+oneline = false
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "/* inline comment */"
+kind = "SLASH_STAR"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = false
+
+[[cases.comments]]
+image = "/* inline comment 2 */"
+kind = "SLASH_STAR"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases.comments]]
+image = "#\n"
+kind = "POUND"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "/* aaa */"
+kind = "SLASH_STAR"
+multiline = false
+oneline = false
+at_line_begin = true
+at_line_end = false
+
+[[cases.comments]]
+image = "# bbb\n"
+kind = "POUND"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases.comments]]
+image = "/* ccc */"
+kind = "SLASH_STAR"
+multiline = false
+oneline = false
+at_line_begin = true
+at_line_end = false
+
+[[cases.comments]]
+image = "//ddd\n"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases.comments]]
+image = "# comment /* not a nested comment */\n"
+kind = "POUND"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+
+[[cases]]
+input = """
+-- Foo.
+-- Bar.
+SELECT a, b, -- c,
+       // column,
+       ROUND(x, /*precision=*/4) AS value,
+  FROM source  // TABLESAMPLE SYSTEM (1 PERCENT)
+ -- WHERE condition
+ WHERE id = 1 /* description */
+"""
+erased = """
+~~~~~~~
+~~~~~~~
+SELECT~a,~b,~~~~~~
+~~~~~~~~~~~~~~~~~
+~~~~~~~ROUND(x,~~~~~~~~~~~~~~~4)~AS~value,
+~~FROM~source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+~WHERE~id~=~1~~~~~~~~~~~~~~~~~~
+"""
+
+[[cases.comments]]
+image = "-- Foo.\n"
+kind = "DOUBLE_DASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "-- Bar.\n"
+kind = "DOUBLE_DASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "-- c,\n"
+kind = "DOUBLE_DASH"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases.comments]]
+image = "// column,\n"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "/*precision=*/"
+kind = "SLASH_STAR"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = false
+
+[[cases.comments]]
+image = "// TABLESAMPLE SYSTEM (1 PERCENT)\n"
+kind = "DOUBLE_SLASH"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases.comments]]
+image = "-- WHERE condition\n"
+kind = "DOUBLE_DASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "/* description */"
+kind = "SLASH_STAR"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases]]
+input = """
+select
+# full line comment
+/* block
+   comment */
+-- full line comment
+1# partial line comment
++-- partial line comment
+2/*partial line block comment*/+3;
+"""
+erased = """
+select
+~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+1~~~~~~~~~~~~~~~~~~~~~~
++~~~~~~~~~~~~~~~~~~~~~~~
+2~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+3;
+"""
+
+[[cases.comments]]
+image = "# full line comment\n"
+kind = "POUND"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "/* block\n   comment */"
+kind = "SLASH_STAR"
+multiline = true
+oneline = false
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "-- full line comment\n"
+kind = "DOUBLE_DASH"
+multiline = false
+oneline = true
+at_line_begin = true
+at_line_end = true
+
+[[cases.comments]]
+image = "# partial line comment\n"
+kind = "POUND"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases.comments]]
+image = "-- partial line comment\n"
+kind = "DOUBLE_DASH"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = true
+
+[[cases.comments]]
+image = "/*partial line block comment*/"
+kind = "SLASH_STAR"
+multiline = false
+oneline = false
+at_line_begin = false
+at_line_end = false

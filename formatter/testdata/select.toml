@@ -1,0 +1,71 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+Select
+coalesce(a.key1,b.key1)as key1,
+date_sub ( key2, interval 2 month ) as month,
+max ( value ) as value
+from
+`table` as a
+-- `table_tmp`
+full outer join other_table as b on (a.key1 = b.key1) group by 1,2
+"""
+formatted = """
+SELECT COALESCE(a.key1, b.key1)         AS key1,
+       DATE_SUB(key2, INTERVAL 2 MONTH) AS month,
+       MAX(value)                       AS value
+  FROM `table` AS a
+       -- `table_tmp`
+
+       FULL OUTER JOIN
+       other_table AS b
+       ON (a.key1 = b.key1)
+ GROUP BY 1, 2
+"""
+
+[[cases]]
+input = """
+Select
+coalesce(a.key1,b.key1)as key1,
+date_sub ( key2, interval 2 month ) as month,
+max ( value ) as value
+from
+`table` as a
+-- `table_tmp`
+full outer join other_table as b on (a.key1 = b.key1)
+left join third_table using (key1)
+group by 1,2
+"""
+formatted = """
+SELECT COALESCE(a.key1, b.key1)         AS key1,
+       DATE_SUB(key2, INTERVAL 2 MONTH) AS month,
+       MAX(value)                       AS value
+  FROM `table` AS a
+       -- `table_tmp`
+
+       FULL OUTER JOIN
+       other_table AS b
+       ON (a.key1 = b.key1)
+
+       LEFT JOIN
+       third_table
+       USING (key1)
+ GROUP BY 1, 2
+"""

@@ -1,0 +1,242 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select a from t order by a, b;
+"""
+formatted = """
+SELECT a
+  FROM t
+ ORDER BY a, b
+"""
+
+[[cases]]
+input = """
+select a from t order by a+b;
+"""
+formatted = """
+SELECT a
+  FROM t
+ ORDER BY a + b
+"""
+
+[[cases]]
+input = """
+select a from t order by 1;
+"""
+formatted = """
+SELECT a
+  FROM t
+ ORDER BY 1
+"""
+
+[[cases]]
+input = """
+select a from t group by a having a > 5 order by 1;
+"""
+formatted = """
+SELECT a
+  FROM t
+ GROUP BY a
+HAVING a > 5
+ ORDER BY 1
+"""
+
+[[cases]]
+description = "ORDER BY attaches outside of the UNION ALL"
+input = """
+select a from t
+union all
+select b from t
+order by 1
+"""
+formatted = """
+SELECT a
+  FROM t
+ UNION ALL
+SELECT b
+  FROM t
+ ORDER BY 1
+"""
+
+[[cases]]
+description = "ORDER BY attaches outside of the UNION ALL"
+input = """
+(select a from t order by 1)
+UNION ALL
+(select b from t order by 2)
+order by 3
+"""
+formatted = """
+(
+  SELECT a
+    FROM t
+   ORDER BY 1
+)
+UNION ALL
+(
+  SELECT b
+    FROM t
+   ORDER BY 2
+)
+ORDER BY 3
+"""
+
+[[cases]]
+input = """
+select * from (select a from t order by 1);
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT a
+           FROM t
+          ORDER BY 1
+       )
+"""
+
+[[cases]]
+input = """
+select a from T order by a asc, b desc;
+"""
+formatted = """
+SELECT a
+  FROM T
+ ORDER BY a ASC, b DESC
+"""
+
+[[cases]]
+input = """
+select sum(a+b) as the_sum from T group by x, y order by the_sum;
+"""
+formatted = """
+SELECT SUM(a + b) AS the_sum
+  FROM T
+ GROUP BY x, y
+ ORDER BY the_sum
+"""
+
+[[cases]]
+input = """
+select a from T order by a asc nulls first;
+"""
+formatted = """
+SELECT a
+  FROM T
+ ORDER BY a ASC NULLS FIRST
+"""
+
+[[cases]]
+input = """
+select a from T order by a desc nulls last;
+"""
+formatted = """
+SELECT a
+  FROM T
+ ORDER BY a DESC NULLS LAST
+"""
+
+[[cases]]
+input = """
+select a from T order by 1 nulls last, first desc nulls first, last asc nulls last;
+"""
+formatted = """
+SELECT a
+  FROM T
+ ORDER BY 1 NULLS LAST, first DESC NULLS FIRST, last ASC NULLS LAST
+"""
+
+[[cases]]
+input = """
+select * from T
+order by col COLLATE "en_US" ASC
+"""
+formatted = """
+SELECT *
+  FROM T
+ ORDER BY col COLLATE "en_US" ASC
+"""
+
+[[cases]]
+input = """
+select * from T
+order by col COLLATE @en_US ASC
+"""
+formatted = """
+SELECT *
+  FROM T
+ ORDER BY col COLLATE @en_US ASC
+"""
+
+[[cases]]
+input = """
+select * from T
+order by col1 ASC,
+         col2 COLLATE "c2" DESC,
+         3 DESC,
+         4 COLLATE @c4 ASC
+"""
+formatted = """
+SELECT *
+  FROM T
+ ORDER BY col1 ASC, col2 COLLATE "c2" DESC, 3 DESC, 4 COLLATE @c4 ASC
+"""
+
+[[cases]]
+input = """
+select f() over (ORDER BY a COLLATE "en") from T
+"""
+formatted = """
+SELECT F() OVER (ORDER BY a COLLATE "en")
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over(partition by a order by a COLLATE "en") from T
+"""
+formatted = """
+SELECT F() OVER (
+         PARTITION BY a
+             ORDER BY a COLLATE "en"
+       )
+  FROM T
+"""
+
+[[cases]]
+input = """
+select f() over (order by a COLLATE "ca" ASC,
+                          b COLLATE "cb" DESC,
+                          3 COLLATE @c3 ASC,
+                          4 COLLATE @c4 DESC)
+"""
+formatted = """
+SELECT F() OVER (ORDER BY a COLLATE "ca" ASC, b COLLATE "cb" DESC, 3 COLLATE @c3 ASC, 4 COLLATE @c4 DESC)
+"""
+
+[[cases]]
+input = """
+select * from T
+order by 1 COLLATE ""
+"""
+formatted = """
+SELECT *
+  FROM T
+ ORDER BY 1 COLLATE ""
+"""

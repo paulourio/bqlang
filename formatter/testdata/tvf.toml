@@ -1,0 +1,892 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_catalog = "BIGQUERY"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select * from mytvf()
+"""
+formatted = """
+SELECT *
+  FROM mytvf()
+"""
+
+[[cases]]
+description = "Literals in the argument list."
+input = """
+select * from mytvf(1, 2, 3)
+"""
+formatted = """
+SELECT *
+  FROM mytvf(1, 2, 3)
+"""
+
+[[cases]]
+description = "A subquery in the argument list."
+input = """
+select * from mytvf((select Key from KeyValue group by Key))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT Key
+             FROM KeyValue
+            GROUP BY Key
+         )
+       )
+"""
+
+[[cases]]
+description = "A subquery and literals in the argument list."
+input = """
+select * from mytvf((select Key from KeyValue group by Key), 1, 2, 3)
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT Key
+             FROM KeyValue
+            GROUP BY Key
+         ),
+         1,
+         2,
+         3
+       )
+"""
+
+[[cases]]
+description = "Complex expressions in the argument list."
+input = """
+select * from mytvf(1 + 2, 3 + 4, 5 + 6)
+"""
+formatted = """
+SELECT *
+  FROM mytvf(1 + 2, 3 + 4, 5 + 6)
+"""
+
+[[cases]]
+description = "A subquery and complex expressions in the argument list."
+input = """
+select * from mytvf((select Key from KeyValue group by Key), 1 + 2, 3 + 4)
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT Key
+             FROM KeyValue
+            GROUP BY Key
+         ),
+         1 + 2,
+         3 + 4
+       )
+"""
+
+[[cases]]
+description = "A subquery and complex expressions in the argument list."
+input = """
+select * from mytvf((select 1), 1 + 2, 3 + 4)
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+         ),
+         1 + 2,
+         3 + 4
+       )
+"""
+
+[[cases]]
+description = "Two subqueries in the argument list."
+input = """
+select * from `MyTVF`((select Key from KeyValue group by Key), (select 1))
+"""
+formatted = """
+SELECT *
+  FROM `MyTVF`(
+         (
+           SELECT Key
+             FROM KeyValue
+            GROUP BY Key
+         ),
+         (
+           SELECT 1
+         )
+       )
+"""
+
+[[cases]]
+description = "A subquery and SQL function calls in the argument list."
+input = """
+select * from mytvf((select 1), abs(1 + 2), abs(1 - 2))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+         ),
+         ABS(1 + 2),
+         ABS(1 - 2)
+       )
+"""
+
+[[cases]]
+description = "A subquery and nested TVF calls in the argument list."
+input = """
+select * from mytvf((select 1),
+                    (select 1 from mytvf()),
+                    (select 1 from mytvf() limit 1),
+                    (select 1, 2 from mytvf()),
+                    (select * from mytvf(abs(1 - 2))))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+         ),
+         (
+           SELECT 1
+             FROM mytvf()
+         ),
+         (
+           SELECT 1
+             FROM mytvf()
+            LIMIT 1
+         ),
+         (
+           SELECT 1, 2
+             FROM mytvf()
+         ),
+         (
+           SELECT *
+             FROM mytvf(ABS(1 - 2))
+         )
+       )
+"""
+
+[[cases]]
+description = "A nested TVF call and some SQL function expressions without arguments in the argument list."
+input = """
+select * from mytvf((select 1 from mytvf()),
+                    current_date(),
+                    current_timestamp())
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+             FROM mytvf()
+         ),
+         CURRENT_DATE(),
+         CURRENT_TIMESTAMP()
+       )
+"""
+
+[[cases]]
+description = "A TVF has a correlated reference to the enclosing query."
+input = """
+select (select * from mytvf(Key)) from KeyValue
+"""
+formatted = """
+SELECT (
+         SELECT *
+           FROM mytvf(Key)
+       )
+  FROM KeyValue
+"""
+
+[[cases]]
+description = "A TVF has a correlated reference to the enclosing query."
+input = """
+select (select * from mytvf((SELECT Key))) from KeyValue
+"""
+formatted = """
+SELECT (
+         SELECT *
+           FROM mytvf(
+                  (
+                    SELECT Key
+                  )
+                )
+       )
+  FROM KeyValue
+"""
+
+[[cases]]
+description = "The TVF call contains a table reference without using a subquery."
+input = """
+select * from mytvf(keyvalue)
+"""
+formatted = """
+SELECT *
+  FROM mytvf(keyvalue)
+"""
+
+[[cases]]
+description = "The TVF call contains a nested TVF call without using a subquery."
+input = """
+select * from mytvf(MYTVF2() /* this second one is parsed as a function */ )
+"""
+formatted = """
+SELECT *
+  FROM mytvf(MYTVF2()  /* this second one is parsed as a function */)
+"""
+
+[[cases]]
+description = "The TVF call contains a column reference 'Key' to a previous table 'KeyValue' in the FROM clause."
+input = """
+select * from KeyValue JOIN mytvf(Key) ON (TRUE)
+"""
+formatted = """
+SELECT *
+  FROM KeyValue
+       JOIN
+       mytvf(Key)
+       ON TRUE
+"""
+
+[[cases]]
+description = "A dot-separated TVF name."
+input = """
+select * from my.dot.separated.tvf((select * from keyvalue))
+"""
+formatted = """
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           SELECT *
+             FROM keyvalue
+         )
+       )
+"""
+
+[[cases]]
+description = "A dot-separated TVF name with numerals."
+input = """
+select * from my.42dot.separated.tvf((select * from keyvalue))
+"""
+formatted = """
+SELECT *
+  FROM my.42dot.separated.tvf(
+         (
+           SELECT *
+             FROM keyvalue
+         )
+       )
+"""
+
+[[cases]]
+description = "A dot-separated TVF name with numerals."
+input = """
+select * from my.dot.separated.42((select * from keyvalue))
+"""
+formatted = """
+SELECT *
+  FROM my.dot.separated.42(
+         (
+           SELECT *
+             FROM keyvalue
+         )
+       )
+"""
+
+[[cases]]
+description = "The TVF has an alias."
+input = """
+select * from my.dot.separated.tvf((select * from keyvalue)) myalias
+"""
+formatted = """
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           SELECT *
+             FROM keyvalue
+         )
+       ) AS myalias
+"""
+
+[[cases]]
+description = "The TVF has an alias with the AS keyword."
+input = """
+select * from my.dot.separated.tvf((select * from keyvalue)) AS myalias
+"""
+formatted = """
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           SELECT *
+             FROM keyvalue
+         )
+       ) AS myalias
+"""
+
+[[cases]]
+description = "The TVF has a hint."
+input = """
+select * from my.dot.separated.tvf((select * from keyvalue)) @{num_workers=42}
+"""
+formatted = """
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           SELECT *
+             FROM keyvalue
+         )
+       ) @{num_workers=42}
+"""
+
+[[cases]]
+description = "The TVF has an alias and a hint."
+input = """
+select * from
+my.dot.separated.tvf((select * from keyvalue)) @{num_workers=42} AS myalias
+"""
+formatted = """
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           SELECT *
+             FROM keyvalue
+         )
+       ) @{num_workers=42} AS myalias
+"""
+
+[[cases]]
+description = "Multiple levels of parentheses in various TVF arguments."
+input = """
+select * from mytvf (((select 1)))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+         )
+       )
+"""
+
+[[cases]]
+description = "Multiple levels of parentheses in various TVF arguments."
+input = """
+select * from mytvf ((1))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(1)
+"""
+
+[[cases]]
+description = "Multiple levels of parentheses in various TVF arguments."
+input = """
+select * from mytvf (((1)))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(1)
+"""
+
+[[cases]]
+input = """
+select * from mytvf ((select 1) + 1)
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+         ) + 1
+       )
+"""
+
+[[cases]]
+input = """
+select * from mytvf (1+(select 1))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         1 + (
+           SELECT 1
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select * from mytvf ((select 1 from mytvf()))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+             FROM mytvf()
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select * from mytvf (((select 1 from mytvf())))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT 1
+             FROM mytvf()
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select * from if(true, (select 1), (select 2))
+"""
+formatted = """
+SELECT *
+  FROM IF(
+         TRUE,
+         (
+           SELECT 1
+         ),
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+input = """
+select * from safe_cast(true, (select 1), (select 2))
+"""
+formatted = """
+SELECT *
+  FROM SAFE_CAST(
+         TRUE,
+         (
+           SELECT 1
+         ),
+         (
+           SELECT 2
+         )
+       )
+"""
+
+[[cases]]
+description = "Valid TABLE path syntax for table-valued function arguments."
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(table keyvalue)
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         TABLE keyvalue
+       )
+"""
+
+[[cases]]
+description = "Valid MODEL path syntax for table-valued function arguments."
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(model keyvalue)
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         MODEL keyvalue
+       )
+"""
+
+[[cases]]
+description = "Valid MODEL path syntax for table-valued function arguments."
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(connection keyvalue)
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         CONNECTION keyvalue
+       )
+"""
+
+[[cases]]
+description = "Valid MODEL path syntax for table-valued function arguments."
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(table a.b.c)
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         TABLE a.b.c
+       )
+"""
+
+[[cases]]
+description = "Valid TABLE path syntax for table-valued function arguments, with another argument."
+input = """
+select *
+from tvf_two_relation_args_return_proto_value_table(
+    table keyvalue, (select 3, 4)) as mytvf
+"""
+formatted = """
+SELECT *
+  FROM tvf_two_relation_args_return_proto_value_table(
+         TABLE keyvalue,
+         (
+           SELECT 3, 4
+         )
+       ) AS mytvf
+"""
+
+[[cases]]
+description = "Valid MODEL path syntax for table-valued function arguments, with another argument."
+input = """
+select *
+from tvf_two_relation_args_return_proto_value_table(
+    model keyvalue, (select 3, 4)) as mytvf
+"""
+formatted = """
+SELECT *
+  FROM tvf_two_relation_args_return_proto_value_table(
+         MODEL keyvalue,
+         (
+           SELECT 3, 4
+         )
+       ) AS mytvf
+"""
+
+[[cases]]
+description = "Valid CONNECTION path syntax for table-valued function arguments, with another argument."
+input = """
+select *
+from tvf_two_relation_args_return_proto_value_table(
+    connection keyvalue, (select 3, 4)) as mytvf
+"""
+formatted = """
+SELECT *
+  FROM tvf_two_relation_args_return_proto_value_table(
+         CONNECTION keyvalue,
+         (
+           SELECT 3, 4
+         )
+       ) AS mytvf
+"""
+
+[[cases]]
+description = "Missing table keyword, but keyvalue parses as an identifier expression."
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(keyvalue)
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(keyvalue)
+"""
+
+[[cases]]
+description = """
+Valid 'TABLE path(arguments...)' syntax for table-valued function call:
+empty argument list.
+"""
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(table t());
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         TABLE t()
+       )
+"""
+
+[[cases]]
+description = """
+Valid 'TABLE path(arguments...)' syntax for table-valued function call:
+empty argument list.
+"""
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(table t(1));
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         TABLE t(1)
+       )
+"""
+
+[[cases]]
+description = """
+Valid 'TABLE path(arguments...)' syntax for table-valued function call:
+empty argument list.
+"""
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(table t(1, "abc", [true]));
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         TABLE t(
+           1,
+           "abc",
+           [TRUE]
+         )
+       )
+"""
+
+[[cases]]
+description = """
+Valid 'TABLE path(arguments...)' syntax for table-valued function call:
+empty argument list.
+"""
+input = """
+select * from tvf_one_relation_arg_with_fixed_output(table t(null, null));
+"""
+formatted = """
+SELECT *
+  FROM tvf_one_relation_arg_with_fixed_output(
+         TABLE t(NULL, NULL)
+       )
+"""
+
+[[cases]]
+description = """
+Valid TABLESAMPLE clause for table-valued function call using subqueries
+to represent table arguments.
+"""
+input = """
+select * from safe_cast(true, (select 1), (select 2))
+tablesample reservoir (100 rows) repeatable(10)
+"""
+formatted = """
+SELECT *
+  FROM SAFE_CAST(
+         TRUE,
+         (
+           SELECT 1
+         ),
+         (
+           SELECT 2
+         )
+       )
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = """
+Valid TABLESAMPLE clause for table-valued function call using subqueries
+to represent table arguments.
+"""
+input = """
+select * from safe_cast(true, table keyvalue, table keyvalue2)
+tablesample reservoir (100 rows) repeatable(10)
+"""
+formatted = """
+SELECT *
+  FROM SAFE_CAST(
+         TRUE,
+         TABLE keyvalue,
+         TABLE keyvalue2
+       )
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = """
+Valid TABLESAMPLE clause for table-valued function call using subqueries
+to represent table arguments: with query hint.
+"""
+input = """
+select * from safe_cast(true, table keyvalue, table keyvalue2)
+@{num_workers=42}
+tablesample reservoir (100 rows) repeatable(10)
+"""
+formatted = """
+SELECT *
+  FROM SAFE_CAST(
+         TRUE,
+         TABLE keyvalue,
+         TABLE keyvalue2
+       ) @{num_workers=42}
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = """
+Valid TABLESAMPLE clause for table-valued function call using subqueries
+to represent table arguments: with alias.
+"""
+input = """
+select * from safe_cast(true, table keyvalue, table keyvalue2)
+as myalias
+tablesample reservoir (100 rows) repeatable(10)
+"""
+formatted = """
+SELECT *
+  FROM SAFE_CAST(
+         TRUE,
+         TABLE keyvalue,
+         TABLE keyvalue2
+       ) AS myalias
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = """
+Valid TABLESAMPLE clause for table-valued function call using subqueries
+to represent table arguments: with query hint and with alias.
+"""
+input = """
+select * from safe_cast(true, table keyvalue, table keyvalue2)
+@{num_workers=42} as myalias
+tablesample reservoir (100 rows) repeatable(10)
+"""
+formatted = """
+SELECT *
+  FROM SAFE_CAST(
+         TRUE,
+         TABLE keyvalue,
+         TABLE keyvalue2
+       ) @{num_workers=42} AS myalias
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = """
+The TVF relation argument is a reference to a WITH clause in the enclosing
+query.
+"""
+input = """
+with w as (select 1 as x)
+select * from
+my.dot.separated.tvf((select * from w))
+"""
+formatted = """
+WITH
+w AS (
+SELECT 1 AS x
+)
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           SELECT *
+             FROM w
+         )
+       )
+"""
+
+[[cases]]
+description = """
+The TVF relation argument is a reference to a WITH clause in the enclosing
+query, with one level of nested subqery.
+"""
+input = """
+with w as (select 1 as x)
+select * from
+my.dot.separated.tvf((select * from (select * from w)))
+"""
+formatted = """
+WITH
+w AS (
+SELECT 1 AS x
+)
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           SELECT *
+             FROM (
+                    SELECT *
+                      FROM w
+                  )
+         )
+       )
+"""
+
+[[cases]]
+description = """
+The TVF relation argument is a reference to a WITH clause inside the subquery.
+"""
+input = """
+select * from
+my.dot.separated.tvf((with w as (select 1 as x) select * from w))
+"""
+formatted = """
+SELECT *
+  FROM my.dot.separated.tvf(
+         (
+           WITH
+           w AS (
+           SELECT 1 AS x
+           )
+           SELECT *
+             FROM w
+         )
+       )
+"""
+
+[[cases]]
+description = """
+Descriptor in the argument list.
+"""
+input = """
+select * from mytvf(descriptor(mycol))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         DESCRIPTOR(mycol)
+       )
+"""
+
+[[cases]]
+description = """
+Descriptor with multiple columns in the argument list.
+"""
+input = """
+select * from mytvf(descriptor(mycol, mycol2, mycol3))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         DESCRIPTOR(mycol, mycol2, mycol3)
+       )
+"""
+
+[[cases]]
+description = """
+Subquery and descriptor in the argument list.
+"""
+input = """
+select * from mytvf((select Key from KeyValue group by Key), descriptor(Key))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         (
+           SELECT Key
+             FROM KeyValue
+            GROUP BY Key
+         ),
+         DESCRIPTOR(Key)
+       )
+"""

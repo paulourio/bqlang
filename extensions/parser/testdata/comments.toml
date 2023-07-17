@@ -1,0 +1,205 @@
+[[cases]]
+input = "   \t  \n "
+dump = """
+Script [0-0]
+"""
+
+[[cases]]
+description = "unicode space"
+input = " \u0009\u000A\u000D\u0020\u2000\u2001\u2003\u2004 "
+dump = """
+Script [0-0]
+"""
+
+[[cases]]
+description = "one line, no comments"
+input = "select * from samples where id=1"
+dump = """
+Script [0-0]
+"""
+
+[[cases]]
+input = "Select * FROM `Samples` Where ID =1"
+dump = """
+Script [0-0]
+"""
+
+[[cases]]
+input = "-- Select * FROM `Samples` Where ID =1\n"
+dump = """
+Script [0-39]
+  Comment [0-39]
+"""
+
+[[cases]]
+description = "C-star comment"
+input = "/* Select * FROM `Samples` Where ID =1*/\n"
+dump = """
+Script [0-40]
+  Comment [0-40]
+"""
+
+[[cases]]
+description = "C-dash comment"
+input = "// Select * FROM `Samples` Where ID =1\n"
+dump = """
+Script [0-39]
+  Comment [0-39]
+"""
+
+[[cases]]
+description = "Pound comment"
+input = "# Select * FROM `Samples` Where ID =1\n"
+dump = """
+Script [0-38]
+  Comment [0-38]
+"""
+
+[[cases]]
+input = """
+SELECT 1 /* * */
+// FROM `Samples`
+  FROM /* comment
+       */ `table` -- TABLESAMPLE SYSTEM (0.1 PERCENT)
+"""
+dump = """
+Script [9-107]
+  Comment [9-16]
+  Comment [17-35]
+  Comment [42-62]
+  Comment [71-107]
+"""
+
+[[cases]]
+input = """
+SELECT ARRAY</*élement=*/INT64>[0.1, 2];
+"""
+dump = """
+Script [13-26]
+  Comment [13-26]
+"""
+
+[[cases]]
+input = """
+SELECT '''ARRAY</*élement=*/INT64>[0.1, 2];'''
+"""
+dump = """
+Script [0-0]
+"""
+
+[[cases]]
+input = """
+CREATE TEMP FUNCTION
+AS '''
+// embed comment
+/* embed comment */
+# embed comment
+-- embed comment
+''';
+
+SELECT b''' /* comment */
+'''
+"""
+dump = """
+Script [0-0]
+"""
+
+[[cases]]
+input = """
+SELECT COALESCE(a.key1, b.key1)         AS key1,
+  FROM `table` -- `table_tmp`
+       FULL JOIN
+       `abc`
+       USING (key)
+"""
+dump = """
+Script [64-79]
+  Comment [64-79]
+"""
+
+[[cases]]
+input = """
+select
+# full line comment
+/* block
+   comment */
+-- full line comment
+1# partial line comment
++-- partial line comment
+2/*partial line block comment*/+3;
+"""
+dump = """
+Script [7-151]
+  Comment [7-27]
+  Comment [27-49]
+  Comment [50-71]
+  Comment [72-95]
+  Comment [96-120]
+  Comment [121-151]
+"""
+
+[[cases]]
+input = """
+{{ statement_generator() }};
+
+SELECT 1
+  FROM {{ ref()|table }}
+"""
+dump = """
+Script [0-63]
+  TemplateVariable [0-27]
+  TemplateVariable [46-63]
+"""
+
+[[cases]]
+input = """
+{{ create_as('abc', 'def') }}
+WITH
+SELECT 1
+  FROM {{ abc }}
+"""
+dump = """
+Script [0-60]
+  TemplateVariable [0-29]
+  TemplateVariable [51-60]
+"""
+
+[[cases]]
+input = """
+{% set = value -%}
+
+{{ statement }}
+
+WITH
+t AS (
+{% for a in list %}
+  {% for b in list %}
+    SELECT 1
+    {% if not loop.last %}  {% endif %}
+  {% endfor -%}
+  {%- if not loop.last %} value {% else %} {% endif %}
+{% endfor %}
+)
+SELECT *
+  FROM {{ abc }}
+"""
+dump = """
+Script [0-255]
+  TemplateSetBlock [0-18]
+  TemplateVariable [20-35]
+  TemplateForBlock [49-217]
+    TemplateForBlock [71-148]
+      TemplateIfBlock [108-134]
+    TemplateIfBlock [162-205]
+  TemplateVariable [246-255]
+"""
+
+[[cases]]
+input = """
+select * {# comment #}
+  from t
+"""
+dump = """
+Script [9-22]
+  TemplateComment [9-22]
+"""

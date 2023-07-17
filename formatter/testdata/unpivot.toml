@@ -1,0 +1,480 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = false
+column_list_trailing_comma = "NEVER"
+indentation = 1
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "AS_IS"
+null_style = "AS_IS"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = "Simple UNPIVOT"
+input = """
+SELECT * FROM t UNPIVOT (a FOR c IN (x, y));
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR c IN (x, y)
+       )
+"""
+
+[[cases]]
+description = "Simple UNPIVOT with INCLUDE NULLS"
+input = """
+SELECT * FROM t UNPIVOT INCLUDE NULLS (a FOR c IN (x, y));
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT INCLUDE NULLS (
+         a
+         FOR c IN (x, y)
+       )
+"""
+
+[[cases]]
+description = "Simple UNPIVOT with single-element IN-list"
+input = """
+SELECT * FROM t UNPIVOT(a FOR b IN (x));
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (x)
+       )
+"""
+
+[[cases]]
+description = "Simple UNPIVOT with single-element IN-list with parentheses."
+input = """
+SELECT * FROM t UNPIVOT((a) FOR b IN (x));
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (x)
+       )
+"""
+
+[[cases]]
+description = "Multiple output value columns in UNPIVOT"
+input = """
+SELECT * FROM t UNPIVOT((a, b) FOR c IN ((x, y)));
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         (a, b)
+         FOR c IN ((x, y))
+       )
+"""
+
+[[cases]]
+description = "Columns with default and explicit string labels."
+input = """
+SELECT * FROM t UNPIVOT(a FOR e IN ((f), w AS '1', (x) '2', y "3"));
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR e IN (
+           f,
+           w AS '1',
+           x AS '2',
+           y AS "3"
+         )
+       )
+"""
+
+[[cases]]
+description = "Column names with integer labels."
+input = """
+SELECT * FROM t UNPIVOT(a FOR e IN (w AS 1, x AS 2));
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR e IN (
+           w AS 1,
+           x AS 2
+         )
+       )
+"""
+
+[[cases]]
+description = "UNPIVOT on join input (comma join)"
+input = """
+SELECT * FROM t1,t2 UNPIVOT(a for b IN (c));
+"""
+formatted = """
+SELECT *
+  FROM t1,
+       t2
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = "UNPIVOT on join input (inner join)"
+input = """
+SELECT * FROM t1 INNER JOIN t2 UNPIVOT(a for b IN (c)) USING(x);
+"""
+formatted = """
+SELECT *
+  FROM t1
+
+       INNER JOIN
+       t2
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+       USING (x)
+"""
+
+[[cases]]
+description = "UNPIVOT on join input (cross join)"
+input = """
+SELECT * FROM t1 CROSS JOIN t2 UNPIVOT(a for b in (c));
+"""
+formatted = """
+SELECT *
+  FROM t1
+
+       CROSS JOIN
+       t2
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = "alias on the result of the entire UNPIVOT"
+input = """
+sELECT * FROM t UNPIVOT(a for b in (c)) AS t_unpivot;
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       ) AS t_unpivot
+"""
+
+[[cases]]
+description = "UNPIVOT on tvf result"
+input = """
+SELECT * FROM MyTVF(t) UNPIVOT(a for b in (c));
+"""
+formatted = """
+SELECT *
+  FROM MyTVF(t)
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = "UNPIVOT on tvf argument"
+input = """
+SELECT * from MyTVF((SELECT * FROM t UNPIVOT(a for b in (c))));
+"""
+formatted = """
+SELECT *
+  FROM MyTVF(
+         (
+           SELECT *
+             FROM t
+                  UNPIVOT (
+                    a
+                    FOR b IN (c)
+                  )
+         )
+       )
+"""
+
+[[cases]]
+description = "UNPIVOT on subquery"
+input = """
+SELECT * FROM (SELECT a, b, c FROM t) UNPIVOT(a for b in (c));
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT a, b, c
+           FROM t
+       )
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = "UNPIVOT combined with other clauses"
+input = """
+SELECT * FROM t UNPIVOT(a for b in (c))
+WHERE a < 5 HAVING sum_zero = 1 LIMIT 10;
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+ WHERE a < 5
+HAVING sum_zero = 1
+ LIMIT 10
+"""
+
+[[cases]]
+description = "UNPIVOT combined with TABLESAMPLE"
+input = """
+SELECT * FROM
+t UNPIVOT(a for b in (C))
+TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (C)
+       )
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = "UNPIVOT combined with TABLESAMPLE"
+input = """
+SELECT * FROM
+t UNPIVOT(a for b in (C)) AS t_unpivot
+TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (C)
+       ) AS t_unpivot
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = "UNPIVOT on time-travel table"
+input = """
+SELECT * FROM
+(SELECT * FROM t FOR SYSTEM TIME AS OF '2018-01-01')
+UNPIVOT(a for b in (c))
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT *
+           FROM t
+                FOR SYSTEM_TIME AS OF '2018-01-01'
+       )
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = """
+Table alias named "UNPIVOT" - OK because UNPIVOT is a non-reserved keyword.
+"""
+input = """
+SELECT * FROM t UNPIVOT;
+"""
+formatted = """
+SELECT *
+  FROM t AS UNPIVOT
+"""
+
+[[cases]]
+description = """
+Table alias named "UNPIVOT" - OK because UNPIVOT is a non-reserved keyword.
+"""
+input = """
+SELECT * FROM t as  UNPIVOT;
+"""
+formatted = """
+SELECT *
+  FROM t AS UNPIVOT
+"""
+
+[[cases]]
+description = """
+UNPIVOT AS alias of table produced by a UNPIVOT clause.
+"""
+input = """
+select * from t unpivot(a for b in (c)) unpivot;
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       ) AS unpivot
+"""
+
+[[cases]]
+description = """
+TVF named "PIVOT".
+"""
+input = """
+SELECT * FROM Unpivot(t);
+"""
+formatted = """
+SELECT *
+  FROM Unpivot(t)
+"""
+
+[[cases]]
+description = """
+UNPIVOT combined with TABLESAMPLE and alias (without AS keyword)
+"""
+input = """
+SELECT * FROM
+t UNPIVOT(a for b in (c))
+t_unpivot TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       ) AS t_unpivot
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = """
+Alias on input table of UNPIVOT, both with and without AS keyword.
+"""
+input = """
+SELECT * FROM t AS t1 UNPIVOT(a FOR b IN (c));
+"""
+formatted = """
+SELECT *
+  FROM t AS t1
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = """
+Alias on input table of UNPIVOT, both with and without AS keyword.
+"""
+input = """
+SELECT * FROM t t1 UNPIVOT(a FOR b IN (c));
+"""
+formatted = """
+SELECT *
+  FROM t AS t1
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = """
+Alias on input table of UNPIVOT, both with and without AS keyword.
+"""
+input = """
+SELECT * FROM t t1 UNPIVOT(a FOR b IN (c)) t2;
+"""
+formatted = """
+SELECT *
+  FROM t AS t1
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       ) AS t2
+"""
+
+[[cases]]
+description = """
+Alias on input table of UNPIVOT, both with and without AS keyword.
+"""
+input = """
+SELECT * FROM t as t1 UNPIVOT(a FOR b IN (c))as t2;
+"""
+formatted = """
+SELECT *
+  FROM t AS t1
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       ) AS t2
+"""
+
+[[cases]]
+description = """
+UNPIVOT on UNNEST() is an error on the resolver (because unnest() returns a
+value table), but it's allowed on the parser layer.
+Test both with and without a WITH OFFSET clause.
+"""
+input = """
+SELECT * FROM UNNEST([1, 2, 3])
+UNPIVOT(a for b in (c)) AS x;
+"""
+formatted = """
+SELECT *
+  FROM UNNEST([1, 2, 3])
+       UNPIVOT (
+         a
+         FOR b IN (c)
+       ) AS x
+"""
+
+[[cases]]
+description = """
+Qualified references to column from input table within unpivot clause
+"""
+input = """
+SELECT * FROM t UNPIVOT(t.a FOR t.b IN (c))  t2;
+"""
+formatted = """
+SELECT *
+  FROM t
+       UNPIVOT (
+         t.a
+         FOR t.b IN (c)
+       ) AS t2
+"""

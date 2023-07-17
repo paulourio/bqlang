@@ -1,0 +1,276 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Scalar subqueries"
+input = """
+SELECT
+  username,
+  (SELECT mascot FROM Mascots WHERE Players.team = Mascots.team) AS player_mascot
+FROM
+  Players;
+SELECT
+  username,
+  level,
+  (SELECT AVG(level) FROM Players) AS avg_level
+FROM
+  Players;
+"""
+formatted = """
+SELECT username,
+       (
+         SELECT mascot
+           FROM Mascots
+          WHERE Players.team = Mascots.team
+       ) AS player_mascot
+  FROM Players;
+
+SELECT username,
+       level,
+       (
+         SELECT AVG(level)
+           FROM Players
+       ) AS avg_level
+  FROM Players;
+"""
+
+[[cases]]
+description = "Array subqueries"
+input = """
+SELECT
+  ARRAY(SELECT username FROM NPCs WHERE team = 'red') AS red;
+"""
+formatted = """
+SELECT ARRAY(
+         SELECT username
+           FROM NPCs
+          WHERE team = 'red'
+       ) AS red
+"""
+
+[[cases]]
+description = "IN subqueries"
+input = """
+SELECT
+  'corba' IN (SELECT username FROM Players) AS result;
+"""
+formatted = """
+SELECT 'corba' IN (
+         SELECT username
+           FROM Players
+       ) AS result
+"""
+
+[[cases]]
+description = "EXISTS subqueries"
+input = """
+SELECT
+  EXISTS(SELECT username FROM Players WHERE team = 'yellow') AS result;
+"""
+formatted = """
+SELECT EXISTS(
+         SELECT username
+           FROM Players
+          WHERE team = 'yellow'
+       ) AS result
+"""
+
+[[cases]]
+description = "Table subqueries"
+input = """
+SELECT results.username
+FROM (SELECT * FROM Players) AS results;
+SELECT
+  username
+FROM (
+  WITH red_team AS (SELECT * FROM NPCs WHERE team = 'red')
+  SELECT * FROM red_team
+);
+"""
+formatted = """
+SELECT results.username
+  FROM (
+         SELECT *
+           FROM Players
+       ) AS results;
+
+SELECT username
+  FROM (
+         WITH
+           red_team AS (
+             SELECT *
+               FROM NPCs
+              WHERE team = 'red'
+           )
+         SELECT *
+           FROM red_team
+       );
+"""
+
+[[cases]]
+description = "Correlated subqueries"
+input = """
+SELECT mascot
+FROM Mascots
+WHERE
+  NOT EXISTS(SELECT username FROM Players WHERE Mascots.team = Players.team);
+SELECT
+  username,
+  (SELECT mascot FROM Mascots WHERE Players.team = Mascots.team) AS player_mascot
+FROM Players;
+"""
+formatted = """
+SELECT mascot
+  FROM Mascots
+ WHERE NOT EXISTS(
+         SELECT username
+           FROM Players
+          WHERE Mascots.team = Players.team
+       );
+
+SELECT username,
+       (
+         SELECT mascot
+           FROM Mascots
+          WHERE Players.team = Mascots.team
+       ) AS player_mascot
+  FROM Players;
+"""
+
+[[cases]]
+description = "Volatile subqueries"
+input = """
+SELECT
+  results.username
+FROM
+  (SELECT * FROM Players WHERE RAND() < 0.5) AS results;
+"""
+formatted = """
+SELECT results.username
+  FROM (
+         SELECT *
+           FROM Players
+          WHERE RAND() < 0.5
+       ) AS results
+"""
+
+[[cases]]
+description = "Common tables used is examples"
+input = """
+WITH
+  Players AS (
+    SELECT 'gorbie' AS username, 29 AS level, 'red' AS team UNION ALL
+    SELECT 'junelyn', 2 , 'blue' UNION ALL
+    SELECT 'corba', 43, 'green'),
+  NPCs AS (
+    SELECT 'niles' AS username, 'red' AS team UNION ALL
+    SELECT 'jujul', 'red' UNION ALL
+    SELECT 'effren', 'blue'),
+  Mascots AS (
+    SELECT 'cardinal' AS mascot , 'red' AS team UNION ALL
+    SELECT 'parrot', 'green' UNION ALL
+    SELECT 'finch', 'blue' UNION ALL
+    SELECT 'sparrow', 'yellow')
+SELECT * FROM (
+  SELECT username, team FROM Players UNION ALL
+  SELECT username, team FROM NPCs);
+"""
+formatted = """
+WITH
+  Players AS (
+    SELECT 'gorbie' AS username,
+           29       AS level,
+           'red'    AS team
+     UNION ALL
+    SELECT 'junelyn', 2, 'blue'
+     UNION ALL
+    SELECT 'corba', 43, 'green'
+  ),
+  NPCs AS (
+    SELECT 'niles' AS username,
+           'red'   AS team
+     UNION ALL
+    SELECT 'jujul', 'red'
+     UNION ALL
+    SELECT 'effren', 'blue'
+  ),
+  Mascots AS (
+    SELECT 'cardinal' AS mascot,
+           'red'      AS team
+     UNION ALL
+    SELECT 'parrot', 'green'
+     UNION ALL
+    SELECT 'finch', 'blue'
+     UNION ALL
+    SELECT 'sparrow', 'yellow'
+  )
+SELECT *
+  FROM (
+         SELECT username, team
+           FROM Players
+          UNION ALL
+         SELECT username, team
+           FROM NPCs
+       )
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""

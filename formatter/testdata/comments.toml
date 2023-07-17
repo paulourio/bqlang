@@ -1,0 +1,179 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = false
+column_list_trailing_comma = "NEVER"
+indentation = 1
+min_joins_to_separate_in_blocks = 1
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "AS_IS"
+null_style = "AS_IS"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = ""
+formatted = ""
+
+[[cases]]
+input = "   \t  \n "
+formatted = ""
+
+[[cases]]
+description = "unicode space"
+input = " \u0009\u000A\u000D\u0020\u2000\u2001\u2003\u2004 "
+formatted = ""
+
+[[cases]]
+input = "select *from          samples where id=1"
+formatted = """
+SELECT *
+  FROM samples
+ WHERE id = 1
+"""
+
+[[cases]]
+input = "Select * FROM `Samples` Where ID =1"
+formatted = """
+SELECT *
+  FROM `Samples`
+ WHERE ID = 1
+"""
+
+[[cases]]
+input = """
+Select
+*
+/* key */
+from `Samples`/*tablesample system (1 percent)*/
+Where
+ID    =1 -- 2
+"""
+formatted = """
+SELECT *
+       /* key */
+  FROM `Samples`  /*tablesample system (1 percent)*/
+ WHERE ID = 1  -- 2
+"""
+
+[[cases]]
+input = """
+Select
+* -- key,
+from `Samples`/*tablesample system (1 percent)*/
+Where
+ID    =1 -- 2
+"""
+formatted = """
+SELECT *  -- key,
+  FROM `Samples`  /*tablesample system (1 percent)*/
+ WHERE ID = 1  -- 2
+"""
+
+[[cases]]
+input = """
+-- Comment before statement.
+Select
+key1, -- key2,
+-- key3,
+ROUND(x, /*precision=*/4) AS value,
+-- , key4
+from Samples  -- TABLESAMPLE SYSTEM (1 PERCENT)
+ -- between from and where, in a separate line.
+ Where -- between where and the first expression
+ id=1 /* description */
+;
+"""
+formatted = """
+-- Comment before statement.
+SELECT key1,  -- key2,
+       -- key3,
+       ROUND(x, /*precision=*/ 4) AS value
+       -- , key4
+  FROM Samples  -- TABLESAMPLE SYSTEM (1 PERCENT)
+       -- between from and where, in a separate line.
+ WHERE -- between where and the first expression
+       id = 1  /* description */
+"""
+
+# [[cases]]
+# input = """
+# -- 1
+# select /* 2 */ key1, /* 3 */
+#        -- 4
+#        key2,
+#        /* 5 */  FROM /* 6 */ table /* 7 */
+#        -- 8
+#   where -- 9
+#         expr -- 10
+#         -- 11
+# group by -- 12
+#         row_number() over (/* partition by 1 */) = 1 -- 13
+#         -- 15
+#   having -- 16
+#           expr1 -- 17
+#           -- 18
+#   qualify -- 19
+#            1 -- 20
+#           -- 21
+#   window -- 22
+#         name AS (), -- 23
+#         name2 AS ( /* aaa */ )-- 23a
+#         -- 24
+#   order by -- 25
+#         expr -- 26
+#         -- 27
+#   limit -- 28
+#         1 -- 29
+#         -- 30
+# ;
+# """
+# formatted = """
+# -- 1
+#  SELECT /* 2 */ key1,
+#         /* 3 */
+#         -- 4
+#         key2 /* 5 */
+#    FROM /* 6 */ table  /* 7 */
+#         -- 8
+#   WHERE -- 9
+#         expr  -- 10
+#         -- 11
+#   GROUP BY -- 12
+#            ROW_NUMBER() OVER (/* partition by 1 */) = 1  -- 13
+#         -- 15
+#  HAVING -- 16
+#         expr1  -- 17
+#         -- 18
+# QUALIFY -- 19
+#         1  -- 20
+#         -- 21
+#  WINDOW -- 22
+#         name AS (),
+#         -- 23
+#         name2 AS ()  /* aaa */
+#         -- 23a
+#         -- 24
+#   ORDER BY -- 25
+#            expr  -- 26
+#         -- 27
+#   LIMIT -- 28
+#         1  -- 29
+# -- 30
+# """
+
+[[cases]]
+input = """
+select \"""abc # \""", \""" def -- \""", \""" ghi /* \""", \""" */ jkl \"""
+"""
+formatted = """
+SELECT \"""abc # \""",
+       \""" def -- \""",
+       \""" ghi /* \""",
+       \""" */ jkl \"""
+"""

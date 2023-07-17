@@ -1,0 +1,109 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select col BETWEEN value1 AND value2
+"""
+formatted = """
+SELECT col BETWEEN value1 AND value2
+"""
+
+[[cases]]
+input = """
+select x BETWEEN a AND b AND c AND D
+"""
+formatted = """
+SELECT     x BETWEEN a AND b
+       AND c
+       AND D
+"""
+
+[[cases]]
+input = """
+select x between (a and b) and (c and d)
+"""
+formatted = """
+SELECT x BETWEEN (a AND b) AND (c AND d)
+"""
+
+[[cases]]
+input = """
+select (col between a and b) is null
+"""
+formatted = """
+SELECT (col BETWEEN a AND b) IS NULL
+"""
+
+[[cases]]
+input = """
+select * from T where T.name BETWEEN 'A' AND 'B'
+"""
+formatted = """
+SELECT *
+  FROM T
+ WHERE T.name BETWEEN 'A' AND 'B'
+"""
+
+[[cases]]
+input = """
+select x BETWEEN y and z
+"""
+formatted = """
+SELECT x BETWEEN y AND z
+"""
+
+[[cases]]
+input = """
+select x BETWEEN a << b AND c
+"""
+formatted = """
+SELECT x BETWEEN a << b AND c
+"""
+
+[[cases]]
+input = """
+select x BETWEEN a >> b AND c
+"""
+formatted = """
+SELECT x BETWEEN a >> b AND c
+"""
+
+[[cases]]
+input = """
+select x BETWEEN a^c AND c
+"""
+formatted = """
+SELECT x BETWEEN a ^ c AND c
+"""
+
+[[cases]]
+input = """
+select x BETWEEN a | b AND c | d
+"""
+formatted = """
+SELECT x BETWEEN a | b AND c | d
+"""
+
+[[cases]]
+input = """
+select x BETWEEN a AND b << c
+"""
+formatted = """
+SELECT x BETWEEN a AND b << c
+"""

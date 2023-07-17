@@ -1,0 +1,99 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select pos1, pos2
+  from T, T.arr AS arr WITH OFFSET AS pos1, T.arr WITH OFFSET pos2
+"""
+formatted = """
+SELECT pos1, pos2
+  FROM T,
+       T.arr AS arr WITH OFFSET pos1,
+       T.arr WITH OFFSET pos2
+"""
+
+[[cases]]
+input = """
+select a from arr a WITH OFFSET
+"""
+formatted = """
+SELECT a
+  FROM arr AS a WITH OFFSET
+"""
+
+[[cases]]
+input = """
+select 1+pos from T.arr WITH OFFSET pos
+"""
+formatted = """
+SELECT 1 + pos
+  FROM T.arr WITH OFFSET pos
+"""
+
+[[cases]]
+input = """
+select pos, value
+  from keys AS key WITH OFFSET pos
+       JOIN
+       values AS value WITH OFFSET pos USING (pos)
+  where key='Mykey'
+"""
+formatted = """
+SELECT pos, value
+  FROM keys AS key WITH OFFSET pos
+       JOIN
+       values AS value WITH OFFSET pos
+       USING (pos)
+ WHERE key = 'Mykey'
+"""
+
+[[cases]]
+input = """
+select * from structs AS s WITH OFFSET AS pos
+"""
+formatted = """
+SELECT *
+  FROM structs AS s WITH OFFSET pos
+"""
+
+[[cases]]
+input = """
+select * from t1 WITH OFFSET offset, t2 WITH OFFSET as offset
+"""
+formatted = """
+SELECT *
+  FROM t1 WITH OFFSET offset,
+       t2 WITH OFFSET offset
+"""
+
+[[cases]]
+description = "Combining WITH OFFSET and FOR SYSTEM TIME AS OF"
+input = """
+select pos1, pos2
+  from T, T.arr AS arr WITH OFFSET AS pos1, T.arr WITH OFFSET pos2
+  FOR SYSTEM TIME AS OF '2007-01-02';
+"""
+formatted = """
+SELECT pos1, pos2
+  FROM T,
+       T.arr AS arr WITH OFFSET pos1,
+       T.arr WITH OFFSET pos2
+       FOR SYSTEM_TIME AS OF '2007-01-02'
+"""

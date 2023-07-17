@@ -1,0 +1,90 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+SELECT NORMALIZE('abcdefg'),
+       NORMALIZE('abcdefg', NFC),
+       NORMALIZE('abcdefg', nfkc),
+       NORMALIZE('abcdefg', NFD),
+       NORMALIZE('abcdefg', Nfkd)
+"""
+formatted = """
+SELECT NORMALIZE('abcdefg'),
+       NORMALIZE('abcdefg', NFC),
+       NORMALIZE('abcdefg', NFKC),
+       NORMALIZE('abcdefg', NFD),
+       NORMALIZE('abcdefg', NFKD)
+"""
+
+[[cases]]
+input = """
+SELECT NORMALIZE('abcdefg', XYZ)
+"""
+formatted = """
+SELECT NORMALIZE('abcdefg', XYZ)
+"""
+
+[[cases]]
+input = """
+select normalize_and_casefold('abcdefg'),
+       normalize_and_casefold('abcdefg', nfc),
+       normalize_and_casefold('abcdefg', nfkc),
+       normalize_and_casefold('abcdefg', nfd),
+       NORMALIZE_AND_CASEFOLD('abcdefg', NFKD)
+"""
+formatted = """
+SELECT NORMALIZE_AND_CASEFOLD('abcdefg'),
+       NORMALIZE_AND_CASEFOLD('abcdefg', NFC),
+       NORMALIZE_AND_CASEFOLD('abcdefg', NFKC),
+       NORMALIZE_AND_CASEFOLD('abcdefg', NFD),
+       NORMALIZE_AND_CASEFOLD('abcdefg', NFKD)
+"""
+
+[[cases]]
+input = """
+select normalize(x),
+       normalize_and_casefold(y),
+       normalize,
+       normalize_and_casefold
+from t
+"""
+formatted = """
+SELECT NORMALIZE(x),
+       NORMALIZE_AND_CASEFOLD(y),
+       normalize,
+       normalize_and_casefold
+  FROM t
+"""
+
+[[cases]]
+description = """
+There's no special syntax for NORMALIZE, so this is caught at analysis time.
+"""
+input = """
+select normalize("abc", "nfc", 3), `normalize`("abc", "nfc", 3),
+normalize_and_casefold("abc", "nfc", def),
+       `normalize_and_casefold`("abc", "nfc", def)
+"""
+formatted = """
+SELECT NORMALIZE("abc", "nfc", 3),
+       `normalize`("abc", "nfc", 3),
+       NORMALIZE_AND_CASEFOLD("abc", "nfc", def),
+       `normalize_and_casefold`("abc", "nfc", def)
+"""

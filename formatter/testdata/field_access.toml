@@ -1,0 +1,146 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select NULL, x from a.b.c.T;
+"""
+formatted = """
+SELECT NULL, x
+  FROM a.b.c.T
+"""
+
+[[cases]]
+input = """
+select x.1e+5;
+"""
+formatted = """
+SELECT x.1e + 5
+"""
+
+[[cases]]
+input = """
+select x. 1e+5;
+"""
+formatted = """
+SELECT x.1e + 5
+"""
+
+[[cases]]
+input = """
+select NULL, x from a.b.c.123;
+"""
+formatted = """
+SELECT NULL, x
+  FROM a.b.c.123
+"""
+
+[[cases]]
+input = """
+select NULL, x from a.b.2daysago.      456;
+"""
+formatted = """
+SELECT NULL, x
+  FROM a.b.2daysago.456
+"""
+
+[[cases]]
+input = """
+select x from a.b.456.   2daysago;
+"""
+formatted = """
+SELECT x
+  FROM a.b.456.2daysago
+"""
+
+[[cases]]
+input = """
+select x from abc.111111111111111111111111111111111111111111111111111111111111111111.2days;
+"""
+formatted = """
+SELECT x
+  FROM abc.111111111111111111111111111111111111111111111111111111111111111111.2days
+"""
+
+[[cases]]
+input = """
+select x from abc.111111111111111111111111111111111111111111111111111111111111111111daysago;
+"""
+formatted = """
+SELECT x
+  FROM abc.111111111111111111111111111111111111111111111111111111111111111111daysago
+"""
+
+[[cases]]
+input = """
+select NULL, x from a.b.c.31daysago;
+"""
+formatted = """
+SELECT NULL, x
+  FROM a.b.c.31daysago
+"""
+
+[[cases]]
+input = """
+select x.123.y.2daysago.z;
+"""
+formatted = """
+SELECT x.123.y.2daysago.z
+"""
+
+[[cases]]
+input = """
+select x.2_3.2abc3.1234xxx.555_;
+"""
+formatted = """
+SELECT x.2_3.2abc3.1234xxx.555_
+"""
+
+[[cases]]
+input = """
+select (x+y).123;
+"""
+formatted = """
+SELECT (x + y).123
+"""
+
+[[cases]]
+input = """
+select (x+y).1dayago
+"""
+formatted = """
+SELECT (x + y).1dayago
+"""
+
+[[cases]]
+input = """
+select [1, 2].123;
+"""
+formatted = """
+SELECT [1, 2].123
+"""
+
+[[cases]]
+input = """
+select null from x.y. 2. z;
+"""
+formatted = """
+SELECT NULL
+  FROM x.y.2.z
+"""

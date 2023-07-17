@@ -1,0 +1,244 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select if(x), if(x,y,if(z,1,2)), `if`(x, y, z), 123 as `if`
+"""
+formatted = """
+SELECT IF(x),
+       IF(x, y, IF(z, 1, 2)),
+       `if`(x, y, z),
+       123 AS `if`
+"""
+
+[[cases]]
+description = "LANGUAGE is a keyword in CREATE FUNCTION statements; make sure it still works elsewhere in a query."
+input = """
+select lang as language, count(*)
+from language
+where language like 'sv%'
+group by language
+order by language
+"""
+formatted = """
+SELECT lang AS language,
+       COUNT(*)
+  FROM language
+ WHERE language LIKE 'sv%'
+ GROUP BY language
+ ORDER BY language
+"""
+
+[[cases]]
+description = "FUNCTION is a keyword in CREATE FUNCTION statements; make sure it still works elsewhere in a query."
+input = """
+select func as function, count(*)
+from function
+where function like 'sv%'
+group by function order by function
+"""
+formatted = """
+SELECT func AS function,
+       COUNT(*)
+  FROM function
+ WHERE function LIKE 'sv%'
+ GROUP BY function
+ ORDER BY function
+"""
+
+[[cases]]
+description = "RETURNS is a keyword in CREATE FUNCTION statements; make sure it still works elsewhere in a query."
+input = """
+select func as returns, count(*)
+from returns
+where returns like 'sv%'
+group by returns order by returns
+"""
+formatted = """
+SELECT func AS returns,
+       COUNT(*)
+  FROM returns
+ WHERE returns LIKE 'sv%'
+ GROUP BY returns
+ ORDER BY returns
+"""
+
+[[cases]]
+description = "safe_cast should still be used as column or path name."
+input = """
+select safe_cast from (select 1 as safe_cast)
+"""
+formatted = """
+SELECT safe_cast
+  FROM (
+         SELECT 1 AS safe_cast
+       )
+"""
+
+[[cases]]
+description = "Unreserved keyword DATE_ADD and similar keywords can be used as an alias and column name."
+input = """
+select date_add, date_sub, timestamp_add, timestamp_sub,
+       datetime_add, datetime_sub, time_add, time_sub
+from (select 1 as date_add, 1 as date_sub, 1 as timestamp_add,
+      1 as timestamp_sub, 1 as datetime_add, 1 as datetime_sub,
+      1 as time_ad, 1 as time_sub);
+"""
+formatted = """
+SELECT date_add,
+       date_sub,
+       timestamp_add,
+       timestamp_sub,
+       datetime_add,
+       datetime_sub,
+       time_add,
+       time_sub
+  FROM (
+         SELECT 1 AS date_add,
+                1 AS date_sub,
+                1 AS timestamp_add,
+                1 AS timestamp_sub,
+                1 AS datetime_add,
+                1 AS datetime_sub,
+                1 AS time_ad,
+                1 AS time_sub
+       )
+"""
+
+[[cases]]
+input = """
+select 1 as `array`
+"""
+formatted = """
+SELECT 1 AS `array`
+"""
+
+[[cases]]
+input = """
+select 1 as `array` from foo;
+"""
+formatted = """
+SELECT 1 AS `array`
+  FROM foo
+"""
+
+[[cases]]
+input = """
+select foo.array from foo;
+"""
+formatted = """
+SELECT foo.array
+  FROM foo
+"""
+
+[[cases]]
+input = """
+select foo.`array` from foo;
+"""
+formatted = """
+SELECT foo.`array`
+  FROM foo
+"""
+
+[[cases]]
+description = "Reserved keywords as identifiers work after a closing parenthesis or square bracket followed by a dot."
+input = """
+select FOO().array, (foo).array, foo[3].array, ?.array, @param.array, @@sysvar.array from foo;
+"""
+formatted = """
+SELECT FOO().array,
+       (foo).array,
+       foo[3].array,
+       ?.array,
+       @param.array,
+       @@sysvar.array
+  FROM foo
+"""
+
+[[cases]]
+description = "Reserved keywords as identifiers work after an identifier followed by a dot, even when the path epxression does not consist of only identifiers."
+input = """
+select FOO().bar.array from foo;
+"""
+formatted = """
+SELECT FOO().bar.array
+  FROM foo
+"""
+
+[[cases]]
+input = """
+select `array`.foo from foo;
+"""
+formatted = """
+SELECT `array`.foo
+  FROM foo
+"""
+
+[[cases]]
+input = """
+select * from `array`;
+"""
+formatted = """
+SELECT *
+  FROM `array`
+"""
+
+[[cases]]
+input = """
+select * from foo.`array`;
+"""
+formatted = """
+SELECT *
+  FROM foo.`array`
+"""
+
+[[cases]]
+input = """
+select 1 as `all`
+"""
+formatted = """
+SELECT 1 AS `all`
+"""
+
+[[cases]]
+input = """
+select `all` from foo;
+"""
+formatted = """
+SELECT `all`
+  FROM foo
+"""
+
+[[cases]]
+input = """
+select foo.all from foo;
+"""
+formatted = """
+SELECT foo.all
+  FROM foo
+"""
+
+[[cases]]
+input = """
+select foo.`all` from foo;
+"""
+formatted = """
+SELECT foo.`all`
+  FROM foo
+"""

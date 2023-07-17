@@ -1,0 +1,177 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_catalog = "BIGQUERY"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select parse_date(format_string => "%x", date_string => "12/25/08")
+"""
+formatted = """
+SELECT PARSE_DATE(format_string => "%x", date_string => "12/25/08")
+"""
+
+[[cases]]
+description = """
+Valid function call with named arguments in a different order that they appear
+in the function signature.
+"""
+input = """
+select parse_date(date_string => "12/25/08", format_string => "%x")
+"""
+formatted = """
+SELECT PARSE_DATE(date_string => "12/25/08", format_string => "%x")
+"""
+
+[[cases]]
+description = """
+Valid function call with named arguments assigned to non-literal expressions.
+"""
+input = """
+select parse_date(
+    format_string => concat("%", "x"),
+    date_string => concat(cast(10 + 2 as string), "/25/08"))
+"""
+formatted = """
+SELECT PARSE_DATE(
+         format_string => CONCAT("%", "x"),
+         date_string =>
+           CONCAT(
+             CAST(10 + 2 AS STRING),
+             "/25/08"
+           )
+       )
+"""
+
+[[cases]]
+description = """
+Valid function call with a positional argument followed by a named argument.
+"""
+input = """
+select parse_date("%x", date_string => "12/25/08")
+"""
+formatted = """
+SELECT PARSE_DATE("%x", date_string => "12/25/08")
+"""
+
+[[cases]]
+description = """
+Valid TVF call with expression named arguments.
+"""
+input = """
+select * from mytvf(date_string => "12/25/08", format_string => "%x")
+"""
+formatted = """
+SELECT *
+  FROM mytvf(date_string => "12/25/08", format_string => "%x")
+"""
+
+[[cases]]
+description = """
+Valid TVF call with a combination of expression and relation named arguments.
+"""
+input = """
+select * from mytvf(
+    date_string => '''
+      field: value
+    ''',
+    format_string => (select * from keyvalue));
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         date_string =>
+           '''
+      field: value
+    '''
+         ,
+         format_string =>
+           (
+             SELECT *
+               FROM keyvalue
+           )
+       )
+"""
+
+[[cases]]
+description = """
+Valid TVF call with a positional argument followed by a named argument.
+"""
+input = """
+select * from mytvf("%x", date_string => (select 'abc' as input))
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         "%x",
+         date_string =>
+           (
+             SELECT 'abc' AS input
+           )
+       )
+"""
+
+[[cases]]
+description = """
+Valid TVF call with double parentheses in a named argument.
+"""
+input = """
+select * from mytvf(date_string => ((select 1)));
+"""
+formatted = """
+SELECT *
+  FROM mytvf(
+         date_string =>
+           (
+             SELECT 1
+           )
+       )
+"""
+
+[[cases]]
+description = """
+Invalid function call with a positional argument preceding a named argument.
+"""
+input = """
+select parse_date(format_string => "%x", "12/25/08")
+"""
+formatted = """
+SELECT PARSE_DATE(format_string => "%x", "12/25/08")
+"""
+
+[[cases]]
+description = """
+Invalid function call missing a required argument.
+"""
+input = """
+select parse_date(format_string => "%x")
+"""
+formatted = """
+SELECT PARSE_DATE(format_string => "%x")
+"""
+
+[[cases]]
+description = """
+Invalid function call missing the value of a required argument.
+"""
+input = """
+select parse_date("%x", date_string => "12/25/08")
+"""
+formatted = """
+SELECT PARSE_DATE("%x", date_string => "12/25/08")
+"""

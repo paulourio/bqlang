@@ -1,0 +1,550 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+SELECT * FROM t PIVOT(SUM(a) FOR b IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a)
+         FOR b IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "Simple PIVOT with single-element IN-list"
+input = """
+SELECT * FROM t PIVOT(SUM(a) FOR b IN (0));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a)
+         FOR b IN (0)
+       )
+"""
+
+[[cases]]
+description = "Multiple pivot exprs"
+input = """
+SELECT * FROM t PIVOT(SUM(a), SUM(b) FOR b IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a), SUM(b)
+         FOR b IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "Complex pivot exprs"
+input = """
+SELECT * FROM t PIVOT(SUM(a) + SUM(b), COUNT(*), COUNT(DISTINCT c)
+FOR b IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a) + SUM(b), COUNT(*), COUNT(DISTINCT c)
+         FOR b IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "Pivot expression with alias"
+input = """
+SELECT * FROM t PIVOT(SUM(a) AS sum_a, COUNT(b) FOR x IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a) AS sum_a,
+         COUNT(b)
+         FOR x IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "Pivot expression with alias"
+input = """
+SELECT * FROM t PIVOT(SUM(a) AS sum_a, COUNT(b) FOR x IN (0 AS zero, 1));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a) AS sum_a,
+         COUNT(b)
+         FOR x IN (
+           0 AS zero,
+           1
+         )
+       )
+"""
+
+[[cases]]
+description = "PIVOT on join input (comma join)"
+input = """
+SELECT * FROM t1,t2 PIVOT(SUM(a) FOR b IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM t1,
+       t2
+       PIVOT (
+         SUM(a)
+         FOR b IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "PIVOT on join input (inner join)"
+input = """
+SELECT * FROM t1 INNER JOIN t2 PIVOT(SUM(a) FOR b IN (0, 1)) USING(x);
+"""
+formatted = """
+SELECT *
+  FROM t1
+       INNER JOIN
+       t2
+       PIVOT (
+         SUM(a)
+         FOR b IN (0, 1)
+       )
+       USING (x)
+"""
+
+[[cases]]
+description = "PIVOT on join input (cross join)"
+input = """
+SELECT * FROM t1 CROSS JOIN t2 PIVOT(SUM(a) FOR b IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM t1
+       CROSS JOIN
+       t2
+       PIVOT (
+         SUM(a)
+         FOR b IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "alias on the result of the entire PIVOT"
+input = """
+SELECT * FROM t PIVOT(SUM(a) FOR b IN (0, 1)) AS t_pivot;
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a)
+         FOR b IN (0, 1)
+       ) AS t_pivot
+"""
+
+[[cases]]
+description = "PIVOT on tvf result"
+input = """
+SELECT * FROM MyTVF(t) PIVOT(SUM(a) FOR b IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM MyTVF(t)
+       PIVOT (
+         SUM(a)
+         FOR b IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "PIVOT on tvf argument"
+input = """
+SELECT * from MyTVF((SELECT * FROM t PIVOT(SUM(a) FOR b IN (0, 1))));
+"""
+formatted = """
+SELECT *
+  FROM MyTVF(
+         (
+           SELECT *
+             FROM t
+                  PIVOT (
+                    SUM(a)
+                    FOR b IN (0, 1)
+                  )
+         )
+       )
+"""
+
+[[cases]]
+description = "PIVOT on subquery"
+input = """
+SELECT * FROM (SELECT a, b, c FROM t) PIVOT(SUM(a) FOR b IN (0, 1));
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT a, b, c
+           FROM t
+       )
+       PIVOT (
+         SUM(a)
+         FOR b IN (0, 1)
+       )
+"""
+
+[[cases]]
+description = "PIVOT combined with other clauses"
+input = """
+SELECT * FROM t PIVOT(SUM(a) AS sum FOR b IN (0 AS zero, 1))
+WHERE a < 5 HAVING sum_zero = 1 LIMIT 10;
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a) AS sum
+         FOR b IN (
+           0 AS zero,
+           1
+         )
+       )
+ WHERE a < 5
+HAVING sum_zero = 1
+ LIMIT 10
+"""
+
+[[cases]]
+description = "PIVOT combined with TABLESAMPLE"
+input = """
+SELECT * FROM
+t PIVOT(SUM(a) AS sum FOR b IN (0 AS zero, 1))
+TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a) AS sum
+         FOR b IN (
+           0 AS zero,
+           1
+         )
+       )
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = "PIVOT combined with TABLESAMPLE"
+input = """
+SELECT * FROM
+t PIVOT(SUM(a) AS sum FOR b IN (0 AS zero, 1)) AS t_pivot
+TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a) AS sum
+         FOR b IN (
+           0 AS zero,
+           1
+         )
+       ) AS t_pivot
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+description = "PIVOT on time-travel table"
+input = """
+SELECT * FROM
+(SELECT * FROM t FOR SYSTEM TIME AS OF '2018-01-01')
+PIVOT(SUM(a) AS sum FOR b IN (0 AS zero, 1))
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT *
+           FROM t
+                FOR SYSTEM_TIME AS OF '2018-01-01'
+       )
+       PIVOT (
+         SUM(a) AS sum
+         FOR b IN (
+           0 AS zero,
+           1
+         )
+       )
+"""
+
+[[cases]]
+description = "Table alias named PIVOT - OK because PIVOT is a non-reserved keyword."
+input = """
+SELECT * FROM t PIVOT;
+"""
+formatted = """
+SELECT *
+  FROM t AS PIVOT
+"""
+
+[[cases]]
+description = "PIVOT as identifier outside of table context"
+input = """
+SELECT PIVOT;
+"""
+formatted = """
+SELECT PIVOT
+"""
+
+[[cases]]
+description = "PIVOT AS alias of table produced by a PIVOT clause."
+input = """
+SELECT * FROM t PIVOT(a FOR b IN (c)) PIVOT;
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         a
+         FOR b IN (c)
+       ) AS PIVOT
+"""
+
+[[cases]]
+description = "TVF named PIVOT."
+input = """
+SELECT * FROM PIVOT(t);
+"""
+formatted = """
+SELECT *
+  FROM PIVOT(t)
+"""
+
+[[cases]]
+description = "Complex pivot value exprs"
+input = """
+SELECT * FROM t PIVOT(SUM(a) FOR b IN (1+2+3, 4+5+6));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(a)
+         FOR b IN (
+           1 + 2 + 3,
+           4 + 5 + 6
+         )
+       )
+"""
+
+[[cases]]
+description = "Alias on input table of PIVOT, both with AS keyword."
+input = """
+SELECT * FROM t AS t1 PIVOT(a FOR b IN (c));
+"""
+formatted = """
+SELECT *
+  FROM t AS t1
+       PIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = "Alias on input table of PIVOT, both without AS keyword."
+input = """
+SELECT * FROM t PIVOT(a FOR b IN (c));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         a
+         FOR b IN (c)
+       )
+"""
+
+[[cases]]
+description = "Alias on both input table and result of PIVOT"
+input = """
+SELECT * FROM t AS t1 PIVOT(a FOR b IN (c)) AS t2;
+"""
+formatted = """
+SELECT *
+  FROM t AS t1
+       PIVOT (
+         a
+         FOR b IN (c)
+       ) AS t2
+"""
+
+[[cases]]
+description = "PIVOT on UNNEST() is an error on the resolver (because unnest() returns a value table), but it's allowed on the parser layer."
+input = """
+SELECT * FROM UNNEST([1, 2, 3])
+PIVOT(SUM(x) FOR x IN (4, 5)) AS x;
+"""
+formatted = """
+SELECT *
+  FROM UNNEST([1, 2, 3])
+       PIVOT (
+         SUM(x)
+         FOR x IN (4, 5)
+       ) AS x
+"""
+
+[[cases]]
+description = "Qualified references to column from input table within pivot clause"
+input = """
+SELECT * FROM t PIVOT(t.a FOR t.b IN (c)) AS t2;
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         t.a
+         FOR t.b IN (c)
+       ) AS t2
+"""
+
+[[cases]]
+description = "FOR expr with its own IN clause (with parentheses)"
+input = """
+SELECT * FROM t
+PIVOT(SUM(x) FOR (y IN (1, 2)) IN (TRUE, FALSE));
+"""
+formatted = """
+SELECT *
+  FROM t
+       PIVOT (
+         SUM(x)
+         FOR
+           (y IN (1, 2))
+         IN (
+           TRUE,
+           FALSE
+         )
+       )
+"""
+
+[[cases]]
+description = "Subqueries nested inside pivot input are not marked as pivot input."
+input = """
+SELECT * FROM (SELECT * FROM (SELECT * FROM t)) PIVOT (SUM(x) FOR y IN (1, 2));
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT *
+           FROM (
+                  SELECT *
+                    FROM t
+                )
+       )
+       PIVOT (
+         SUM(x)
+         FOR y IN (1, 2)
+       )
+"""
+
+[[cases]]
+description = "When a pivot input query uses a WITH clause, the main query is still marked as pivot input (but the with entry subqueries are not)"
+input = """
+SELECT * FROM (
+  WITH tt AS (SELECT 1 FROM t)
+  SELECT * FROM tt)
+  PIVOT (SUM(x) FOR y IN (1, 2));
+"""
+formatted = """
+SELECT *
+  FROM (
+         WITH
+         tt AS (
+         SELECT 1
+           FROM t
+         )
+         SELECT *
+           FROM tt
+       )
+       PIVOT (
+         SUM(x)
+         FOR y IN (1, 2)
+       )
+"""
+
+[[cases]]
+description = "Inputs to a set operation used as pivot input are not marked as pivot input"
+input = """
+SELECT * FROM (
+  SELECT a, b FROM t1
+  UNION ALL (SELECT c, d FROM t2)
+) PIVOT (SUM(x) FOR y IN (1, 2));
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT a, b
+           FROM t1
+          UNION ALL
+         (
+           SELECT c, d
+             FROM t2
+         )
+       )
+       PIVOT (
+         SUM(x)
+         FOR y IN (1, 2)
+       )
+"""
+
+[[cases]]
+description = "Inputs to a join operation used as pivot input are not marked as pivot input"
+input = """
+SELECT * FROM (
+  SELECT a, b FROM t1
+  INNER JOIN (SELECT c, d FROM t2) ON (a = c)
+) PIVOT (SUM(x) FOR y IN (1, 2));
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT a, b
+           FROM t1
+                INNER JOIN
+                (
+                  SELECT c, d
+                    FROM t2
+                )
+                ON (a = c)
+       )
+       PIVOT (
+         SUM(x)
+         FOR y IN (1, 2)
+       )
+"""

@@ -1,0 +1,221 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Operations that propagate collation"
+input = """
+-- With collation
+SELECT *
+FROM UNNEST([
+  COLLATE('B', 'und:ci'),
+  'b',
+  'a'
+]) AS character
+ORDER BY character;
+
+/*-----------*
+ | character |
+ +-----------+
+ | a         |
+ | B         |
+ | b         |
+ *-----------*/
+
+ -- Without collation
+SELECT *
+FROM UNNEST([
+  'B',
+  'b',
+  'a'
+]) AS character
+ORDER BY character
+
+/*-----------*
+ | character |
+ +-----------+
+ | B         |
+ | a         |
+ | b         |
+ *-----------*/
+"""
+formatted = """
+-- With collation
+SELECT *
+  FROM UNNEST([COLLATE('B', 'und:ci'), 'b', 'a']) AS character
+ ORDER BY character;
+
+/*-----------*
+ | character |
+ +-----------+
+ | a         |
+ | B         |
+ | b         |
+ *-----------*/
+-- Without collation
+SELECT *
+  FROM UNNEST(['B', 'b', 'a']) AS character
+ ORDER BY character;
+/*-----------*
+ | character |
+ +-----------+
+ | B         |
+ | a         |
+ | b         |
+ *-----------*/
+"""
+
+[[cases]]
+description = "Define a collation specification for a collation-supported column"
+input = """
+CREATE TABLE t(
+  case_insensitive_column STRING COLLATE 'und:ci'
+)
+"""
+formatted = """
+CREATE TABLE t
+(
+  case_insensitive_column STRING COLLATE 'und:ci'
+)
+"""
+
+[[cases]]
+description = "Specify a collation specification for a collation-supported expression with the COLLATE function"
+input = """
+SELECT COLLATE('a', 'und:ci') AS character
+"""
+formatted = """
+SELECT COLLATE('a', 'und:ci') AS character
+"""
+
+[[cases]]
+description = "Collation"
+input = """
+-- Assume there's a table with this column declaration:
+CREATE TABLE table_a
+(
+    col_a STRING COLLATE 'und:ci',
+    col_b STRING COLLATE '',
+    col_c STRING,
+    col_d STRING COLLATE 'und:ci'
+);
+
+-- This runs. Column 'b' has a collation specification and the
+-- column 'c' doesn't.
+SELECT STARTS_WITH(col_b_expression, col_c_expression)
+FROM table_a;
+
+-- This runs. Column 'a' and 'd' have the same collation specification.
+SELECT STARTS_WITH(col_a_expression, col_d_expression)
+FROM table_a;
+
+-- This runs. Even though column 'a' and 'b' have different
+-- collation specifications, column 'b' is considered the default collation
+-- because it's assigned to an empty collation specification.
+SELECT STARTS_WITH(col_a_expression, col_b_expression)
+FROM table_a;
+
+-- This works. Even though column 'a' and 'b' have different
+-- collation specifications, column 'b' is updated to use the same
+-- collation specification as column 'a'.
+SELECT STARTS_WITH(col_a_expression, COLLATE(col_b_expression, 'und:ci'))
+FROM table_a;
+
+-- This runs. Column 'c' doesn't have a collation specification, so it uses the
+-- collation specification of column 'd'.
+SELECT STARTS_WITH(col_c_expression, col_d_expression)
+FROM table_a;
+"""
+formatted = """
+-- Assume there's a table with this column declaration:
+CREATE TABLE table_a
+(
+  col_a STRING COLLATE 'und:ci',
+  col_b STRING COLLATE '',
+  col_c STRING,
+  col_d STRING COLLATE 'und:ci'
+);
+
+-- This runs. Column 'b' has a collation specification and the
+-- column 'c' doesn't.
+SELECT STARTS_WITH(col_b_expression, col_c_expression)
+  FROM table_a;
+
+-- This runs. Column 'a' and 'd' have the same collation specification.
+SELECT STARTS_WITH(col_a_expression, col_d_expression)
+  FROM table_a;
+
+-- This runs. Even though column 'a' and 'b' have different
+-- collation specifications, column 'b' is considered the default collation
+-- because it's assigned to an empty collation specification.
+SELECT STARTS_WITH(col_a_expression, col_b_expression)
+  FROM table_a;
+
+-- This works. Even though column 'a' and 'b' have different
+-- collation specifications, column 'b' is updated to use the same
+-- collation specification as column 'a'.
+SELECT STARTS_WITH(col_a_expression, COLLATE(col_b_expression, 'und:ci'))
+  FROM table_a;
+
+-- This runs. Column 'c' doesn't have a collation specification, so it uses the
+-- collation specification of column 'd'.
+SELECT STARTS_WITH(col_c_expression, col_d_expression)
+  FROM table_a;
+"""
+
+[[cases]]
+description = """
+Collation limitations: materialized views
+"""
+input = """
+CREATE MATERIALIZED VIEW my_dataset.my_mv
+AS SELECT
+  t1.col_ci AS t1_col_ci,
+  t2.col_int64 AS t2_col_int64
+FROM my_dataset.collated_table1 AS t1
+JOIN my_dataset.collated_table2 AS t2
+ON t1.col_ci = t2.col_ci;
+
+SELECT * FROM my_dataset.my_mv
+WHERE t1_col_ci = 'abc'
+
+-- Assuming collated_table1.col_ci and collated_table2.col_ci are columns
+-- with 'und:ci' collation, the query to my_mv may use data from
+-- collated_table1 and collated_table2, rather than data from my_mv.
+"""
+formatted = """
+CREATE MATERIALIZED VIEW my_dataset.my_mv
+AS
+SELECT t1.col_ci    AS t1_col_ci,
+       t2.col_int64 AS t2_col_int64
+  FROM my_dataset.collated_table1 AS t1
+
+       JOIN
+       my_dataset.collated_table2 AS t2
+       ON t1.col_ci = t2.col_ci;
+
+SELECT *
+  FROM my_dataset.my_mv
+ WHERE t1_col_ci = 'abc';
+-- Assuming collated_table1.col_ci and collated_table2.col_ci are columns
+-- with 'und:ci' collation, the query to my_mv may use data from
+-- collated_table1 and collated_table2, rather than data from my_mv.
+"""

@@ -1,0 +1,1562 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "ANY_VALUE"
+input = """
+SELECT ANY_VALUE(fruit) as any_value
+FROM UNNEST(["apple", "banana", "pear"]) as fruit;
+
+SELECT
+  fruit,
+  ANY_VALUE(fruit) OVER (ORDER BY LENGTH(fruit) ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS any_value
+FROM UNNEST(["apple", "banana", "pear"]) as fruit;
+
+WITH
+  Store AS (
+    SELECT 20 AS sold, "apples" AS fruit
+    UNION ALL
+    SELECT 30 AS sold, "pears" AS fruit
+    UNION ALL
+    SELECT 30 AS sold, "bananas" AS fruit
+    UNION ALL
+    SELECT 10 AS sold, "oranges" AS fruit
+  )
+SELECT ANY_VALUE(fruit HAVING MAX sold) AS a_highest_selling_fruit FROM Store;
+
+WITH
+  Store AS (
+    SELECT 20 AS sold, "apples" AS fruit
+    UNION ALL
+    SELECT 30 AS sold, "pears" AS fruit
+    UNION ALL
+    SELECT 30 AS sold, "bananas" AS fruit
+    UNION ALL
+    SELECT 10 AS sold, "oranges" AS fruit
+  )
+SELECT ANY_VALUE(fruit HAVING MIN sold) AS a_lowest_selling_fruit FROM Store;
+"""
+formatted = """
+SELECT ANY_VALUE(fruit) AS any_value
+  FROM UNNEST(['apple', 'banana', 'pear']) AS fruit;
+
+SELECT fruit,
+       ANY_VALUE(fruit) OVER (
+         ORDER BY LENGTH(fruit)
+          ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+       ) AS any_value
+  FROM UNNEST(['apple', 'banana', 'pear']) AS fruit;
+
+WITH
+  Store AS (
+    SELECT 20       AS sold,
+           'apples' AS fruit
+     UNION ALL
+    SELECT 30      AS sold,
+           'pears' AS fruit
+     UNION ALL
+    SELECT 30        AS sold,
+           'bananas' AS fruit
+     UNION ALL
+    SELECT 10        AS sold,
+           'oranges' AS fruit
+  )
+SELECT ANY_VALUE(fruit HAVING MAX sold) AS a_highest_selling_fruit
+  FROM Store;
+
+WITH
+  Store AS (
+    SELECT 20       AS sold,
+           'apples' AS fruit
+     UNION ALL
+    SELECT 30      AS sold,
+           'pears' AS fruit
+     UNION ALL
+    SELECT 30        AS sold,
+           'bananas' AS fruit
+     UNION ALL
+    SELECT 10        AS sold,
+           'oranges' AS fruit
+  )
+SELECT ANY_VALUE(fruit HAVING MIN sold) AS a_lowest_selling_fruit
+  FROM Store;
+"""
+
+[[cases]]
+description = "ARRAY_AGG"
+input = """
+SELECT ARRAY_AGG(x) AS array_agg FROM UNNEST([2, 1,-2, 3, -2, 1, 2]) AS x;
+
+SELECT ARRAY_AGG(DISTINCT x) AS array_agg
+FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+
+SELECT ARRAY_AGG(x IGNORE NULLS) AS array_agg
+FROM UNNEST([NULL, 1, -2, 3, -2, 1, NULL]) AS x;
+
+SELECT ARRAY_AGG(x ORDER BY ABS(x)) AS array_agg
+FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+
+SELECT ARRAY_AGG(x LIMIT 5) AS array_agg
+FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+
+WITH vals AS
+  (
+    SELECT 1 x UNION ALL
+    SELECT -2 x UNION ALL
+    SELECT 3 x UNION ALL
+    SELECT -2 x UNION ALL
+    SELECT 1 x
+  )
+SELECT ARRAY_AGG(DISTINCT x ORDER BY x) as array_agg
+FROM vals;
+
+WITH vals AS
+  (
+    SELECT 1 x, 'a' y UNION ALL
+    SELECT 1 x, 'b' y UNION ALL
+    SELECT 2 x, 'a' y UNION ALL
+    SELECT 2 x, 'c' y
+  )
+SELECT x, ARRAY_AGG(y) as array_agg
+FROM vals
+GROUP BY x;
+
+SELECT
+  x,
+  ARRAY_AGG(x) OVER (ORDER BY ABS(x)) AS array_agg
+FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+"""
+formatted = """
+SELECT ARRAY_AGG(x) AS array_agg
+  FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+
+SELECT ARRAY_AGG(DISTINCT x) AS array_agg
+  FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+
+SELECT ARRAY_AGG(x IGNORE NULLS) AS array_agg
+  FROM UNNEST([NULL, 1, -2, 3, -2, 1, NULL]) AS x;
+
+SELECT ARRAY_AGG(x ORDER BY ABS(x)) AS array_agg
+  FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+
+SELECT ARRAY_AGG(x LIMIT 5) AS array_agg
+  FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+
+WITH
+  vals AS (
+    SELECT 1 AS x
+     UNION ALL
+    SELECT -2 AS x
+     UNION ALL
+    SELECT 3 AS x
+     UNION ALL
+    SELECT -2 AS x
+     UNION ALL
+    SELECT 1 AS x
+  )
+SELECT ARRAY_AGG(DISTINCT x ORDER BY x) AS array_agg
+  FROM vals;
+
+WITH
+  vals AS (
+    SELECT 1   AS x,
+           'a' AS y
+     UNION ALL
+    SELECT 1   AS x,
+           'b' AS y
+     UNION ALL
+    SELECT 2   AS x,
+           'a' AS y
+     UNION ALL
+    SELECT 2   AS x,
+           'c' AS y
+  )
+SELECT x, ARRAY_AGG(y) AS array_agg
+  FROM vals
+ GROUP BY x;
+
+SELECT x,
+       ARRAY_AGG(x) OVER (ORDER BY ABS(x)) AS array_agg
+  FROM UNNEST([2, 1, -2, 3, -2, 1, 2]) AS x;
+"""
+
+[[cases]]
+description = "ARRAY_CONCAT_AGG"
+input = """
+SELECT FORMAT("%T", ARRAY_CONCAT_AGG(x)) AS array_concat_agg FROM (
+  SELECT [NULL, 1, 2, 3, 4] AS x
+  UNION ALL SELECT NULL
+  UNION ALL SELECT [5, 6]
+  UNION ALL SELECT [7, 8, 9]
+);
+
+SELECT FORMAT("%T", ARRAY_CONCAT_AGG(x ORDER BY ARRAY_LENGTH(x))) AS array_concat_agg FROM (
+  SELECT [1, 2, 3, 4] AS x
+  UNION ALL SELECT [5, 6]
+  UNION ALL SELECT [7, 8, 9]
+);
+
+SELECT FORMAT("%T", ARRAY_CONCAT_AGG(x LIMIT 2)) AS array_concat_agg FROM (
+  SELECT [1, 2, 3, 4] AS x
+  UNION ALL SELECT [5, 6]
+  UNION ALL SELECT [7, 8, 9]
+);
+
+SELECT FORMAT("%T", ARRAY_CONCAT_AGG(x ORDER BY ARRAY_LENGTH(x) LIMIT 2)) AS array_concat_agg FROM (
+  SELECT [1, 2, 3, 4] AS x
+  UNION ALL SELECT [5, 6]
+  UNION ALL SELECT [7, 8, 9]
+);
+"""
+formatted = """
+SELECT FORMAT('%T', ARRAY_CONCAT_AGG(x)) AS array_concat_agg
+  FROM (
+         SELECT [NULL, 1, 2, 3, 4] AS x
+          UNION ALL
+         SELECT NULL
+          UNION ALL
+         SELECT [5, 6]
+          UNION ALL
+         SELECT [7, 8, 9]
+       );
+
+SELECT FORMAT('%T', ARRAY_CONCAT_AGG(x ORDER BY ARRAY_LENGTH(x))) AS array_concat_agg
+  FROM (
+         SELECT [1, 2, 3, 4] AS x
+          UNION ALL
+         SELECT [5, 6]
+          UNION ALL
+         SELECT [7, 8, 9]
+       );
+
+SELECT FORMAT('%T', ARRAY_CONCAT_AGG(x LIMIT 2)) AS array_concat_agg
+  FROM (
+         SELECT [1, 2, 3, 4] AS x
+          UNION ALL
+         SELECT [5, 6]
+          UNION ALL
+         SELECT [7, 8, 9]
+       );
+
+SELECT FORMAT(
+         '%T',
+         ARRAY_CONCAT_AGG(
+           x
+           ORDER BY ARRAY_LENGTH(x)
+           LIMIT 2
+         )
+       ) AS array_concat_agg
+  FROM (
+         SELECT [1, 2, 3, 4] AS x
+          UNION ALL
+         SELECT [5, 6]
+          UNION ALL
+         SELECT [7, 8, 9]
+       );
+"""
+
+[[cases]]
+description = "AVG"
+input = """
+SELECT AVG(x) as avg
+FROM UNNEST([0, 2, 4, 4, 5]) as x;
+
+SELECT AVG(DISTINCT x) AS avg
+FROM UNNEST([0, 2, 4, 4, 5]) AS x;
+
+SELECT
+  x,
+  AVG(x) OVER (ORDER BY x ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS avg
+FROM UNNEST([0, 2, NULL, 4, 4, 5]) AS x;
+"""
+formatted = """
+SELECT AVG(x) AS avg
+  FROM UNNEST([0, 2, 4, 4, 5]) AS x;
+
+SELECT AVG(DISTINCT x) AS avg
+  FROM UNNEST([0, 2, 4, 4, 5]) AS x;
+
+SELECT x,
+       AVG(x) OVER (
+         ORDER BY x
+          ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+       ) AS avg
+  FROM UNNEST([0, 2, NULL, 4, 4, 5]) AS x;
+"""
+
+[[cases]]
+description = "BIT_AND, BIT_OR, BIT_XOR"
+input = """
+SELECT BIT_AND(x) as bit_and FROM UNNEST([0xF001, 0x00A1]) as x;
+
+SELECT BIT_OR(x) as bit_or FROM UNNEST([0xF001, 0x00A1]) as x;
+
+SELECT BIT_XOR(x) AS bit_xor FROM UNNEST([5678, 1234]) AS x;
+
+SELECT BIT_XOR(DISTINCT x) AS bit_xor FROM UNNEST([1234, 5678, 1234]) AS x;
+"""
+formatted = """
+SELECT BIT_AND(x) AS bit_and
+  FROM UNNEST([0xF001, 0x00A1]) AS x;
+
+SELECT BIT_OR(x) AS bit_or
+  FROM UNNEST([0xF001, 0x00A1]) AS x;
+
+SELECT BIT_XOR(x) AS bit_xor
+  FROM UNNEST([5678, 1234]) AS x;
+
+SELECT BIT_XOR(DISTINCT x) AS bit_xor
+  FROM UNNEST([1234, 5678, 1234]) AS x;
+"""
+
+[[cases]]
+description = "COUNT"
+input = """
+SELECT
+  COUNT(*) AS count_star,
+  COUNT(DISTINCT x) AS count_dist_x
+FROM UNNEST([1, 4, 4, 5]) AS x;
+
+SELECT
+  x,
+  COUNT(*) OVER (PARTITION BY MOD(x, 3)) AS count_star,
+  COUNT(DISTINCT x) OVER (PARTITION BY MOD(x, 3)) AS count_dist_x
+FROM UNNEST([1, 4, 4, 5]) AS x;
+
+SELECT
+  x,
+  COUNT(*) OVER (PARTITION BY MOD(x, 3)) AS count_star,
+  COUNT(x) OVER (PARTITION BY MOD(x, 3)) AS count_x
+FROM UNNEST([1, 4, NULL, 4, 5]) AS x;
+
+SELECT COUNT(DISTINCT IF(x > 0, x, NULL)) AS distinct_positive
+FROM UNNEST([1, -2, 4, 1, -5, 4, 1, 3, -6, 1]) AS x;
+
+WITH Events AS (
+  SELECT DATE '2021-01-01' AS event_date, 'SUCCESS' AS event_type
+  UNION ALL
+  SELECT DATE '2021-01-02' AS event_date, 'SUCCESS' AS event_type
+  UNION ALL
+  SELECT DATE '2021-01-02' AS event_date, 'FAILURE' AS event_type
+  UNION ALL
+  SELECT DATE '2021-01-03' AS event_date, 'SUCCESS' AS event_type
+  UNION ALL
+  SELECT DATE '2021-01-04' AS event_date, 'FAILURE' AS event_type
+  UNION ALL
+  SELECT DATE '2021-01-04' AS event_date, 'FAILURE' AS event_type
+)
+SELECT
+  COUNT(DISTINCT IF(event_type = 'FAILURE', event_date, NULL))
+    AS distinct_dates_with_failures
+FROM Events;
+"""
+formatted = """
+SELECT COUNT(*)          AS count_star,
+       COUNT(DISTINCT x) AS count_dist_x
+  FROM UNNEST([1, 4, 4, 5]) AS x;
+
+SELECT x,
+       COUNT(*) OVER (PARTITION BY MOD(x, 3))          AS count_star,
+       COUNT(DISTINCT x) OVER (PARTITION BY MOD(x, 3)) AS count_dist_x
+  FROM UNNEST([1, 4, 4, 5]) AS x;
+
+SELECT x,
+       COUNT(*) OVER (PARTITION BY MOD(x, 3)) AS count_star,
+       COUNT(x) OVER (PARTITION BY MOD(x, 3)) AS count_x
+  FROM UNNEST([1, 4, NULL, 4, 5]) AS x;
+
+SELECT COUNT(DISTINCT IF(x > 0, x, NULL)) AS distinct_positive
+  FROM UNNEST([1, -2, 4, 1, -5, 4, 1, 3, -6, 1]) AS x;
+
+WITH
+  Events AS (
+    SELECT DATE '2021-01-01' AS event_date,
+           'SUCCESS'         AS event_type
+     UNION ALL
+    SELECT DATE '2021-01-02' AS event_date,
+           'SUCCESS'         AS event_type
+     UNION ALL
+    SELECT DATE '2021-01-02' AS event_date,
+           'FAILURE'         AS event_type
+     UNION ALL
+    SELECT DATE '2021-01-03' AS event_date,
+           'SUCCESS'         AS event_type
+     UNION ALL
+    SELECT DATE '2021-01-04' AS event_date,
+           'FAILURE'         AS event_type
+     UNION ALL
+    SELECT DATE '2021-01-04' AS event_date,
+           'FAILURE'         AS event_type
+  )
+SELECT COUNT(DISTINCT IF(event_type = 'FAILURE', event_date, NULL)) AS distinct_dates_with_failures
+  FROM Events;
+"""
+
+[[cases]]
+description = "COUNTIF"
+input = """
+SELECT COUNTIF(x<0) AS num_negative, COUNTIF(x>0) AS num_positive
+FROM UNNEST([5, -2, 3, 6, -10, -7, 4, 0]) AS x;
+
+SELECT
+  x,
+  COUNTIF(x<0) OVER (ORDER BY ABS(x) ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) AS num_negative
+FROM UNNEST([5, -2, 3, 6, -10, NULL, -7, 4, 0]) AS x;
+"""
+formatted = """
+SELECT COUNTIF(x < 0) AS num_negative,
+       COUNTIF(x > 0) AS num_positive
+  FROM UNNEST([5, -2, 3, 6, -10, -7, 4, 0]) AS x;
+
+SELECT x,
+       COUNTIF(x < 0) OVER (
+         ORDER BY ABS(x)
+          ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+       ) AS num_negative
+  FROM UNNEST([5, -2, 3, 6, -10, NULL, -7, 4, 0]) AS x;
+"""
+
+[[cases]]
+description = "LOGICAL_AND and LOGICAL_OR"
+input = """
+SELECT LOGICAL_AND(x < 3) AS logical_and FROM UNNEST([1, 2, 4]) AS x;
+SELECT LOGICAL_OR(x < 3) AS logical_or FROM UNNEST([1, 2, 4]) AS x;
+"""
+formatted = """
+SELECT LOGICAL_AND(x < 3) AS logical_and
+  FROM UNNEST([1, 2, 4]) AS x;
+
+SELECT LOGICAL_OR(x < 3) AS logical_or
+  FROM UNNEST([1, 2, 4]) AS x;
+"""
+
+[[cases]]
+description = "MAX and MIN"
+input = """
+SELECT MAX(x) AS max
+FROM UNNEST([8, 37, 55, 4]) AS x;
+
+SELECT x, MAX(x) OVER (PARTITION BY MOD(x, 2)) AS max
+FROM UNNEST([8, NULL, 37, 55, NULL, 4]) AS x;
+
+SELECT MIN(x) AS min
+FROM UNNEST([8, 37, 4, 55]) AS x;
+
+SELECT x, MIN(x) OVER (PARTITION BY MOD(x, 2)) AS min
+FROM UNNEST([8, NULL, 37, 4, NULL, 55]) AS x;
+"""
+formatted = """
+SELECT MAX(x) AS max
+  FROM UNNEST([8, 37, 55, 4]) AS x;
+
+SELECT x,
+       MAX(x) OVER (PARTITION BY MOD(x, 2)) AS max
+  FROM UNNEST([8, NULL, 37, 55, NULL, 4]) AS x;
+
+SELECT MIN(x) AS min
+  FROM UNNEST([8, 37, 4, 55]) AS x;
+
+SELECT x,
+       MIN(x) OVER (PARTITION BY MOD(x, 2)) AS min
+  FROM UNNEST([8, NULL, 37, 4, NULL, 55]) AS x;
+"""
+
+[[cases]]
+description = "STRING_AGG"
+input = """
+SELECT STRING_AGG(fruit) AS string_agg
+FROM UNNEST(["apple", NULL, "pear", "banana", "pear"]) AS fruit;
+
+SELECT STRING_AGG(fruit, " & ") AS string_agg
+FROM UNNEST(["apple", "pear", "banana", "pear"]) AS fruit;
+
+SELECT STRING_AGG(DISTINCT fruit, " & ") AS string_agg
+FROM UNNEST(["apple", "pear", "banana", "pear"]) AS fruit;
+
+SELECT STRING_AGG(fruit, " & " ORDER BY LENGTH(fruit)) AS string_agg
+FROM UNNEST(["apple", "pear", "banana", "pear"]) AS fruit;
+
+SELECT STRING_AGG(fruit, " & " LIMIT 2) AS string_agg
+FROM UNNEST(["apple", "pear", "banana", "pear"]) AS fruit;
+
+SELECT STRING_AGG(DISTINCT fruit, " & " ORDER BY fruit DESC LIMIT 2) AS string_agg
+FROM UNNEST(["apple", "pear", "banana", "pear"]) AS fruit;
+
+SELECT
+  fruit,
+  STRING_AGG(fruit, " & ") OVER (ORDER BY LENGTH(fruit)) AS string_agg
+FROM UNNEST(["apple", NULL, "pear", "banana", "pear"]) AS fruit;
+"""
+formatted = """
+SELECT STRING_AGG(fruit) AS string_agg
+  FROM UNNEST(['apple', NULL, 'pear', 'banana', 'pear']) AS fruit;
+
+SELECT STRING_AGG(fruit, ' & ') AS string_agg
+  FROM UNNEST(['apple', 'pear', 'banana', 'pear']) AS fruit;
+
+SELECT STRING_AGG(DISTINCT fruit, ' & ') AS string_agg
+  FROM UNNEST(['apple', 'pear', 'banana', 'pear']) AS fruit;
+
+SELECT STRING_AGG(fruit, ' & ' ORDER BY LENGTH(fruit)) AS string_agg
+  FROM UNNEST(['apple', 'pear', 'banana', 'pear']) AS fruit;
+
+SELECT STRING_AGG(fruit, ' & ' LIMIT 2) AS string_agg
+  FROM UNNEST(['apple', 'pear', 'banana', 'pear']) AS fruit;
+
+SELECT STRING_AGG(
+         DISTINCT
+         fruit,
+         ' & '
+         ORDER BY fruit DESC
+         LIMIT 2
+       ) AS string_agg
+  FROM UNNEST(['apple', 'pear', 'banana', 'pear']) AS fruit;
+
+SELECT fruit,
+       STRING_AGG(fruit, ' & ') OVER (ORDER BY LENGTH(fruit)) AS string_agg
+  FROM UNNEST(['apple', NULL, 'pear', 'banana', 'pear']) AS fruit;
+"""
+
+[[cases]]
+description = "SUM"
+input = """
+SELECT SUM(x) AS sum
+FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT SUM(DISTINCT x) AS sum
+FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT
+  x,
+  SUM(x) OVER (PARTITION BY MOD(x, 3)) AS sum
+FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT
+  x,
+  SUM(DISTINCT x) OVER (PARTITION BY MOD(x, 3)) AS sum
+FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT SUM(x) AS sum
+FROM UNNEST([]) AS x;
+"""
+formatted = """
+SELECT SUM(x) AS sum
+  FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT SUM(DISTINCT x) AS sum
+  FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT x,
+       SUM(x) OVER (PARTITION BY MOD(x, 3)) AS sum
+  FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT x,
+       SUM(DISTINCT x) OVER (PARTITION BY MOD(x, 3)) AS sum
+  FROM UNNEST([1, 2, 3, 4, 5, 4, 3, 2, 1]) AS x;
+
+SELECT SUM(x) AS sum
+  FROM UNNEST([]) AS x;
+"""
+
+[[cases]]
+description = "CORR"
+input = """
+SELECT CORR(y, x) AS results
+FROM
+  UNNEST(
+    [
+      STRUCT(1.0 AS y, 5.0 AS x),
+      (3.0, 9.0),
+      (4.0, 7.0)]);
+
+SELECT CORR(y, x) AS results
+FROM
+  UNNEST(
+    [
+      STRUCT(1.0 AS y, 5.0 AS x),
+      (3.0, 9.0),
+      (4.0, NULL)]);
+
+SELECT CORR(y, x) AS results
+FROM UNNEST([STRUCT(1.0 AS y, NULL AS x),(9.0, 3.0)]);
+
+SELECT CORR(y, x) AS results
+FROM UNNEST([STRUCT(1.0 AS y, NULL AS x),(9.0, NULL)]);
+
+SELECT CORR(y, x) AS results
+FROM
+  UNNEST(
+    [
+      STRUCT(1.0 AS y, 5.0 AS x),
+      (3.0, 9.0),
+      (4.0, 7.0),
+      (5.0, 1.0),
+      (7.0, CAST('Infinity' as FLOAT64))]);
+
+SELECT CORR(x, y) AS results
+FROM
+  (
+    SELECT 0 AS x, 0 AS y
+    UNION ALL
+    SELECT 0 AS x, 0 AS y
+  )
+"""
+formatted = """
+SELECT CORR(y, x) AS results
+  FROM UNNEST([
+                STRUCT(1.0 AS y, 5.0 AS x),
+                (3.0, 9.0),
+                (4.0, 7.0)
+              ]);
+
+SELECT CORR(y, x) AS results
+  FROM UNNEST([
+                STRUCT(1.0 AS y, 5.0 AS x),
+                (3.0, 9.0),
+                (4.0, NULL)
+              ]);
+
+SELECT CORR(y, x) AS results
+  FROM UNNEST([
+                STRUCT(1.0 AS y, NULL AS x),
+                (9.0, 3.0)
+              ]);
+
+SELECT CORR(y, x) AS results
+  FROM UNNEST([
+                STRUCT(1.0 AS y, NULL AS x),
+                (9.0, NULL)
+              ]);
+
+SELECT CORR(y, x) AS results
+  FROM UNNEST([
+                STRUCT(1.0 AS y, 5.0 AS x),
+                (3.0, 9.0),
+                (4.0, 7.0),
+                (5.0, 1.0),
+                (
+                  7.0,
+                  CAST('Infinity' AS FLOAT64)
+                )
+              ]);
+
+SELECT CORR(x, y) AS results
+  FROM (
+         SELECT 0 AS x,
+                0 AS y
+          UNION ALL
+         SELECT 0 AS x,
+                0 AS y
+       );
+"""
+
+[[cases]]
+description = "APPROX_QUANTILES"
+input = """
+SELECT APPROX_QUANTILES(x, 2) AS approx_quantiles
+FROM UNNEST([1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT APPROX_QUANTILES(x, 100)[OFFSET(90)] AS percentile_90
+FROM UNNEST([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT APPROX_QUANTILES(DISTINCT x, 2) AS approx_quantiles
+FROM UNNEST([1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT FORMAT("%T", APPROX_QUANTILES(x, 2 RESPECT NULLS)) AS approx_quantiles
+FROM UNNEST([NULL, NULL, 1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT FORMAT("%T", APPROX_QUANTILES(DISTINCT x, 2 RESPECT NULLS)) AS approx_quantiles
+FROM UNNEST([NULL, NULL, 1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+"""
+formatted = """
+SELECT APPROX_QUANTILES(x, 2) AS approx_quantiles
+  FROM UNNEST([1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT APPROX_QUANTILES(x, 100)[OFFSET(90)] AS percentile_90
+  FROM UNNEST([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT APPROX_QUANTILES(DISTINCT x, 2) AS approx_quantiles
+  FROM UNNEST([1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT FORMAT('%T', APPROX_QUANTILES(x, 2 RESPECT NULLS)) AS approx_quantiles
+  FROM UNNEST([NULL, NULL, 1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+
+SELECT FORMAT('%T', APPROX_QUANTILES(DISTINCT x, 2 RESPECT NULLS)) AS approx_quantiles
+  FROM UNNEST([NULL, NULL, 1, 1, 1, 4, 5, 6, 7, 8, 9, 10]) AS x;
+"""
+
+[[cases]]
+description = "HLL_COUNT.EXTRACT, HLL_COUNT.INIT, HLL_COUNT.MERGE"
+input = """
+SELECT
+  country,
+  HLL_COUNT.EXTRACT(HLL_sketch) AS distinct_customers_with_open_invoice
+FROM
+  (
+    SELECT
+      country,
+      HLL_COUNT.INIT(customer_id) AS hll_sketch
+    FROM
+      UNNEST(
+        ARRAY<STRUCT<country STRING, customer_id STRING, invoice_id STRING>>[
+          ('UA', 'customer_id_1', 'invoice_id_11'),
+          ('BR', 'customer_id_3', 'invoice_id_31'),
+          ('CZ', 'customer_id_2', 'invoice_id_22'),
+          ('CZ', 'customer_id_2', 'invoice_id_23'),
+          ('BR', 'customer_id_3', 'invoice_id_31'),
+          ('UA', 'customer_id_2', 'invoice_id_24')])
+    GROUP BY country
+  );
+"""
+formatted = """
+SELECT country, HLL_COUNT.EXTRACT(HLL_sketch) AS distinct_customers_with_open_invoice
+  FROM (
+         SELECT country, HLL_COUNT.INIT(customer_id) AS hll_sketch
+           FROM UNNEST(ARRAY<
+                         STRUCT<country STRING, customer_id STRING, invoice_id STRING>
+                       >[
+                         ('UA', 'customer_id_1', 'invoice_id_11'),
+                         ('BR', 'customer_id_3', 'invoice_id_31'),
+                         ('CZ', 'customer_id_2', 'invoice_id_22'),
+                         ('CZ', 'customer_id_2', 'invoice_id_23'),
+                         ('BR', 'customer_id_3', 'invoice_id_31'),
+                         ('UA', 'customer_id_2', 'invoice_id_24')
+                       ])
+          GROUP BY country
+       )
+"""
+
+[[cases]]
+description = "BIT_COUNT"
+input = """
+SELECT a, BIT_COUNT(a) AS a_bits, FORMAT("%T", b) as b, BIT_COUNT(b) AS b_bits
+FROM UNNEST([
+  STRUCT(0 AS a, b'' AS b), (0, b'\\x00'), (5, b'\\x05'), (8, b'\\x00\\x08'),
+  (0xFFFF, b'\\xFF\\xFF'), (-2, b'\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFE'),
+  (-1, b'\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF'),
+  (NULL, b'\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF')
+]) AS x;
+"""
+formatted = """
+SELECT a,
+       BIT_COUNT(a)    AS a_bits,
+       FORMAT('%T', b) AS b,
+       BIT_COUNT(b)    AS b_bits
+  FROM UNNEST([
+                STRUCT(0 AS a, b'' AS b),
+                (0, b'\\x00'),
+                (5, b'\\x05'),
+                (8, b'\\x00\\x08'),
+                (0xFFFF, b'\\xFF\\xFF'),
+                (-2, b'\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFE'),
+                (-1, b'\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF'),
+                (NULL, b'\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF\\xFF')
+              ]) AS x
+"""
+
+[[cases]]
+description = "CAST"
+input = """
+SELECT CAST(x=1 AS STRING),
+CAST(expr AS array<int64>),
+cast(expr as bignumeric),
+cast(expr as bool),
+-- Cast as STRUCT is not available for go-zetasql.
+-- cast(x as struct)
+;
+
+SELECT input, CAST(input AS INTERVAL) AS output
+FROM UNNEST([
+  '1-2 3 10:20:30.456',
+  '1-2',
+  '10:20:30',
+  'P1Y2M3D',
+  'PT10H20M30,456S'
+]) input;
+
+SELECT CAST(
+  TIMESTAMP '2008-12-25 00:00:00+00:00'
+  AS STRING FORMAT 'YYYY-MM-DD HH24:MI:SS TZH:TZM'
+  AT TIME ZONE 'Asia/Kolkata') AS date_time_to_string;
+
+SELECT CAST('06/02/2020 17:00:53.110' AS TIMESTAMP FORMAT 'MM/DD/YYYY HH24:MI:SS.FF3' AT TIME ZONE 'UTC') AS as_timestamp;
+
+"""
+formatted = """
+SELECT CAST(x = 1 AS STRING),
+       CAST(expr AS ARRAY<INT64>),
+       CAST(expr AS BIGNUMERIC),
+       CAST(expr AS BOOL);
+
+-- Cast as STRUCT is not available for go-zetasql.
+-- cast(x as struct)
+SELECT input,
+       CAST(input AS INTERVAL) AS output
+  FROM UNNEST(['1-2 3 10:20:30.456', '1-2', '10:20:30', 'P1Y2M3D', 'PT10H20M30,456S']) AS input;
+
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'YYYY-MM-DD HH24:MI:SS TZH:TZM' AT TIME ZONE 'Asia/Kolkata') AS date_time_to_string;
+
+SELECT CAST('06/02/2020 17:00:53.110' AS TIMESTAMP FORMAT 'MM/DD/YYYY HH24:MI:SS.FF3' AT TIME ZONE 'UTC') AS as_timestamp;
+"""
+
+[[cases]]
+description = "COT"
+input = """
+select cot(1) as a, safe.cot(0) as b;
+"""
+formatted = """
+SELECT COT(1)      AS a,
+       SAFE.COT(0) AS b
+"""
+
+[[cases]]
+description = "FIRST_VALUE"
+input = """
+WITH finishers AS
+ (SELECT 'Sophia Liu' as name,
+  TIMESTAMP '2016-10-18 2:51:45' as finish_time,
+  'F30-34' as division
+  UNION ALL SELECT 'Lisa Stelzner', TIMESTAMP '2016-10-18 2:54:11', 'F35-39'
+  UNION ALL SELECT 'Nikki Leith', TIMESTAMP '2016-10-18 2:59:01', 'F30-34'
+  UNION ALL SELECT 'Lauren Matthews', TIMESTAMP '2016-10-18 3:01:17', 'F35-39'
+  UNION ALL SELECT 'Desiree Berry', TIMESTAMP '2016-10-18 3:05:42', 'F35-39'
+  UNION ALL SELECT 'Suzy Slane', TIMESTAMP '2016-10-18 3:06:24', 'F35-39'
+  UNION ALL SELECT 'Jen Edwards', TIMESTAMP '2016-10-18 3:06:36', 'F30-34'
+  UNION ALL SELECT 'Meghan Lederer', TIMESTAMP '2016-10-18 3:07:41', 'F30-34'
+  UNION ALL SELECT 'Carly Forte', TIMESTAMP '2016-10-18 3:08:58', 'F25-29'
+  UNION ALL SELECT 'Lauren Reasoner', TIMESTAMP '2016-10-18 3:10:14', 'F30-34')
+SELECT name,
+  FORMAT_TIMESTAMP('%X', finish_time) AS finish_time,
+  division,
+  FORMAT_TIMESTAMP('%X', fastest_time) AS fastest_time,
+  TIMESTAMP_DIFF(finish_time, fastest_time, SECOND) AS delta_in_seconds
+FROM (
+  SELECT name,
+  finish_time,
+  division,
+  FIRST_VALUE(finish_time)
+    OVER (PARTITION BY division ORDER BY finish_time ASC
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS fastest_time
+  FROM finishers);
+"""
+formatted = """
+WITH
+  finishers AS (
+    SELECT 'Sophia Liu'                   AS name,
+           TIMESTAMP '2016-10-18 2:51:45' AS finish_time,
+           'F30-34'                       AS division
+     UNION ALL
+    SELECT 'Lisa Stelzner', TIMESTAMP '2016-10-18 2:54:11', 'F35-39'
+     UNION ALL
+    SELECT 'Nikki Leith', TIMESTAMP '2016-10-18 2:59:01', 'F30-34'
+     UNION ALL
+    SELECT 'Lauren Matthews', TIMESTAMP '2016-10-18 3:01:17', 'F35-39'
+     UNION ALL
+    SELECT 'Desiree Berry', TIMESTAMP '2016-10-18 3:05:42', 'F35-39'
+     UNION ALL
+    SELECT 'Suzy Slane', TIMESTAMP '2016-10-18 3:06:24', 'F35-39'
+     UNION ALL
+    SELECT 'Jen Edwards', TIMESTAMP '2016-10-18 3:06:36', 'F30-34'
+     UNION ALL
+    SELECT 'Meghan Lederer', TIMESTAMP '2016-10-18 3:07:41', 'F30-34'
+     UNION ALL
+    SELECT 'Carly Forte', TIMESTAMP '2016-10-18 3:08:58', 'F25-29'
+     UNION ALL
+    SELECT 'Lauren Reasoner', TIMESTAMP '2016-10-18 3:10:14', 'F30-34'
+  )
+SELECT name,
+       FORMAT_TIMESTAMP('%X', finish_time) AS finish_time,
+       division,
+       FORMAT_TIMESTAMP('%X', fastest_time)              AS fastest_time,
+       TIMESTAMP_DIFF(finish_time, fastest_time, SECOND) AS delta_in_seconds
+  FROM (
+         SELECT name,
+                finish_time,
+                division,
+                FIRST_VALUE(finish_time) OVER (
+                  PARTITION BY division
+                      ORDER BY finish_time ASC
+                       ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+                ) AS fastest_time
+           FROM finishers
+       )
+"""
+
+[[cases]]
+description = "NTH_VALUE"
+input = """
+WITH finishers AS
+ (SELECT 'Sophia Liu' as name,
+  TIMESTAMP '2016-10-18 2:51:45' as finish_time,
+  'F30-34' as division
+  UNION ALL SELECT 'Lisa Stelzner', TIMESTAMP '2016-10-18 2:54:11', 'F35-39'
+  UNION ALL SELECT 'Nikki Leith', TIMESTAMP '2016-10-18 2:59:01', 'F30-34'
+  UNION ALL SELECT 'Lauren Matthews', TIMESTAMP '2016-10-18 3:01:17', 'F35-39'
+  UNION ALL SELECT 'Desiree Berry', TIMESTAMP '2016-10-18 3:05:42', 'F35-39'
+  UNION ALL SELECT 'Suzy Slane', TIMESTAMP '2016-10-18 3:06:24', 'F35-39'
+  UNION ALL SELECT 'Jen Edwards', TIMESTAMP '2016-10-18 3:06:36', 'F30-34'
+  UNION ALL SELECT 'Meghan Lederer', TIMESTAMP '2016-10-18 3:07:41', 'F30-34'
+  UNION ALL SELECT 'Carly Forte', TIMESTAMP '2016-10-18 3:08:58', 'F25-29'
+  UNION ALL SELECT 'Lauren Reasoner', TIMESTAMP '2016-10-18 3:10:14', 'F30-34')
+SELECT name,
+  FORMAT_TIMESTAMP('%X', finish_time) AS finish_time,
+  division,
+  FORMAT_TIMESTAMP('%X', fastest_time) AS fastest_time,
+  FORMAT_TIMESTAMP('%X', second_fastest) AS second_fastest
+FROM (
+  SELECT name,
+  finish_time,
+  division,finishers,
+  FIRST_VALUE(finish_time)
+    OVER w1 AS fastest_time,
+  NTH_VALUE(finish_time, 2)
+    OVER w1 as second_fastest
+  FROM finishers
+  WINDOW w1 AS (
+    PARTITION BY division ORDER BY finish_time ASC
+    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING));
+"""
+formatted = """
+WITH
+  finishers AS (
+    SELECT 'Sophia Liu'                   AS name,
+           TIMESTAMP '2016-10-18 2:51:45' AS finish_time,
+           'F30-34'                       AS division
+     UNION ALL
+    SELECT 'Lisa Stelzner', TIMESTAMP '2016-10-18 2:54:11', 'F35-39'
+     UNION ALL
+    SELECT 'Nikki Leith', TIMESTAMP '2016-10-18 2:59:01', 'F30-34'
+     UNION ALL
+    SELECT 'Lauren Matthews', TIMESTAMP '2016-10-18 3:01:17', 'F35-39'
+     UNION ALL
+    SELECT 'Desiree Berry', TIMESTAMP '2016-10-18 3:05:42', 'F35-39'
+     UNION ALL
+    SELECT 'Suzy Slane', TIMESTAMP '2016-10-18 3:06:24', 'F35-39'
+     UNION ALL
+    SELECT 'Jen Edwards', TIMESTAMP '2016-10-18 3:06:36', 'F30-34'
+     UNION ALL
+    SELECT 'Meghan Lederer', TIMESTAMP '2016-10-18 3:07:41', 'F30-34'
+     UNION ALL
+    SELECT 'Carly Forte', TIMESTAMP '2016-10-18 3:08:58', 'F25-29'
+     UNION ALL
+    SELECT 'Lauren Reasoner', TIMESTAMP '2016-10-18 3:10:14', 'F30-34'
+  )
+SELECT name,
+       FORMAT_TIMESTAMP('%X', finish_time) AS finish_time,
+       division,
+       FORMAT_TIMESTAMP('%X', fastest_time)   AS fastest_time,
+       FORMAT_TIMESTAMP('%X', second_fastest) AS second_fastest
+  FROM (
+         SELECT name,
+                finish_time,
+                division,
+                finishers,
+                FIRST_VALUE(finish_time) OVER w1  AS fastest_time,
+                NTH_VALUE(finish_time, 2) OVER w1 AS second_fastest
+           FROM finishers
+         WINDOW w1 AS (
+                  PARTITION BY division
+                      ORDER BY finish_time ASC
+                       ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+                )
+       )
+"""
+
+[[cases]]
+description = "CODE_POINTS_TO_BYTES"
+input = """
+SELECT CODE_POINTS_TO_BYTES(ARRAY_AGG(
+  (SELECT
+      CASE
+        WHEN chr BETWEEN b'a' and b'z'
+          THEN TO_CODE_POINTS(b'a')[offset(0)] +
+            MOD(code+13-TO_CODE_POINTS(b'a')[offset(0)],26)
+        WHEN chr BETWEEN b'A' and b'Z'
+          THEN TO_CODE_POINTS(b'A')[offset(0)] +
+            MOD(code+13-TO_CODE_POINTS(b'A')[offset(0)],26)
+        ELSE code
+      END
+   FROM
+     (SELECT code, CODE_POINTS_TO_BYTES([code]) chr)
+  ) ORDER BY OFFSET)) AS encoded_string
+FROM UNNEST(TO_CODE_POINTS(b'Test String!')) code WITH OFFSET;
+"""
+formatted = """
+SELECT CODE_POINTS_TO_BYTES(
+         ARRAY_AGG(
+           (
+             SELECT CASE
+                      WHEN
+                        chr BETWEEN b'a' AND b'z'
+                      THEN
+                        TO_CODE_POINTS(b'a')[OFFSET(0)] + MOD(
+                          code + 13 - TO_CODE_POINTS(b'a')[OFFSET(0)],
+                          26
+                        )
+
+                      WHEN
+                        chr BETWEEN b'A' AND b'Z'
+                      THEN
+                        TO_CODE_POINTS(b'A')[OFFSET(0)] + MOD(
+                          code + 13 - TO_CODE_POINTS(b'A')[OFFSET(0)],
+                          26
+                        )
+
+                      ELSE
+                        code
+
+                    END
+               FROM (
+                      SELECT code,
+                             CODE_POINTS_TO_BYTES(
+                               [code]
+                             ) AS chr
+                    )
+           )
+           ORDER BY OFFSET
+         )
+       ) AS encoded_string
+  FROM UNNEST(TO_CODE_POINTS(b'Test String!')) AS code WITH OFFSET
+"""
+
+[[cases]]
+description = "CODE_POINTS_TO_STRING"
+input = """
+WITH Words AS (
+  SELECT word
+  FROM UNNEST(['foo', 'bar', 'baz', 'giraffe', 'llama']) AS word
+)
+SELECT
+  CODE_POINTS_TO_STRING([code_point]) AS letter,
+  COUNT(*) AS letter_count
+FROM Words,
+  UNNEST(TO_CODE_POINTS(word)) AS code_point
+GROUP BY 1
+ORDER BY 2 DESC;
+"""
+formatted = """
+WITH
+  Words AS (
+    SELECT word
+      FROM UNNEST(['foo', 'bar', 'baz', 'giraffe', 'llama']) AS word
+  )
+SELECT CODE_POINTS_TO_STRING(
+         [code_point]
+       )        AS letter,
+       COUNT(*) AS letter_count
+  FROM Words,
+       UNNEST(TO_CODE_POINTS(word)) AS code_point
+ GROUP BY 1
+ ORDER BY 2 DESC
+"""
+
+[[cases]]
+description = "COLLATE"
+input = """
+WITH Words AS (
+  SELECT
+    COLLATE('a', 'und:ci') AS char1,
+    COLLATE('Z', 'und:ci') AS char2
+)
+SELECT ( Words.char1 < Words.char2 ) AS a_less_than_Z
+FROM Words;
+
+/* In this example, the weight of a is greater than the weight of Z.
+   This is because the default collate specification assigns more weight to a.
+ */
+
+WITH Words AS (
+  SELECT
+    'a' AS char1,
+    'Z' AS char2
+)
+SELECT ( Words.char1 < Words.char2 ) AS a_less_than_Z
+FROM Words;
+"""
+formatted = """
+WITH
+  Words AS (
+    SELECT COLLATE('a', 'und:ci') AS char1,
+           COLLATE('Z', 'und:ci') AS char2
+  )
+SELECT (Words.char1 < Words.char2) AS a_less_than_Z
+  FROM Words;
+
+/* In this example, the weight of a is greater than the weight of Z.
+   This is because the default collate specification assigns more weight to a.
+ */
+WITH
+  Words AS (
+    SELECT 'a' AS char1,
+           'Z' AS char2
+  )
+SELECT (Words.char1 < Words.char2) AS a_less_than_Z
+  FROM Words;
+"""
+
+[[cases]]
+description = "INITCAP"
+input = """
+WITH example AS
+(
+  SELECT 'Hello World-everyone!' AS value UNION ALL
+  SELECT 'tHe dog BARKS loudly+friendly' AS value UNION ALL
+  SELECT 'apples&oranges;&pears' AS value UNION ALL
+  SELECT 'καθίσματα ταινιών' AS value
+)
+SELECT value, INITCAP(value) AS initcap_value FROM example;
+
+/*-------------------------------+-------------------------------*
+ | value                         | initcap_value                 |
+ +-------------------------------+-------------------------------+
+ | Hello World-everyone!         | Hello World-Everyone!         |
+ | tHe dog BARKS loudly+friendly | The Dog Barks Loudly+Friendly |
+ | apples&oranges;&pears         | Apples&Oranges;&Pears         |
+ | καθίσματα ταινιών             | Καθίσματα Ταινιών             |
+ *-------------------------------+-------------------------------*/
+
+WITH example AS
+(
+  SELECT 'hello WORLD!' AS value, '' AS delimiters UNION ALL
+  SELECT 'καθίσματα ταιντιώ@ν' AS value, 'τ@' AS delimiters UNION ALL
+  SELECT 'Apples1oranges2pears' AS value, '12' AS delimiters UNION ALL
+  SELECT 'tHisEisEaESentence' AS value, 'E' AS delimiters
+)
+SELECT value, delimiters, INITCAP(value, delimiters) AS initcap_value FROM example;
+
+/*----------------------+------------+----------------------*
+ | value                | delimiters | initcap_value        |
+ +----------------------+------------+----------------------+
+ | hello WORLD!         |            | Hello world!         |
+ | καθίσματα ταιντιώ@ν  | τ@         | ΚαθίσματΑ τΑιντΙώ@Ν  |
+ | Apples1oranges2pears | 12         | Apples1Oranges2Pears |
+ | tHisEisEaESentence   | E          | ThisEIsEAESentence   |
+ *----------------------+------------+----------------------*/
+"""
+formatted = """
+WITH
+  example AS (
+    SELECT 'Hello World-everyone!' AS value
+     UNION ALL
+    SELECT 'tHe dog BARKS loudly+friendly' AS value
+     UNION ALL
+    SELECT 'apples&oranges;&pears' AS value
+     UNION ALL
+    SELECT 'καθίσματα ταινιών' AS value
+  )
+SELECT value, INITCAP(value) AS initcap_value
+  FROM example;
+
+/*-------------------------------+-------------------------------*
+ | value                         | initcap_value                 |
+ +-------------------------------+-------------------------------+
+ | Hello World-everyone!         | Hello World-Everyone!         |
+ | tHe dog BARKS loudly+friendly | The Dog Barks Loudly+Friendly |
+ | apples&oranges;&pears         | Apples&Oranges;&Pears         |
+ | καθίσματα ταινιών             | Καθίσματα Ταινιών             |
+ *-------------------------------+-------------------------------*/
+WITH
+  example AS (
+    SELECT 'hello WORLD!' AS value,
+           ''             AS delimiters
+     UNION ALL
+    SELECT 'καθίσματα ταιντιώ@ν' AS value,
+           'τ@'                  AS delimiters
+     UNION ALL
+    SELECT 'Apples1oranges2pears' AS value,
+           '12'                   AS delimiters
+     UNION ALL
+    SELECT 'tHisEisEaESentence' AS value,
+           'E'                  AS delimiters
+  )
+SELECT value, delimiters, INITCAP(value, delimiters) AS initcap_value
+  FROM example;
+/*----------------------+------------+----------------------*
+ | value                | delimiters | initcap_value        |
+ +----------------------+------------+----------------------+
+ | hello WORLD!         |            | Hello world!         |
+ | καθίσματα ταιντιώ@ν  | τ@         | ΚαθίσματΑ τΑιντΙώ@Ν  |
+ | Apples1oranges2pears | 12         | Apples1Oranges2Pears |
+ | tHisEisEaESentence   | E          | ThisEIsEAESentence   |
+ *----------------------+------------+----------------------*/
+"""
+
+[[cases]]
+description = "LPAD"
+input = """
+SELECT t, len, FORMAT('%T', LPAD(t, len)) AS LPAD FROM UNNEST([
+  STRUCT('abc' AS t, 5 AS len),
+  ('abc', 2),
+  ('例子', 4)
+]);
+
+/*------+-----+----------*
+ | t    | len | LPAD     |
+ |------|-----|----------|
+ | abc  | 5   | "  abc"  |
+ | abc  | 2   | "ab"     |
+ | 例子  | 4   | "  例子" |
+ *------+-----+----------*/
+
+SELECT t, len, pattern, FORMAT('%T', LPAD(t, len, pattern)) AS LPAD FROM UNNEST([
+  STRUCT('abc' AS t, 8 AS len, 'def' AS pattern),
+  ('abc', 5, '-'),
+  ('例子', 5, '中文')
+]);
+
+/*------+-----+---------+--------------*
+ | t    | len | pattern | LPAD         |
+ |------|-----|---------|--------------|
+ | abc  | 8   | def     | "defdeabc"   |
+ | abc  | 5   | -       | "--abc"      |
+ | 例子  | 5   | 中文    | "中文中例子"   |
+ *------+-----+---------+--------------*/
+
+SELECT FORMAT('%T', t) AS t, len, FORMAT('%T', LPAD(t, len)) AS LPAD FROM UNNEST([
+  STRUCT(b'abc' AS t, 5 AS len),
+  (b'abc', 2),
+  (b'\\xab\\xcd\\xef', 4)
+]);
+
+/*-----------------+-----+------------------*
+ | t               | len | LPAD             |
+ |-----------------|-----|------------------|
+ | b"abc"          | 5   | b"  abc"         |
+ | b"abc"          | 2   | b"ab"            |
+ | b"\\xab\\xcd\\xef" | 4   | b" \\xab\\xcd\\xef" |
+ *-----------------+-----+------------------*/
+
+SELECT
+  FORMAT('%T', t) AS t,
+  len,
+  FORMAT('%T', pattern) AS pattern,
+  FORMAT('%T', LPAD(t, len, pattern)) AS LPAD
+FROM UNNEST([
+  STRUCT(b'abc' AS t, 8 AS len, b'def' AS pattern),
+  (b'abc', 5, b'-'),
+  (b'\\xab\\xcd\\xef', 5, b'\\x00')
+]);
+
+/*-----------------+-----+---------+-------------------------*
+ | t               | len | pattern | LPAD                    |
+ |-----------------|-----|---------|-------------------------|
+ | b"abc"          | 8   | b"def"  | b"defdeabc"             |
+ | b"abc"          | 5   | b"-"    | b"--abc"                |
+ | b"\\xab\\xcd\\xef" | 5   | b"\\x00" | b"\\x00\\x00\\xab\\xcd\\xef" |
+ *-----------------+-----+---------+-------------------------*/
+"""
+formatted = """
+SELECT t, len, FORMAT('%T', LPAD(t, len)) AS LPAD
+  FROM UNNEST([
+                STRUCT('abc' AS t, 5 AS len),
+                ('abc', 2),
+                ('例子', 4)
+              ]);
+
+/*------+-----+----------*
+ | t    | len | LPAD     |
+ |------|-----|----------|
+ | abc  | 5   | "  abc"  |
+ | abc  | 2   | "ab"     |
+ | 例子  | 4   | "  例子" |
+ *------+-----+----------*/
+SELECT t,
+       len,
+       pattern,
+       FORMAT('%T', LPAD(t, len, pattern)) AS LPAD
+  FROM UNNEST([
+                STRUCT('abc' AS t, 8 AS len, 'def' AS pattern),
+                ('abc', 5, '-'),
+                ('例子', 5, '中文')
+              ]);
+
+/*------+-----+---------+--------------*
+ | t    | len | pattern | LPAD         |
+ |------|-----|---------|--------------|
+ | abc  | 8   | def     | "defdeabc"   |
+ | abc  | 5   | -       | "--abc"      |
+ | 例子  | 5   | 中文    | "中文中例子"   |
+ *------+-----+---------+--------------*/
+SELECT FORMAT('%T', t) AS t,
+       len,
+       FORMAT('%T', LPAD(t, len)) AS LPAD
+  FROM UNNEST([
+                STRUCT(b'abc' AS t, 5 AS len),
+                (b'abc', 2),
+                (b'\\xab\\xcd\\xef', 4)
+              ]);
+
+/*-----------------+-----+------------------*
+ | t               | len | LPAD             |
+ |-----------------|-----|------------------|
+ | b"abc"          | 5   | b"  abc"         |
+ | b"abc"          | 2   | b"ab"            |
+ | b"\\xab\\xcd\\xef" | 4   | b" \\xab\\xcd\\xef" |
+ *-----------------+-----+------------------*/
+SELECT FORMAT('%T', t) AS t,
+       len,
+       FORMAT('%T', pattern)               AS pattern,
+       FORMAT('%T', LPAD(t, len, pattern)) AS LPAD
+  FROM UNNEST([
+                STRUCT(b'abc' AS t, 8 AS len, b'def' AS pattern),
+                (b'abc', 5, b'-'),
+                (b'\\xab\\xcd\\xef', 5, b'\\x00')
+              ]);
+/*-----------------+-----+---------+-------------------------*
+ | t               | len | pattern | LPAD                    |
+ |-----------------|-----|---------|-------------------------|
+ | b"abc"          | 8   | b"def"  | b"defdeabc"             |
+ | b"abc"          | 5   | b"-"    | b"--abc"                |
+ | b"\\xab\\xcd\\xef" | 5   | b"\\x00" | b"\\x00\\x00\\xab\\xcd\\xef" |
+ *-----------------+-----+---------+-------------------------*/
+"""
+
+[[cases]]
+description = "NORMALIZE"
+input = """
+WITH EquivalentNames AS (
+  SELECT name
+  FROM UNNEST([
+      'Jane\\u2004Doe',
+      'John\\u2004Smith',
+      'Jane\\u2005Doe',
+      'Jane\\u2006Doe',
+      'John Smith']) AS name
+)
+SELECT
+  NORMALIZE(name, NFKC) AS normalized_name,
+  COUNT(*) AS name_count
+FROM EquivalentNames
+GROUP BY 1;
+"""
+formatted = """
+WITH
+  EquivalentNames AS (
+    SELECT name
+      FROM UNNEST(['Jane\\u2004Doe', 'John\\u2004Smith', 'Jane\\u2005Doe', 'Jane\\u2006Doe', 'John Smith']) AS name
+  )
+SELECT NORMALIZE(name, NFKC) AS normalized_name,
+       COUNT(*)              AS name_count
+  FROM EquivalentNames
+ GROUP BY 1
+"""
+
+[[cases]]
+description = "REGEXP_CONTAINS"
+input = """
+SELECT
+  email,
+  REGEXP_CONTAINS(email, r'@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+') AS is_valid
+FROM
+  (SELECT
+    ['foo@example.com', 'bar@example.org', 'www.example.net']
+    AS addresses),
+  UNNEST(addresses) AS email;
+
+-- Performs a full match, using ^ and $. Due to regular expression operator
+-- precedence, it is good practice to use parentheses around everything between ^
+-- and $.
+SELECT
+  email,
+  REGEXP_CONTAINS(email, r'^([\\w.+-]+@foo\\.com|[\\w.+-]+@bar\\.org)$')
+    AS valid_email_address,
+  REGEXP_CONTAINS(email, r'^[\\w.+-]+@foo\\.com|[\\w.+-]+@bar\\.org$')
+    AS without_parentheses
+FROM
+  (SELECT
+    ['a@foo.com', 'a@foo.computer', 'b@bar.org', '!b@bar.org', 'c@buz.net']
+    AS addresses),
+  UNNEST(addresses) AS email;
+"""
+formatted = """
+SELECT email, REGEXP_CONTAINS(email, r'@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+') AS is_valid
+  FROM (
+         SELECT ['foo@example.com', 'bar@example.org', 'www.example.net'] AS addresses
+       ),
+       UNNEST(addresses) AS email;
+
+-- Performs a full match, using ^ and $. Due to regular expression operator
+-- precedence, it is good practice to use parentheses around everything between ^
+-- and $.
+SELECT email,
+       REGEXP_CONTAINS(email, r'^([\\w.+-]+@foo\\.com|[\\w.+-]+@bar\\.org)$') AS valid_email_address,
+       REGEXP_CONTAINS(email, r'^[\\w.+-]+@foo\\.com|[\\w.+-]+@bar\\.org$')   AS without_parentheses
+  FROM (
+         SELECT ['a@foo.com', 'a@foo.computer', 'b@bar.org', '!b@bar.org', 'c@buz.net'] AS addresses
+       ),
+       UNNEST(addresses) AS email;
+"""
+
+[[cases]]
+description = "TO_BASE64"
+input = """
+SELECT REPLACE(REPLACE(TO_BASE64(b'\\377\\340'), '+', '-'), '/', '_') as websafe_base64;
+"""
+formatted = """
+SELECT REPLACE(REPLACE(TO_BASE64(b'\\377\\340'), '+', '-'), '/', '_') AS websafe_base64
+"""
+
+[[cases]]
+description = "ARRAY_CONCAT"
+input = """
+SELECT ARRAY_CONCAT([1, 2], [3, 4], [5, 6]) as count_to_six;
+"""
+formatted = """
+SELECT ARRAY_CONCAT(
+         [1, 2],
+         [3, 4],
+         [5, 6]
+       ) AS count_to_six
+"""
+
+[[cases]]
+description = "DATE_TRUNC"
+input = """
+select date as original, date_trunc(date, week(monday)) as truncated
+from (select date('2017-11-05') as date);
+
+select
+  date_trunc('2015-06-15', isoyear) as isoyear_boundary,
+  extract(isoyear from date '2015-06-15') as isoyear_number;
+"""
+formatted = """
+SELECT date                           AS original,
+       DATE_TRUNC(date, WEEK(MONDAY)) AS truncated
+  FROM (
+         SELECT DATE('2017-11-05') AS date
+       );
+
+SELECT DATE_TRUNC('2015-06-15', ISOYEAR)       AS isoyear_boundary,
+       EXTRACT(ISOYEAR FROM DATE '2015-06-15') AS isoyear_number;
+"""
+
+[[cases]]
+description = "EXTRACT"
+input = """
+select
+  date,
+  extract(isoyear from date) as isoyear,
+  extract(isoweek from date) as isoweek,
+  extract(year from date) as year,
+  extract(week from date) as week
+from unnest(generate_date_array('2015-12-23', '2016-01-09')) as date
+order by date;
+"""
+formatted = """
+SELECT date,
+       EXTRACT(ISOYEAR FROM date) AS isoyear,
+       EXTRACT(ISOWEEK FROM date) AS isoweek,
+       EXTRACT(YEAR FROM date)    AS year,
+       EXTRACT(WEEK FROM date)    AS week
+  FROM UNNEST(GENERATE_DATE_ARRAY('2015-12-23', '2016-01-09')) AS date
+ ORDER BY date
+"""
+
+[[cases]]
+description = "LAST_DAY"
+input = """
+select last_day(date '2008-11-25', month) as last_day;
+select last_day(date '2008-11-25') as last_day;
+select last_day(date '2008-11-25', year) as last_day;
+select last_day(date '2008-11-10', week(sunday)) as last_day;
+select last_day(date '2008-11-10', week(monday)) as last_day;
+"""
+formatted = """
+SELECT LAST_DAY(DATE '2008-11-25', MONTH) AS last_day;
+
+SELECT LAST_DAY(DATE '2008-11-25') AS last_day;
+
+SELECT LAST_DAY(DATE '2008-11-25', YEAR) AS last_day;
+
+SELECT LAST_DAY(DATE '2008-11-10', WEEK(SUNDAY)) AS last_day;
+
+SELECT LAST_DAY(DATE '2008-11-10', WEEK(MONDAY)) AS last_day;
+"""
+
+[[cases]]
+description = "EXTRACT"
+input = """
+WITH Input AS (SELECT TIMESTAMP("2008-12-25 05:30:00+00") AS timestamp_value)
+SELECT
+  EXTRACT(DAY FROM timestamp_value AT TIME ZONE "UTC") AS the_day_utc,
+  EXTRACT(DAY FROM timestamp_value AT TIME ZONE "America/Los_Angeles") AS the_day_california
+FROM Input
+"""
+formatted = """
+WITH
+  Input AS (
+    SELECT TIMESTAMP('2008-12-25 05:30:00+00') AS timestamp_value
+  )
+SELECT EXTRACT(DAY FROM timestamp_value AT TIME ZONE 'UTC')                 AS the_day_utc,
+       EXTRACT(DAY FROM timestamp_value AT TIME ZONE 'America/Los_Angeles') AS the_day_california
+  FROM Input
+"""
+
+[[cases]]
+description = "ERROR"
+input = """
+SELECT
+  CASE
+    WHEN value = 'foo' THEN 'Value is foo.'
+    WHEN value = 'bar' THEN 'Value is bar.'
+    ELSE ERROR(CONCAT('Found unexpected value: ', value))
+  END AS new_value
+FROM (
+  SELECT 'foo' AS value UNION ALL
+  SELECT 'bar' AS value UNION ALL
+  SELECT 'baz' AS value);
+"""
+formatted = """
+SELECT CASE
+         WHEN value = 'foo' THEN 'Value is foo.'
+         WHEN value = 'bar' THEN 'Value is bar.'
+                            ELSE ERROR(CONCAT('Found unexpected value: ', value))
+       END AS new_value
+  FROM (
+         SELECT 'foo' AS value
+          UNION ALL
+         SELECT 'bar' AS value
+          UNION ALL
+         SELECT 'baz' AS value
+       )
+"""
+
+[[cases]]
+description = "EXTERNAL_OBJECT_TRANSFORM"
+input = """
+select uri, signed_url
+from external_object_transform(table mydataset.myobjecttable, ['signed_url']);
+"""
+formatted = """
+SELECT uri, signed_url
+  FROM EXTERNAL_OBJECT_TRANSFORM(
+         TABLE mydataset.myobjecttable,
+         ['signed_url']
+       )
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""

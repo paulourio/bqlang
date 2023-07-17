@@ -1,0 +1,71 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+SELECT x, SUM(y) FROM T GROUP BY ROLLUP(x);
+"""
+formatted = """
+SELECT x,
+       SUM(y)
+  FROM T
+ GROUP BY ROLLUP(x)
+"""
+
+[[cases]]
+input = """
+SELECT x, y, GROUPING(x) = 1, IF(GROUPING(y) = 0, "foo", "bar")
+FROM T GROUP BY ROLLUP(x, y);
+"""
+formatted = """
+SELECT x,
+       y,
+       GROUPING(x) = 1,
+       IF(GROUPING(y) = 0, "foo", "bar")
+  FROM T
+ GROUP BY ROLLUP(x, y)
+"""
+
+[[cases]]
+input = """
+select x, SUM(y) FROM T GROUP @{hint_name=5} BY ROLLUP(x);
+"""
+formatted = """
+SELECT x,
+       SUM(y)
+  FROM T
+ GROUP @{hint_name=5} BY ROLLUP(x)
+"""
+
+[[cases]]
+input = """
+select x, y, z, GROUPING (
+x)
+FROM T
+GROUP BY 1, 2, ROLLUP (
+x + 2, y = 'foo', z), z, x, ROLLUP(y, x
+);
+"""
+formatted = """
+SELECT x,
+       y,
+       z,
+       GROUPING(x)
+  FROM T
+ GROUP BY 1, 2, ROLLUP(x + 2, y = 'foo', z), z, x, ROLLUP(y, x)
+"""

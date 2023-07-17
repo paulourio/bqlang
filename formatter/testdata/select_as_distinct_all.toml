@@ -1,0 +1,259 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select
+  # ALL here means opposite of DISTINCT
+  ALL
+    # Regular column
+    x,
+    # 'all' as suffix for column name
+    y.all,
+    # 'all' in the middle of path expression
+    z.all.good,
+    # quoted identifier `all`
+    `all`,
+    # Only prefix needs to be quoted
+    `all`.all,
+    # all (no pun) magic suffixes together
+    x.123.all.y.2daysago.all
+from x.all;
+"""
+formatted = """
+SELECT # ALL here means opposite of DISTINCT
+       # Regular column
+       x,
+       # 'all' as suffix for column name
+       y.all,
+       # 'all' in the middle of path expression
+       z.all.good,
+       # quoted identifier `all`
+       `all`,
+       # Only prefix needs to be quoted
+       `all`.all,
+       # all (no pun) magic suffixes together
+       x.123.all.y.2daysago.all
+  FROM x.all
+"""
+
+[[cases]]
+input = """
+select as struct 1, 2;
+"""
+formatted = """
+SELECT AS STRUCT
+       1, 2
+"""
+
+[[cases]]
+input = """
+select as struct 'abc' from T;
+"""
+formatted = """
+SELECT AS STRUCT
+       'abc'
+  FROM T
+"""
+
+[[cases]]
+input = """
+select as MyProto 1,2,3;
+"""
+formatted = """
+SELECT AS MyProto
+       1, 2, 3
+"""
+
+[[cases]]
+input = """
+select as catalog.catalog.MyProto a,b from T
+"""
+formatted = """
+SELECT AS catalog.catalog.MyProto
+       a, b
+  FROM T
+"""
+
+[[cases]]
+input = """
+select 1, (select as struct 123), array(select as struct 4, 5)
+from (select as struct * from T1),
+     (select as struct z from y),
+     (select as a.b.c q from y)
+"""
+formatted = """
+SELECT 1,
+       (
+         SELECT AS STRUCT
+                123
+       ),
+       ARRAY(
+         SELECT AS STRUCT
+                4, 5
+       )
+  FROM (
+         SELECT AS STRUCT
+                *
+           FROM T1
+       ),
+       (
+         SELECT AS STRUCT
+                z
+           FROM y
+       ),
+       (
+         SELECT AS a.b.c
+                q
+           FROM y
+       )
+"""
+
+[[cases]]
+input = """
+select as struct 5 as five
+"""
+formatted = """
+SELECT AS STRUCT
+       5 AS five
+"""
+
+[[cases]]
+input = """
+select as myproto 5 as myproto
+"""
+formatted = """
+SELECT AS myproto
+       5 AS myproto
+"""
+
+[[cases]]
+input = """
+select distinct as struct a1, a2 from Table1
+"""
+formatted = """
+SELECT DISTINCT AS STRUCT
+       a1, a2
+  FROM Table1
+"""
+
+[[cases]]
+input = """
+select distinct (select distinct * from Table1)
+"""
+formatted = """
+SELECT DISTINCT
+       (
+         SELECT DISTINCT *
+           FROM Table1
+       )
+"""
+
+[[cases]]
+input = """
+select all * from (select all a,b from t)
+"""
+formatted = """
+SELECT *
+  FROM (
+         SELECT a, b
+           FROM t
+       )
+"""
+
+[[cases]]
+input = """
+select all as struct 1,2
+"""
+formatted = """
+SELECT AS STRUCT
+       1, 2
+"""
+
+[[cases]]
+input = """
+select as value 5
+"""
+formatted = """
+SELECT AS VALUE
+       5
+"""
+
+[[cases]]
+input = """
+select as `value` 5
+"""
+formatted = """
+SELECT AS `value`
+       5
+"""
+
+[[cases]]
+input = """
+select as `value` x,y,z
+"""
+formatted = """
+SELECT AS `value`
+       x, y, z
+"""
+
+[[cases]]
+input = """
+select as value value as values
+"""
+formatted = """
+SELECT AS VALUE
+       value AS values
+"""
+
+[[cases]]
+input = """
+select (select as value 1), (select as struct value)
+"""
+formatted = """
+SELECT (
+         SELECT AS VALUE
+                1
+       ),
+       (
+         SELECT AS STRUCT
+                value
+       )
+"""
+
+[[cases]]
+input = """
+select distinct as value v1
+"""
+formatted = """
+SELECT DISTINCT AS VALUE
+       v1
+"""
+
+[[cases]]
+input = """
+select 1, (select distinct * from Table1)
+"""
+formatted = """
+SELECT 1,
+       (
+         SELECT DISTINCT *
+           FROM Table1
+       )
+"""

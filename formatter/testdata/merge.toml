@@ -1,0 +1,547 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = """
+Only has WHEN MATCHED clause
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN MATCHED AND T.T1 = 5 THEN
+UPDATE SET T1 = T1 + 10, T2 = T.T1 + S.C1
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN MATCHED AND T.T1 = 5 THEN
+      UPDATE SET
+        T1 = T1 + 10,
+        T2 = T.T1 + S.C1
+"""
+
+[[cases]]
+description = """
+We can use generalized paths with SET
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN MATCHED AND T.T1 = 5 THEN
+UPDATE SET T1.(foo.bar) = T1.(foo.bar) + 10, T2 = T.T1 + S.C1
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN MATCHED AND T.T1 = 5 THEN
+      UPDATE SET
+        T1.(foo.bar) = T1.(foo.bar) + 10,
+        T2           = T.T1 + S.C1
+"""
+
+[[cases]]
+description = """
+We can use generalized paths with SET
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN MATCHED AND T.T1 = 5 THEN
+UPDATE SET T1.(foo.bar) = T1.(foo.bar) + 10, T2 = T.T1 + S.C1
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN MATCHED AND T.T1 = 5 THEN
+      UPDATE SET
+        T1.(foo.bar) = T1.(foo.bar) + 10,
+        T2           = T.T1 + S.C1
+"""
+
+[[cases]]
+description = """
+Only has (implicit) NOT MATCHED BY TARGET clause
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN NOT MATCHED THEN
+INSERT(t1, t2, t3) VALUES(10, S.C3, S.C1 + S.C2)
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN NOT MATCHED THEN
+      INSERT
+        (t1, t2, t3)
+      VALUES
+        (10, S.C3, S.C1 + S.C2)
+"""
+
+[[cases]]
+description = """
+Only has NOT MATCHED BY SOURCE clause
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN NOT MATCHED BY SOURCE THEN
+DELETE
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN NOT MATCHED BY SOURCE THEN
+      DELETE
+"""
+
+[[cases]]
+description = """
+Has MATCHED & NOT MATCHED BY TARGET clauses.
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN MATCHED AND T.T1 = 5 THEN
+UPDATE SET T1 = T1 + 10, T2 = T.T1 + S.C1
+WHEN NOT MATCHED THEN
+INSERT(t1, t2, t3) VALUES(10, S.C3, S.C1 + S.C2)
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN MATCHED AND T.T1 = 5 THEN
+      UPDATE SET
+        T1 = T1 + 10,
+        T2 = T.T1 + S.C1
+ WHEN NOT MATCHED THEN
+      INSERT
+        (t1, t2, t3)
+      VALUES
+        (10, S.C3, S.C1 + S.C2)
+"""
+
+[[cases]]
+description = """
+Has MATCHED & NOT MATCHED BY SOURCE clauses.
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN MATCHED AND T.T1 = 5 THEN
+UPDATE SET T1 = T1 + 10, Tab2 = T.T1 + S.C1
+WHEN NOT MATCHED BY SOURCE THEN
+DELETE
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN MATCHED AND T.T1 = 5 THEN
+      UPDATE SET
+        T1   = T1 + 10,
+        Tab2 = T.T1 + S.C1
+ WHEN NOT MATCHED BY SOURCE THEN
+      DELETE
+"""
+
+[[cases]]
+description = """
+Has NOT MATCHED BY SOURCE & TARGET clauses.
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN NOT MATCHED THEN
+INSERT(t1, t2, t3) VALUES(10, S.C3, S.C1 + S.C2)
+WHEN NOT MATCHED BY SOURCE THEN
+DELETE
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN NOT MATCHED THEN
+      INSERT
+        (t1, t2, t3)
+      VALUES
+        (10, S.C3, S.C1 + S.C2)
+ WHEN NOT MATCHED BY SOURCE THEN
+      DELETE
+"""
+
+[[cases]]
+description = """
+Has NOT MATCHED BY SOURCE & TARGET clauses with several columns.
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN NOT MATCHED THEN
+INSERT(a, aa, aaa, aaaa, aaaaa, b, bb, bbb, bbbb, bbbbb,
+       c, cc, ccc, cccc, ccccc, c, cc, ccc, cccc, ccccc)
+VALUES(a, aa, aaa, aaaa, aaaaa, b, bb, bbb, bbbb, bbbbb,
+       c, cc, ccc, cccc, ccccc, c, cc, ccc, cccc, ccccc)
+WHEN NOT MATCHED BY SOURCE THEN
+DELETE
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN NOT MATCHED THEN
+      INSERT
+        (
+          a,
+          aa,
+          aaa,
+          aaaa,
+          aaaaa,
+          b,
+          bb,
+          bbb,
+          bbbb,
+          bbbbb,
+          c,
+          cc,
+          ccc,
+          cccc,
+          ccccc,
+          c,
+          cc,
+          ccc,
+          cccc,
+          ccccc
+        )
+      VALUES
+        (
+          a,
+          aa,
+          aaa,
+          aaaa,
+          aaaaa,
+          b,
+          bb,
+          bbb,
+          bbbb,
+          bbbbb,
+          c,
+          cc,
+          ccc,
+          cccc,
+          ccccc,
+          c,
+          cc,
+          ccc,
+          cccc,
+          ccccc
+        )
+ WHEN NOT MATCHED BY SOURCE THEN
+      DELETE
+"""
+
+[[cases]]
+description = """
+Has all three clauses.
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN MATCHED AND T.T1 = 5 THEN
+UPDATE SET T1 = T1 + 10, T2 = T.T1 + S.C1
+WHEN NOT MATCHED THEN
+INSERT(t1, t2, t3) VALUES(10, S.C3, S.C1 + S.C2)
+WHEN NOT MATCHED BY SOURCE THEN
+DELETE
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN MATCHED AND T.T1 = 5 THEN
+      UPDATE SET
+        T1 = T1 + 10,
+        T2 = T.T1 + S.C1
+ WHEN NOT MATCHED THEN
+      INSERT
+        (t1, t2, t3)
+      VALUES
+        (10, S.C3, S.C1 + S.C2)
+ WHEN NOT MATCHED BY SOURCE THEN
+      DELETE
+"""
+
+[[cases]]
+input = """
+MERGE INTO T
+USING S
+ON T.t1 = S.s1
+WHEN NOT MATCHED BY TARGET AND s1 > 10 THEN
+INSERT(t1) VALUES(10)
+"""
+formatted = """
+MERGE T
+USING S
+   ON T.t1 = S.s1
+ WHEN NOT MATCHED BY TARGET AND s1 > 10 THEN
+      INSERT
+        (t1)
+      VALUES
+        (10)
+"""
+
+[[cases]]
+input = """
+MERGE T
+USING S
+ON T.t1 = S.s1
+WHEN NOT MATCHED THEN
+INSERT(t1) VALUES(10)
+"""
+formatted = """
+MERGE T
+USING S
+   ON T.t1 = S.s1
+ WHEN NOT MATCHED THEN
+      INSERT
+        (t1)
+      VALUES
+        (10)
+"""
+
+[[cases]]
+description = """
+# Using subquery as source table.
+"""
+input = """
+MERGE INTO T
+USING (SELECT * FROM Y JOIN Z ON Y.C1 = Z.C1) AS S
+ON t1 = s1
+WHEN NOT MATCHED AND S.C2 = 20 THEN
+INSERT(t1, t2, t3) VALUES(10, S.C3, S.C1 + S.C2)
+"""
+formatted = """
+MERGE T
+USING (
+        SELECT *
+          FROM Y
+               JOIN
+               Z
+               ON Y.C1 = Z.C1
+      ) AS S
+   ON t1 = s1
+ WHEN NOT MATCHED AND S.C2 = 20 THEN
+      INSERT
+        (t1, t2, t3)
+      VALUES
+        (10, S.C3, S.C1 + S.C2)
+"""
+
+[[cases]]
+description = """
+Has multiple WHEN NOT MATCHED BY TARGET clauses.
+"""
+input = """
+MERGE T AS X
+USING S
+ON X.t1 = S.s1
+WHEN NOT MATCHED AND S.C1 > 100 AND s.c2 > ifnull(a, b) AND s.c2 is distinct from 2 THEN
+INSERT(t1) VALUES(S.C2)
+WHEN NOT MATCHED AND S.C1 > 50 THEN
+INSERT(t1) VALUES(S.C2 * 10)
+WHEN NOT MATCHED THEN
+INSERT(t1) VALUES(S.C2 * 100)
+"""
+formatted = """
+MERGE T AS X
+USING S
+   ON X.t1 = S.s1
+ WHEN NOT MATCHED AND
+            S.C1 >                 100
+        AND s.c2 >                 IFNULL(a, b)
+        AND s.c2 IS DISTINCT FROM  2
+      THEN
+      INSERT
+        (t1)
+      VALUES
+        (S.C2)
+ WHEN NOT MATCHED AND S.C1 > 50 THEN
+      INSERT
+        (t1)
+      VALUES
+        (S.C2 * 10)
+ WHEN NOT MATCHED THEN
+      INSERT
+        (t1)
+      VALUES
+        (S.C2 * 100)
+"""
+
+[[cases]]
+description = """
+More than 1 same type clauses together with other clause type.
+"""
+input = """
+MERGE INTO T
+USING (SELECT * FROM Y JOIN Z ON Y.C1 = Z.C1) AS S
+ON t1 = s1
+WHEN MATCHED AND T.T1 = 5 AND S.Cat3 < 0 THEN
+UPDATE SET T1 = T1 + 10, T2 = T.T1 + S.C1
+WHEN MATCHED THEN
+DELETE
+WHEN NOT MATCHED AND S.C2 = 20 THEN
+INSERT(t1, t2, t3) VALUES(10, S.C3, S.C1 + S.C2)
+"""
+formatted = """
+MERGE T
+USING (
+        SELECT *
+          FROM Y
+               JOIN
+               Z
+               ON Y.C1 = Z.C1
+      ) AS S
+   ON t1 = s1
+ WHEN MATCHED AND
+            T.T1   = 5
+        AND S.Cat3 < 0
+      THEN
+      UPDATE SET
+        T1 = T1 + 10,
+        T2 = T.T1 + S.C1
+ WHEN MATCHED THEN
+      DELETE
+ WHEN NOT MATCHED AND S.C2 = 20 THEN
+      INSERT
+        (t1, t2, t3)
+      VALUES
+        (10, S.C3, S.C1 + S.C2)
+"""
+
+[[cases]]
+description = """
+This is allowed in parser, but will be disabled by resolver.
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN NOT MATCHED THEN
+  DELETE
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN NOT MATCHED THEN
+      DELETE
+"""
+
+[[cases]]
+description = """
+This is allowed in parser, but will be disabled by resolver.
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN MATCHED THEN
+  DELETE
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN MATCHED THEN
+      DELETE
+"""
+
+[[cases]]
+description = """
+Omit both insert column and value lists
+"""
+input = """
+MERGE INTO T
+USING S
+ON t1 = s1
+WHEN NOT MATCHED BY SOURCE THEN
+  INSERT ROW
+"""
+formatted = """
+MERGE T
+USING S
+   ON t1 = s1
+ WHEN NOT MATCHED BY SOURCE THEN
+      INSERT ROW
+"""
+
+[[cases]]
+input = """
+MERGE INTO `table_id` AS t
+USING `source` AS d
+ON t.key1 = d.key1 and t.other_key2 = d.other_key2
+when matched and t.hash_diff != d.hash_diff then
+    update set hash_diff = d.hash_diff, value=d.value,
+               updated_at = current_timestamp()
+when not matched by target then insert (key1, other_key2, value, hash_diff, updated_at)
+values (d.key1, d.key2, d.value, d.hash_diff, current_timestamp())
+"""
+formatted = """
+MERGE `table_id` AS t
+USING `source` AS d
+   ON     t.key1       = d.key1
+      AND t.other_key2 = d.other_key2
+ WHEN MATCHED AND t.hash_diff != d.hash_diff THEN
+      UPDATE SET
+        hash_diff  = d.hash_diff,
+        value      = d.value,
+        updated_at = CURRENT_TIMESTAMP()
+ WHEN NOT MATCHED BY TARGET THEN
+      INSERT
+        (
+          key1,
+          other_key2,
+          value,
+          hash_diff,
+          updated_at
+        )
+      VALUES
+        (
+          d.key1,
+          d.key2,
+          d.value,
+          d.hash_diff,
+          CURRENT_TIMESTAMP()
+        )
+"""

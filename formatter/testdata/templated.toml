@@ -1,0 +1,77 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = "Template comments"
+input = """
+select * {# comment #}
+  from t
+"""
+formatted = """
+SELECT *  {# comment #}
+  FROM t
+"""
+
+# [[cases]]
+# input = """
+# {% set = value -%}
+
+# {{  statement  }}
+
+# with t as (
+# {% for a in list %}
+#   {% for b in list %}
+#     SELECT 1
+#     {% if not loop.last %}  {% endif %}
+#   {% endfor -%}
+#   {%- if not loop.last %} value {% else %} {% endif %}
+# {% endfor %}
+# )
+# select case when coalesce(a.key, /* param => */ 'abc')   = b then '2' else '3' end
+# from {{ abc }}
+# """
+# dump = """
+# Script [6-155]
+
+# """
+
+# [[cases]]
+# input = """{% set = value.2 -%}
+# {% set = value.2 -%}
+# declare g_bookmark timestamp default current_timestmap();
+
+# select concat(p.key, '00') as key,
+#        min(date_trunc(day, month)  )as month,
+#       array_agg(
+#          x having min {{ my_constant }} clamped between 1 and 2
+#          limit 1 offset @my_param       ) as a
+#   FROM {{ table_id(foo.bar)|id }}
+#        pivot( max({{ col }}) for x in ('a', 'b', 'c'))
+#        where true
+# qualify row_number() over ( /* partition by 1 */ order by rand()  ) = 1
+# ;
+
+
+# merge into t using d on t.key=b.key
+# when matched and t.hash_diff != d.hashdiff then update set value = d.value,
+# hash_diff = d.hash_diff, updated_at = d.updated_at;
+
+# """
+# formatted = """
+
+# """

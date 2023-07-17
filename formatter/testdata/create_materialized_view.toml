@@ -1,0 +1,135 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = """
+PARTITION BY with multiple columns and expressions
+"""
+input = """
+create materialized view mv
+partition by c1, c2 + cast(c3 as int64)
+as select c1, c2, c3, c4 from t2
+"""
+formatted = """
+CREATE MATERIALIZED VIEW mv
+PARTITION BY c1, c2 + CAST(c3 AS INT64)
+AS
+SELECT c1, c2, c3, c4
+  FROM t2
+"""
+
+[[cases]]
+description = """
+PARTITION BY with multiple columns and expressions and select(*)
+"""
+input = """
+create materialized view mv
+partition by c1, c2 + cast(c3 as int64)
+as select * from t2
+"""
+formatted = """
+CREATE MATERIALIZED VIEW mv
+PARTITION BY c1, c2 + CAST(c3 AS INT64)
+AS
+SELECT *
+  FROM t2
+"""
+
+[[cases]]
+description = """
+PARTITION BY with OPTIONS
+"""
+input = """
+create materialized view mv
+partition by c1, c2 + cast(c3 as int64)
+options (foo=true)
+as select * from t2
+"""
+formatted = """
+CREATE MATERIALIZED VIEW mv
+PARTITION BY c1, c2 + CAST(c3 AS INT64)
+OPTIONS (foo=TRUE)
+AS
+SELECT *
+  FROM t2
+"""
+
+[[cases]]
+description = """
+PARTITION BY and CLUSTER BY with multiple columns and expressions
+"""
+input = """
+create materialized view mv
+partition by c1, c2 + cast(c3 as int64)
+cluster by mod(c1, 2)
+as select * from t2
+"""
+formatted = """
+CREATE MATERIALIZED VIEW mv
+PARTITION BY c1, c2 + CAST(c3 AS INT64)
+  CLUSTER BY MOD(c1, 2)
+AS
+SELECT *
+  FROM t2
+"""
+
+[[cases]]
+description = """
+CLUSTER BY without PARTITION BY
+"""
+input = """
+create materialized view mv
+cluster by c1
+as select * from t2
+"""
+formatted = """
+CREATE MATERIALIZED VIEW mv
+CLUSTER BY c1
+AS
+SELECT *
+  FROM t2
+"""
+
+[[cases]]
+input = """
+create materialized view mv
+partition by c1
+cluster by c2
+as select timestamp as c1, string as c2, int32 as c3 from SimpleTypes
+"""
+formatted = """
+CREATE MATERIALIZED VIEW mv
+PARTITION BY c1
+  CLUSTER BY c2
+AS
+SELECT timestamp AS c1,
+       string    AS c2,
+       int32     AS c3
+  FROM SimpleTypes
+"""
+
+# [[cases]]
+# input = """
+# CREATE MATERIALIZED VIEW rm1 OPTIONS (replica_interval_minutes = 300) AS REPLICA OF src_ds.src
+# """
+# formatted = """
+# CREATE MATERIALIZED VIEW rm1
+# OPTIONS (replica_interval_minutes=300)
+# AS REPLICA OF src_ds.src
+# """

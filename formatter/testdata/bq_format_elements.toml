@@ -1,0 +1,320 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+align_trailing_comments = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Format elements for date and time parts"
+input = """
+SELECT FORMAT_DATE("%b-%d-%Y", DATE "2008-12-25") AS formatted;
+
+/*-------------*
+ | formatted   |
+ +-------------+
+ | Dec-25-2008 |
+ *-------------*/
+
+SELECT
+  FORMAT_DATETIME("%c", DATETIME "2008-12-25 15:30:00")
+  AS formatted;
+
+/*--------------------------*
+ | formatted                |
+ +--------------------------+
+ | Thu Dec 25 15:30:00 2008 |
+ *--------------------------*/
+
+SELECT FORMAT_TIME("%R", TIME "15:30:00") as formatted_time;
+
+/*----------------*
+ | formatted_time |
+ +----------------+
+ | 15:30          |
+ *----------------*/
+
+SELECT FORMAT_TIMESTAMP("%b %Y %Ez", TIMESTAMP "2008-12-25 15:30:00+00")
+  AS formatted;
+
+/*-----------------*
+ | formatted       |
+ +-----------------+
+ | Dec 2008 +00:00 |
+ *-----------------*/
+
+SELECT PARSE_DATE("%Y%m%d", "20081225") AS parsed;
+
+/*------------*
+ | parsed     |
+ +------------+
+ | 2008-12-25 |
+ *------------*/
+
+SELECT PARSE_DATETIME('%Y-%m-%d %H:%M:%S', '1998-10-18 13:45:55') AS datetime;
+
+/*---------------------*
+ | datetime            |
+ +---------------------+
+ | 1998-10-18T13:45:55 |
+ *---------------------*/
+
+SELECT PARSE_TIME('%I:%M:%S %p', '2:23:38 pm') AS parsed_time;
+
+/*-------------*
+ | parsed_time |
+ +-------------+
+ | 14:23:38    |
+ *-------------*/
+
+SELECT PARSE_TIMESTAMP("%c", "Thu Dec 25 07:30:00 2008") AS parsed;
+
+-- Display of results may differ, depending upon the environment and
+-- time zone where this query was executed.
+/*-------------------------*
+ | parsed                  |
+ +-------------------------+
+ | 2008-12-25 07:30:00 UTC |
+ *-------------------------*/
+
+"""
+formatted = """
+SELECT FORMAT_DATE('%b-%d-%Y', DATE '2008-12-25') AS formatted;
+
+/*-------------*
+ | formatted   |
+ +-------------+
+ | Dec-25-2008 |
+ *-------------*/
+SELECT FORMAT_DATETIME('%c', DATETIME '2008-12-25 15:30:00') AS formatted;
+
+/*--------------------------*
+ | formatted                |
+ +--------------------------+
+ | Thu Dec 25 15:30:00 2008 |
+ *--------------------------*/
+SELECT FORMAT_TIME('%R', TIME '15:30:00') AS formatted_time;
+
+/*----------------*
+ | formatted_time |
+ +----------------+
+ | 15:30          |
+ *----------------*/
+SELECT FORMAT_TIMESTAMP('%b %Y %Ez', TIMESTAMP '2008-12-25 15:30:00+00') AS formatted;
+
+/*-----------------*
+ | formatted       |
+ +-----------------+
+ | Dec 2008 +00:00 |
+ *-----------------*/
+SELECT PARSE_DATE('%Y%m%d', '20081225') AS parsed;
+
+/*------------*
+ | parsed     |
+ +------------+
+ | 2008-12-25 |
+ *------------*/
+SELECT PARSE_DATETIME('%Y-%m-%d %H:%M:%S', '1998-10-18 13:45:55') AS datetime;
+
+/*---------------------*
+ | datetime            |
+ +---------------------+
+ | 1998-10-18T13:45:55 |
+ *---------------------*/
+SELECT PARSE_TIME('%I:%M:%S %p', '2:23:38 pm') AS parsed_time;
+
+/*-------------*
+ | parsed_time |
+ +-------------+
+ | 14:23:38    |
+ *-------------*/
+SELECT PARSE_TIMESTAMP('%c', 'Thu Dec 25 07:30:00 2008') AS parsed;
+-- Display of results may differ, depending upon the environment and
+-- time zone where this query was executed.
+/*-------------------------*
+ | parsed                  |
+ +-------------------------+
+ | 2008-12-25 07:30:00 UTC |
+ *-------------------------*/
+"""
+
+[[cases]]
+description = "Format bytes as string"
+input = """
+SELECT CAST(b'\\x48\\x65\\x6c\\x6c\\x6f' AS STRING FORMAT 'ASCII') AS bytes_to_string;
+"""
+formatted = """
+SELECT CAST(b'\\x48\\x65\\x6c\\x6c\\x6f' AS STRING FORMAT 'ASCII') AS bytes_to_string
+"""
+
+[[cases]]
+description = "Format string as bytes"
+input = """
+SELECT CAST('Hello' AS BYTES FORMAT 'ASCII') AS string_to_bytes
+"""
+formatted = """
+SELECT CAST('Hello' AS BYTES FORMAT 'ASCII') AS string_to_bytes
+"""
+
+[[cases]]
+description = "Format year part as string"
+input = """
+SELECT CAST(DATE '2018-01-30' AS STRING FORMAT 'YYYY') AS date_time_to_string;
+"""
+formatted = """
+SELECT CAST(DATE '2018-01-30' AS STRING FORMAT 'YYYY') AS date_time_to_string
+"""
+
+[[cases]]
+description = "Format month part as string"
+input = """
+SELECT CAST(DATE '2018-01-30' AS STRING FORMAT 'MONTH') AS date_time_to_string;
+"""
+formatted = """
+SELECT CAST(DATE '2018-01-30' AS STRING FORMAT 'MONTH') AS date_time_to_string
+"""
+
+[[cases]]
+description = "Format day part as string"
+input = """
+select cast(date '2018-02-15' as string format 'DD') as date_time_to_string;
+"""
+formatted = """
+SELECT CAST(DATE '2018-02-15' AS STRING FORMAT 'DD') AS date_time_to_string
+"""
+
+[[cases]]
+description = "Format hour part as string"
+input = """
+SELECT CAST(DATE '2018-02-15' AS STRING FORMAT 'DD') AS date_time_to_string;
+SELECT CAST(TIME '21:30:00' AS STRING FORMAT 'HH12') AS date_time_to_string;
+"""
+formatted = """
+SELECT CAST(DATE '2018-02-15' AS STRING FORMAT 'DD') AS date_time_to_string;
+
+SELECT CAST(TIME '21:30:00' AS STRING FORMAT 'HH12') AS date_time_to_string;
+"""
+
+[[cases]]
+description = "Format time zone part as string"
+input = """
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZH') AS date_time_to_string;
+
+-- Results depend upon where this query was executed.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | -08                 |
+ *---------------------*/
+
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZH' AT TIME ZONE 'Asia/Kolkata')
+AS date_time_to_string;
+
+-- Because the time zone is specified, the result is always the same.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | +05                 |
+ *---------------------*/
+
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZM') AS date_time_to_string;
+
+-- Results depend upon where this query was executed.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | 00                  |
+ *---------------------*/
+
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZM' AT TIME ZONE 'Asia/Kolkata')
+AS date_time_to_string;
+
+-- Because the time zone is specified, the result is always the same.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | 30                  |
+ *---------------------*/
+"""
+formatted = """
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZH') AS date_time_to_string;
+
+-- Results depend upon where this query was executed.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | -08                 |
+ *---------------------*/
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZH' AT TIME ZONE 'Asia/Kolkata') AS date_time_to_string;
+
+-- Because the time zone is specified, the result is always the same.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | +05                 |
+ *---------------------*/
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZM') AS date_time_to_string;
+
+-- Results depend upon where this query was executed.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | 00                  |
+ *---------------------*/
+SELECT CAST(TIMESTAMP '2008-12-25 00:00:00+00:00' AS STRING FORMAT 'TZM' AT TIME ZONE 'Asia/Kolkata') AS date_time_to_string;
+-- Because the time zone is specified, the result is always the same.
+/*---------------------*
+ | date_time_to_string |
+ +---------------------+
+ | 30                  |
+ *---------------------*/
+"""
+
+[[cases]]
+description = "Format numeric type as string"
+input = """
+SELECT input, CAST(input AS STRING FORMAT '$999,999.999') AS output
+FROM UNNEST([1.2, 12.3, 123.456, 1234.56, -12345.678, 1234567.89]) AS input
+
+/*------------+---------------*
+ |   input    |    output     |
+ +------------+---------------+
+ |        1.2 |        $1.200 |
+ |       12.3 |       $12.300 |
+ |    123.456 |      $123.456 |
+ |    1234.56 |    $1,234.560 |
+ | -12345.678 |  -$12,345.678 |
+ | 1234567.89 |  $###,###.### |
+ *------------+---------------*/
+"""
+formatted = """
+SELECT input,
+       CAST(input AS STRING FORMAT '$999,999.999') AS output
+  FROM UNNEST([1.2, 12.3, 123.456, 1234.56, -12345.678, 1234567.89]) AS input
+/*------------+---------------*
+ |   input    |    output     |
+ +------------+---------------+
+ |        1.2 |        $1.200 |
+ |       12.3 |       $12.300 |
+ |    123.456 |      $123.456 |
+ |    1234.56 |    $1,234.560 |
+ | -12345.678 |  -$12,345.678 |
+ | 1234567.89 |  $###,###.### |
+ *------------+---------------*/
+"""

@@ -1,0 +1,288 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+indent_case_when = true
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select case when a < 0 then 5 end;
+"""
+formatted = """
+SELECT CASE
+         WHEN a < 0 THEN 5
+       END
+"""
+
+[[cases]]
+input = """
+select case when a < 0 then 5 else 15 end;
+"""
+formatted = """
+SELECT CASE
+         WHEN a < 0 THEN 5
+                    ELSE 15
+       END
+"""
+
+[[cases]]
+input = """
+select case when a < 0 then 5 when a > 0 then 10 end;
+"""
+formatted = """
+SELECT CASE
+         WHEN a < 0 THEN 5
+         WHEN a > 0 THEN 10
+       END
+"""
+
+[[cases]]
+input = """
+select case when a < 0 then 5 when a > 0 then 10 else 15 end;
+"""
+formatted = """
+SELECT CASE
+         WHEN a < 0 THEN 5
+         WHEN a > 0 THEN 10
+                    ELSE 15
+       END
+"""
+
+[[cases]]
+input = """
+select case a1 when a2 then 5 end;
+"""
+formatted = """
+SELECT CASE a1
+         WHEN a2 THEN 5
+       END
+"""
+
+[[cases]]
+input = """
+select case (SELECT a1) when a2 then 5 end;
+"""
+formatted = """
+SELECT CASE
+         (
+           SELECT a1
+         )
+
+         WHEN a2 THEN
+           5
+
+       END
+"""
+
+[[cases]]
+input = """
+select case a1+57 when sqrt(a2/5) then concat(c,d)
+       when a3*4 then 'ddd'
+       else if(a4 = 6, 'aaa', 'bbb') end;
+"""
+formatted = """
+SELECT CASE a1 + 57
+         WHEN SQRT(a2 / 5) THEN CONCAT(c, d)
+         WHEN       a3 * 4 THEN 'ddd'
+                           ELSE IF(a4 = 6, 'aaa', 'bbb')
+       END
+"""
+
+[[cases]]
+input = """
+select (case a when 1 then proto1 else proto2 end).foo
+"""
+formatted = """
+SELECT (
+         CASE a
+           WHEN 1 THEN proto1
+                  ELSE proto2
+         END
+       ).foo
+"""
+
+[[cases]]
+description = "Case with single binary op"
+input = """
+select case
+when field > 100 then '1'
+when field > 50 then '2'
+when field > 10 then '3'
+else '4' end;
+"""
+formatted = """
+SELECT CASE
+         WHEN field > 100 THEN '1'
+         WHEN field >  50 THEN '2'
+         WHEN field >  10 THEN '3'
+                          ELSE '4'
+       END
+"""
+
+[[cases]]
+description = "Cases with mixed simple LHS expressions"
+input = """
+select case
+when field > 100 then '1'
+when field > 50 then '2'
+when value then '3'
+when MAX(value) then '3'
+else null end;
+"""
+formatted = """
+SELECT CASE
+         WHEN field > 100 THEN '1'
+         WHEN  field > 50 THEN '2'
+         WHEN       value THEN '3'
+         WHEN  MAX(value) THEN '3'
+                          ELSE NULL
+       END
+"""
+
+[[cases]]
+description = "Cases with mixed simple LHS expressions, too complex for single lines"
+input = """
+select case
+when field > 100 then '1'
+when field > 50 then '2'
+when value then '3'
+when (SELECT 1 FROM UNNEST(`array`) WHERE x) > 0 then '3'
+else '4' end;
+"""
+formatted = """
+SELECT CASE
+         WHEN field > 100 THEN
+           '1'
+
+         WHEN field > 50 THEN
+           '2'
+
+         WHEN value THEN
+           '3'
+
+         WHEN
+           (
+             SELECT 1
+               FROM UNNEST(`array`)
+              WHERE x
+           ) > 0
+         THEN
+           '3'
+
+         ELSE
+           '4'
+
+       END
+"""
+
+[[cases]]
+description = "Nested cases"
+input = """
+select
+case
+when (select value from unnest(values) where cod=1) > 100 then '1'
+when (select value from unnest(values) where cod=1) > 100
+then
+  case (select 1)
+  when (select value from unnest(values) where cod=1) > 100
+  then
+    case
+      when abc then '2'
+      when not def then '3'
+      else MAX(x)
+      end
+  when (select 2) IS DISTINCT FROM (select 3)
+  then
+    case value
+    when 1 then '1'
+    when 2 THEN '2'
+    else '3'
+    end
+  when x then ifnull(x, 'value2')
+    else coalesce(field, 'value')
+  end
+when (select value from unnest(values) where cod=1) IS DISTINCT FROM 2 then '1'
+end
+"""
+formatted = """
+SELECT CASE
+         WHEN
+           (
+             SELECT value
+               FROM UNNEST(values)
+              WHERE cod = 1
+           ) > 100
+         THEN
+           '1'
+
+         WHEN
+           (
+             SELECT value
+               FROM UNNEST(values)
+              WHERE cod = 1
+           ) > 100
+         THEN
+           CASE
+             (
+               SELECT 1
+             )
+
+             WHEN
+               (
+                 SELECT value
+                   FROM UNNEST(values)
+                  WHERE cod = 1
+               ) > 100
+             THEN
+               CASE
+                 WHEN     abc THEN '2'
+                 WHEN NOT def THEN '3'
+                              ELSE MAX(x)
+               END
+
+             WHEN
+               (
+                 SELECT 2
+               ) IS DISTINCT FROM (
+                 SELECT 3
+               )
+             THEN
+               CASE value
+                 WHEN 1 THEN '1'
+                 WHEN 2 THEN '2'
+                        ELSE '3'
+               END
+
+             WHEN x THEN
+               IFNULL(x, 'value2')
+
+             ELSE
+               COALESCE(field, 'value')
+
+           END
+
+         WHEN
+           (
+             SELECT value
+               FROM UNNEST(values)
+              WHERE cod = 1
+           ) IS DISTINCT FROM 2
+         THEN
+           '1'
+
+       END
+"""

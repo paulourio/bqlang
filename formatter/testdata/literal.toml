@@ -1,0 +1,549 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = false
+column_list_trailing_comma = "NEVER"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "AS_IS"
+null_style = "AS_IS"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+hex_style = "UPPER_CASE"
+
+[[cases]]
+input = """select Null, True, "x", b"y", 1, 1.0"""
+formatted = """
+SELECT Null,
+       True,
+       "x",
+       b"y",
+       1,
+       1.0
+"""
+
+[[cases]]
+input = """select 1e10, .1e10, 0.1e10, 1.e10, 1e+10, .1e-10, 0.1e+10, 1.e-10;"""
+formatted = """
+SELECT 1e10,
+       .1e10,
+       0.1e10,
+       1.e10,
+       1e+10,
+       .1e-10,
+       0.1e+10,
+       1.e-10
+"""
+
+[[cases]]
+input = """select 'abc', 'a\\b', "def", '\\\\x53', '\\\\u1235', "\\\\U00012346";"""
+formatted = """
+SELECT 'abc',
+       'a\\b',
+       "def",
+       '\\\\x53',
+       '\\\\u1235',
+       "\\\\U00012346"
+"""
+
+[[cases]]
+input = """select \"""line1\""", '''line1''';"""
+formatted = """
+SELECT \"""line1\""",
+       '''line1'''
+"""
+
+[[cases]]
+input = """select '''abc'\\\\''def''', '''abc''\\\\'def''',
+\"""abc"\\\\""def\""", \"""abc""\\\\"def\"""
+;"""
+formatted = """
+SELECT '''abc'\\\\''def''',
+       '''abc''\\\\'def''',
+       \"""abc"\\\\""def\""",
+       \"""abc""\\\\"def\"""
+"""
+
+[[cases]]
+input = """
+select \"""line1 'single_quote' "double_quote" \\x41g \\u22FD \\U000022FD\"""
+;"""
+formatted = """
+SELECT \"""line1 'single_quote' "double_quote" \\x41g \\u22FD \\U000022FD\"""
+"""
+
+[[cases]]
+input = """
+select '''line1 'single_quote' "double_quote" \\x41g \\u22FD \\U000022FD'''
+;"""
+formatted = """
+SELECT '''line1 'single_quote' "double_quote" \\x41g \\u22FD \\U000022FD'''
+"""
+
+[[cases]]
+input = """
+select '''line1 'single_quote' "double_quote" \\x41g \\u22FD \\U000022FD'''
+;"""
+formatted = """
+SELECT '''line1 'single_quote' "double_quote" \\x41g \\u22FD \\U000022FD'''
+"""
+
+[[cases]]
+description = "Basic tests for all the valid escapes"
+input = """
+select
+   '\\x53'        as OneHexByte
+  ,'\\X41'        as AnotherHexByte
+  ,'\\001'        as OneOctalByte
+  ,'\\a...'       as a
+  ,'\\b...'       as b
+  ,'\\f...'       as f
+  ,'\\n...'       as n
+  ,'\\r...'       as r
+  ,'\\t...'       as t
+  ,'\\v...'       as v
+  ,'\\\\...'      as backslash
+  ,'\\?...'       as question
+  ,'\\"...'       as single_double_quote
+  ,'\\'...'       as single_single_quote
+  ,'\\`...'       as single_back_tick
+  ,"\\"..."       as double_double_quote
+  ,"\\'..."       as double_single_quote
+  ,"\\`..."       as double_back_tick
+  ,'\\uabcd'      as short_UTF8_char
+  ,'\\U0010FFFF'  as long_UTF8_char
+"""
+formatted = """
+SELECT '\\x53'       AS OneHexByte,
+       '\\X41'       AS AnotherHexByte,
+       '\\001'       AS OneOctalByte,
+       '\\a...'      AS a,
+       '\\b...'      AS b,
+       '\\f...'      AS f,
+       '\\n...'      AS n,
+       '\\r...'      AS r,
+       '\\t...'      AS t,
+       '\\v...'      AS v,
+       '\\\\...'      AS backslash,
+       '\\?...'      AS question,
+       '\\"...'      AS single_double_quote,
+       '\\'...'      AS single_single_quote,
+       '\\`...'      AS single_back_tick,
+       "\\"..."      AS double_double_quote,
+       "\\'..."      AS double_single_quote,
+       "\\`..."      AS double_back_tick,
+       '\\uabcd'     AS short_UTF8_char,
+       '\\U0010FFFF' AS long_UTF8_char
+"""
+
+
+[[cases]]
+input = """
+select b'abc', B"def", B'"', B"'", B'`', B"`"
+"""
+formatted = """
+SELECT b'abc',
+       B"def",
+       B'"',
+       B"'",
+       B'`',
+       B"`"
+"""
+
+[[cases]]
+input = """
+select b\"""abc\""", B'''def''', B\"""'''a'''\""", b'''"a"''', B'''`''', B\"""`\"""
+"""
+formatted = """
+SELECT b\"""abc\""",
+       B'''def''',
+       B\"""'''a'''\""",
+       b'''"a"''',
+       B'''`''',
+       B\"""`\"""
+"""
+
+[[cases]]
+input = """
+SELECT
+  b'\\x53' AS OneHexByte,
+  b'\\001' AS OneOctalByte,
+  b'\\a...' AS a,
+  b'\\b...' AS b,
+  b'\\f...' AS f,
+  b'\\n...' aS n,
+  b'\\r...' As r,
+  b'\\t...' AS t,
+  b'\\v...' AS v,
+  b'\\\\...' AS backslash,
+  b'\\?...' AS question,
+  b'\\"...' AS single_double_quote,
+  b'\\'...' AS single_single_quote,
+  b'\\`...' AS single_back_tick,
+  b"\\"..." AS double_double_quote,
+  b"\\'..." as double_single_quote,
+  b"\\`..." AS double_back_tick
+"""
+formatted = """
+SELECT b'\\x53'  AS OneHexByte,
+       b'\\001'  AS OneOctalByte,
+       b'\\a...' AS a,
+       b'\\b...' AS b,
+       b'\\f...' AS f,
+       b'\\n...' AS n,
+       b'\\r...' AS r,
+       b'\\t...' AS t,
+       b'\\v...' AS v,
+       b'\\\\...' AS backslash,
+       b'\\?...' AS question,
+       b'\\"...' AS single_double_quote,
+       b'\\'...' AS single_single_quote,
+       b'\\`...' AS single_back_tick,
+       b"\\"..." AS double_double_quote,
+       b"\\'..." AS double_single_quote,
+       b"\\`..." AS double_back_tick
+"""
+
+
+[[cases]]
+description = 'Zero length strings'
+input = """
+select '', "", \"""\""", ''''''
+"""
+formatted = """
+SELECT '',
+       "",
+       \"""\""",
+       ''''''
+"""
+
+[[cases]]
+description = 'Zero length bytes'
+input = """
+select b'', B"", b'''''', B\"""\"""
+"""
+formatted = """
+SELECT b'',
+       B"",
+       b'''''',
+       B\"""\"""
+"""
+
+[[cases]]
+input = """
+select rb\"""1\""",
+       rb\"""\\x53\""", rb\"""\\x123\""", rb'''\\001''', rb'''a\\444A''',
+       rb'''a\\e''', rb'''\\ea''',
+       rb\"""\\U1234\""", RB\"""\\u\""",
+       rb'''\\xc2\\\\''', rb'''|\\xc2|\\\\''',
+       rb'''f\\(abc,(.*),def\\?'''
+"""
+formatted = """
+SELECT rb\"""1\""",
+       rb\"""\\x53\""",
+       rb\"""\\x123\""",
+       rb'''\\001''',
+       rb'''a\\444A''',
+       rb'''a\\e''',
+       rb'''\\ea''',
+       rb\"""\\U1234\""",
+       RB\"""\\u\""",
+       rb'''\\xc2\\\\''',
+       rb'''|\\xc2|\\\\''',
+       rb'''f\\(abc,(.*),def\\?'''
+"""
+
+[[cases]]
+input = """
+select r'a\\'b', r"a\\"b",
+       r'''a\\'''b''', r'''a'\\''b''', r'''a''\\'b''',
+       r\"""a\\\"""b\""", r\"""a"\\""b\""", r\"""a""\\"b\"""
+"""
+formatted = """
+SELECT r'a\\'b',
+       r"a\\"b",
+       r'''a\\'''b''',
+       r'''a'\\''b''',
+       r'''a''\\'b''',
+       r\"""a\\\"""b\""",
+       r\"""a"\\""b\""",
+       r\"""a""\\"b\"""
+"""
+
+[[cases]]
+input = """
+select r'''...
+           ...''',
+       r'''...\\
+           ...''',
+       br'''...
+            ...''',
+       br'''...\\
+            ...''',
+       rb'''...
+            ...''',
+       rb'''...\\
+            ...'''
+"""
+formatted = """
+SELECT r'''...
+           ...''',
+       r'''...\\
+           ...''',
+       br'''...
+            ...''',
+       br'''...\\
+            ...''',
+       rb'''...
+            ...''',
+       rb'''...\\
+            ...'''
+"""
+
+[[cases]]
+input = """
+select
+  r'''...
+      ...''',
+  r'''...\\
+      ...''',
+  br'''...
+      ...''',
+  br'''...\\
+      ...''',
+  rb'''...
+      ...''',
+  rb'''...\\
+      ...'''
+"""
+formatted = """
+SELECT r'''...
+      ...''',
+       r'''...\\
+      ...''',
+       br'''...
+      ...''',
+       br'''...\\
+      ...''',
+       rb'''...
+      ...''',
+       rb'''...\\
+      ...'''
+"""
+
+
+[[cases]]
+input = """
+select 0x1, 0xabc, 0XABC, 0xABC, 0Xabc,
+       -0x01a a, -0X01a b, +0x02a c, +0X02a d, 0X000000001 as e,
+       0x0123456789AbCdEf,
+       0xffffffffffffffffffffffffffffffffffffffff
+"""
+formatted = """
+SELECT 0x1,
+       0xABC,
+       0xABC,
+       0xABC,
+       0xABC,
+       -0x01A      AS a,
+       -0x01A      AS b,
+       +0x02A      AS c,
+       +0x02A      AS d,
+       0x000000001 AS e,
+       0x0123456789ABCDEF,
+       0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+"""
+
+
+[[cases]]
+input = """
+select a, sum(b) from foo
+group by 0x1
+order by 0x2
+limit 0x3
+offset 0x4
+"""
+formatted = """
+SELECT a,
+       SUM(b)
+  FROM foo
+ GROUP BY 0x1
+ ORDER BY 0x2
+ LIMIT 0x3 OFFSET 0x4
+"""
+
+
+[[cases]]
+input = """
+select NUMERIC '1.1',
+       NUMERIC '0.123',
+    NUMERIC '456.0',
+    NUMERIC '123',
+    NUMERIC "123",
+    NUMERIC '0',
+    NUMERIC '-1.1',
+    NUMERIC '-0.123',
+    NUMERIC '-456.0',
+    NUMERIC '-123',
+    NUMERIC "-123",
+    NUMERIC '0.999999999',
+    NUMERIC '99999999999999999999999999999.999999999',
+    NUMERIC '-0.999999999',
+    NUMERIC "-99999999999999999999999999999.999999999",
+    NUMERIC '-0',
+    NUMERIC '+5',
+    NUMERIC '+5.123',
+    NUMERIC '',
+    NUMERIC 'abc',
+    NUMERIC '99999999999999999999999999999999999999',
+    NUMERIC '0.99999999999999999999999999999999999999',
+    NUMERIC '+',
+    NUMERIC '-'
+"""
+formatted = """
+SELECT NUMERIC '1.1',
+       NUMERIC '0.123',
+       NUMERIC '456.0',
+       NUMERIC '123',
+       NUMERIC "123",
+       NUMERIC '0',
+       NUMERIC '-1.1',
+       NUMERIC '-0.123',
+       NUMERIC '-456.0',
+       NUMERIC '-123',
+       NUMERIC "-123",
+       NUMERIC '0.999999999',
+       NUMERIC '99999999999999999999999999999.999999999',
+       NUMERIC '-0.999999999',
+       NUMERIC "-99999999999999999999999999999.999999999",
+       NUMERIC '-0',
+       NUMERIC '+5',
+       NUMERIC '+5.123',
+       NUMERIC '',
+       NUMERIC 'abc',
+       NUMERIC '99999999999999999999999999999999999999',
+       NUMERIC '0.99999999999999999999999999999999999999',
+       NUMERIC '+',
+       NUMERIC '-'
+"""
+
+
+[[cases]]
+input = """
+select BIGNUMERIC '1.1',
+    BIGNUMERIC '0.123',
+    BIGNUMERIC '456.0',
+    BIGNUMERIC '123',
+    BIGNUMERIC "123",
+    BIGNUMERIC '0',
+    BIGNUMERIC '-1.1',
+    BIGNUMERIC '-0.123',
+    BIGNUMERIC '-456.0',
+    BIGNUMERIC '-123',
+       BIGNUMERIC "-123",
+       BIGNUMERIC '0.99999999999999999999999999999999999999',
+       BIGNUMERIC '578960446186580977117854925043439539266.34992332820282019728792003956564819967',
+       BIGNUMERIC '-0.99999999999999999999999999999999999999',
+       BIGNUMERIC '-578960446186580977117854925043439539266.34992332820282019728792003956564819968',
+       BIGNUMERIC '-0',
+       BIGNUMERIC '+5',
+       BIGNUMERIC '+5.123',
+       BIGNUMERIC '',
+       BIGNUMERIC 'abc',
+       BIGNUMERIC '99999999999999999999999999999999999999999999999999999999999',
+       BIGNUMERIC '0.999999999999999999999999999999999999999999999999999999999',
+       BIGNUMERIC '+',
+       BIGNUMERIC '-'
+"""
+formatted = """
+SELECT BIGNUMERIC '1.1',
+       BIGNUMERIC '0.123',
+       BIGNUMERIC '456.0',
+       BIGNUMERIC '123',
+       BIGNUMERIC "123",
+       BIGNUMERIC '0',
+       BIGNUMERIC '-1.1',
+       BIGNUMERIC '-0.123',
+       BIGNUMERIC '-456.0',
+       BIGNUMERIC '-123',
+       BIGNUMERIC "-123",
+       BIGNUMERIC '0.99999999999999999999999999999999999999',
+       BIGNUMERIC '578960446186580977117854925043439539266.34992332820282019728792003956564819967',
+       BIGNUMERIC '-0.99999999999999999999999999999999999999',
+       BIGNUMERIC '-578960446186580977117854925043439539266.34992332820282019728792003956564819968',
+       BIGNUMERIC '-0',
+       BIGNUMERIC '+5',
+       BIGNUMERIC '+5.123',
+       BIGNUMERIC '',
+       BIGNUMERIC 'abc',
+       BIGNUMERIC '99999999999999999999999999999999999999999999999999999999999',
+       BIGNUMERIC '0.999999999999999999999999999999999999999999999999999999999',
+       BIGNUMERIC '+',
+       BIGNUMERIC '-'
+"""
+
+[[cases]]
+input = """
+select BIGNUMERIC '100.1'
++BIGNUMERIC '200',  - BIGNUMERIC '100'
+"""
+formatted = """
+SELECT BIGNUMERIC '100.1' + BIGNUMERIC '200',
+       -BIGNUMERIC '100'
+"""
+
+[[cases]]
+input = """
+select json '1'
+"""
+formatted = """
+SELECT JSON '1'
+"""
+
+[[cases]]
+input = """
+SELECT JSON "true",
+       JSON '\\'value\\'',
+       JSON "t",
+       JSON 'true',
+       JSON "'v'",
+       JSON 'null',
+       JSON '[1, 2, 3]',
+       JSON '{ "k1": "v1", "k2": [true, false]}',
+       JSON '{\\n"k" : "v"\\n}',
+       JSON r'{"k\\n1" : "v"}',
+       JSON '',
+       JSON '0.123',
+       JSON '456.0',
+       JSON '123',
+       JSON "123",
+       JSON '-1.1',
+       JSON '-123',
+       JSON "-123"
+"""
+formatted = """
+SELECT JSON "true",
+       JSON '\\'value\\'',
+       JSON "t",
+       JSON 'true',
+       JSON "'v'",
+       JSON 'null',
+       JSON '[1, 2, 3]',
+       JSON '{ "k1": "v1", "k2": [true, false]}',
+       JSON '{\\n"k" : "v"\\n}',
+       JSON r'{"k\\n1" : "v"}',
+       JSON '',
+       JSON '0.123',
+       JSON '456.0',
+       JSON '123',
+       JSON "123",
+       JSON '-1.1',
+       JSON '-123',
+       JSON "-123"
+"""

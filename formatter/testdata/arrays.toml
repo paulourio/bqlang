@@ -1,0 +1,273 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select 1, [1], ARRAY[1], ARRAY<int32>[1]
+"""
+formatted = """
+SELECT 1,
+       [1],
+       ARRAY[1],
+       ARRAY<INT32>[1]
+"""
+
+[[cases]]
+input = """
+select [x, f(x), x + f(x), (select x)]
+"""
+formatted = """
+SELECT [
+         x,
+         F(x),
+         x + F(x),
+         (
+           SELECT x
+         )
+       ]
+"""
+
+[[cases]]
+input = """
+select [1,2,3], ARRAY[1, 2, 3], ARRAY<int32>[1, 2, 3]
+"""
+formatted = """
+SELECT [1, 2, 3],
+       ARRAY[1, 2, 3],
+       ARRAY<INT32>[1, 2, 3]
+"""
+
+[[cases]]
+input = """
+select "a", 3, ["a", 3], ARRAY<string> [3, "a"]
+"""
+formatted = """
+SELECT "a",
+       3,
+       ["a", 3],
+       ARRAY<STRING>[3, "a"]
+"""
+
+[[cases]]
+input = """
+select [], ARRAY[], ARRAY<int32>[]
+"""
+formatted = """
+SELECT [],
+       ARRAY[],
+       ARRAY<INT32>[]
+"""
+
+[[cases]]
+input = """
+select ARRAY[ARRAY(select 1), ARRAY[1, f(2), 1.0], 1 + ARRAY[1]]
+"""
+formatted = """
+SELECT ARRAY[
+         ARRAY(
+           SELECT 1
+         ),
+         ARRAY[1, F(2), 1.0],
+         1 + ARRAY[1]
+       ]
+"""
+
+[[cases]]
+input = """
+select ARRAY[1, 2, 3][0], [1][0]
+"""
+formatted = """
+SELECT ARRAY[1, 2, 3][0],
+       [1][0]
+"""
+
+[[cases]]
+input = """
+select [1].1
+"""
+formatted = """
+SELECT [1].1
+"""
+
+[[cases]]
+input = """
+select [1].a[1]
+"""
+formatted = """
+SELECT [1].a[1]
+"""
+
+[[cases]]
+input = """
+select a[offset(b+c)]
+"""
+formatted = """
+SELECT a[OFFSET(b + c)]
+"""
+
+[[cases]]
+input = """
+select a[ordinal(b+c)]
+"""
+formatted = """
+SELECT a[ORDINAL(b + c)]
+"""
+
+[[cases]]
+input = """
+select a[safe_offset(b)], a[safe_ordinal(b+1)]
+"""
+formatted = """
+SELECT a[SAFE_OFFSET(b)],
+       a[SAFE_ORDINAL(b + 1)]
+"""
+
+[[cases]]
+input = """
+select a[offset], a[ordinal], a[`offset`], a[ordinal(ordinal)]
+"""
+formatted = """
+SELECT a[offset],
+       a[ordinal],
+       a[`offset`],
+       a[ORDINAL(ordinal)]
+"""
+
+[[cases]]
+input = """
+select f(a), a.b[1 + 2 * (3 + 4)], 3
+"""
+formatted = """
+SELECT F(a),
+       a.b[1 + 2 * (3 + 4)],
+       3
+"""
+
+[[cases]]
+input = """
+select a[-1], a['x'], a[NULL]
+"""
+formatted = """
+SELECT a[-1],
+       a['x'],
+       a[NULL]
+"""
+
+[[cases]]
+input = """
+select f(a).b[f(c)]
+"""
+formatted = """
+SELECT F(a).b[F(c)]
+"""
+
+[[cases]]
+input = """
+select a + b2*b[2] + c1*c2
+"""
+formatted = """
+SELECT a + b2 * b[2] + c1 * c2
+"""
+
+[[cases]]
+input = """
+select arr[1] + arr[2]
+"""
+formatted = """
+SELECT arr[1] + arr[2]
+"""
+
+[[cases]]
+input = """
+select a[b.c[d]];
+"""
+formatted = """
+SELECT a[b.c[d]]
+"""
+
+[[cases]]
+input = """
+select a[ 1 ]+a[1+f(2)]
+"""
+formatted = """
+SELECT a[1] + a[1 + F(2)]
+"""
+
+[[cases]]
+input = """
+select (a+b)[c]
+"""
+formatted = """
+SELECT (a + b)[c]
+"""
+
+[[cases]]
+input = """
+select a[b].c[d].e[f]
+"""
+formatted = """
+SELECT a[b].c[d].e[f]
+"""
+
+[[cases]]
+input = """
+select (((a)[b]).c[d]).e[(f)]
+"""
+formatted = """
+SELECT (((a)[b]).c[d]).e[(f)]
+"""
+
+[[cases]]
+input = """
+select a[b][c]
+"""
+formatted = """
+SELECT a[b][c]
+"""
+
+[[cases]]
+input = """
+select a[b[c[d]]]
+"""
+formatted = """
+SELECT a[b[c[d]]]
+"""
+
+[[cases]]
+input = """
+select function()[5]
+"""
+formatted = """
+SELECT FUNCTION()[5]
+"""
+
+[[cases]]
+input = """
+select 5[6];
+"""
+formatted = """
+SELECT 5[6]
+"""
+
+[[cases]]
+input = """
+select NULL[NULL[NULL]]
+"""
+formatted = """
+SELECT NULL[NULL[NULL]]
+"""

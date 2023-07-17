@@ -1,0 +1,196 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Parameterized data types"
+input = """
+-- Declare a variable with type parameters.
+DECLARE x STRING(10);
+
+-- This is a valid assignment to x.
+SET x = "hello";
+
+-- This assignment to x violates the type parameter constraint and results in an OUT_OF_RANGE error.
+SET x = "this string is too long";
+
+-- Declare variables with type parameters.
+DECLARE x NUMERIC(10) DEFAULT 12345;
+DECLARE y NUMERIC(5, 2) DEFAULT 123.45;
+
+-- The variable x is treated as a NUMERIC value when read, so the result of this query
+-- is a NUMERIC without type parameters.
+SELECT x;
+
+-- Type parameters are not propagated within expressions, so variables x and y are treated
+-- as NUMERIC values when read and the result of this query is a NUMERIC without type parameters.
+SELECT x + y;
+"""
+formatted = """
+-- Declare a variable with type parameters.
+DECLARE x STRING(10);
+
+-- This is a valid assignment to x.
+SET x = 'hello';
+
+-- This assignment to x violates the type parameter constraint and results in an OUT_OF_RANGE error.
+SET x = 'this string is too long';
+
+-- Declare variables with type parameters.
+DECLARE x NUMERIC(10) DEFAULT 12345;
+DECLARE y NUMERIC(5, 2) DEFAULT 123.45;
+
+-- The variable x is treated as a NUMERIC value when read, so the result of this query
+-- is a NUMERIC without type parameters.
+SELECT x;
+
+-- Type parameters are not propagated within expressions, so variables x and y are treated
+-- as NUMERIC values when read and the result of this query is a NUMERIC without type parameters.
+SELECT x + y;
+"""
+
+[[cases]]
+description = "NULLS and the array type"
+input = """
+SELECT CAST(NULL AS ARRAY<INT64>) IS NULL AS array_is_null;
+
+WITH Items AS (
+  SELECT [] AS numbers, "Empty array in query" AS description UNION ALL
+  SELECT CAST(NULL AS ARRAY<INT64>), "NULL array in query")
+SELECT numbers, description, numbers IS NULL AS numbers_null
+FROM Items;
+
+SELECT numbers, description, numbers IS NULL AS numbers_null
+FROM Items;
+
+SELECT FORMAT("%T", [1, NULL, 3]) as numbers;
+"""
+formatted = """
+SELECT CAST(NULL AS ARRAY<INT64>) IS NULL AS array_is_null;
+
+WITH
+  Items AS (
+    SELECT []                     AS numbers,
+           'Empty array in query' AS description
+     UNION ALL
+    SELECT CAST(NULL AS ARRAY<INT64>),
+           'NULL array in query'
+  )
+SELECT numbers, description, numbers IS NULL AS numbers_null
+  FROM Items;
+
+SELECT numbers, description, numbers IS NULL AS numbers_null
+  FROM Items;
+
+SELECT FORMAT(
+         '%T',
+         [1, NULL, 3]
+       ) AS numbers;
+"""
+
+[[cases]]
+description = "Constructing an array"
+input = """
+SELECT [1, 2, 3] AS numbers;
+
+SELECT ["apple", "pear", "orange"] AS fruit;
+
+SELECT [true, false, true] AS booleans;
+
+SELECT [a, b, c]
+FROM
+  (SELECT 5 AS a,
+          37 AS b,
+          406 AS c);
+
+SELECT [a, b, c]
+FROM
+  (SELECT CAST(5 AS INT64) AS a,
+          CAST(37 AS FLOAT64) AS b,
+          406 AS c);
+
+SELECT ARRAY<FLOAT64>[1, 2, 3] AS floats;
+
+SELECT [1, 2, 3] AS numbers;
+"""
+formatted = """
+SELECT [1, 2, 3] AS numbers;
+
+SELECT ['apple', 'pear', 'orange'] AS fruit;
+
+SELECT [TRUE, FALSE, TRUE] AS booleans;
+
+SELECT [a, b, c]
+  FROM (
+         SELECT 5   AS a,
+                37  AS b,
+                406 AS c
+       );
+
+SELECT [a, b, c]
+  FROM (
+         SELECT CAST(5 AS INT64)    AS a,
+                CAST(37 AS FLOAT64) AS b,
+                406                 AS c
+       );
+
+SELECT ARRAY<FLOAT64>[1, 2, 3] AS floats;
+
+SELECT [1, 2, 3] AS numbers;
+"""
+
+[[cases]]
+description = "Using generated values"
+input = """
+SELECT GENERATE_ARRAY(11, 33, 2) AS odds;
+
+SELECT GENERATE_ARRAY(21, 14, -1) AS countdown;
+
+SELECT
+  GENERATE_DATE_ARRAY('2017-11-21', '2017-12-31', INTERVAL 1 WEEK)
+    AS date_array;
+"""
+formatted = """
+SELECT GENERATE_ARRAY(11, 33, 2) AS odds;
+
+SELECT GENERATE_ARRAY(21, 14, -1) AS countdown;
+
+SELECT GENERATE_DATE_ARRAY('2017-11-21', '2017-12-31', INTERVAL 1 WEEK) AS date_array;
+"""
+
+[[cases]]
+description = "Geography type"
+input = """
+SELECT
+  ST_GEOGFROMTEXT('POINT EMPTY') AS a,
+  ST_GEOGFROMTEXT('GEOMETRYCOLLECTION EMPTY') AS b;
+
+SELECT
+  ST_GEOGFROMTEXT('MULTIPOINT(1 1, 2 2)') AS a,
+  ST_GEOGFROMTEXT('GEOMETRYCOLLECTION(POINT(1 1), POINT(2 2))') AS b;
+"""
+formatted = """
+SELECT ST_GEOGFROMTEXT('POINT EMPTY')              AS a,
+       ST_GEOGFROMTEXT('GEOMETRYCOLLECTION EMPTY') AS b;
+
+SELECT ST_GEOGFROMTEXT('MULTIPOINT(1 1, 2 2)')                       AS a,
+       ST_GEOGFROMTEXT('GEOMETRYCOLLECTION(POINT(1 1), POINT(2 2))') AS b;
+"""

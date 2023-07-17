@@ -1,0 +1,628 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Operator precedence"
+input = """
+select
+-- The expression:
+x * y / z,
+-- is interpreted as:
+( ( x * y ) / z )
+"""
+formatted = """
+SELECT -- The expression:
+       x * y / z,
+       -- is interpreted as:
+       ((x * y) / z)
+"""
+
+[[cases]]
+description = "Field access operator"
+input = """
+WITH orders AS (
+  SELECT STRUCT(STRUCT('Yonge Street' AS street, 'Canada' AS country) AS address) AS customer
+)
+SELECT t.customer.address.country FROM orders AS t;
+
+"""
+formatted = """
+WITH
+  orders AS (
+    SELECT STRUCT(
+             STRUCT('Yonge Street' AS street, 'Canada' AS country) AS address
+           ) AS customer
+  )
+SELECT t.customer.address.country
+  FROM orders AS t
+"""
+
+[[cases]]
+description = "Array subscript operator"
+input = """
+WITH Items AS (SELECT ["coffee", "tea", "milk"] AS item_array)
+SELECT
+  item_array,
+  item_array[OFFSET(0)] AS item_offset,
+  item_array[ORDINAL(1)] AS item_ordinal,
+  item_array[SAFE_OFFSET(6)] AS item_safe_offset
+FROM Items
+"""
+formatted = """
+WITH
+  Items AS (
+    SELECT ['coffee', 'tea', 'milk'] AS item_array
+  )
+SELECT item_array,
+       item_array[OFFSET(0)]      AS item_offset,
+       item_array[ORDINAL(1)]     AS item_ordinal,
+       item_array[SAFE_OFFSET(6)] AS item_safe_offset
+  FROM Items
+"""
+
+# This is not supported due to a bug for JSON literals on go-zetasql.
+# [[cases]]
+# description = "JSON subscript operator"
+# input = """
+# SELECT json_value.class.students[0]['name'] AS first_student
+# FROM
+#   UNNEST(
+#     [
+#       JSON '{"class" : {"students" : [{"name" : "Jane"}]}}',
+#       JSON '{"class" : {"students" : []}}',
+#       JSON '{"class" : {"students" : [{"name" : "John"}, {"name": "Jamie"}]}}'])
+#     AS json_value;
+# """
+# formatted = """
+# """
+
+[[cases]]
+description = "Date arithmetic operators"
+input = """
+SELECT DATE "2020-09-22" + 1 AS day_later, DATE "2020-09-22" - 7 AS week_ago
+"""
+formatted = """
+SELECT DATE '2020-09-22' + 1 AS day_later,
+       DATE '2020-09-22' - 7 AS week_ago
+"""
+
+[[cases]]
+description = "Datetime subtraction"
+input = """
+SELECT
+  DATE "2021-05-20" - DATE "2020-04-19" AS date_diff,
+  TIMESTAMP "2021-06-01 12:34:56.789" - TIMESTAMP "2021-05-31 00:00:00" AS time_diff
+"""
+formatted = """
+SELECT DATE '2021-05-20' - DATE '2020-04-19'                                 AS date_diff,
+       TIMESTAMP '2021-06-01 12:34:56.789' - TIMESTAMP '2021-05-31 00:00:00' AS time_diff
+"""
+
+[[cases]]
+description = "Interval arithmetic operators"
+input = """
+SELECT
+  DATE "2021-04-20" + INTERVAL 25 HOUR AS date_plus,
+  TIMESTAMP "2021-05-02 00:01:02.345" - INTERVAL 10 SECOND AS time_minus;
+"""
+formatted = """
+SELECT DATE '2021-04-20' + INTERVAL 25 HOUR                     AS date_plus,
+       TIMESTAMP '2021-05-02 00:01:02.345' - INTERVAL 10 SECOND AS time_minus
+"""
+
+[[cases]]
+description = "Multiplication and division"
+input = """
+SELECT
+  INTERVAL '1:2:3' HOUR TO SECOND * 10 AS mul1,
+  INTERVAL 35 SECOND * 4 AS mul2,
+  INTERVAL 10 YEAR / 3 AS div1,
+  INTERVAL 1 MONTH / 12 AS div2
+"""
+formatted = """
+SELECT INTERVAL '1:2:3' HOUR TO SECOND * 10 AS mul1,
+       INTERVAL 35 SECOND * 4               AS mul2,
+       INTERVAL 10 YEAR / 3                 AS div1,
+       INTERVAL 1 MONTH / 12                AS div2
+"""
+
+[[cases]]
+description = "Logical operators"
+input = """
+-- The examples in this section reference a table called entry_table:
+
+/*-------*
+ | entry |
+ +-------+
+ | a     |
+ | b     |
+ | c     |
+ | NULL  |
+ *-------*/
+
+
+SELECT 'a' FROM entry_table WHERE entry = 'a';
+
+-- a => 'a' = 'a' => TRUE
+-- b => 'b' = 'a' => FALSE
+-- NULL => NULL = 'a' => NULL
+
+/*-------*
+ | entry |
+ +-------+
+ | a     |
+ *-------*/
+
+SELECT entry FROM entry_table WHERE NOT (entry = 'a');
+
+-- a => NOT('a' = 'a') => NOT(TRUE) => FALSE
+-- b => NOT('b' = 'a') => NOT(FALSE) => TRUE
+-- NULL => NOT(NULL = 'a') => NOT(NULL) => NULL
+
+/*-------*
+ | entry |
+ +-------+
+ | b     |
+ | c     |
+ *-------*/
+
+SELECT entry FROM entry_table WHERE entry IS NULL;
+
+-- a => 'a' IS NULL => FALSE
+-- b => 'b' IS NULL => FALSE
+-- NULL => NULL IS NULL => TRUE
+
+/*-------*
+ | entry |
+ +-------+
+ | NULL  |
+ *-------*/
+"""
+formatted = """
+-- The examples in this section reference a table called entry_table:
+/*-------*
+ | entry |
+ +-------+
+ | a     |
+ | b     |
+ | c     |
+ | NULL  |
+ *-------*/
+SELECT 'a'
+  FROM entry_table
+ WHERE entry = 'a';
+
+-- a => 'a' = 'a' => TRUE
+-- b => 'b' = 'a' => FALSE
+-- NULL => NULL = 'a' => NULL
+/*-------*
+ | entry |
+ +-------+
+ | a     |
+ *-------*/
+SELECT entry
+  FROM entry_table
+ WHERE NOT(entry = 'a');
+
+-- a => NOT('a' = 'a') => NOT(TRUE) => FALSE
+-- b => NOT('b' = 'a') => NOT(FALSE) => TRUE
+-- NULL => NOT(NULL = 'a') => NOT(NULL) => NULL
+/*-------*
+ | entry |
+ +-------+
+ | b     |
+ | c     |
+ *-------*/
+SELECT entry
+  FROM entry_table
+ WHERE entry IS NULL;
+-- a => 'a' IS NULL => FALSE
+-- b => 'b' IS NULL => FALSE
+-- NULL => NULL IS NULL => TRUE
+/*-------*
+ | entry |
+ +-------+
+ | NULL  |
+ *-------*/
+"""
+
+[[cases]]
+description = "EXISTS operator"
+input = """
+WITH Words AS (
+  SELECT 'Intend' as value, 'east' as direction UNION ALL
+  SELECT 'Secure', 'north' UNION ALL
+  SELECT 'Clarity', 'west'
+ )
+SELECT EXISTS ( SELECT value FROM Words WHERE direction = 'south' ) as result;
+"""
+formatted = """
+WITH
+  Words AS (
+    SELECT 'Intend' AS value,
+           'east'   AS direction
+     UNION ALL
+    SELECT 'Secure', 'north'
+     UNION ALL
+    SELECT 'Clarity', 'west'
+  )
+SELECT EXISTS(
+         SELECT value
+           FROM Words
+          WHERE direction = 'south'
+       ) AS result
+"""
+
+[[cases]]
+description = "IN operator"
+input = """
+-- Example with IN and an expression:
+
+SELECT * FROM Words WHERE value IN ('Intend', 'Secure');
+
+/*----------*
+ | value    |
+ +----------+
+ | Intend   |
+ | Secure   |
+ | Intend   |
+ *----------*/
+
+-- Example with NOT IN and an expression:
+
+SELECT * FROM Words WHERE value NOT IN ('Intend');
+
+/*----------*
+ | value    |
+ +----------+
+ | Secure   |
+ | Clarity  |
+ | Peace    |
+ *----------*/
+
+-- Example with IN, a scalar subquery, and an expression:
+
+SELECT * FROM Words WHERE value IN ((SELECT 'Intend'), 'Clarity');
+
+/*----------*
+ | value    |
+ +----------+
+ | Intend   |
+ | Clarity  |
+ | Intend   |
+ *----------*/
+
+-- Example with IN and an UNNEST operation:
+
+SELECT * FROM Words WHERE value IN UNNEST(['Secure', 'Clarity']);
+
+/*----------*
+ | value    |
+ +----------+
+ | Secure   |
+ | Clarity  |
+ *----------*/
+
+-- Example with IN and a struct:
+
+SELECT
+  (SELECT AS STRUCT Items.info) as item
+FROM
+  Items
+WHERE (info.shape, info.color) IN (('round', 'blue'));
+
+/*------------------------------------*
+ | item                               |
+ +------------------------------------+
+ | { {blue color, round shape} info } |
+ *------------------------------------*/
+"""
+formatted = """
+-- Example with IN and an expression:
+SELECT *
+  FROM Words
+ WHERE value IN ('Intend', 'Secure');
+
+/*----------*
+ | value    |
+ +----------+
+ | Intend   |
+ | Secure   |
+ | Intend   |
+ *----------*/
+-- Example with NOT IN and an expression:
+SELECT *
+  FROM Words
+ WHERE value NOT IN ('Intend');
+
+/*----------*
+ | value    |
+ +----------+
+ | Secure   |
+ | Clarity  |
+ | Peace    |
+ *----------*/
+-- Example with IN, a scalar subquery, and an expression:
+SELECT *
+  FROM Words
+ WHERE value IN (
+         (
+           SELECT 'Intend'
+         ),
+         'Clarity'
+       );
+
+/*----------*
+ | value    |
+ +----------+
+ | Intend   |
+ | Clarity  |
+ | Intend   |
+ *----------*/
+-- Example with IN and an UNNEST operation:
+SELECT *
+  FROM Words
+ WHERE value IN UNNEST(['Secure', 'Clarity']);
+
+/*----------*
+ | value    |
+ +----------+
+ | Secure   |
+ | Clarity  |
+ *----------*/
+-- Example with IN and a struct:
+SELECT (
+         SELECT AS STRUCT
+                Items.info
+       ) AS item
+  FROM Items
+ WHERE (info.shape, info.color) IN (
+         ('round', 'blue')
+       );
+/*------------------------------------*
+ | item                               |
+ +------------------------------------+
+ | { {blue color, round shape} info } |
+ *------------------------------------*/
+"""
+
+[[cases]]
+description = "IS operators"
+input = """
+select
+X IS TRUE 	,
+X IS NOT TRUE 	,
+X IS FALSE 	,
+X IS NOT FALSE 	,
+X IS NULL,
+X IS NOT NULL,
+X IS UNKNOWN 	,
+X IS NOT UNKNOWN 	,
+"""
+formatted = """
+SELECT X IS TRUE,
+       X IS NOT TRUE,
+       X IS FALSE,
+       X IS NOT FALSE,
+       X IS NULL,
+       X IS NOT NULL,
+       X IS UNKNOWN,
+       X IS NOT UNKNOWN
+"""
+
+[[cases]]
+description = "Bitwise operators"
+input = """
+SELECT
+~ X,
+X | Y 	,
+X ^ Y ,
+X & Y ,
+X << Y,
+X >> Y,
+"""
+formatted = """
+SELECT ~X,
+       X | Y,
+       X ^ Y,
+       X & Y,
+       X << Y,
+       X >> Y
+"""
+
+[[cases]]
+description = "IS DISTINCT FROM operator"
+input = """
+SELECT 1 IS DISTINCT FROM 2;
+SELECT 1 IS DISTINCT FROM NULL;
+SELECT 1 IS NOT DISTINCT FROM 1;
+SELECT NULL IS NOT DISTINCT FROM NULL;
+# These return FALSE:
+SELECT NULL IS DISTINCT FROM NULL;
+SELECT 1 IS DISTINCT FROM 1;
+SELECT 1 IS NOT DISTINCT FROM 2;
+SELECT 1 IS NOT DISTINCT FROM NULL
+"""
+formatted = """
+SELECT 1 IS DISTINCT FROM 2;
+
+SELECT 1 IS DISTINCT FROM NULL;
+
+SELECT 1 IS NOT DISTINCT FROM 1;
+
+SELECT NULL IS NOT DISTINCT FROM NULL;
+
+# These return FALSE:
+SELECT NULL IS DISTINCT FROM NULL;
+
+SELECT 1 IS DISTINCT FROM 1;
+
+SELECT 1 IS NOT DISTINCT FROM 2;
+
+SELECT 1 IS NOT DISTINCT FROM NULL;
+"""
+
+[[cases]]
+description = "LIKE operator"
+input = """
+-- Returns TRUE
+SELECT 'apple' LIKE 'a%';
+
+-- Returns FALSE
+SELECT '%a' LIKE 'apple';
+
+-- Returns FALSE
+SELECT 'apple' NOT LIKE 'a%';
+
+-- Returns TRUE
+SELECT '%a' NOT LIKE 'apple';
+
+-- Produces an error
+SELECT NULL LIKE 'a%';
+
+-- Produces an error
+SELECT 'apple' LIKE NULL;
+
+-- The following examples illustrate how collation can be used with the LIKE operator.
+
+-- Returns FALSE
+SELECT 'Foo' LIKE '%foo%';
+
+-- Returns TRUE
+SELECT COLLATE('Foo', 'und:ci') LIKE COLLATE('%foo%', 'und:ci');
+
+-- Returns TRUE
+SELECT COLLATE('Foo', 'und:ci') = COLLATE('foo', 'und:ci');
+
+-- Produces an error
+SELECT COLLATE('Foo', 'und:ci') LIKE COLLATE('%foo%', 'binary');
+
+-- Produces an error
+SELECT COLLATE('Foo', 'und:ci') LIKE COLLATE('%f_o%', 'und:ci');
+
+-- Returns TRUE
+SELECT COLLATE('Foo_', 'und:ci') LIKE COLLATE('%foo\\\\_%', 'und:ci');
+
+-- Returns FALSE
+SELECT 'MASSE' LIKE 'Maße';
+
+-- Returns FALSE
+SELECT COLLATE('MASSE', 'und:ci') LIKE '%Maße%';
+
+-- Returns FALSE
+SELECT COLLATE('MASSE', 'und:ci') = COLLATE('Maße', 'und:ci');
+
+-- Returns FALSE
+SELECT '\\u3042' LIKE '%\\u30A2%';
+
+-- Returns TRUE
+SELECT COLLATE('\\u3042', 'und:ci') LIKE COLLATE('%\\u30A2%', 'und:ci');
+
+-- Returns TRUE
+SELECT COLLATE('\\u3042', 'und:ci') = COLLATE('\\u30A2', 'und:ci');
+
+-- Returns FALSE
+SELECT '\\u0061\\u030A' LIKE '%\\u00C5%';
+
+-- Returns TRUE
+SELECT COLLATE('\\u0061\\u030A', 'und:ci') LIKE '%\\u00C5%';
+
+-- Returns TRUE
+SELECT COLLATE('\\u0061\\u030A', 'und:ci') = COLLATE('\\u00C5', 'und:ci');
+
+-- Returns FALSE
+SELECT '\\u0083' LIKE '';
+
+-- Returns TRUE
+SELECT COLLATE('\\u0083', 'und:ci') LIKE '';
+"""
+formatted = """
+-- Returns TRUE
+SELECT 'apple' LIKE 'a%';
+
+-- Returns FALSE
+SELECT '%a' LIKE 'apple';
+
+-- Returns FALSE
+SELECT 'apple' NOT LIKE 'a%';
+
+-- Returns TRUE
+SELECT '%a' NOT LIKE 'apple';
+
+-- Produces an error
+SELECT NULL LIKE 'a%';
+
+-- Produces an error
+SELECT 'apple' LIKE NULL;
+
+-- The following examples illustrate how collation can be used with the LIKE operator.
+-- Returns FALSE
+SELECT 'Foo' LIKE '%foo%';
+
+-- Returns TRUE
+SELECT COLLATE('Foo', 'und:ci') LIKE COLLATE('%foo%', 'und:ci');
+
+-- Returns TRUE
+SELECT COLLATE('Foo', 'und:ci') = COLLATE('foo', 'und:ci');
+
+-- Produces an error
+SELECT COLLATE('Foo', 'und:ci') LIKE COLLATE('%foo%', 'binary');
+
+-- Produces an error
+SELECT COLLATE('Foo', 'und:ci') LIKE COLLATE('%f_o%', 'und:ci');
+
+-- Returns TRUE
+SELECT COLLATE('Foo_', 'und:ci') LIKE COLLATE('%foo\\\\_%', 'und:ci');
+
+-- Returns FALSE
+SELECT 'MASSE' LIKE 'Maße';
+
+-- Returns FALSE
+SELECT COLLATE('MASSE', 'und:ci') LIKE '%Maße%';
+
+-- Returns FALSE
+SELECT COLLATE('MASSE', 'und:ci') = COLLATE('Maße', 'und:ci');
+
+-- Returns FALSE
+SELECT '\\u3042' LIKE '%\\u30A2%';
+
+-- Returns TRUE
+SELECT COLLATE('\\u3042', 'und:ci') LIKE COLLATE('%\\u30A2%', 'und:ci');
+
+-- Returns TRUE
+SELECT COLLATE('\\u3042', 'und:ci') = COLLATE('\\u30A2', 'und:ci');
+
+-- Returns FALSE
+SELECT '\\u0061\\u030A' LIKE '%\\u00C5%';
+
+-- Returns TRUE
+SELECT COLLATE('\\u0061\\u030A', 'und:ci') LIKE '%\\u00C5%';
+
+-- Returns TRUE
+SELECT COLLATE('\\u0061\\u030A', 'und:ci') = COLLATE('\\u00C5', 'und:ci');
+
+-- Returns FALSE
+SELECT '\\u0083' LIKE '';
+
+-- Returns TRUE
+SELECT COLLATE('\\u0083', 'und:ci') LIKE '';
+"""

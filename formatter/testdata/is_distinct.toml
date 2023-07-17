@@ -1,0 +1,77 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+Select 1 Is Distinct From 2;
+"""
+formatted = """
+SELECT 1 IS DISTINCT FROM 2
+"""
+
+[[cases]]
+input = """
+Select 1 Is Not Distinct From 2;
+"""
+formatted = """
+SELECT 1 IS NOT DISTINCT FROM 2
+"""
+
+[[cases]]
+input = """
+select 1 + 2 is distinct from NULL;
+"""
+formatted = """
+SELECT 1 + 2 IS DISTINCT FROM NULL
+"""
+
+[[cases]]
+description = "Complex lhs/rhs expressions"
+input = """
+SELECT 1 + 2*3 IS NOT DISTINCT FROM (4*5 + 6 BETWEEN 7 AND 8);
+"""
+formatted = """
+SELECT 1 + 2 * 3 IS NOT DISTINCT FROM (4 * 5 + 6 BETWEEN 7 AND 8)
+"""
+
+[[cases]]
+description = "Complex lhs/rhs expressions"
+input = """
+SELECT (1 + 2 * 3 IS NOT DISTINCT FROM 9) BETWEEN TRUE AND true
+"""
+formatted = """
+SELECT (1 + 2 * 3 IS NOT DISTINCT FROM 9) BETWEEN TRUE AND TRUE
+"""
+
+[[cases]]
+description = "IS DISTINCT FROM as lhs of IS"
+input = """
+SELECT (1 IS DISTINCT FROM 2) IS TRUE;
+"""
+formatted = """
+SELECT (1 IS DISTINCT FROM 2) IS TRUE
+"""
+
+[[cases]]
+description = "IS DISTINCT FROM as lhs and rhs of IS DISTINCT FROM"
+input = """
+SELECT (1 IS DISTINCT FROM 2) IS DISTINCT FROM (3 IS DISTINCT FROM 4);
+"""
+formatted = """
+SELECT (1 IS DISTINCT FROM 2) IS DISTINCT FROM (3 IS DISTINCT FROM 4)
+"""

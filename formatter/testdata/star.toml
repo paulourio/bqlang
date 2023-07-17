@@ -1,0 +1,122 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select * from t
+"""
+formatted = """
+SELECT *
+  FROM t
+"""
+
+[[cases]]
+input = """
+select * except (a) from t
+"""
+formatted = """
+SELECT * EXCEPT(a)
+  FROM t
+"""
+
+[[cases]]
+input = """
+select * replace (a+1 as b) from t
+"""
+formatted = """
+SELECT *
+       REPLACE(
+         a + 1 AS b
+       )
+  FROM t
+"""
+
+[[cases]]
+input = """
+select t.* replace (a+1 as b) from t
+"""
+formatted = """
+SELECT t.*
+       REPLACE(
+         a + 1 AS b
+       )
+  FROM t
+"""
+
+[[cases]]
+input = """
+select 123, * except (a,b,c) replace (a+1 as b, b as c, 5 as d), 456
+"""
+formatted = """
+SELECT 123,
+       * EXCEPT(a, b, c)
+       REPLACE(
+         a + 1 AS b,
+         b AS c,
+         5 AS d
+       ),
+       456
+"""
+
+[[cases]]
+input = """
+select func().x.* except(b) replace(1 as d), z.* except(Y)
+"""
+formatted = """
+SELECT FUNC().x.* EXCEPT(b)
+       REPLACE(
+         1 AS d
+       ),
+       z.* EXCEPT(Y)
+"""
+
+[[cases]]
+input = """
+select `func`().x.* except(b) replace(1 as d), z.* except(Y)
+"""
+formatted = """
+SELECT `func`().x.* EXCEPT(b)
+       REPLACE(
+         1 AS d
+       ),
+       z.* EXCEPT(Y)
+"""
+
+[[cases]]
+input = """
+select a.b.c, a.*, (a).*, a.b.*, (a+b).*, f(a.b), f(a.b).c  from A;
+"""
+formatted = """
+SELECT a.b.c,
+       a.*,
+       (a).*,
+       a.b.*,
+       (a + b).*,
+       F(a.b),
+       F(a.b).c
+  FROM A
+"""
+
+[[cases]]
+input = """
+SELECT a. /* this is a comment */ * FROM b
+"""
+formatted = """
+SELECT a.*  /* this is a comment */
+  FROM b
+"""

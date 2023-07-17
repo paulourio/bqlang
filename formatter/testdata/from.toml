@@ -1,0 +1,280 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select a as c, b as d from Table1 as T1 inner join Table2 T2 on(T1.c = T2.c);
+"""
+formatted = """
+SELECT a AS c,
+       b AS d
+  FROM Table1 AS T1
+       INNER JOIN
+       Table2 AS T2
+       ON (T1.c = T2.c)
+"""
+
+[[cases]]
+input = """
+select T1.a as a, T2.b as b from Table1 as T1 left join Table2 T2 using (c, d);
+"""
+formatted = """
+SELECT T1.a AS a,
+       T2.b AS b
+  FROM Table1 AS T1
+       LEFT JOIN
+       Table2 AS T2
+       USING (c, d)
+"""
+
+[[cases]]
+input = """
+select a as x, b as y from Table1 as T1 inner join
+    Table2 T2 on T2.x = T3.y join Table3 as T3 using(c);
+"""
+formatted = """
+SELECT a AS x,
+       b AS y
+  FROM Table1 AS T1
+
+       INNER JOIN
+       Table2 AS T2
+       ON T2.x = T3.y
+
+       JOIN
+       Table3 AS T3
+       USING (c)
+"""
+
+[[cases]]
+input = """
+select T3.a as x, b as y from Table1 as T1 cross join
+    Table2 T2 full outer join Table3 as T3 using(c);
+"""
+formatted = """
+SELECT T3.a AS x,
+       b    AS y
+  FROM Table1 AS T1
+
+       CROSS JOIN
+       Table2 AS T2
+
+       FULL OUTER JOIN
+       Table3 AS T3
+       USING (c)
+"""
+
+[[cases]]
+input = """
+select a as a, b as b from Table1 as T1 inner join
+    (Table2 T2 full join Table3 as T3 on T2.x = T3.y and T2.c = T3.c) using(c);
+"""
+formatted = """
+SELECT a AS a,
+       b AS b
+  FROM Table1 AS T1
+       INNER JOIN
+       (
+         Table2 AS T2
+         FULL JOIN
+         Table3 AS T3
+         ON  T2.x = T3.y
+         AND T2.c = T3.c
+       )
+       USING (c)
+"""
+
+[[cases]]
+input = """
+select T1.a as a, T2.b as b from Table1 T1 cross join Table2 as T2;
+"""
+formatted = """
+SELECT T1.a AS a,
+       T2.b AS b
+  FROM Table1 AS T1
+       CROSS JOIN
+       Table2 AS T2
+"""
+
+[[cases]]
+input = """
+select T1.a as a, T2.b as b from Table1 T1, Table2 as T2, Table3, Table4;
+"""
+formatted = """
+SELECT T1.a AS a,
+       T2.b AS b
+  FROM Table1 AS T1,
+       Table2 AS T2,
+       Table3,
+       Table4
+"""
+
+[[cases]]
+input = """
+select T1.a as a, T2.b as b
+from Table1 T1,
+     (Table2 as T2 full join Table3 T3 on(T1.x = T3.y));
+"""
+formatted = """
+SELECT T1.a AS a,
+       T2.b AS b
+  FROM Table1 AS T1,
+       (
+         Table2 AS T2
+         FULL JOIN
+         Table3 AS T3
+         ON (T1.x = T3.y)
+       )
+"""
+
+[[cases]]
+input = """
+select x, y from Table1 T1, Table2 T2 join Table3 T3 using (x);
+"""
+formatted = """
+SELECT x,
+       y
+  FROM Table1 AS T1,
+       Table2 AS T2
+
+       JOIN
+       Table3 AS T3
+       USING (x)
+"""
+
+[[cases]]
+input = """
+select x, y from Table1 T1 right join Table2 T2 on(T1.x = T2.y), Table3 T3
+"""
+formatted = """
+SELECT x,
+       y
+  FROM Table1 AS T1
+
+       RIGHT JOIN
+       Table2 AS T2
+       ON (T1.x = T2.y),
+       Table3 AS T3
+"""
+
+[[cases]]
+input = """
+select x, y from Table1 T1 natural left outer join Table2 T2 on T1.x = T2.y;
+"""
+formatted = """
+SELECT x,
+       y
+  FROM Table1 AS T1
+       NATURAL LEFT OUTER JOIN
+       Table2 AS T2
+       ON T1.x = T2.y
+"""
+
+[[cases]]
+input = """
+select x + y, true FROM b join c, d join e;
+"""
+formatted = """
+SELECT x + y,
+       TRUE
+  FROM b
+
+       JOIN
+       c,
+       d
+
+       JOIN
+       e
+"""
+
+[[cases]]
+input = """
+select 1
+from a LEFT OUTER JOIN b,
+     (c RIGHT JOIN d),
+     (e FULL JOIN f)
+"""
+formatted = """
+SELECT 1
+  FROM a
+
+       LEFT OUTER JOIN
+       b,
+       (
+         c
+
+         RIGHT JOIN
+         d
+       ),
+       (
+         e
+
+         FULL JOIN
+         f
+       )
+"""
+
+[[cases]]
+input = """
+select * FROM A RIGHT JOIN B FULL JOIN C, D LEFT JOIN E
+"""
+formatted = """
+SELECT *
+  FROM A
+
+       RIGHT JOIN
+       B
+
+       FULL JOIN
+       C,
+       D
+
+       LEFT JOIN
+       E
+"""
+
+[[cases]]
+input = """
+select * from t1 LOOKUP JOIN t2
+"""
+formatted = """
+SELECT *
+  FROM t1
+       LOOKUP JOIN
+       t2
+"""
+
+[[cases]]
+input = """
+select * from t1 HASH JOIN t2
+"""
+formatted = """
+SELECT *
+  FROM t1
+       HASH JOIN
+       t2
+"""
+
+[[cases]]
+input = """
+select 1 a, 'foo' b,
+"""
+formatted = """
+SELECT 1     AS a,
+       'foo' AS b
+"""

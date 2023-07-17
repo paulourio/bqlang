@@ -1,0 +1,94 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+indent_case_when = true
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+SELECT * FROM t FOR SYSTEM_TIME AS OF TIMESTAMP '2011-01-01 12:20:20'
+"""
+formatted = """
+SELECT *
+  FROM t
+       FOR SYSTEM_TIME AS OF TIMESTAMP '2011-01-01 12:20:20'
+"""
+
+[[cases]]
+input = """
+SELECT * FROM t FOR SYSTEM_TIME AS OF TIMESTAMP_ADD(@yesterday, INTERVAL 2 HOUR)
+"""
+formatted = """
+SELECT *
+  FROM t
+       FOR SYSTEM_TIME AS OF TIMESTAMP_ADD(@yesterday, INTERVAL 2 HOUR)
+"""
+
+[[cases]]
+input = """
+SELECT * FROM t FOR SYSTEM_TIME AS OF TIMESTAMP_ADD(@yesterday, INTERVAL @@sysvar2 HOUR)
+"""
+formatted = """
+SELECT *
+  FROM t
+       FOR SYSTEM_TIME AS OF TIMESTAMP_ADD(@yesterday, INTERVAL @@sysvar2 HOUR)
+"""
+
+[[cases]]
+input = """
+SELECT * FROM a.b.c.d.e FOR SYSTEM_TIME AS OF ts
+"""
+formatted = """
+SELECT *
+  FROM a.b.c.d.e
+       FOR SYSTEM_TIME AS OF ts
+"""
+
+[[cases]]
+input = """
+select * from a.b.c.d.e for system_time as of current_timestamp tablesample reservoir(100 rows) repeatable (10)
+"""
+formatted = """
+SELECT *
+  FROM a.b.c.d.e
+       FOR SYSTEM_TIME AS OF CURRENT_TIMESTAMP()
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+input = """
+select * from a.b.c.d.e for system_time as of `current_timestamp` tablesample reservoir(100 rows) repeatable (10)
+"""
+formatted = """
+SELECT *
+  FROM a.b.c.d.e
+       FOR SYSTEM_TIME AS OF `current_timestamp`
+       TABLESAMPLE RESERVOIR (100 ROWS) REPEATABLE(10)
+"""
+
+[[cases]]
+input = """
+select * from a for system_time as of t1 left outer join b for system_time as of t2
+"""
+formatted = """
+SELECT *
+  FROM a
+       FOR SYSTEM_TIME AS OF t1
+       LEFT OUTER JOIN
+       b
+       FOR SYSTEM_TIME AS OF t2
+"""

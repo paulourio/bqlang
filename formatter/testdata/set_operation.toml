@@ -1,0 +1,311 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select abc from T
+UNION ALL
+select 5
+UNION ALL
+select null from T2
+"""
+formatted = """
+SELECT abc
+  FROM T
+ UNION ALL
+SELECT 5
+ UNION ALL
+SELECT NULL
+  FROM T2
+"""
+
+[[cases]]
+input = """
+select 1
+from (select 2 UNION ALL select 3)
+"""
+formatted = """
+SELECT 1
+  FROM (
+         SELECT 2
+          UNION ALL
+         SELECT 3
+       )
+"""
+
+[[cases]]
+input = """
+select 1
+UNION DISTINCT
+select 2
+"""
+formatted = """
+SELECT 1
+ UNION DISTINCT
+SELECT 2
+"""
+
+
+[[cases]]
+input = """
+select 1
+EXCEPT ALL
+select 2
+"""
+formatted = """
+SELECT 1
+EXCEPT ALL
+SELECT 2
+"""
+
+
+[[cases]]
+input = """
+select 1
+EXCEPT DISTINCT
+select 2
+"""
+formatted = """
+SELECT 1
+EXCEPT DISTINCT
+SELECT 2
+"""
+
+[[cases]]
+input = """
+select 1
+INTERSECT ALL
+select 2
+"""
+formatted = """
+   SELECT 1
+INTERSECT ALL
+   SELECT 2
+"""
+
+[[cases]]
+input = """
+select 1
+INTERSECT DISTINCT
+select 2
+"""
+formatted = """
+   SELECT 1
+INTERSECT DISTINCT
+   SELECT 2
+"""
+
+[[cases]]
+input = """
+select 1
+UNION DISTINCT
+select 2
+UNION DISTINCT
+select 1
+"""
+formatted = """
+SELECT 1
+ UNION DISTINCT
+SELECT 2
+ UNION DISTINCT
+SELECT 1
+"""
+
+[[cases]]
+input = """
+select 1
+EXCEPT ALL
+select 2
+EXCEPT ALL
+select 3
+"""
+formatted = """
+SELECT 1
+EXCEPT ALL
+SELECT 2
+EXCEPT ALL
+SELECT 3
+"""
+
+[[cases]]
+input = """
+select 1
+EXCEPT DISTINCT
+select 2
+EXCEPT DISTINCT
+select 1
+"""
+formatted = """
+SELECT 1
+EXCEPT DISTINCT
+SELECT 2
+EXCEPT DISTINCT
+SELECT 1
+"""
+
+[[cases]]
+input = """
+select 1
+INTERSECT ALL
+select 2
+INTERSECT ALL
+select 3
+"""
+formatted = """
+   SELECT 1
+INTERSECT ALL
+   SELECT 2
+INTERSECT ALL
+   SELECT 3
+"""
+
+[[cases]]
+input = """
+select 1
+INTERSECT DISTINCT
+select 2
+INTERSECT DISTINCT
+select 3
+"""
+formatted = """
+   SELECT 1
+INTERSECT DISTINCT
+   SELECT 2
+INTERSECT DISTINCT
+   SELECT 3
+"""
+
+[[cases]]
+input = """
+select 1
+UNION ALL
+(select 2 EXCEPT ALL select 3)
+"""
+formatted = """
+SELECT 1
+ UNION ALL
+(
+  SELECT 2
+  EXCEPT ALL
+  SELECT 3
+)
+"""
+
+[[cases]]
+input = """
+select 1
+INTERSECT ALL
+(select 2 INTERSECT DISTINCT select 3)
+"""
+formatted = """
+   SELECT 1
+INTERSECT ALL
+(
+     SELECT 2
+  INTERSECT DISTINCT
+     SELECT 3
+)
+"""
+
+[[cases]]
+input = """
+select 1
+UNION ALL
+(select 2
+ INTERSECT ALL
+ (select 3 EXCEPT ALL select 4))
+"""
+formatted = """
+SELECT 1
+ UNION ALL
+(
+     SELECT 2
+  INTERSECT ALL
+  (
+    SELECT 3
+    EXCEPT ALL
+    SELECT 4
+  )
+)
+"""
+
+[[cases]]
+input = """
+select 1
+UNION  @{ key = 5 } ALL
+select 2
+"""
+formatted = """
+SELECT 1
+ UNION @{key=5} ALL
+SELECT 2
+"""
+
+[[cases]]
+input = """
+select 1
+INTERSECT  @{ key = 5 } ALL
+select 2
+"""
+formatted = """
+   SELECT 1
+INTERSECT @{key=5} ALL
+   SELECT 2
+"""
+
+[[cases]]
+input = """
+select 1
+EXCEPT  @{ key = 5 } ALL
+select 2
+"""
+formatted = """
+SELECT 1
+EXCEPT @{key=5} ALL
+SELECT 2
+"""
+
+[[cases]]
+input = """
+select 1
+INTERSECT @{ key = 5 } DISTINCT
+select 2
+"""
+formatted = """
+   SELECT 1
+INTERSECT @{key=5} DISTINCT
+   SELECT 2
+"""
+
+[[cases]]
+input = """
+(select 1
+  UNION @{ key = 1 } ALL
+  select 2)
+UNION @{ key = 2 } ALL
+select 3
+"""
+formatted = """
+(
+  SELECT 1
+   UNION @{key=1} ALL
+  SELECT 2
+)
+ UNION @{key=2} ALL
+SELECT 3
+"""

@@ -1,0 +1,500 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+create table t1 as select * from t2;
+"""
+formatted = """
+CREATE TABLE t1
+AS
+SELECT *
+  FROM t2
+"""
+
+[[cases]]
+description = """
+CREATE TABLE LIKE AS
+"""
+input = """
+create table t1 like t2 as select * from t2;
+"""
+formatted = """
+CREATE TABLE t1
+LIKE t2
+AS
+SELECT *
+  FROM t2
+"""
+
+[[cases]]
+description = """
+CREATE TABLE LIKE AS with column list, valid for parser and Resolver will
+catch the co-existence of LIKE and column list.
+"""
+input = """
+create table t1 (x int64) like t2 as select * from t2;
+"""
+formatted = """
+CREATE TABLE t1
+(
+  x INT64
+)
+LIKE t2
+AS
+SELECT *
+  FROM t2
+"""
+
+[[cases]]
+input = """
+create temp table pkg1.`pkg2`.`t 2` as
+select 1 as a;
+"""
+formatted = """
+CREATE TEMPORARY TABLE pkg1.`pkg2`.`t 2`
+AS
+SELECT 1 AS a
+"""
+
+[[cases]]
+input = """
+create public table pkg1.`pkg2`.`t 2` as
+select 1 as a;
+"""
+formatted = """
+CREATE PUBLIC TABLE pkg1.`pkg2`.`t 2`
+AS
+SELECT 1 AS a
+"""
+
+[[cases]]
+input = """
+create private table pkg1.`pkg2`.`t 2` as
+select 1 as a;
+"""
+formatted = """
+CREATE PRIVATE TABLE pkg1.`pkg2`.`t 2`
+AS
+SELECT 1 AS a
+"""
+
+[[cases]]
+input = """
+create temp table pkg1.`pkg2`.`t 2` as
+select 1 from t2 union all select 2 from t3 cross join t4
+"""
+formatted = """
+CREATE TEMPORARY TABLE pkg1.`pkg2`.`t 2`
+AS
+SELECT 1
+  FROM t2
+ UNION ALL
+SELECT 2
+  FROM t3
+       CROSS JOIN
+       t4
+"""
+
+[[cases]]
+description = "WITH goes inside create table."
+input = """
+create table t3 as
+with tt as (select * from KeyValue)
+select * from tt
+"""
+formatted = """
+CREATE TABLE t3
+AS
+WITH
+tt AS (
+SELECT *
+  FROM KeyValue
+)
+SELECT *
+  FROM tt
+"""
+
+[[cases]]
+input = """
+create table t4 options(x=y) as
+with t1 as (select 1), t2 as (select 2)
+select 3
+"""
+formatted = """
+CREATE TABLE t4
+OPTIONS (x=y)
+AS
+WITH
+t1 AS (
+SELECT 1
+),
+t2 AS (
+SELECT 2
+)
+SELECT 3
+"""
+
+[[cases]]
+input = """
+create table tt
+options (x = 1)
+as select 1;
+"""
+formatted = """
+CREATE TABLE tt
+OPTIONS (x=1)
+AS
+SELECT 1
+"""
+
+[[cases]]
+input = """
+create temporary table tt
+options (x = 5, y = 'abc', z = @param, zz = ident, zzz = @@sysvar)
+as select 2;
+"""
+formatted = """
+CREATE TEMPORARY TABLE tt
+OPTIONS (
+  x   = 5,
+  y   = 'abc',
+  z   = @param,
+  zz  = ident,
+  zzz = @@sysvar
+)
+AS
+SELECT 2
+"""
+
+[[cases]]
+input = """
+create table tt
+options ()
+as select 2
+"""
+formatted = """
+CREATE TABLE tt
+OPTIONS ()
+AS
+SELECT 2
+"""
+
+[[cases]]
+input = """
+create table tt
+options (x=5.5, y=a, z=b.c)
+as select 2
+"""
+formatted = """
+CREATE TABLE tt
+OPTIONS (
+  x = 5.5,
+  y = a,
+  z = b.c
+)
+AS
+SELECT 2
+"""
+
+[[cases]]
+input = """
+create table tt
+options (y='b.c', z=`b.c`)
+as select 2
+"""
+formatted = """
+CREATE TABLE tt
+OPTIONS (
+  y = 'b.c',
+  z = `b.c`
+)
+AS
+SELECT 2
+"""
+
+[[cases]]
+description = "Options is a non-reserved keyword so can be used as an identifier."
+input = """
+create table options as select 1 x;
+"""
+formatted = """
+CREATE TABLE options
+AS
+SELECT 1 AS x
+"""
+
+[[cases]]
+description = "This is parsed as a table named options with an options clause."
+input = """
+create table options OPTIONS (x=y) AS select 1 x;
+"""
+formatted = """
+CREATE TABLE options
+OPTIONS (x=y)
+AS
+SELECT 1 AS x
+"""
+
+[[cases]]
+input = """
+create or replace table xyz as (select 1)
+"""
+formatted = """
+CREATE OR REPLACE TABLE xyz
+AS
+(
+  SELECT 1
+)
+"""
+
+[[cases]]
+input = """
+create table if not exists xyz as (select 1)
+"""
+formatted = """
+CREATE TABLE IF NOT EXISTS xyz
+AS
+(
+  SELECT 1
+)
+"""
+
+[[cases]]
+input = """
+create table t as
+with q as (select 1), q2 as (select * from q)
+select * from q2
+"""
+formatted = """
+CREATE TABLE t
+AS
+WITH
+q AS (
+SELECT 1
+),
+q2 AS (
+SELECT *
+  FROM q
+)
+SELECT *
+  FROM q2
+"""
+
+[[cases]]
+description = "Column list for CREATE TABLE AS"
+input = """
+create table t1 (a int64, bbb string) AS SELECT 1 a, 'hi' b;
+"""
+formatted = """
+CREATE TABLE t1
+(
+  a   INT64,
+  bbb STRING
+)
+AS
+SELECT 1    AS a,
+       'hi' AS b
+"""
+
+[[cases]]
+input = """
+create temp table t(param1 int64, param2 int64) as
+select 1, 2, 3
+"""
+formatted = """
+CREATE TEMPORARY TABLE t
+(
+  param1 INT64,
+  param2 INT64
+)
+AS
+SELECT 1, 2, 3
+"""
+
+[[cases]]
+input = """
+create table t1 partition by key, value as
+select key, value from KeyValue
+"""
+formatted = """
+CREATE TABLE t1
+PARTITION BY key, value
+AS
+SELECT key, value
+  FROM KeyValue
+"""
+
+[[cases]]
+description = "CREATE TABLE AS with column list and PARTITION BY"
+input = """
+create table t1 (a int64, bbb string) PARTITION BY b AS SELECT 1 a, 'hi' b;
+"""
+formatted = """
+CREATE TABLE t1
+(
+  a   INT64,
+  bbb STRING
+)
+PARTITION BY b
+AS
+SELECT 1    AS a,
+       'hi' AS b
+"""
+
+[[cases]]
+input = """
+create table t1 cluster by key, value as
+select key, value from KeyValue
+"""
+formatted = """
+CREATE TABLE t1
+CLUSTER BY key, value
+AS
+SELECT key, value
+  FROM KeyValue
+"""
+
+[[cases]]
+description = "CREATE TABLE AS with column list and CLUSTER BY"
+input = """
+create table t1 (a int64, b string) CLUSTER BY b AS SELECT 1 a, 'hi' b;
+"""
+formatted = """
+CREATE TABLE t1
+(
+  a INT64,
+  b STRING
+)
+CLUSTER BY b
+AS
+SELECT 1    AS a,
+       'hi' AS b
+"""
+
+[[cases]]
+description = """
+CREATE TABLE AS with column list, PARTITION BY, CLUSTER BY, and OPTIONS
+"""
+input = """
+create table t1 (a int64, field_name string)
+PARTITION BY field_name CLUSTER BY a OPTIONS (key='value') AS
+SELECT 1 a, 'hi' b;
+"""
+formatted = """
+CREATE TABLE t1
+(
+  a          INT64,
+  field_name STRING
+)
+PARTITION BY field_name
+  CLUSTER BY a
+OPTIONS (key='value')
+AS
+SELECT 1    AS a,
+       'hi' AS b
+"""
+
+[[cases]]
+input = """
+create table t1 (a int64, b string,) as select 1 a, 'foo' b,
+"""
+formatted = """
+CREATE TABLE t1
+(
+  a INT64,
+  b STRING
+)
+AS
+SELECT 1     AS a,
+       'foo' AS b
+"""
+
+[[cases]]
+description = "Table with complex schema."
+input = """
+create table t1 (
+hash_key string not null,
+load_date timestamp,
+business_key string not null,
+elements struct<
+         key string, bar date,
+         elems struct<
+           cod string
+           , values array<
+              struct< key string, amount numeric(19,2) >
+           >
+         >           ,
+         lo date
+       >,
+nums array<int64 not null>,
+nums2 array<bignumeric(34,3) not null> not null,
+nullables array<struct<value float64>>,
+mixed array<struct<struct<b float>, x timestamp>>
+)
+partition by date(load_date) cluster by hash_key
+ as
+ with cte as (select * from abc where true)
+ select 1 a, 'foo' b, from cte
+"""
+formatted = """
+CREATE TABLE t1
+(
+  hash_key     STRING NOT NULL,
+  load_date    TIMESTAMP,
+  business_key STRING NOT NULL,
+  elements     STRUCT<
+                 key   STRING,
+                 bar   DATE,
+                 elems STRUCT<
+                         cod    STRING,
+                         values ARRAY<
+                                  STRUCT<
+                                    key    STRING,
+                                    amount NUMERIC(19, 2)
+                                  >
+                                >
+                       >,
+                 lo    DATE
+               >,
+  nums         ARRAY<INT64 NOT NULL>,
+  nums2        ARRAY<
+                 BIGNUMERIC(34, 3) NOT NULL
+               > NOT NULL,
+  nullables    ARRAY<STRUCT<value FLOAT64>>,
+  mixed        ARRAY<
+                 STRUCT<
+                     STRUCT<b FLOAT>,
+                   x TIMESTAMP
+                 >
+               >
+)
+PARTITION BY DATE(load_date)
+  CLUSTER BY hash_key
+AS
+WITH
+cte AS (
+SELECT *
+  FROM abc
+ WHERE TRUE
+)
+SELECT 1     AS a,
+       'foo' AS b
+  FROM cte
+"""

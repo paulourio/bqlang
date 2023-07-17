@@ -1,0 +1,51 @@
+run:
+  concurrency: 10
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - asasalint
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - cyclop
+    - decorder
+    - dupl
+    - dupword
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - exportloopref
+    - forcetypeassert
+    - gci
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - godot
+    - godox
+    - gofmt
+    - goprintffuncname
+    - gosimple
+    - gosmopolitan
+    - govet
+    - ineffassign
+    - misspell
+    - paralleltest
+    - prealloc
+    - predeclared
+    - reassign
+    - revive
+    - staticcheck
+    - tparallel
+    - typecheck
+    - unparam
+    - unused
+    - wrapcheck
+    - wsl

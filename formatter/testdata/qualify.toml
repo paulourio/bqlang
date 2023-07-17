@@ -1,0 +1,128 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select f1, f2 from T AS QUALIFY
+"""
+formatted = """
+SELECT f1,
+       f2
+  FROM T AS QUALIFY
+"""
+
+[[cases]]
+input = """
+select f1, f2 from T QUALIFY WHERE true
+"""
+formatted = """
+SELECT f1,
+       f2
+  FROM T AS QUALIFY
+ WHERE TRUE
+"""
+
+[[cases]]
+input = """
+select f1, f2 from T WHERE true QUALIFY row_number() OVER (PARTITION BY f2 ORDER BY f3) = 1
+"""
+formatted = """
+ SELECT f1,
+        f2
+   FROM T
+  WHERE TRUE
+QUALIFY ROW_NUMBER() OVER (
+          PARTITION BY f2
+              ORDER BY f3
+        ) = 1
+"""
+
+[[cases]]
+input = """
+select f1, f2 from T GROUP BY f1, f2 QUALIFY row_number() OVER (PARTITION BY f2 ORDER BY f3) = 1
+"""
+formatted = """
+ SELECT f1,
+        f2
+   FROM T
+  GROUP BY f1, f2
+QUALIFY ROW_NUMBER() OVER (
+          PARTITION BY f2
+              ORDER BY f3
+        ) = 1
+"""
+
+[[cases]]
+input = """
+select f1, f2 from T HAVING SUM(f1) < 3 QUALIFY row_number() OVER (PARTITION BY f2 ORDER BY f3) = 1
+"""
+formatted = """
+ SELECT f1,
+        f2
+   FROM T
+ HAVING SUM(f1) < 3
+QUALIFY ROW_NUMBER() OVER (
+          PARTITION BY f2
+              ORDER BY f3
+        ) = 1
+"""
+
+[[cases]]
+input = """
+select f1, f2, f3, row_number() OVER (PARTITION BY f2 ORDER BY f3) as row_num from T WHERE true QUALIFY row_num = 1
+"""
+formatted = """
+ SELECT f1,
+        f2,
+        f3,
+        ROW_NUMBER() OVER (
+          PARTITION BY f2
+              ORDER BY f3
+        ) AS row_num
+   FROM T
+  WHERE TRUE
+QUALIFY row_num = 1
+"""
+
+[[cases]]
+input = """
+select f1, sum(f2) over (partition by f1) as sum_f2
+  from T
+  where f2 < 4
+  group by f1, f2
+  having sum(f3) > 3
+  qualify sum_f2 in (
+    select min(f1)
+      from test
+      group by f1
+      having min(f3) > 3);
+"""
+formatted = """
+ SELECT f1,
+        SUM(f2) OVER (PARTITION BY f1) AS sum_f2
+   FROM T
+  WHERE f2 < 4
+  GROUP BY f1, f2
+ HAVING SUM(f3) > 3
+QUALIFY sum_f2 IN (
+          SELECT MIN(f1)
+            FROM test
+           GROUP BY f1
+          HAVING MIN(f3) > 3
+        )
+"""

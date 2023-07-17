@@ -1,0 +1,730 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_catalog = "BIGQUERY"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = "Inferred return type with int literal."
+input = """
+create function myfunc ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = "CREATE scope modifiers"
+input = """
+create temp function myfunc ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION myfunc()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = "CREATE scope modifiers"
+input = """
+create temporary function `myfunc` ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION `myfunc`()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = "CREATE scope modifiers"
+input = """
+create public function myfunc ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE PUBLIC FUNCTION myfunc()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = "CREATE scope modifiers"
+input = """
+create private function MyFunc ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE PRIVATE FUNCTION MyFunc()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = """
+"temp" and "if not exists"
+"""
+input = """
+create temp function if not exists myfunc ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION IF NOT EXISTS myfunc()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = """
+"or replace"
+"""
+input = """
+create or replace function myfunc ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE OR REPLACE FUNCTION myfunc()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = """
+Function with multi-part name.
+"""
+input = """
+create function mypackage.myfunc ( )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE FUNCTION mypackage.myfunc()
+AS (
+  42
+)
+"""
+
+[[cases]]
+description = """
+Function with options in the end.
+"""
+input = """
+create function `mypackage.myFunc` ( )
+  as ( 42 )
+  options ( a=b, bruce=lee ) ;
+"""
+formatted = """
+CREATE FUNCTION `mypackage.myFunc`()
+AS (
+  42
+)
+OPTIONS (
+  a     = b,
+  bruce = lee
+)
+"""
+
+[[cases]]
+description = """
+Function with options before body.
+"""
+input = """
+create function `mypackage.myfunc` ( )
+  options ( a=b, bruce=lee )
+  as ( 42 ) ;
+"""
+formatted = """
+CREATE FUNCTION `mypackage.myfunc`()
+AS (
+  42
+)
+OPTIONS (
+  a     = b,
+  bruce = lee
+)
+"""
+
+[[cases]]
+description = """
+Inferred return type with statement.
+"""
+input = """
+create function myfunc ( a int64 )
+  as ( if ( a > 0, a, -1 ) ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc(a INT64)
+AS (
+  IF(a > 0, a, -1)
+)
+"""
+
+[[cases]]
+description = """
+Explicit return type with statement.
+"""
+input = """
+create function myfunc ( a int32 )
+  returns int32
+  as ( if ( a > 0, a, -1 ) ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc(a INT32)
+RETURNS INT32
+AS (
+  IF(a > 0, a, -1)
+)
+"""
+
+[[cases]]
+description = """
+Multiple arguments.
+"""
+input = """
+create function myfunc ( x int32, y int32 )
+  returns int32
+  as ( x * y ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc(x INT32, y INT32)
+RETURNS INT32
+AS (
+  x * y
+)
+"""
+
+[[cases]]
+description = """
+Explicit standalone return type.
+Also tests trivially returning an integer.
+"""
+input = """
+create function myfunc (int64 x)
+  returns a.b.c
+  as ( 999 ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc(int64 X)
+RETURNS A.B.C
+AS (
+  999
+)
+"""
+
+[[cases]]
+description = """
+Trivial function that returns a boolean.
+"""
+input = """
+create function myfunc ( )
+  returns boolean
+  as ( true ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc()
+RETURNS BOOLEAN
+AS (
+  TRUE
+)
+"""
+
+[[cases]]
+description = """
+Trivial function that returns a struct.
+"""
+input = """
+create function myfunc ( )
+  returns struct<a string, b int32>
+  as ( STRUCT<a string, b int32>('balloons', 99)
+ ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc()
+RETURNS
+  STRUCT<a STRING, b INT32>
+AS (
+  STRUCT<a STRING, b INT32>('balloons', 99)
+)
+"""
+
+[[cases]]
+description = """
+Trivial function that returns a struct, alternate syntax.
+"""
+input = """
+create function myfunc ( )
+  returns struct<x string, y boolean>
+  as ( ('abc', true) ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc()
+RETURNS
+  STRUCT<x STRING, y BOOLEAN>
+AS (
+  ('abc', TRUE)
+)
+"""
+
+[[cases]]
+description = """
+Trivial function that returns a string
+"""
+input = """
+create function myfunc ( )
+  returns string
+  as ( 'hello world' ) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc()
+RETURNS STRING
+AS (
+  'hello world'
+)
+"""
+
+[[cases]]
+description = "Aggregate function."
+input = """
+create aggregate function myfunc
+          (string not aggregate, s string, int32, i int32 not aggregate)
+  as ( count(*) ) ;
+"""
+formatted = """
+CREATE AGGREGATE FUNCTION myfunc
+(
+    STRING NOT AGGREGATE,
+  s STRING,
+    INT32,
+  i INT32 NOT AGGREGATE
+)
+AS (
+  COUNT(*)
+)
+"""
+
+[[cases]]
+description = "Aggregate function."
+input = """
+create or replace aggregate function if not exists myfunc();
+"""
+formatted = """
+CREATE OR REPLACE AGGREGATE FUNCTION IF NOT EXISTS myfunc()
+"""
+
+[[cases]]
+description = "Aggregate function."
+input = """
+create temp aggregate function if not exists myfunc();
+"""
+formatted = """
+CREATE TEMPORARY AGGREGATE FUNCTION IF NOT EXISTS myfunc()
+"""
+
+[[cases]]
+description = "Aggregate function."
+input = """
+create temp aggregate function myfunc();
+"""
+formatted = """
+CREATE TEMPORARY AGGREGATE FUNCTION myfunc()
+"""
+
+[[cases]]
+description = "Aggregate function."
+input = """
+create or replace temp aggregate function myfunc();
+"""
+formatted = """
+CREATE OR REPLACE TEMPORARY AGGREGATE FUNCTION myfunc()
+"""
+
+[[cases]]
+input = """
+create function myfunc(x interval) returns interval
+as (x)
+"""
+formatted = """
+CREATE FUNCTION myfunc(x INTERVAL)
+RETURNS INTERVAL
+AS (
+  x
+)
+"""
+
+[[cases]]
+description = "Function with complex parameters"
+input = """
+create temp function my_t1 (
+hash_key string,
+load_date timestamp,
+business_key string not aggregate,
+elements struct<
+         key string, bar date,
+         elems struct<
+           cod string
+           , values array<
+              struct< key string, amount numeric(19,2) >
+           >
+         >           ,
+         lo date
+       >,
+nums array<int64>,
+nums2 array<bignumeric(34,3)>,
+nullables array<struct<value float64>>,
+mixed array<struct<struct<b float>, x timestamp>>
+)
+returns struct<values array<struct<cod string, value numeric(1, 2)>> >
+as (
+ case (select 1) when (select 2) then (select 3) end
+)
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION my_t1
+(
+  hash_key     STRING,
+  load_date    TIMESTAMP,
+  business_key STRING NOT AGGREGATE,
+  elements     STRUCT<
+                 key   STRING,
+                 bar   DATE,
+                 elems STRUCT<
+                         cod    STRING,
+                         values ARRAY<
+                                  STRUCT<
+                                    key    STRING,
+                                    amount NUMERIC(19, 2)
+                                  >
+                                >
+                       >,
+                 lo    DATE
+               >,
+  nums         ARRAY<INT64>,
+  nums2        ARRAY<
+                 BIGNUMERIC(34, 3)
+               >,
+  nullables    ARRAY<
+                 STRUCT<value FLOAT64>
+               >,
+  mixed        ARRAY<
+                 STRUCT<
+                     STRUCT<b FLOAT>,
+                   x TIMESTAMP
+                 >
+               >
+)
+RETURNS
+  STRUCT<
+    values ARRAY<
+             STRUCT<
+               cod   STRING,
+               value NUMERIC(1, 2)
+             >
+           >
+  >
+AS (
+  CASE
+    (
+      SELECT 1
+    )
+
+    WHEN
+      (
+        SELECT 2
+      )
+    THEN
+      (
+        SELECT 3
+      )
+
+  END
+)
+"""
+
+[[cases]]
+description = """
+A function where the SELECT list path expression could resolve to a qualifed
+struct field (for an argument struct) or a qualified column name (for a table
+scanned in the FROM clause).
+"""
+input = """
+create function AddFunc(x STRUCT<y INT64>)
+as ((SELECT x.y from (SELECT 1 AS y) AS x))
+"""
+formatted = """
+CREATE FUNCTION AddFunc
+(
+  x STRUCT<y INT64>
+)
+AS (
+  (
+    SELECT x.y
+      FROM (
+             SELECT 1 AS y
+           ) AS x
+  )
+)
+"""
+
+[[cases]]
+description = """
+Query parameter in options.
+"""
+input = """
+create function AddFunc(x int64, y int64) as (x + y)
+options(param1=CONCAT(@test_param_string,'_param'));
+"""
+formatted = """
+CREATE FUNCTION AddFunc(x INT64, y INT64)
+AS (
+  x + y
+)
+OPTIONS (param1=CONCAT(@test_param_string, '_param'))
+"""
+
+[[cases]]
+description = """
+Function with quoted argument names.
+"""
+input = """
+create function fn(`a b` int32, `c d` int32)
+as (`a b` + `c d`)
+"""
+formatted = """
+CREATE FUNCTION fn(`a b` INT32, `c d` INT32)
+AS (
+  `a b` + `c d`
+)
+"""
+
+[[cases]]
+description = """
+A function body with a table reference.
+"""
+input = """
+create function fn() as ((select max(1) as foo from KeyValue));
+"""
+formatted = """
+CREATE FUNCTION fn()
+AS (
+  (
+    SELECT MAX(1) AS foo
+      FROM KeyValue
+  )
+)
+"""
+
+[[cases]]
+description = """
+STRUCT constructor in options.
+"""
+input = """
+create function AddFunc(x int64, y int64) as (x + y)
+options(
+  ui_hints=STRUCT("ui_hints.LegacySemanticType.CURRENCY" as semantic_type,
+                  ("impressions.clicks",
+                   "impressions.clicks.conversions") as paths));
+"""
+formatted = """
+CREATE FUNCTION AddFunc(x INT64, y INT64)
+AS (
+  x + y
+)
+OPTIONS (
+  ui_hints = STRUCT(
+               "ui_hints.LegacySemanticType.CURRENCY" AS semantic_type,
+               ("impressions.clicks", "impressions.clicks.conversions") AS paths
+             )
+)
+"""
+
+[[cases]]
+description = """
+STRUCT constructor with ARRAY constructor in options.
+"""
+input = """
+create function AddFunc(x int64, y int64) as (x + y)
+options(ui_hints=STRUCT("CURRENCY" as semantic_type,
+                        [("impressions.clicks",
+                          "impressions.clicks.conversions"),
+                         ("clicks2", "clicks2.conversions")] as paths));
+"""
+formatted = """
+CREATE FUNCTION AddFunc(x INT64, y INT64)
+AS (
+  x + y
+)
+OPTIONS (
+  ui_hints = STRUCT(
+               "CURRENCY" AS semantic_type,
+               [
+                 ("impressions.clicks", "impressions.clicks.conversions"),
+                 ("clicks2", "clicks2.conversions")
+               ] AS paths
+             )
+)
+"""
+
+[[cases]]
+description = """
+Test that deprecation warnings come out in both the resolved AST and in the
+analyzer warnings.
+"""
+input = """
+create function myfunc(msg zetasql_test__.SimpleProto3Message )
+  returns int64 as (deprecation_warning()) ;
+"""
+formatted = """
+CREATE FUNCTION myfunc(msg ZETASQL_TEST__.SIMPLEPROTO3MESSAGE)
+RETURNS INT64
+AS (
+  deprecation_warning()
+)
+"""
+
+[[cases]]
+description = """
+Struct return type (b/28942765).
+"""
+input = """
+CREATE TEMPORARY FUNCTION MakeStruct(x INT64, y STRING)
+RETURNS STRUCT<x INT64, y STRING> AS (STRUCT(x + 5, SUBSTR(y, 0, 10)));
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION MakeStruct(x INT64, y STRING)
+RETURNS
+  STRUCT<x INT64, y STRING>
+AS (
+  STRUCT(x + 5, SUBSTR(y, 0, 10))
+)
+"""
+
+[[cases]]
+description = """
+Struct return type with field type coercion (b/28942765).
+"""
+input = """
+CREATE TEMPORARY FUNCTION StructFromLarger(first INT64, second INT64)
+RETURNS STRUCT<x DOUBLE> AS
+(IF(first > second, STRUCT(first), STRUCT(second)));
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION StructFromLarger(first INT64, second INT64)
+RETURNS
+  STRUCT<x DOUBLE>
+AS (
+  IF(
+    first > second,
+    STRUCT(first),
+    STRUCT(second)
+  )
+)
+"""
+
+[[cases]]
+description = """
+SQL function with sub-select.
+"""
+input = """
+CREATE TEMPORARY FUNCTION CountPositiveElements(arr ARRAY<INT64>)
+RETURNS INT64 AS ((SELECT COUNT(*) FROM UNNEST(arr) AS x WHERE x > 0));
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION CountPositiveElements
+(
+  arr ARRAY<INT64>
+)
+RETURNS INT64
+AS (
+  (
+    SELECT COUNT(*)
+      FROM UNNEST(arr) AS x
+     WHERE x > 0
+  )
+)
+"""
+
+[[cases]]
+description = """
+Multiple arguments including stuct and array types.
+"""
+input = """
+create function
+  mypackage.myfunc( a int32, b struct<x string, y int32>, c array<boolean> )
+  returns string language testlang ;
+"""
+formatted = """
+CREATE FUNCTION mypackage.myfunc
+(
+  a INT32,
+  b STRUCT<x STRING, y INT32>,
+  c ARRAY<BOOLEAN>
+)
+RETURNS STRING
+LANGUAGE testlang
+"""
+
+[[cases]]
+description = """
+Multi-line function body.
+"""
+input = """
+create function fn( s string )
+returns string not deterministic language testlang
+as \""" return
+  "presto!" + s + '\\n';
+\"""
+"""
+formatted = """
+CREATE FUNCTION fn(s STRING)
+RETURNS STRING
+NOT DETERMINISTIC
+LANGUAGE testlang
+AS \""" return
+  "presto!" + s + '\\n';
+\"""
+"""
+
+[[cases]]
+description = """
+Function with options.
+"""
+input = """
+create function fn( s string )
+returns string deterministic language testlang as "return 'a';"
+options ( a=b, bruce=lee, c=@test_param_string ) ;
+"""
+formatted = """
+CREATE FUNCTION fn(s STRING)
+RETURNS STRING
+DETERMINISTIC
+LANGUAGE testlang
+AS "return 'a';"
+OPTIONS (
+  a     = b,
+  bruce = lee,
+  c     = @test_param_string
+)
+"""

@@ -1,0 +1,149 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select a AND b AND c OR d
+"""
+formatted = """
+SELECT a AND b AND c OR d
+"""
+
+[[cases]]
+input = """
+select a AND b AND (c OR d)
+"""
+formatted = """
+SELECT     a
+       AND b
+       AND (c OR d)
+"""
+
+[[cases]]
+input = """
+select x + y,  x + y*z
+"""
+formatted = """
+SELECT x + y, x + y * z
+"""
+
+[[cases]]
+input = """
+select x+y/z, (x+y)/z
+"""
+formatted = """
+SELECT x + y / z, (x + y) / z
+"""
+
+[[cases]]
+input = """
+select x/y + y*x/z
+"""
+formatted = """
+SELECT x / y + y * x / z
+"""
+
+[[cases]]
+input = """
+select x/y * z/x;
+"""
+formatted = """
+SELECT x / y * z / x
+"""
+
+[[cases]]
+input = """
+select x/y/z
+"""
+formatted = """
+SELECT x / y / z
+"""
+
+[[cases]]
+input = """
+select (x+y) * z, x + y*z
+"""
+formatted = """
+SELECT (x + y) * z, x + y * z
+"""
+
+[[cases]]
+input = """
+select (x+y) > z or a < b
+"""
+formatted = """
+SELECT    (x + y) > z
+       OR a < b
+"""
+
+[[cases]]
+input = """
+select not a or f(x)
+"""
+formatted = """
+SELECT NOT a OR F(x)
+"""
+
+[[cases]]
+input = """
+select x+y+z, a+b-c+d
+"""
+formatted = """
+SELECT x + y + z, a + b - c + d
+"""
+
+[[cases]]
+input = """
+select - -+-++3;
+"""
+formatted = """
+SELECT - -+-++3
+"""
+
+[[cases]]
+input = """
+select not(not a not like b);
+"""
+formatted = """
+SELECT NOT NOT a NOT LIKE b
+"""
+
+[[cases]]
+input = """
+select a like b and c like d;
+"""
+formatted = """
+SELECT a LIKE b AND c LIKE d
+"""
+
+[[cases]]
+input = """
+select a like b or c like d;
+"""
+formatted = """
+SELECT a LIKE b OR c LIKE d
+"""
+
+[[cases]]
+input = """
+select a like b or c;
+"""
+formatted = """
+SELECT a LIKE b OR c
+"""

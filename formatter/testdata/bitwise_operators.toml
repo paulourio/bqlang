@@ -1,0 +1,57 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+select 1<<3&2>>1|~2^2
+"""
+formatted = """
+SELECT 1 << 3 & 2 >> 1 | ~2 ^ 2
+"""
+
+[[cases]]
+input = """
+select a[1<<a[1&a*a[1]]]
+"""
+formatted = """
+SELECT a[1 << a[1 & a * a[1]]]
+"""
+
+[[cases]]
+input = """
+select ~a+b
+"""
+formatted = """
+SELECT ~a + b
+"""
+
+[[cases]]
+input = """
+select ~a>>b<<c
+"""
+formatted = """
+SELECT ~a >> b << c
+"""
+
+[[cases]]
+input = """
+select a | b OR c AND d & e ^ f
+"""
+formatted = """
+SELECT a | b OR c AND d & e ^ f
+"""

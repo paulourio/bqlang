@@ -1,0 +1,129 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "CASE expr"
+input = """
+WITH Numbers AS (
+  SELECT 90 as A, 2 as B UNION ALL
+  SELECT 50, 8 UNION ALL
+  SELECT 60, 6 UNION ALL
+  SELECT 50, 10
+)
+SELECT
+  A,
+  B,
+  CASE A
+    WHEN 90 THEN 'red'
+    WHEN 50 THEN 'blue'
+    ELSE 'green'
+    END
+    AS result
+FROM Numbers
+"""
+formatted = """
+WITH
+  Numbers AS (
+    SELECT 90 AS A,
+           2  AS B
+     UNION ALL
+    SELECT 50, 8
+     UNION ALL
+    SELECT 60, 6
+     UNION ALL
+    SELECT 50, 10
+  )
+SELECT A,
+       B,
+       CASE A
+         WHEN 90 THEN 'red'
+         WHEN 50 THEN 'blue'
+                 ELSE 'green'
+       END AS result
+  FROM Numbers
+"""
+
+[[cases]]
+description = "COALESCE"
+input = """
+SELECT COALESCE('A', 'B', 'C') as result;
+SELECT COALESCE(NULL, 'B', 'C') as result
+"""
+formatted = """
+SELECT COALESCE('A', 'B', 'C') AS result;
+
+SELECT COALESCE(NULL, 'B', 'C') AS result;
+"""
+
+[[cases]]
+description = "IF"
+input = """
+WITH Numbers AS (
+  SELECT 10 as A, 20 as B UNION ALL
+  SELECT 50, 30 UNION ALL
+  SELECT 60, 60
+)
+SELECT
+  A,
+  B,
+  IF(A < B, 'true', 'false') AS result
+FROM Numbers
+"""
+formatted = """
+WITH
+  Numbers AS (
+    SELECT 10 AS A,
+           20 AS B
+     UNION ALL
+    SELECT 50, 30
+     UNION ALL
+    SELECT 60, 60
+  )
+SELECT A,
+       B,
+       IF(A < B, 'true', 'false') AS result
+  FROM Numbers
+"""
+
+[[cases]]
+description = "IFNULL"
+input = """
+SELECT IFNULL(NULL, 0) as result;
+SELECT IFNULL(10, 0) as result
+"""
+formatted = """
+SELECT IFNULL(NULL, 0) AS result;
+
+SELECT IFNULL(10, 0) AS result;
+"""
+
+[[cases]]
+description = "IFNULL"
+input = """
+SELECT NULLIF(0, 0) as result;
+SELECT NULLIF(10, 0) as result
+"""
+formatted = """
+SELECT NULLIF(0, 0) AS result;
+
+SELECT NULLIF(10, 0) AS result;
+"""
