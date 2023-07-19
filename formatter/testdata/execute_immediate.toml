@@ -1,0 +1,202 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE "select 1";
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  'select 1'
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE CONCAT("a", "b");
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  CONCAT('a', 'b')
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE x;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  x
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE @x;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  @x
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE @@x;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  @@x
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE x
+INTO a;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  x
+INTO a
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE x INTO a, b;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  x
+INTO a, b
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE x USING 4 AS y;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  x
+USING
+  4 AS y
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE x USING 4 AS y, 5 AS z;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  x
+USING
+  4 AS y,
+  5 AS z
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE x USING @t AS y;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  x
+USING
+  @t AS y
+"""
+
+[[cases]]
+input = """
+EXECUTE IMMEDIATE x USING @@t AS y;
+"""
+formatted = """
+EXECUTE IMMEDIATE
+  x
+USING
+  @@t AS y
+"""
+
+[[cases]]
+input = """
+-- create some variables
+DECLARE book_name STRING DEFAULT 'Ulysses';
+DECLARE book_year INT64 DEFAULT 1922;
+DECLARE first_date INT64;
+
+-- Create a temporary table called Books.
+EXECUTE IMMEDIATE
+  "CREATE TEMP TABLE Books (title STRING, publish_date INT64)";
+
+-- Add a row for Hamlet (less secure)
+EXECUTE IMMEDIATE
+  "INSERT INTO Books (title, publish_date) VALUES('Hamlet', 1599)";
+
+-- add a row for Ulysses, using the variables declared and the ? placeholder
+EXECUTE IMMEDIATE
+  "INSERT INTO Books (title, publish_date) VALUES(?, ?)"
+  USING book_name, book_year;
+
+-- add a row for Emma, using the identifier placeholder
+EXECUTE IMMEDIATE
+  "INSERT INTO Books (title, publish_date) VALUES(@name, @year)"
+  USING 1815 as year, "Emma" as name;
+
+-- add a row for Middlemarch, using an expression
+EXECUTE IMMEDIATE
+  CONCAT(
+    "INSERT INTO Books (title, publish_date)", "VALUES('Middlemarch', 1871)"
+  );
+
+-- save the publish date of the first book, Hamlet, to a variable called
+-- first_date
+EXECUTE IMMEDIATE "SELECT publish_date FROM Books LIMIT 1" INTO first_date;
+"""
+formatted = """
+-- create some variables
+DECLARE book_name STRING DEFAULT 'Ulysses';
+DECLARE book_year INT64 DEFAULT 1922;
+DECLARE first_date INT64;
+
+-- Create a temporary table called Books.
+EXECUTE IMMEDIATE
+  'CREATE TEMP TABLE Books (title STRING, publish_date INT64)';
+
+-- Add a row for Hamlet (less secure)
+EXECUTE IMMEDIATE
+  "INSERT INTO Books (title, publish_date) VALUES('Hamlet', 1599)";
+
+-- add a row for Ulysses, using the variables declared and the ? placeholder
+EXECUTE IMMEDIATE
+  'INSERT INTO Books (title, publish_date) VALUES(?, ?)'
+USING
+  book_name,
+  book_year;
+
+-- add a row for Emma, using the identifier placeholder
+EXECUTE IMMEDIATE
+  'INSERT INTO Books (title, publish_date) VALUES(@name, @year)'
+USING
+  1815 AS year,
+  'Emma' AS name;
+
+-- add a row for Middlemarch, using an expression
+EXECUTE IMMEDIATE
+  CONCAT('INSERT INTO Books (title, publish_date)', "VALUES('Middlemarch', 1871)");
+
+-- save the publish date of the first book, Hamlet, to a variable called
+-- first_date
+EXECUTE IMMEDIATE
+  'SELECT publish_date FROM Books LIMIT 1'
+INTO first_date;
+"""

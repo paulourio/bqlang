@@ -222,6 +222,14 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitDropTableFunctionStatement(m, d)
 	case *ast.DropStatementNode:
 		p.VisitDropStatement(m, d)
+	case *ast.ExecuteIntoClauseNode:
+		p.VisitExecuteIntoClause(m, d)
+	case *ast.ExecuteImmediateStatementNode:
+		p.VisitExecuteImmediateStatement(m, d)
+	case *ast.ExecuteUsingArgumentNode:
+		p.VisitExecuteUsingArgument(m, d)
+	case *ast.ExecuteUsingClauseNode:
+		p.VisitExecuteUsingClause(m, d)
 	case *ast.ExpressionSubqueryNode:
 		p.VisitExpressionSubquery(m, d)
 	case *ast.ExtractExpressionNode:

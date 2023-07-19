@@ -63,6 +63,50 @@ func (p *Printer) VisitCallStatement(n *ast.CallStatementNode, d Data) {
 	p.movePast(n)
 }
 
+func (p *Printer) VisitExecuteIntoClause(n *ast.ExecuteIntoClauseNode, d Data) {
+	p.moveBefore(n)
+	p.print(p.keyword("INTO"))
+	p.accept(n.Identifiers(), d)
+}
+
+func (p *Printer) VisitExecuteImmediateStatement(n *ast.ExecuteImmediateStatementNode, d Data) {
+	p.moveBefore(n)
+	p.println(p.keyword("EXECUTE IMMEDIATE"))
+	p.incDepth()
+	// In the future we may try to format the SQL contents when they're
+	// a single string containing a valid SQL.
+	p.accept(n.SQL(), d)
+	p.println("")
+	p.decDepth()
+	p.lnaccept(n.IntoClause(), d)
+	p.lnaccept(n.UsingClause(), d)
+}
+
+func (p *Printer) VisitExecuteUsingArgument(n *ast.ExecuteUsingArgumentNode, d Data) {
+	p.moveBefore(n)
+	p.accept(n.Expression(), d)
+	p.accept(n.Alias(), d)
+}
+
+func (p *Printer) VisitExecuteUsingClause(n *ast.ExecuteUsingClauseNode, d Data) {
+	p.moveBefore(n)
+	p.println(p.keyword("USING"))
+	p.incDepth()
+
+	args := n.Arguments()
+
+	for i, a := range args {
+		if i > 0 {
+			p.println(",")
+		}
+
+		p.accept(a, d)
+	}
+
+	p.println("")
+	p.decDepth()
+}
+
 func (p *Printer) VisitIfStatement(n *ast.IfStatementNode, d Data) {
 	p.moveBefore(n)
 

@@ -124,8 +124,9 @@ Formatting without comment is always idempotent, but formatting code preserving 
 
 - [x] DECLARE
 - [x] SET
-- [ ] EXECUTE IMMEDIATE
-- [ ] BEGIN...[EXCEPTION...]END
+- [x] EXECUTE IMMEDIATE
+- [x] BEGIN...END
+- [ ] BEGIN...EXCEPTION...END
 - [ ] CASE [search_expression]
 - [x] IF
 - [ ] Labels
