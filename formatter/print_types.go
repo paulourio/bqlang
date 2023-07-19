@@ -2,6 +2,7 @@
 package formatter
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/goccy/go-zetasql/ast"
@@ -248,4 +249,100 @@ func (p *Printer) VisitStructType(n *ast.StructTypeNode, d Data) {
 	pp.accept(n.TypeParameters(), d)
 	pp.accept(n.Collate(), d)
 	p.print(pp.unnest())
+}
+
+func (p *Printer) VisitTemplatedParameterType(n *ast.TemplatedParameterTypeNode, d Data) {
+	p.moveBefore(n)
+
+	switch n.TemplatedKind() {
+	case ast.TemplatedUninitialized:
+		p.print(p.keyword("<UNINITIALIZED TEMPLATED KIND>"))
+	case ast.TemplatedAnyType:
+		p.print(p.keyword("ANY TYPE"))
+	case ast.TemplatedAnyProto:
+		p.print(p.keyword("ANY PROTO"))
+	case ast.TemplatedAnyEnum:
+		p.print(p.keyword("ANY ENUM"))
+	case ast.TemplatedAnyStruct:
+		p.print(p.keyword("ANY STRUCT"))
+	case ast.TemplatedAnyArray:
+		p.print(p.keyword("ANY ARRAY"))
+	case ast.TemplatedAnyTable:
+		p.print(p.keyword("ANY TABLE"))
+	}
+
+	p.movePast(n)
+}
+
+// This is a patch to format TemplatedParameterTypes and Table types,
+// which are not accessible in go-zetasql for now.
+func (p *Printer) patchedVisitTemplatedParameterType(n *ast.FunctionParameterNode) {
+	input := p.nodeErasedInput(n)
+	inputUpcase := strings.ToUpper(input)
+	field := p.toString(n.Name(), nil)
+
+	i := strings.Index(inputUpcase, strings.ToUpper(field))
+
+	// We just print whatever we find after the field name as a typename.
+	p.print(p.typename(strings.TrimSpace(input[i+len(field)+1:])))
+
+	// Check if this is one of the expected bug.
+	types := []string{"ANY TYPE", "ANY PROTO", "ANY ENUM", "ANY STRUCT",
+		"ANY ARRAY", "ANY TABLE", "TABLE"}
+
+	for _, candidate := range types {
+		if strings.Contains(inputUpcase, candidate) {
+			return
+		}
+	}
+
+	panic(fmt.Sprintf("Unsupported type in input %#v", input))
+}
+
+func (p *Printer) VisitTVFSchema(n *ast.TVFSchemaNode, d Data) {
+	cols := n.Columns()
+	simple := len(cols) <= 4 && allTrue(mapIsSimpleTVFSchema(cols))
+
+	pp := p.nest()
+	pp.moveBefore(n)
+
+	p1 := pp.nest()
+
+	for i, e := range cols {
+		if i > 0 {
+			p1.print(",")
+
+			if !simple {
+				p1.println("")
+			}
+		}
+
+		p1.accept(e, d)
+	}
+
+	pp.print(pp.keyword("RETURNS"))
+
+	if simple {
+		pp.print(pp.keyword("TABLE") + "<" + p1.unnestLeft() + ">")
+	} else {
+		pp.println("")
+		pp.incDepth()
+		pp.println(pp.keyword("TABLE") + "<")
+		pp.incDepth()
+		pp.println(p1.unnestLeft())
+		pp.decDepth()
+		pp.print(">")
+		pp.incDepth()
+		pp.decDepth()
+	}
+
+	p.print(pp.unnestLeft())
+}
+
+func (p *Printer) VisitTVFSchemaColumn(n *ast.TVFSchemaColumnNode, d Data) {
+	pp := p.nest()
+	pp.moveBefore(n)
+	pp.accept(n.Name(), d)
+	pp.acceptNested(n.Type(), d)
+	p.print(pp.String())
 }

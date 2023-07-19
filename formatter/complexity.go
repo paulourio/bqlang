@@ -291,6 +291,16 @@ func mapIsSimpleFunctionParameters(params []*ast.FunctionParameterNode) []bool {
 	return r
 }
 
+func mapIsSimpleTVFSchema(cols []*ast.TVFSchemaColumnNode) []bool {
+	r := make([]bool, 0, len(cols))
+
+	for _, c := range cols {
+		r = append(r, isSimpleType(c.Type()))
+	}
+
+	return r
+}
+
 func mapIsSimpleOptionsList(n *ast.OptionsListNode) []bool {
 	entries := n.OptionsEntries()
 	r := make([]bool, 0, len(entries))

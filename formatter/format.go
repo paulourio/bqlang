@@ -14,8 +14,9 @@ import (
 )
 
 type SQLFormatter struct {
-	Logger       *log.Logger
-	PrintOptions *PrintOptions
+	Logger        *log.Logger
+	PrintOptions  *PrintOptions
+	ParserOptions *zetasql.ParserOptions
 }
 
 func NewBigQueryFormatter(options ...func(*SQLFormatter)) *SQLFormatter {
@@ -26,6 +27,12 @@ func NewBigQueryFormatter(options ...func(*SQLFormatter)) *SQLFormatter {
 	}
 
 	return f
+}
+
+func WithParserOptions(p *zetasql.ParserOptions) func(*SQLFormatter) {
+	return func(f *SQLFormatter) {
+		f.ParserOptions = p
+	}
 }
 
 func WithPrintOptions(p *PrintOptions) func(*SQLFormatter) {
@@ -88,9 +95,17 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 		}
 	}
 
+	var parserOpts *zetasql.ParserOptions
+
+	if f.ParserOptions == nil {
+		parserOpts = bqlang.DefaultParserOptions()
+	} else {
+		parserOpts = f.ParserOptions
+	}
+
 	root, err := zetasql.ParseScript(
 		input,
-		bqlang.DefaultParserOptions(),
+		parserOpts,
 		zetasql.ErrorMessageMultiLineWithCaret)
 	if err != nil {
 		f.error("Failed to ParseScript: %v", err)

@@ -66,8 +66,46 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 	}
 
 	switch m := n.(type) {
+	case *ast.AddColumnActionNode:
+		p.VisitAddColumnAction(m, d)
+	case *ast.AddConstraintActionNode:
+		p.VisitAddConstraintAction(m, d)
 	case *ast.AliasNode:
 		p.VisitAlias(m, d)
+	case *ast.AlterActionListNode:
+		p.VisitAlterActionList(m, d)
+	case *ast.AlterAllRowAccessPoliciesStatementNode:
+		p.VisitAlterAllRowAccessPoliciesStatement(m, d)
+	case *ast.AlterColumnDropDefaultActionNode:
+		p.VisitAlterColumnDropDefaultAction(m, d)
+	case *ast.AlterColumnDropNotNullActionNode:
+		p.VisitAlterColumnDropNotNullAction(m, d)
+	case *ast.AlterColumnOptionsActionNode:
+		p.VisitAlterColumnOptionsAction(m, d)
+	case *ast.AlterColumnSetDefaultActionNode:
+		p.VisitAlterColumnSetDefaultAction(m, d)
+	case *ast.AlterColumnTypeActionNode:
+		p.VisitAlterColumnTypeAction(m, d)
+	case *ast.AlterConstraintEnforcementActionNode:
+		p.VisitAlterConstraintEnforcementAction(m, d)
+	case *ast.AlterConstraintSetOptionsActionNode:
+		p.VisitAlterConstraintSetOptionsAction(m, d)
+	case *ast.AlterDatabaseStatementNode:
+		p.VisitAlterDatabaseStatement(m, d)
+	case *ast.AlterEntityStatementNode:
+		p.VisitAlterEntityStatement(m, d)
+	case *ast.AlterMaterializedViewStatementNode:
+		p.VisitAlterMaterializedViewStatement(m, d)
+	case *ast.AlterPrivilegeRestrictionStatementNode:
+		p.VisitAlterPrivilegeRestrictionStatement(m, d)
+	case *ast.AlterRowAccessPolicyStatementNode:
+		p.VisitAlterRowAccessPolicyStatement(m, d)
+	case *ast.AlterSchemaStatementNode:
+		p.VisitAlterSchemaStatement(m, d)
+	case *ast.AlterTableStatementNode:
+		p.VisitAlterTableStatement(m, d)
+	case *ast.AlterViewStatementNode:
+		p.VisitAlterViewStatement(m, d)
 	case *ast.AnalyticFunctionCallNode:
 		p.VisitAnalyticFunctionCall(m, d)
 	case *ast.AndExprNode:
@@ -80,6 +118,8 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitArrayType(m, d)
 	case *ast.AssignmentFromStructNode:
 		p.VisitAssignmentFromStruct(m, d)
+	case *ast.BeginEndBlockNode:
+		p.VisitBeginEndBlock(m, d)
 	case *ast.BetweenExpressionNode:
 		p.VisitBetweenExpression(m, d)
 	case *ast.BigNumericLiteralNode:
@@ -92,6 +132,8 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitBoolLiteral(m, d)
 	case *ast.BytesLiteralNode:
 		p.VisitBytesLiteral(m, d)
+	case *ast.CallStatementNode:
+		p.VisitCallStatement(m, d)
 	case *ast.CaseNoValueExpressionNode:
 		p.VisitCaseNoValueExpression(m, d)
 	case *ast.CaseValueExpressionNode:
@@ -118,16 +160,24 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitColumnSchema(m, d)
 	case *ast.CopyDataSourceNode:
 		p.VisitCopyDataSource(m, d)
+	case *ast.CreateExternalTableStatementNode:
+		p.VisitCreateExternalTableStatement(m, d)
 	case *ast.CreateFunctionStatementNode:
 		p.VisitCreateFunctionStatement(m, d)
 	case *ast.CreateMaterializedViewStatementNode:
 		p.VisitCreateMaterializedViewStatement(m, d)
-	case *ast.CreateTableStatementNode:
-		p.VisitCreateTableStatement(m, d)
+	case *ast.CreateProcedureStatementNode:
+		p.VisitCreateProcedureStatement(m, d)
+	case *ast.CreateRowAccessPolicyStatementNode:
+		p.VisitCreateRowAccessPolicyStatement(m, d)
 	case *ast.CreateSchemaStatementNode:
 		p.VisitCreateSchemaStatement(m, d)
 	case *ast.CreateSnapshotTableStatementNode:
 		p.VisitCreateSnapshotTableStatement(m, d)
+	case *ast.CreateTableStatementNode:
+		p.VisitCreateTableStatement(m, d)
+	case *ast.CreateTableFunctionStatementNode:
+		p.VisitCreateTableFunctionStatement(m, d)
 	case *ast.CreateViewStatementNode:
 		p.VisitCreateViewStatement(m, d)
 	case *ast.DateOrTimeLiteralNode:
@@ -146,6 +196,30 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitDotStar(m, d)
 	case *ast.DotStarWithModifiersNode:
 		p.VisitDotStarWithModifiers(m, d)
+	case *ast.DropAllRowAccessPoliciesStatementNode:
+		p.VisitDropAllRowAccessPoliciesStatement(m, d)
+	case *ast.DropColumnActionNode:
+		p.VisitDropColumnAction(m, d)
+	case *ast.DropConstraintActionNode:
+		p.VisitDropConstraintAction(m, d)
+	case *ast.DropEntityStatementNode:
+		p.VisitDropEntityStatement(m, d)
+	case *ast.DropFunctionStatementNode:
+		p.VisitDropFunctionStatement(m, d)
+	case *ast.DropMaterializedViewStatementNode:
+		p.VisitDropMaterializedViewStatement(m, d)
+	case *ast.DropPrimaryKeyActionNode:
+		p.VisitDropPrimaryKeyAction(m, d)
+	case *ast.DropPrivilegeRestrictionStatementNode:
+		p.VisitDropPrivilegeRestrictionStatement(m, d)
+	case *ast.DropRowAccessPolicyStatementNode:
+		p.VisitDropRowAccessPolicyStatement(m, d)
+	case *ast.DropSearchIndexStatementNode:
+		p.VisitDropSearchIndexStatement(m, d)
+	case *ast.DropSnapshotTableStatementNode:
+		p.VisitDropSnapshotTableStatement(m, d)
+	case *ast.DropTableFunctionStatementNode:
+		p.VisitDropTableFunctionStatement(m, d)
 	case *ast.DropStatementNode:
 		p.VisitDropStatement(m, d)
 	case *ast.ExpressionSubqueryNode:
@@ -154,6 +228,12 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitExtractExpression(m, d)
 	case *ast.FloatLiteralNode:
 		p.VisitFloatLiteral(m, d)
+	case *ast.FilterUsingClauseNode:
+		p.VisitFilterUsingClause(m, d)
+	case *ast.ForeignKeyNode:
+		p.VisitForeignKey(m, d)
+	case *ast.ForeignKeyReferenceNode:
+		p.VisitForeignKeyReference(m, d)
 	case *ast.FormatClauseNode:
 		p.VisitFormatClause(m, d)
 	case *ast.ForSystemTimeNode:
@@ -168,6 +248,10 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitFunctionParameter(m, d)
 	case *ast.FunctionParametersNode:
 		p.VisitFunctionParameters(m, d)
+	case *ast.GranteeListNode:
+		p.VisitGranteeList(m, d)
+	case *ast.GrantToClauseNode:
+		p.VisitGrantToClause(m, d)
 	case *ast.GroupByNode:
 		p.VisitGroupBy(m, d)
 	case *ast.GroupingItemNode:
@@ -258,14 +342,24 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitPivotValue(m, d)
 	case *ast.PivotValueListNode:
 		p.VisitPivotValueList(m, d)
+	case *ast.PrimaryKeyNode:
+		p.VisitPrimaryKey(m, d)
+	case *ast.PrimaryKeyColumnAttributeNode:
+		p.VisitPrimaryKeyColumnAttribute(m, d)
 	case *ast.QualifyNode:
 		p.VisitQualify(m, d)
 	case *ast.QueryNode:
 		p.VisitQuery(m, d)
 	case *ast.QueryStatementNode:
 		p.VisitQueryStatement(m, d)
+	case *ast.RenameColumnActionNode:
+		p.VisitRenameColumnAction(m, d)
+	case *ast.RenameToClauseNode:
+		p.VisitRenameToClause(m, d)
 	case *ast.RepeatableClauseNode:
 		p.VisitRepeatableClause(m, d)
+	case *ast.ReturnStatementNode:
+		p.VisitReturnStatement(m, d)
 	case *ast.RollupNode:
 		p.VisitRollup(m, d)
 	case *ast.SampleClauseNode:
@@ -274,6 +368,8 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitSampleSize(m, d)
 	case *ast.SampleSuffixNode:
 		p.VisitSampleSuffix(m, d)
+	case *ast.SetCollateClauseNode:
+		p.VisitSetCollateClause(m, d)
 	case *ast.ScriptBaseNode:
 		p.VisitScript(m, d)
 	case *ast.SelectNode:
@@ -284,6 +380,8 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitSelectColumn(m, d)
 	case *ast.SelectListNode:
 		p.VisitSelectList(m, d)
+	case *ast.SetOptionsActionNode:
+		p.VisitSetOptionsAction(m, d)
 	case *ast.SetOperationNode:
 		p.VisitSetOperation(m, d)
 	case *ast.SimpleColumnSchemaNode:
@@ -324,12 +422,18 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitSystemVariableExpr(m, d)
 	case *ast.TableClauseNode:
 		p.VisitTableClause(m, d)
+	case *ast.TableConstraintBaseNode:
+		p.VisitTableConstraint(m, d)
 	case *ast.TableElementListNode:
 		p.VisitTableElementList(m, d)
 	case *ast.TablePathExpressionNode:
 		p.VisitTablePathExpression(m, d)
 	case *ast.TableSubqueryNode:
 		p.VisitTableSubquery(m, d)
+	case *ast.TemplatedParameterTypeNode:
+		p.VisitTemplatedParameterType(m, d)
+	case *ast.TrucateStatementNode:
+		p.VisitTruncateStatement(m, d)
 	case *ast.TVFArgumentNode:
 		p.VisitTVFArgument(m, d)
 	case *ast.TVFNode:
@@ -378,8 +482,12 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitWithClause(m, d)
 	case *ast.WithClauseEntryNode:
 		p.VisitWithClauseEntry(m, d)
+	case *ast.WithConnectionClauseNode:
+		p.VisitWithConnectionClause(m, d)
 	case *ast.WithOffsetNode:
 		p.VisitWithOffset(m, d)
+	case *ast.WithPartitionColumnsClauseNode:
+		p.VisitWithPartitionColumnsClause(m, d)
 	case *ast.WithWeightNode:
 		p.VisitWithWeight(m, d)
 

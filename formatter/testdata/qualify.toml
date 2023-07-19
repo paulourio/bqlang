@@ -1,5 +1,8 @@
 [setup]
 
+[setup.language_options]
+disable_qualify_as_keyword = true
+
 [setup.print_options]
 soft_max_cols = 80
 newline_before_clause = true

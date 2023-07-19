@@ -1,0 +1,258 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+drop SCHEMA bar;
+"""
+formatted = """
+DROP SCHEMA bar
+"""
+
+[[cases]]
+input = """
+drop SCHEMA if exists bar;
+"""
+formatted = """
+DROP SCHEMA IF EXISTS bar
+"""
+
+[[cases]]
+input = """
+drop SCHEMA bar cascade;
+"""
+formatted = """
+DROP SCHEMA bar CASCADE
+"""
+
+[[cases]]
+input = """
+drop SCHEMA if exists bar cascade;
+"""
+formatted = """
+DROP SCHEMA IF EXISTS bar CASCADE
+"""
+
+[[cases]]
+input = """
+drop table bar;
+"""
+formatted = """
+DROP TABLE bar
+"""
+
+[[cases]]
+input = """
+drop table if exists bar;
+"""
+formatted = """
+DROP TABLE IF EXISTS bar
+"""
+
+[[cases]]
+input = """
+drop table bar.baz;
+"""
+formatted = """
+DROP TABLE bar.baz
+"""
+
+[[cases]]
+input = """
+drop table if exists bar.baz;
+"""
+formatted = """
+DROP TABLE IF EXISTS bar.baz
+"""
+
+[[cases]]
+input = """
+drop materialized view a;
+"""
+formatted = """
+DROP MATERIALIZED VIEW a
+"""
+
+[[cases]]
+input = """
+drop materialized view if exists a;
+"""
+formatted = """
+DROP MATERIALIZED VIEW IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop materialized view if exists a.b;
+"""
+formatted = """
+DROP MATERIALIZED VIEW IF EXISTS a.b
+"""
+
+[[cases]]
+input = """
+drop snapshot table a;
+"""
+formatted = """
+DROP SNAPSHOT TABLE a
+"""
+
+[[cases]]
+input = """
+drop SNAPSHOT TABLE if exists a;
+"""
+formatted = """
+DROP SNAPSHOT TABLE IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop external table a;
+"""
+formatted = """
+DROP EXTERNAL TABLE a
+"""
+
+[[cases]]
+input = """
+drop external table if exists a;
+"""
+formatted = """
+DROP EXTERNAL TABLE IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop view a;
+"""
+formatted = """
+DROP VIEW a
+"""
+
+[[cases]]
+input = """
+drop view if exists a;
+"""
+formatted = """
+DROP VIEW IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop materialized view a;
+"""
+formatted = """
+DROP MATERIALIZED VIEW a
+"""
+
+[[cases]]
+input = """
+drop materialized view if exists a;
+"""
+formatted = """
+DROP MATERIALIZED VIEW IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop FUNCTION a;
+"""
+formatted = """
+DROP FUNCTION a
+"""
+
+[[cases]]
+input = """
+drop FUNCTION if exists a;
+"""
+formatted = """
+DROP FUNCTION IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop table FUNCTION a;
+"""
+formatted = """
+DROP TABLE FUNCTION a
+"""
+
+[[cases]]
+input = """
+drop table FUNCTION if exists a;
+"""
+formatted = """
+DROP TABLE FUNCTION IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop PROCEDURE a;
+"""
+formatted = """
+DROP PROCEDURE a
+"""
+
+[[cases]]
+input = """
+drop PROCEDURE if exists a;
+"""
+formatted = """
+DROP PROCEDURE IF EXISTS a
+"""
+
+[[cases]]
+input = """
+drop ROW ACCESS POLICY a ON b;
+"""
+formatted = """
+DROP ROW ACCESS POLICY a ON b
+"""
+
+[[cases]]
+input = """
+drop ROW ACCESS POLICY if exists policy_name ON a;
+"""
+formatted = """
+DROP ROW ACCESS POLICY IF EXISTS policy_name ON a
+"""
+
+[[cases]]
+input = """
+DROP ALL ROW ACCESS POLICIES ON table_name;
+"""
+formatted = """
+DROP ALL ROW ACCESS POLICIES ON table_name
+"""
+
+[[cases]]
+input = """
+drop search index a;
+"""
+formatted = """
+DROP SEARCH INDEX a
+"""
+
+[[cases]]
+input = """
+drop search index if exists a;
+"""
+formatted = """
+DROP SEARCH INDEX IF EXISTS a
+"""

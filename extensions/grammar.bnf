@@ -165,7 +165,7 @@ TemplateSetBlock:
     ;
 
 TemplateSetBlockPrefix:
-      template_block_start "set" "="
+      template_block_start "set"
       << NewTemplateSetBlock($0) >>
     | TemplateSetBlockPrefix Element
       << WithExtraChild($0, $1) >>

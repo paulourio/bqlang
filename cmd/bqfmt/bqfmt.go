@@ -64,12 +64,12 @@ func main() {
 		FunctionCatalog:               formatter.BigQueryCatalog,
 		FunctionNameStyle:             formatter.AsIs,
 		BoolStyle:                     formatter.UpperCase,
-		BytesStyle:                    formatter.AsIsStringStyle,
+		BytesStyle:                    formatter.PreferSingleQuote,
 		HexStyle:                      formatter.UpperCase,
 		IdentifierStyle:               formatter.AsIs,
 		KeywordStyle:                  formatter.UpperCase,
 		NullStyle:                     formatter.UpperCase,
-		StringStyle:                   formatter.AsIsStringStyle,
+		StringStyle:                   formatter.PreferSingleQuote,
 		TypeStyle:                     formatter.UpperCase,
 	}
 

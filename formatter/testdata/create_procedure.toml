@@ -1,0 +1,210 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = "valid minimum statement"
+input = """
+CREATE PROCEDURE procedure_name()
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name()
+BEGIN
+END
+"""
+
+[[cases]]
+description = "valid mininum statement with all optional clause"
+input = """
+CREATE OR REPLACE TEMP PROCEDURE IF NOT EXISTS procedure_name()
+OPTIONS()
+BEGIN
+END;
+"""
+formatted = """
+CREATE OR REPLACE TEMPORARY PROCEDURE IF NOT EXISTS procedure_name()
+OPTIONS ()
+BEGIN
+END
+"""
+
+[[cases]]
+description = "valid statement with options"
+input = """
+CREATE PROCEDURE procedure_name()
+OPTIONS(a=1, b="2")
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name()
+OPTIONS (
+  a = 1,
+  b = "2"
+)
+BEGIN
+END
+"""
+
+[[cases]]
+description = "valid statement with multiple arguments"
+input = """
+CREATE PROCEDURE procedure_name(
+  param_a string,
+  param_b int32,
+  param_c numeric,
+  param_d table<int32, int32>,
+  param_e ANY TYPE,
+  OUT param_f ANY TYPE,
+  param_g ANY TABLE,
+  INOUT param_h ANY TABLE
+  )
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name
+(
+        param_a STRING,
+        param_b INT32,
+        param_c NUMERIC,
+        param_d TABLE<INT32, INT32>,
+        param_e ANY TYPE,
+  OUT   param_f ANY TYPE,
+        param_g ANY TABLE,
+  INOUT param_h ANY TABLE
+)
+BEGIN
+END
+"""
+
+[[cases]]
+description = "valid statement with procedure body"
+input = """
+CREATE PROCEDURE procedure_name(OUT param_a string)
+BEGIN
+  DECLARE a int32;
+  SET a = 1;
+  SET param_a = "test";
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name(OUT param_a STRING)
+BEGIN
+  DECLARE a INT32;
+
+  SET a = 1;
+  SET param_a = "test";
+END
+"""
+
+[[cases]]
+description = "valid parameter with empty mode and backtick-quoted parameter name"
+input = """
+CREATE PROCEDURE procedure_name (`OUT` int32)
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name(`OUT` INT32)
+BEGIN
+END
+"""
+
+[[cases]]
+description = """
+valid parameter with mode and "OUT" as parameter name
+"""
+input = """
+CREATE PROCEDURE procedure_name (OUT OUT int32)
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name(OUT OUT INT32)
+BEGIN
+END
+"""
+
+[[cases]]
+description = """
+valid parameter with IN/OUT/INOUT and empty mode
+"""
+input = """
+CREATE PROCEDURE procedure_name (IN param_a int32)
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name(IN param_a INT32)
+BEGIN
+END
+"""
+
+[[cases]]
+description = """
+valid parameter with IN/OUT/INOUT and empty mode
+"""
+input = """
+CREATE PROCEDURE procedure_name (OUT param_a int32)
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name(OUT param_a INT32)
+BEGIN
+END
+"""
+
+[[cases]]
+description = """
+valid parameter with IN/OUT/INOUT and empty mode
+"""
+input = """
+CREATE PROCEDURE procedure_name (INOUT param_a int32)
+BEGIN
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name(INOUT param_a INT32)
+BEGIN
+END
+"""
+
+[[cases]]
+description = """
+procedure with return statement
+"""
+input = """
+CREATE PROCEDURE procedure_name (param_a int32)
+BEGIN
+  IF param_a > 0 THEN
+    RETURN;
+  END IF;
+END;
+"""
+formatted = """
+CREATE PROCEDURE procedure_name(param_a INT32)
+BEGIN
+  IF param_a > 0 THEN
+    RETURN;
+  END IF;
+END
+"""

@@ -648,11 +648,11 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `TemplateSetBlockPrefix : template_block_start "set" "="	<< NewTemplateSetBlock(X[0]) >>`,
+		String: `TemplateSetBlockPrefix : template_block_start "set"	<< NewTemplateSetBlock(X[0]) >>`,
 		Id:         "TemplateSetBlockPrefix",
 		NTType:     6,
 		Index:      63,
-		NumSymbols: 3,
+		NumSymbols: 2,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return NewTemplateSetBlock(X[0])
 		},

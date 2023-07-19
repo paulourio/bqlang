@@ -26,7 +26,12 @@ type TestDataFile struct {
 
 // Setup defines the default configuration for a test case.
 type Setup struct {
-	PrintOptions *formatter.PrintOptions `toml:"print_options"`
+	LanguageOptions *LanguageOptions        `toml:"language_options"`
+	PrintOptions    *formatter.PrintOptions `toml:"print_options"`
+}
+
+type LanguageOptions struct {
+	DisableQualifyAsKeyword bool `toml:"disable_qualify_as_keyword"`
 }
 
 // Case is a single test case specification.

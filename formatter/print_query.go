@@ -1804,8 +1804,7 @@ func (p *Printer) VisitSelect(n *ast.SelectNode, d Data) {
 	}
 
 	if w != nil {
-		pp2.printClause(pp2.keyword("WHERE"))
-		pp2.accept(w, d)
+		pp2.lnaccept(w, d)
 	}
 
 	if gb != nil {
@@ -2085,7 +2084,7 @@ func canGroupStatements(last, curr ast.Kind) bool {
 		return false
 	}
 
-	if curr == ast.VariableDeclaration {
+	if curr == ast.VariableDeclaration || curr == ast.SingleAssignment {
 		return true
 	}
 
@@ -2117,12 +2116,17 @@ func (p *Printer) VisitTableElementList(n *ast.TableElementListNode, d Data) {
 
 	pp := p.nest()
 
+	var prev ast.Node
+
 	for i, e := range n.Elements() {
 		if i > 0 {
-			pp.println(",")
+			pp.print(",")
+			pp.movePastLine(prev)
+			pp.println("")
 		}
 
 		pp.accept(e, d)
+		prev = e
 	}
 
 	p.print(pp.unnestLeft())
@@ -2322,14 +2326,6 @@ func (p *Printer) VisitTVF(n *ast.TVFNode, d Data) {
 	p.movePast(n)
 }
 
-func (p *Printer) VisitTVFSchema(n *ast.TVFSchemaNode, d Data) {
-	p.moveBefore(n)
-}
-
-func (p *Printer) VisitTVFSchemaColumn(n *ast.TVFSchemaColumnNode, d Data) {
-	p.moveBefore(n)
-}
-
 func (p *Printer) VisitTypeParameterList(n *ast.TypeParameterListNode, d Data) {
 	p.moveBefore(n)
 	p.print("(")
@@ -2462,6 +2458,7 @@ func (p *Printer) VisitUsingClause(n *ast.UsingClauseNode, d Data) {
 
 func (p *Printer) VisitWhereClause(n *ast.WhereClauseNode, d Data) {
 	p.moveBefore(n)
+	p.print(p.keyword("WHERE"))
 
 	e := n.Expression()
 

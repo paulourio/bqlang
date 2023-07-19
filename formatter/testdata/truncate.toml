@@ -1,0 +1,40 @@
+# Tests cases of examples from BigQuery's documentation.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 1
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "TRUNCATE TABLE"
+input = """
+TRUNCATE TABLE dataset.Inventory
+"""
+formatted = """
+TRUNCATE TABLE dataset.Inventory
+"""
+
+[[cases]]
+description = "Specify partition with WHERE expression"
+input = """
+TRUNCATE TABLE foo WHERE bar > 3;
+"""
+formatted = """
+TRUNCATE TABLE foo
+WHERE bar > 3
+"""

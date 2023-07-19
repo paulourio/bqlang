@@ -16,6 +16,53 @@ func (p *Printer) VisitAssignmentFromStruct(n *ast.AssignmentFromStructNode, d D
 	p.movePast(n)
 }
 
+func (p *Printer) VisitBeginEndBlock(n *ast.BeginEndBlockNode, d Data) {
+	p.moveBefore(n)
+	p.println(p.keyword("BEGIN"))
+	p.incDepth()
+	p.accept(n.StatementListNode(), d)
+	p.movePast(n)
+	p.println("")
+	p.decDepth()
+	p.println(p.keyword("END"))
+}
+
+func (p *Printer) VisitCallStatement(n *ast.CallStatementNode, d Data) {
+	p.moveBefore(n)
+	p.print(p.keyword("CALL"))
+	p.accept(n.ProcedureName(), d)
+
+	args := n.Arguments()
+	simple := len(args) < 4 && allTrue(mapIsSimpleTVFArguments(args))
+
+	pp := p.nest()
+
+	for i, a := range args {
+		if i > 0 {
+			pp.print(",")
+
+			if !simple {
+				pp.println("")
+			}
+		}
+
+		pp.accept(a, d)
+	}
+
+	if simple {
+		p.print("(" + pp.unnestLeft() + ")")
+	} else {
+		p.println("(")
+		p.incDepth()
+		p.print(pp.unnestLeft())
+		p.println("")
+		p.decDepth()
+		p.print(")")
+	}
+
+	p.movePast(n)
+}
+
 func (p *Printer) VisitIfStatement(n *ast.IfStatementNode, d Data) {
 	p.moveBefore(n)
 
@@ -86,6 +133,11 @@ func (p *Printer) VisitParameterAssignment(n *ast.ParameterAssignmentNode, d Dat
 	p.print("=")
 	p.accept(n.Expression(), d)
 	p.moveBefore(n)
+}
+
+func (p *Printer) VisitReturnStatement(n *ast.ReturnStatementNode, d Data) {
+	p.moveBefore(n)
+	p.print(p.keyword("RETURN"))
 }
 
 func (p *Printer) VisitSystemVariableAssignment(n *ast.SystemVariableAssignmentNode, d Data) {

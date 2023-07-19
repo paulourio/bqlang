@@ -1,0 +1,179 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "AUTO"
+indentation = 1
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = """
+create row access policy on t1 grant to ('foo@google.com') filter using(c1 = 'foo');
+"""
+formatted = """
+CREATE ROW ACCESS POLICY
+ON t1
+GRANT TO ('foo@google.com')
+FILTER USING (c1 = 'foo')
+"""
+
+[[cases]]
+description = ""
+input = """
+create row access policy p1 on t1 grant to ('mdbuser/bar') filter using(c2 = 'foo');
+"""
+formatted = """
+CREATE ROW ACCESS POLICY p1
+ON p1
+GRANT TO ('mdbuser/bar')
+FILTER USING (c2 = 'foo')
+"""
+
+[[cases]]
+description = ""
+input = """
+create row access policy on t1 grant to ('foo@google.com', 'mdbgroup/bar') filter using(c1);
+"""
+formatted = """
+CREATE ROW ACCESS POLICY
+ON t1
+GRANT TO (
+  'foo@google.com',
+  'mdbgroup/bar'
+)
+FILTER USING (c1)
+"""
+
+[[cases]]
+input = """
+create row access policy on n1.t1 grant to ('foo@google.com', 'mdbgroup/bar') filter using(c1);
+"""
+formatted = """
+CREATE ROW ACCESS POLICY
+ON n1.t1
+GRANT TO (
+  'foo@google.com',
+  'mdbgroup/bar'
+)
+FILTER USING (c1)
+"""
+
+[[cases]]
+input = """
+create row access policy on n1.t1 grant to ('foo@google.com', 'mdbgroup/bar') filter using(1);
+"""
+formatted = """
+CREATE ROW ACCESS POLICY
+ON n1.t1
+GRANT TO (
+  'foo@google.com',
+  'mdbgroup/bar'
+)
+FILTER USING (1)
+"""
+
+[[cases]]
+description = "GRANT TO clause is optional"
+input = """
+create row access policy p1 on t1 filter using(true);
+"""
+formatted = """
+CREATE ROW ACCESS POLICY p1
+ON p1
+FILTER USING (TRUE)
+"""
+
+[[cases]]
+description = "Test that new keywords are all optional."
+input = """
+create row policy p1 on t1
+grant to ("bar@google.com")
+using (region = "us");
+"""
+formatted = """
+CREATE ROW ACCESS POLICY p1
+ON p1
+GRANT TO ("bar@google.com")
+FILTER USING (region = "us")
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""
+
+[[cases]]
+description = ""
+input = """
+"""
+formatted = """
+"""

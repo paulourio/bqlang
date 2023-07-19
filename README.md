@@ -9,9 +9,6 @@ I develop this tooling mainly for use with BigQuery.
 #### Supported features
 
 - [x] Qualify
-
-    The `QUALIFY` clause is supported only when used in conjunction with `WHERE`, or `GROUP BY` or `HAVING` clause.
-
 - [x] `IS DISTINCT FROM`
 - [x] Consecutive `ON ...`
 - [x] `JSON` type
@@ -20,6 +17,7 @@ I develop this tooling mainly for use with BigQuery.
 
 - [x] Allow dashes in table name (ie, `FROM project-name.dataset.table` without escaping)
 - [x] Create view with column list (`CREATE VIEW vw(field1, field2)`)
+- [x] Remote Functions
 
 #### Types
 
@@ -27,6 +25,10 @@ I develop this tooling mainly for use with BigQuery.
 - [x] ARRAY
 - [x] STRUCT
 - [x] GEOGRAPHY
+- [x] Templated types
+
+    Not supported ideally, but it works on my machine.
+    Currently, go-zetasql has a bug to parse these types but we have a workaround to make it work.
 
 #### Literals
 
@@ -68,46 +70,48 @@ Formatting without comment is always idempotent, but formatting code preserving 
     - [x] CREATE TABLE COPY
     - [x] CREATE SNAPSHOT TABLE
     - [x] CREATE TABLE CLONE
-    - [x] CREATE VIEW - supports all except column list with options (`CREATE VIEW t(field OPTIONS(...))`)
+    - [x] CREATE VIEW
+    - [ ] CREATE VIEW defined with column list with options (`CREATE VIEW t(field OPTIONS(...))`) - not supported by go-zetasql
     - [x] CREATE MATERIALIZED VIEW
     - [x] CREATE EXTERNAL TABLE
+    - [x] CREATE EXTERNAL TABLE WITH CONNECTION
     - [x] CREATE FUNCTION
     - [x] CREATE TABLE FUNCTION
-    - [ ] CREATE PROCEDURE
-    - [ ] CREATE ROW ACCESS POLICY
-    - [ ] CREATE CAPACITY
-    - [ ] CREATE RESERVATION
-    - [ ] CREATE ASSIGNMENT
-    - [ ] CREATE SEARCH INDEX
-    - [ ] ALTER SCHEMA
-    - [ ] ALTER TABLE
-    - [ ] ALTER COLUMN
-    - [ ] ALTER VIEW
-    - [ ] ALTER MATERIALIZED VIEW
-    - [ ] ALTER ORGANIZATION
-    - [ ] ALTER PROJECT
-    - [ ] ALTER BI_CAPACITY
-    - [ ] ALTER CAPACITY
-    - [ ] DROP SCHEMA
-    - [ ] DROP TABLE
-    - [ ] DROP SNAPSHOT TABLE
-    - [ ] DROP EXTERNAL TABLE
-    - [ ] DROP VIEW
-    - [ ] DROP MATERIALIZED VIEW
-    - [ ] DROP FUNCTION
-    - [ ] DROP TABLE FUNCTION
-    - [ ] DROP PROCEDURE
-    - [ ] DROP ROW ACCESS POLICY
-    - [ ] DROP CAPACITY
-    - [ ] DROP RESERVATION
-    - [ ] DROP ASSIGNMENT
-    - [ ] DROP SEARCH INDEX
+    - [x] CREATE PROCEDURE
+    - [x] CREATE ROW ACCESS POLICY
+    - [ ] CREATE CAPACITY - not supported by go-zetasql
+    - [ ] CREATE RESERVATION - not supported by go-zetasql
+    - [ ] CREATE ASSIGNMENT - not supported by go-zetasql
+    - [ ] CREATE SEARCH INDEX - not supported by go-zetasql
+    - [x] ALTER SCHEMA
+    - [x] ALTER TABLE
+    - [x] ALTER COLUMN
+    - [x] ALTER VIEW
+    - [x] ALTER MATERIALIZED VIEW
+    - [ ] ALTER ORGANIZATION - not supported by go-zetaslq
+    - [ ] ALTER PROJECT - not supported by go-zetaslq
+    - [ ] ALTER BI_CAPACITY - not supported by go-zetaslq
+    - [ ] ALTER CAPACITY - not supported by go-zetaslq
+    - [x] DROP SCHEMA
+    - [x] DROP TABLE
+    - [x] DROP SNAPSHOT TABLE
+    - [x] DROP EXTERNAL TABLE
+    - [x] DROP VIEW
+    - [x] DROP MATERIALIZED VIEW
+    - [x] DROP FUNCTION
+    - [x] DROP TABLE FUNCTION
+    - [x] DROP PROCEDURE
+    - [x] DROP ROW ACCESS POLICY
+    - [ ] DROP CAPACITY - not supported by go-zetasql
+    - [ ] DROP RESERVATION - not supported by go-zetasql
+    - [ ] DROP ASSIGNMENT - not supported by go-zetasql
+    - [x] DROP SEARCH INDEX
 
 #### Data Manipulation Language (DML)
 
 - [x] INSERT
 - [x] DELETE
-- [ ] TRUNCATE TABLE
+- [x] TRUNCATE TABLE
 - [x] UPDATE
 - [x] MERGE
 
@@ -140,7 +144,7 @@ Formatting without comment is always idempotent, but formatting code preserving 
     - [ ] ROLLBACK TRANSACTION
 - [ ] RAISE
 - [ ] RETURN
-- [ ] CALL
+- [x] CALL
 
 #### Export and load statements
 

@@ -166,6 +166,17 @@ Script [0-60]
 
 [[cases]]
 input = """
+{%- set abc = path.to.value -%}
+{%- set abc = path.to.value -%}
+"""
+dump = """
+Script [0-63]
+  TemplateSetBlock [0-31]
+  TemplateSetBlock [32-63]
+"""
+
+[[cases]]
+input = """
 {% set = value -%}
 
 {{ statement }}
@@ -187,10 +198,10 @@ dump = """
 Script [0-255]
   TemplateSetBlock [0-18]
   TemplateVariable [20-35]
-  TemplateForBlock [49-217]
-    TemplateForBlock [71-148]
-      TemplateIfBlock [108-134]
-    TemplateIfBlock [162-205]
+  TemplateForBlock [49-227]
+    TemplateForBlock [71-159]
+      TemplateIfBlock [108-143]
+    TemplateIfBlock [162-214]
   TemplateVariable [246-255]
 """
 

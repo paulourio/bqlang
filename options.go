@@ -11,18 +11,17 @@ func DefaultParserOptions() *zetasql.ParserOptions {
 }
 
 func DefaultLanguageOptions() *zetasql.LanguageOptions {
-	lo := zetasql.NewLanguageOptions()
+	lang := zetasql.NewLanguageOptions()
 
-	lo.EnableLanguageFeature(zetasql.FeatureV13Qualify)
-	lo.EnableLanguageFeature(zetasql.FeatureV13IsDistinct)
-	lo.EnableLanguageFeature(zetasql.FeatureV13AllowConsecutiveOn)
-	lo.EnableLanguageFeature(zetasql.FeatureJsonType)
-	lo.EnableLanguageFeature(zetasql.FeatureV13AllowDashesInTableName)
-	lo.EnableLanguageFeature(zetasql.FeatureCreateViewWithColumnList)
-	// lo.EnableLanguageFeature(zetasql.FeatureJsonArrayFunctions)
-	// lo.EnableLanguageFeature(zetasql.FeatureJsonLegacyParse)
-	// lo.EnableLanguageFeature(zetasql.FeatureJsonNoValidation)
-	// lo.EnableLanguageFeature(zetasql.FeatureJsonValueExtractionFunctions)
+	lang.EnableLanguageFeature(zetasql.FeatureCreateExternalTableWithConnection)
+	lang.EnableLanguageFeature(zetasql.FeatureCreateViewWithColumnList)
+	lang.EnableLanguageFeature(zetasql.FeatureJsonType)
+	lang.EnableLanguageFeature(zetasql.FeatureTemplateFunctions)
+	lang.EnableLanguageFeature(zetasql.FeatureV13AllowConsecutiveOn)
+	lang.EnableLanguageFeature(zetasql.FeatureV13AllowDashesInTableName)
+	lang.EnableLanguageFeature(zetasql.FeatureV13IsDistinct)
+	lang.EnableLanguageFeature(zetasql.FeatureV13Qualify)
+	lang.EnableLanguageFeature(zetasql.FeatureV13RemoteFunction)
 
-	return lo
+	return lang
 }

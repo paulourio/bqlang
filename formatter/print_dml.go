@@ -259,6 +259,20 @@ func (p *Printer) VisitMergeWhenClause(n *ast.MergeWhenClauseNode, d Data) {
 	p.movePast(n)
 }
 
+func (p *Printer) VisitTruncateStatement(n *ast.TrucateStatementNode, d Data) {
+	p.moveBefore(n)
+	p.print(p.keyword("TRUNCATE TABLE"))
+	p.accept(n.TargetPath(), d)
+
+	if w := n.Where(); w != nil {
+		p.println("")
+		p.print(p.keyword("WHERE"))
+		p.accept(n.Where(), d)
+	}
+
+	p.movePast(n)
+}
+
 func (p *Printer) VisitUpdateItemList(n *ast.UpdateItemListNode, d Data) {
 	p.moveBefore(n)
 

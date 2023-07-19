@@ -50,7 +50,6 @@ DECLARE x STRING(10);
 
 -- This is a valid assignment to x.
 SET x = 'hello';
-
 -- This assignment to x violates the type parameter constraint and results in an OUT_OF_RANGE error.
 SET x = 'this string is too long';
 

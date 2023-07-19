@@ -8,6 +8,8 @@ import (
 	"path"
 	"testing"
 
+	"github.com/goccy/go-zetasql"
+	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/formatter"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,6 +51,7 @@ func testCase(t *testing.T, f *TestDataFile, c *Case) bool {
 
 	bqfmt := formatter.NewBigQueryFormatter(
 		formatter.WithLogger(logger),
+		formatter.WithParserOptions(getParserOpts(f)),
 		formatter.WithPrintOptions(f.Setup.PrintOptions),
 	)
 
@@ -93,4 +96,23 @@ func testCase(t *testing.T, f *TestDataFile, c *Case) bool {
 	}
 
 	return false
+}
+
+func getParserOpts(f *TestDataFile) *zetasql.ParserOptions {
+	parser := bqlang.DefaultParserOptions()
+
+	if f.Setup.LanguageOptions == nil {
+		return parser
+	}
+
+	lang := parser.LanguageOptions()
+	opts := f.Setup.LanguageOptions
+
+	if opts.DisableQualifyAsKeyword {
+		lang.EnableReservableKeyword("QUALIFY", false)
+	}
+
+	parser.SetLanguageOptions(lang)
+
+	return parser
 }
