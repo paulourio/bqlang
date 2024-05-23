@@ -101,71 +101,73 @@ SELECT key1,  -- key2,
        id = 1  /* description */
 """
 
-# [[cases]]
-# input = """
-# -- 1
-# select /* 2 */ key1, /* 3 */
-#        -- 4
-#        key2,
-#        /* 5 */  FROM /* 6 */ table /* 7 */
-#        -- 8
-#   where -- 9
-#         expr -- 10
-#         -- 11
-# group by -- 12
-#         row_number() over (/* partition by 1 */) = 1 -- 13
-#         -- 15
-#   having -- 16
-#           expr1 -- 17
-#           -- 18
-#   qualify -- 19
-#            1 -- 20
-#           -- 21
-#   window -- 22
-#         name AS (), -- 23
-#         name2 AS ( /* aaa */ )-- 23a
-#         -- 24
-#   order by -- 25
-#         expr -- 26
-#         -- 27
-#   limit -- 28
-#         1 -- 29
-#         -- 30
-# ;
-# """
-# formatted = """
-# -- 1
-#  SELECT /* 2 */ key1,
-#         /* 3 */
-#         -- 4
-#         key2 /* 5 */
-#    FROM /* 6 */ table  /* 7 */
-#         -- 8
-#   WHERE -- 9
-#         expr  -- 10
-#         -- 11
-#   GROUP BY -- 12
-#            ROW_NUMBER() OVER (/* partition by 1 */) = 1  -- 13
-#         -- 15
-#  HAVING -- 16
-#         expr1  -- 17
-#         -- 18
-# QUALIFY -- 19
-#         1  -- 20
-#         -- 21
-#  WINDOW -- 22
-#         name AS (),
-#         -- 23
-#         name2 AS ()  /* aaa */
-#         -- 23a
-#         -- 24
-#   ORDER BY -- 25
-#            expr  -- 26
-#         -- 27
-#   LIMIT -- 28
-#         1  -- 29
-# -- 30
-# """
+# This case should be improved.  Currently, between some blocks make the overall
+# indentation inconsistent.
+[[cases]]
+input = """
+-- 1
+select /* 2 */ key1, /* 3 */
+       -- 4
+       key2,
+       /* 5 */  FROM /* 6 */ table /* 7 */
+       -- 8
+  where -- 9
+        expr -- 10
+        -- 11
+group by -- 12
+        row_number() over (/* partition by 1 */) = 1 -- 13
+        -- 15
+  having -- 16
+          expr1 -- 17
+          -- 18
+  qualify -- 19
+           1 -- 20
+          -- 21
+  window -- 22
+        name AS (), -- 23
+        name2 AS ( /* aaa */ )-- 23a
+        -- 24
+  order by -- 25
+        expr -- 26
+        -- 27
+  limit -- 28
+        1 -- 29
+        -- 30
+;
+"""
+formatted = """
+-- 1
+SELECT /* 2 */ key1,  /* 3 */
+       -- 4
+       key2
+       /* 5 */
+  FROM /* 6 */ table  /* 7 */
+       -- 8
+ WHERE -- 9
+       expr  -- 10
+-- 11
+  GROUP BY -- 12
+           ROW_NUMBER() OVER (/* partition by 1 */) = 1  -- 13
+        -- 15
+ HAVING -- 16
+        expr1  -- 17
+        -- 18
+QUALIFY -- 19
+        1  -- 20
+        -- 21
+ WINDOW -- 22
+        name AS (),
+        -- 23
+        name2 AS ()  /* aaa */
+        -- 23a
+        -- 24
+  ORDER BY -- 25
+           expr  -- 26
+        -- 27
+  LIMIT -- 28
+        1  -- 29
+-- 30
+"""
 
 [[cases]]
 input = """

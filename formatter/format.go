@@ -8,7 +8,7 @@ import (
 
 	// "github.com/charmbracelet/log"
 
-	"github.com/goccy/go-zetasql"
+	zetasql "github.com/goccy/go-zetasql"
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/extensions"
 )

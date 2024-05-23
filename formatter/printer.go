@@ -120,6 +120,8 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitAssignmentFromStruct(m, d)
 	case *ast.BeginEndBlockNode:
 		p.VisitBeginEndBlock(m, d)
+	case *ast.BeginStatementNode:
+		p.VisitBeginStatementNode(m, d)
 	case *ast.BetweenExpressionNode:
 		p.VisitBetweenExpression(m, d)
 	case *ast.BigNumericLiteralNode:
@@ -154,6 +156,8 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitColumnDefinition(m, d)
 	case *ast.ColumnListNode:
 		p.VisitColumnList(m, d)
+	case *ast.CommitStatementNode:
+		p.VisitCommitStatement(m, d)
 	case *ast.ConnectionClauseNode:
 		p.VisitConnectionClause(m, d)
 	case *ast.ColumnSchemaNode:
@@ -222,6 +226,10 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitDropTableFunctionStatement(m, d)
 	case *ast.DropStatementNode:
 		p.VisitDropStatement(m, d)
+	case *ast.ExceptionHandlerListNode:
+		p.VisitExceptionHandlerListNode(m, d)
+	case *ast.ExceptionHandlerNode:
+		p.VisitExceptionHandlerNode(m, d)
 	case *ast.ExecuteIntoClauseNode:
 		p.VisitExecuteIntoClause(m, d)
 	case *ast.ExecuteImmediateStatementNode:
@@ -368,6 +376,8 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.VisitRepeatableClause(m, d)
 	case *ast.ReturnStatementNode:
 		p.VisitReturnStatement(m, d)
+	case *ast.RollbackStatementNode:
+		p.VisitRollbackStatementNode(m, d)
 	case *ast.RollupNode:
 		p.VisitRollup(m, d)
 	case *ast.SampleClauseNode:

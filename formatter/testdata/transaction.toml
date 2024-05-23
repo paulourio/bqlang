@@ -1,0 +1,60 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = false
+column_list_trailing_comma = "NEVER"
+indentation = 1
+min_joins_to_separate_in_blocks = 1
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "AS_IS"
+null_style = "AS_IS"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+input = "begin transaction"
+formatted = """
+BEGIN TRANSACTION
+"""
+
+[[cases]]
+input = """
+BEGIN
+
+  BEGIN TRANSACTION;
+  INSERT INTO mydataset.NewArrivals
+    VALUES ('top load washer', 100, 'warehouse #1');
+  -- Trigger an error.
+  SELECT 1/0;
+  COMMIT TRANSACTION;
+
+EXCEPTION WHEN ERROR THEN
+  -- Roll back the transaction inside the exception handler.
+  SELECT @@error.message;
+  ROLLBACK TRANSACTION;
+END;
+"""
+formatted = """
+BEGIN
+  BEGIN TRANSACTION;
+
+  INSERT INTO mydataset.NewArrivals
+  VALUES
+    ('top load washer', 100, 'warehouse #1');
+
+  -- Trigger an error.
+  SELECT 1 / 0;
+
+  COMMIT TRANSACTION;
+EXCEPTION WHEN ERROR THEN
+  -- Roll back the transaction inside the exception handler.
+  SELECT @@error.message;
+
+  ROLLBACK TRANSACTION;
+END
+"""

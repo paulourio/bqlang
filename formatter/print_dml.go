@@ -46,7 +46,17 @@ func (p *Printer) VisitInsertStatement(n *ast.InsertStatementNode, d Data) {
 	cl := n.ColumnList()
 
 	p.moveBefore(n)
-	p.print(p.keyword("INSERT"))
+
+	begin := n.ParseLocationRange().Start().ByteOffset()
+	end := n.TargetPath().ParseLocationRange().Start().ByteOffset()
+	input := strings.ToUpper(p.viewErasedInput(begin, end))
+
+	if strings.Contains(input, "INTO") {
+		p.print(p.keyword("INSERT INTO"))
+	} else {
+		p.print(p.keyword("INSERT"))
+	}
+
 	p.accept(n.TargetPath(), d)
 
 	if cl != nil {

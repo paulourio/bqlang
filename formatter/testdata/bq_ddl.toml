@@ -493,7 +493,7 @@ CREATE TEMP TABLE Example
 INSERT INTO Example
 VALUES (5, 'foo');
 
-INSERT INTO Example
+INSERT Example
 VALUES (6, 'bar');
 
 SELECT *
@@ -506,7 +506,7 @@ CREATE TEMPORARY TABLE Example
   y STRING
 );
 
-INSERT Example
+INSERT INTO Example
 VALUES
   (5, 'foo');
 
@@ -621,7 +621,7 @@ SELECT orders.l_orderkey,
 
 -- When new data is available, append the data of the 1993 year to the
 -- destination table using the INSERT INTO SELECT statement:
-INSERT myotherdataset.ordersof93
+INSERT INTO myotherdataset.ordersof93
 SELECT *
   FROM myawsdataset.orders
  WHERE l_commitdate >= '1993-01-01'
@@ -646,7 +646,7 @@ WHERE
  numeric_id > 4000000;
 """
 formatted = """
-INSERT mydataset.orders
+INSERT INTO mydataset.orders
   (_PARTITIONTIME, id, numeric_id)
 SELECT TIMESTAMP('2023-01-01'), id, numeric_id
   FROM mydataset.ordersof23

@@ -3,12 +3,12 @@ package formatter_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"testing"
 
-	"github.com/goccy/go-zetasql"
+	zetasql "github.com/goccy/go-zetasql"
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/formatter"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +17,7 @@ import (
 func TestPrinter(t *testing.T) {
 	t.Parallel()
 
-	files, err := ioutil.ReadDir("testdata")
+	files, err := os.ReadDir("testdata")
 	assert.NoError(t, err)
 
 	nerr := 0
@@ -26,7 +26,7 @@ func TestPrinter(t *testing.T) {
 		s := MustReadTest(path.Join("testdata", file.Name()))
 
 		for i, c := range s.Cases {
-			name := fmt.Sprintf("%s case %d", file.Name(), i)
+			name := fmt.Sprintf("%s:case %d", file.Name(), i)
 			t.Run(name, func(t *testing.T) {
 				if !testCase(t, s, c) {
 					nerr++

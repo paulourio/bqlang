@@ -126,7 +126,7 @@ Formatting without comment is always idempotent, but formatting code preserving 
 - [x] SET
 - [x] EXECUTE IMMEDIATE
 - [x] BEGIN...END
-- [ ] BEGIN...EXCEPTION...END
+- [x] BEGIN...EXCEPTION...END
 - [ ] CASE [search_expression]
 - [x] IF
 - [ ] Labels
@@ -139,10 +139,10 @@ Formatting without comment is always idempotent, but formatting code preserving 
     - [ ] CONTINUE
     - [ ] ITERATE
     - [ ] FOR...IN
-- [ ] Transactions
-    - [ ] BEGIN TRANSACTION
-    - [ ] COMMIT TRANSACTION
-    - [ ] ROLLBACK TRANSACTION
+- [x] Transactions
+    - [x] BEGIN TRANSACTION
+    - [x] COMMIT TRANSACTION
+    - [x] ROLLBACK TRANSACTION
 - [ ] RAISE
 - [ ] RETURN
 - [x] CALL

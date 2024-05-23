@@ -78,8 +78,6 @@ func isSimpleExpr(n ast.ExpressionNode) bool {
 	default:
 		return false
 	}
-
-	return false
 }
 
 // isSimpleExpr2 tries to determine if the expression is ok to be
@@ -126,8 +124,6 @@ func isSimpleExpr2(n ast.ExpressionNode) bool {
 	default:
 		return false
 	}
-
-	return false
 }
 
 func isSimpleAndExpr(n *ast.AndExprNode) bool {
