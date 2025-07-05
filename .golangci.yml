@@ -1,10 +1,8 @@
+version: "2"
 run:
   concurrency: 10
-  timeout: 5m
-
 linters:
   enable:
-    - errcheck
     - asasalint
     - bodyclose
     - containedctx
@@ -18,9 +16,7 @@ linters:
     - errname
     - errorlint
     - exhaustive
-    - exportloopref
     - forcetypeassert
-    - gci
     - gocheckcompilerdirectives
     - gochecknoglobals
     - gochecknoinits
@@ -29,22 +25,36 @@ linters:
     - gocritic
     - godot
     - godox
-    - gofmt
     - goprintffuncname
-    - gosimple
     - gosmopolitan
-    - govet
-    - ineffassign
     - misspell
     - paralleltest
     - prealloc
     - predeclared
     - reassign
     - revive
-    - staticcheck
     - tparallel
-    - typecheck
     - unparam
-    - unused
     - wrapcheck
     - wsl
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -6,7 +6,6 @@ func DefaultParserOptions() *zetasql.ParserOptions {
 	po := zetasql.NewParserOptions()
 
 	po.SetLanguageOptions(DefaultLanguageOptions())
-
 	return po
 }
 
