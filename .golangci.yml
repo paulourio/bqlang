@@ -1,60 +1,153 @@
 version: "2"
+
 run:
-  concurrency: 10
-linters:
-  enable:
-    - asasalint
-    - bodyclose
-    - containedctx
-    - contextcheck
-    - cyclop
-    - decorder
-    - dupl
-    - dupword
-    - durationcheck
-    - errchkjson
-    - errname
-    - errorlint
-    - exhaustive
-    - forcetypeassert
-    - gocheckcompilerdirectives
-    - gochecknoglobals
-    - gochecknoinits
-    - gocognit
-    - goconst
-    - gocritic
-    - godot
-    - godox
-    - goprintffuncname
-    - gosmopolitan
-    - misspell
-    - paralleltest
-    - prealloc
-    - predeclared
-    - reassign
-    - revive
-    - tparallel
-    - unparam
-    - wrapcheck
-    - wsl
-  exclusions:
-    generated: lax
-    presets:
-      - comments
-      - common-false-positives
-      - legacy
-      - std-error-handling
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+  timeout: 5m
+  relative-path-mode: gomod
+  modules-download-mode: readonly
+
 formatters:
   enable:
+    - gofumpt
     - gci
-    - gofmt
+  settings:
+    gofumpt:
+      extra:
+        group-params: true
+        clothe-returns: true
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+
+linters:
+  default: standard
+  enable:
+    # Go modernization & stdlib idioms
+    - modernize
+    - exptostd
+    - usestdlibvars
+    - usetesting
+    - intrange
+    - copyloopvar
+
+    # Correctness, nil & error safety
+    - errorlint
+    - errname
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - asasalint
+    - durationcheck
+    - makezero
+    - reassign
+    - musttag
+
+    # Context, I/O, SQL & observability
+    - bodyclose
+    - noctx
+    - fatcontext
+    - canonicalheader
+    - nosprintfhostport
+    - sqlclosecheck
+    - rowserrcheck
+    - unqueryvet
+    - sloglint
+    - loggercheck
+    - spancheck
+    - promlinter
+
+    # Architecture, security & hygiene
+    - exhaustive
+    - gochecksumtype
+    - iface
+    - recvcheck
+    - gocritic
+    - revive
+    - godoclint
+    - gosec
+    - bidichk
+    - gocheckcompilerdirectives
+    - gomoddirectives
+    - depguard
+    - nolintlint
+    - perfsprint
+    - unconvert
+    - unparam
+    - wastedassign
+    - predeclared
+    - gocognit
+    - testifylint
+    - tparallel
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+
+    exhaustive:
+      default-signifies-exhaustive: true
+
+    gocognit:
+      min-complexity: 20
+
+    sloglint:
+      no-global: all
+      context: scope
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+
+    revive:
+      enable-default-rules: true
+      rules:
+        - name: package-comments
+          disabled: true
+
+    depguard:
+      rules:
+        modern-stdlib:
+          files:
+            - "$all"
+          deny:
+            - pkg: "io/ioutil"
+              desc: "Deprecated since Go 1.16; use io and os packages"
+            - pkg: "github.com/pkg/errors"
+              desc: "Use standard library errors and fmt.Errorf with %w"
+            - pkg: "golang.org/x/exp/slices"
+              desc: "Use standard library slices package"
+            - pkg: "golang.org/x/exp/maps"
+              desc: "Use standard library maps package"
+        non-test:
+          files:
+            - "!$test"
+          deny:
+            - pkg: "math/rand$"
+              desc: "Use math/rand/v2 or crypto/rand"
+
   exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+    generated: strict
+    presets:
+      - std-error-handling
+      - common-false-positives
+    rules:
+      - path: '_test\.go'
+        linters:
+          - bodyclose
+          - errcheck
+          - gocognit
+          - gosec
+          - musttag
+          - noctx
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+severity:
+  default: error
