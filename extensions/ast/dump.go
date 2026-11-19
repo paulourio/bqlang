@@ -23,13 +23,15 @@ func (d *dumper) Dump() {
 		return
 	}
 
+	prev := d.node
 	d.currentDepth++
 
-	for _, c := range d.node.Children() {
+	for _, c := range prev.Children() {
 		d.node = c
 		d.Dump()
 	}
 
+	d.node = prev
 	d.currentDepth--
 }
 
@@ -40,14 +42,12 @@ func (d *dumper) String() string {
 func (d *dumper) dumpNode() bool {
 	d.indent()
 	d.out.WriteString(d.node.SingleNodeDebugString())
-	d.out.WriteString(fmt.Sprintf(" [%s]", locationRangeAsString(d.node)))
+	fmt.Fprintf(&d.out, " [%s]", locationRangeAsString(d.node))
 	d.out.WriteString(d.sep)
 
 	if d.currentDepth >= d.maxDepth {
 		d.indent()
-		d.out.WriteString(
-			fmt.Sprintf("  Subtree skipped (reached max depth %d)",
-				d.maxDepth))
+		fmt.Fprintf(&d.out, "  Subtree skipped (reached max depth %d)", d.maxDepth)
 
 		return false
 	}
@@ -60,8 +60,5 @@ func (d *dumper) indent() {
 }
 
 func locationRangeAsString(n NodeHandler) string {
-	s := n.StartLoc()
-	e := n.EndLoc()
-
-	return fmt.Sprintf("%d-%d", s, e)
+	return fmt.Sprintf("%d-%d", n.StartLoc(), n.EndLoc())
 }
