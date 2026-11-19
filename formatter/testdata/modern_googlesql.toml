@@ -1,0 +1,223 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 2
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_catalog = "BIGQUERY"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Pipe query syntax starting with FROM"
+input = """
+from mydataset.orders
+|> where status = "COMPLETE"
+|> extend round(amount * 1.1, 2) as taxed_amount
+|> aggregate count(*) as order_cnt, sum(taxed_amount) as total_amt group by customer_id
+|> order by total_amt desc
+|> limit 10;
+"""
+formatted = """
+FROM mydataset.orders
+|> WHERE status = 'COMPLETE'
+|> EXTEND ROUND(amount * 1.1, 2) AS taxed_amount
+|> AGGREGATE COUNT(*)          AS order_cnt,
+             SUM(taxed_amount) AS total_amt GROUP BY customer_id
+|> ORDER BY total_amt DESC
+|> LIMIT 10
+"""
+
+[[cases]]
+description = "Pipe operators SET, RENAME, DROP, DISTINCT, and JOIN"
+input = """
+select a, b, c from t1
+|> set b = b + 1
+|> rename c as c_new
+|> drop b
+|> distinct
+|> left join t2 using (a);
+"""
+formatted = """
+SELECT a, b, c
+  FROM t1
+|> SET b = b + 1
+|> RENAME c AS c_new
+|> DROP b
+|> DISTINCT
+|> LEFT JOIN t2 USING (a)
+"""
+
+[[cases]]
+description = "Dot-chained function calls and inline WITH() expression"
+input = """
+select (raw_name).trim().lower() as clean_name,
+       with(base as price * qty, tax as base * 0.08, round(base + tax, 2)) as total_val,
+       (created_ts).timestamp_trunc(day) as created_dt
+  from sales_fact
+ group by all;
+"""
+formatted = """
+SELECT (raw_name).TRIM().LOWER()                                           AS clean_name,
+       WITH(base AS price * qty, tax AS base * 0.08, ROUND(base + tax, 2)) AS total_val,
+       (created_ts).TIMESTAMP_TRUNC(DAY)                                   AS created_dt
+  FROM sales_fact
+ GROUP BY ALL
+"""
+
+[[cases]]
+description = "HAVING and QUALIFY with OR and AlignLogicalWithClauses"
+input = """
+select user_id, count(*) as cnt
+  from events
+ group by user_id
+having count(*) > 10 or sum(flag) = 1
+qualify row_number() over (order by cnt desc) = 1 or user_id = 0;
+"""
+formatted = """
+ SELECT user_id, COUNT(*) AS cnt
+   FROM events
+  GROUP BY user_id
+ HAVING COUNT(*) > 10
+     OR SUM(flag) = 1
+QUALIFY ROW_NUMBER() OVER (ORDER BY cnt DESC) = 1
+     OR user_id = 0
+"""
+
+[[cases]]
+description = "DDL constraints, anonymous ANY TYPE UDF, Hints, and Date/Time literals"
+input = """
+create temp function identity_fn(any type) as (1);
+
+create table mydataset.accounts (
+  account_id int64 primary key not enforced,
+  org_id int64,
+  constraint fk_org foreign key (org_id) references mydataset.orgs(org_id) not enforced
+);
+
+select @{force_index=my_idx, join_method='hash'} timestamp'2026-01-01 00:00:00+00' as ts
+  from mydataset.accounts;
+"""
+formatted = """
+CREATE TEMPORARY FUNCTION identity_fn(ANY TYPE)
+AS (
+  1
+);
+
+CREATE TABLE mydataset.accounts
+(
+  account_id INT64 PRIMARY KEY NOT ENFORCED,
+  org_id     INT64,
+  CONSTRAINT fk_org FOREIGN KEY (org_id)
+  REFERENCES mydataset.orgs(org_id) NOT ENFORCED
+);
+
+SELECT @{force_index=my_idx, join_method='hash'} TIMESTAMP '2026-01-01 00:00:00+00' AS ts
+  FROM mydataset.accounts;
+"""
+
+[[cases]]
+description = "Procedural loops, CASE statement, ASSERT, and RAISE"
+input = """
+begin
+  declare i int64 default 0;
+  assert i = 0 as "initial check";
+  while i < 3 do
+    set i = i + 1;
+    if i = 2 then
+      continue;
+    end if;
+  end while;
+  for rec in (select 1 as v) do
+    case rec.v
+      when 1 then
+        select rec.v;
+      else
+        raise using message = "unexpected";
+    end case;
+  end for;
+exception when error then
+  raise;
+end;
+"""
+formatted = """
+BEGIN
+  DECLARE i INT64 DEFAULT 0;
+
+  ASSERT i = 0 AS 'initial check';
+
+  WHILE i < 3 DO
+    SET i = i + 1;
+
+    IF i = 2 THEN
+      CONTINUE;
+    END IF;
+  END WHILE;
+
+  FOR rec IN (
+    SELECT 1 AS v
+  ) DO
+    CASE rec.v
+      WHEN 1 THEN
+        SELECT rec.v;
+      ELSE
+        RAISE USING MESSAGE = 'unexpected';
+    END CASE;
+  END FOR;
+EXCEPTION WHEN ERROR THEN
+  RAISE;
+END
+"""
+
+[[cases]]
+description = "EXPORT DATA, LOAD DATA, GRANT, REVOKE, and CREATE MODEL"
+input = """
+export data options(uri='gs://bucket/out/*.parquet', format='PARQUET') as
+select id from mydataset.t;
+
+load data into mydataset.t from files (format='PARQUET', uris=['gs://bucket/in/*.parquet']);
+
+grant `roles/bigquery.dataViewer` on schema mydataset to 'user:alice@example.com';
+
+revoke `roles/bigquery.dataViewer` on schema mydataset from 'user:alice@example.com';
+
+create or replace model mydataset.churn_model
+options(model_type='logistic_reg') as
+select f1, label from mydataset.train_data;
+"""
+formatted = """
+EXPORT DATA
+OPTIONS (
+  uri    = 'gs://bucket/out/*.parquet',
+  format = 'PARQUET'
+)
+AS
+SELECT id
+  FROM mydataset.t;
+
+LOAD DATA INTO mydataset.t
+FROM FILES (
+  format = 'PARQUET',
+  uris   = ['gs://bucket/in/*.parquet']
+);
+
+GRANT `roles/bigquery.dataViewer` ON SCHEMA mydataset TO 'user:alice@example.com';
+
+REVOKE `roles/bigquery.dataViewer` ON SCHEMA mydataset FROM 'user:alice@example.com';
+
+CREATE OR REPLACE MODEL mydataset.churn_model
+OPTIONS (model_type='logistic_reg')
+AS
+SELECT f1, label
+  FROM mydataset.train_data;
+"""

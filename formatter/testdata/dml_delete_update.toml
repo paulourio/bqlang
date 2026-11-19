@@ -1,0 +1,58 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 2
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_name_style = "UPPER_CASE"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "DELETE FROM with aligned WHERE conditions"
+input = """
+delete from mydataset.detailed_inventory as inv
+where inv.product = "countertop microwave" and inv.quantity = 0;
+"""
+formatted = """
+DELETE FROM mydataset.detailed_inventory AS inv
+ WHERE inv.product  = 'countertop microwave'
+   AND inv.quantity = 0
+"""
+
+[[cases]]
+description = "DELETE without FROM keyword and THEN RETURN"
+input = """
+delete mydataset.sessions where expires_at < current_timestamp() then return session_id;
+"""
+formatted = """
+DELETE mydataset.sessions
+ WHERE expires_at < CURRENT_TIMESTAMP()
+THEN RETURN session_id
+"""
+
+[[cases]]
+description = "UPDATE statement with multiple SET items, FROM join, and WHERE"
+input = """
+update mydataset.detailed_inventory as inv
+set quantity = inv.quantity - s.sold_qty, updated_at = current_timestamp()
+from mydataset.daily_sales as s
+where inv.sku_id = s.sku_id and s.sale_dt = date '2026-01-01';
+"""
+formatted = """
+UPDATE mydataset.detailed_inventory AS inv
+   SET quantity   = inv.quantity - s.sold_qty,
+       updated_at = CURRENT_TIMESTAMP()
+  FROM mydataset.daily_sales AS s
+ WHERE inv.sku_id = s.sku_id
+   AND s.sale_dt  = DATE '2026-01-01'
+"""
