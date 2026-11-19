@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -10,238 +12,217 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
-
-	"github.com/goccy/go-zetasql"
 
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/formatter"
 )
 
-var (
-	list  = flag.Bool("l", false, "list files whose formatting differs from gofmt's")
-	write = flag.Bool("w", false, "write result to (source) file instead of stdout")
-)
-
-const tmpDir = "/tmp/bqfmt"
-
-func usage() {
-	fmt.Fprintf(os.Stderr, "usage: bqfmt [flags] [path ...]\n")
-	flag.PrintDefaults()
+type cliRunner struct {
+	list   bool
+	write  bool
+	debug  bool
+	fdSem  chan struct{}
+	stdin  io.Reader
+	stderr io.Writer
 }
 
-func isBQLFile(f fs.DirEntry) bool {
-	// ignore non-Go files
-	name := f.Name()
-	validSuffix := (strings.HasSuffix(name, ".bql") ||
-		strings.HasSuffix(name, ".sql") ||
-		strings.HasSuffix(name, ".bql.j2") ||
-		strings.HasSuffix(name, ".sql.j2"))
-
-	return !strings.HasPrefix(name, ".") && !f.IsDir() && validSuffix
-}
+const maxOpenFiles = 200
 
 func main() {
-	// Arbitrarily limit in-flight work to 2MiB times the number of threads.
-	//
-	// The actual overhead for the parse tree and output will depend on the
-	// specifics of the file, but this at least keeps the footprint of the process
-	// roughly proportional to GOMAXPROCS.
-	maxWeight := (2 << 20) * int64(runtime.GOMAXPROCS(0))
-	s := newSequencer(maxWeight, os.Stdout, os.Stderr)
-
-	// call gofmtMain in a separate function
-	// so that it can use defer and have them
-	// run before the exit.
-	bqfmtMain(s)
-	os.Exit(s.GetExitCode())
+	os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
 }
 
-func bqfmtMain(s *sequencer) {
-	flag.Usage = usage
-	flag.Parse()
+func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
+	if err := bqlang.Init(); err != nil {
+		fmt.Fprintf(stderr, "bqfmt: %v\n", err)
 
-	if err := os.MkdirAll(tmpDir, 0777); err != nil {
-		panic(err)
+		return 2
 	}
 
-	args := flag.Args()
-	if len(args) == 0 {
-		if *write {
-			s.AddReport(fmt.Errorf("error: cannot use -w with standard input"))
+	flagSet := flag.NewFlagSet("bqfmt", flag.ContinueOnError)
+	flagSet.SetOutput(stderr)
+
+	listFlag := flagSet.Bool("l", false, "list files whose formatting differs from bqfmt's")
+	writeFlag := flagSet.Bool("w", false, "write result to (source) file instead of stdout")
+	debugFlag := flagSet.Bool("debug", false, "emit formatter debug trace to stderr")
+
+	flagSet.Usage = func() {
+		fmt.Fprintf(stderr, "usage: bqfmt [flags] [path ...]\n")
+		flagSet.PrintDefaults()
+	}
+
+	if err := flagSet.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+
+		return 2
+	}
+
+	runner := &cliRunner{
+		list:   *listFlag,
+		write:  *writeFlag,
+		debug:  *debugFlag,
+		fdSem:  make(chan struct{}, maxOpenFiles),
+		stdin:  stdin,
+		stderr: stderr,
+	}
+
+	maxWeight := (2 << 20) * int64(runtime.GOMAXPROCS(0))
+	seq := newSequencer(maxWeight, stdout, stderr)
+	runner.execute(seq, flagSet.Args())
+
+	return seq.GetExitCode()
+}
+
+func (c *cliRunner) execute(s *sequencer, paths []string) {
+	if len(paths) == 0 {
+		if c.write {
+			s.AddReport(errors.New("error: cannot use -w with standard input"))
+
 			return
 		}
 
 		s.Add(0, func(r *reporter) error {
-			return processFile("<standard input>", nil, os.Stdin, r)
+			return c.processFile("<standard input>", nil, c.stdin, r)
 		})
 
 		return
 	}
 
-	for _, arg := range args {
-		switch info, err := os.Stat(arg); {
-		case err != nil:
+	for _, target := range paths {
+		info, err := os.Stat(target)
+		if err != nil {
 			s.AddReport(err)
-		case !info.IsDir():
-			// Non-directory arguments are always formatted.
-			arg := arg
 
-			s.Add(fileWeight(arg, info), func(r *reporter) error {
-				return processFile(arg, info, nil, r)
+			continue
+		}
+
+		if !info.IsDir() {
+			fileArg := target
+
+			s.Add(fileWeight(fileArg, info), func(r *reporter) error {
+				return c.processFile(fileArg, info, nil, r)
 			})
-		default:
-			// Directories are walked, ignoring non-Go files.
-			err := filepath.WalkDir(arg, func(path string, f fs.DirEntry, err error) error {
-				if err != nil || !isBQLFile(f) {
-					return err
-				}
 
-				info, err := f.Info()
-				if err != nil {
-					s.AddReport(err)
-					return nil
-				}
+			continue
+		}
 
-				s.Add(fileWeight(path, info), func(r *reporter) error {
-					return processFile(path, info, nil, r)
-				})
+		walkErr := filepath.WalkDir(target, func(path string, entry fs.DirEntry, werr error) error {
+			if werr != nil || !isBQLFile(entry) {
+				return werr
+			}
+
+			entryInfo, ierr := entry.Info()
+			if ierr != nil {
+				s.AddReport(ierr)
 
 				return nil
-			})
-			if err != nil {
-				s.AddReport(err)
 			}
+
+			s.Add(fileWeight(path, entryInfo), func(r *reporter) error {
+				return c.processFile(path, entryInfo, nil, r)
+			})
+
+			return nil
+		})
+		if walkErr != nil {
+			s.AddReport(walkErr)
 		}
 	}
 }
 
-// If info == nil, we are formatting stdin instead of a file.
-// If in == nil, the source is the contents of the file with the given filename.
-func processFile(filename string, info fs.FileInfo, in io.Reader, r *reporter) error {
-	src, err := readFile(filename, info, in)
+func isBQLFile(f fs.DirEntry) bool {
+	name := f.Name()
+	validSuffix := strings.HasSuffix(name, ".bql") ||
+		strings.HasSuffix(name, ".sql") ||
+		strings.HasSuffix(name, ".bql.j2") ||
+		strings.HasSuffix(name, ".sql.j2")
+
+	return !strings.HasPrefix(name, ".") && !f.IsDir() && validSuffix
+}
+
+// processFile formats a single file or standard input (when info == nil).
+func (c *cliRunner) processFile(filename string, info fs.FileInfo, in io.Reader, r *reporter) error {
+	src, err := c.readFile(filename, info, in)
 	if err != nil {
 		return err
 	}
 
+	printOpts := formatter.DefaultPrintOptions()
+
 	input := string(src)
 
-	logFile := mustGetLogFile()
-	defer func() { logFile.Close() }()
+	var (
+		debugBuf bytes.Buffer
+		fmtOpts  = []formatter.Option{formatter.WithPrintOptions(printOpts)}
+	)
 
-	logger := log.New(logFile, "", 0)
-
-	fmtopts := &formatter.PrintOptions{
-		SoftMaxColumns:                80,
-		NewlineBeforeClause:           true,
-		AlignLogicalWithClauses:       true,
-		AlignTrailingComments:         true,
-		ColumnListTrailingComma:       formatter.Auto,
-		Indentation:                   1,
-		IndentCaseWhen:                true,
-		IndentWithClause:              true,
-		IndentWithEntries:             false,
-		MinJoinsToSeparateInBlocks:    2,
-		MaxColumnsForSingleLineSelect: 4,
-		FunctionCatalog:               formatter.BigQueryCatalog,
-		FunctionNameStyle:             formatter.AsIs,
-		BoolStyle:                     formatter.UpperCase,
-		BytesStyle:                    formatter.PreferSingleQuote,
-		HexStyle:                      formatter.UpperCase,
-		IdentifierStyle:               formatter.AsIs,
-		KeywordStyle:                  formatter.UpperCase,
-		NullStyle:                     formatter.UpperCase,
-		StringStyle:                   formatter.PreferSingleQuote,
-		TypeStyle:                     formatter.UpperCase,
+	if c.debug {
+		logger := log.New(&debugBuf, "[bqfmt] ", 0)
+		fmtOpts = append(fmtOpts, formatter.WithLogger(logger))
 	}
 
-	formatter := formatter.NewBigQueryFormatter(
-		formatter.WithLogger(logger),
-		formatter.WithPrintOptions(fmtopts))
+	bqFormatter := formatter.NewBigQueryFormatter(fmtOpts...)
 
-	result, err := formatter.Format(input)
-	if err != nil {
-		return fmt.Errorf("%s: cannot format input: %w", err)
+	result, err := bqFormatter.Format(input)
+
+	if debugBuf.Len() > 0 {
+		r.Warnf("%s", debugBuf.String())
 	}
 
-	// Check for idempotency
-	result2, err := formatter.Format(result)
 	if err != nil {
-		return fmt.Errorf("%s: re-formatting failed: %v", err)
+		return fmt.Errorf("%s: cannot format input: %w", filename, err)
+	}
+
+	debugBuf.Reset()
+
+	result2, err := bqFormatter.Format(result)
+	if err != nil {
+		return fmt.Errorf("%s: re-formatting failed: %w", filename, err)
 	}
 
 	if result != result2 {
-		return fmt.Errorf("%s: formatting is not idempotent")
+		return fmt.Errorf("%s: formatting is not idempotent", filename)
 	}
 
-	if input != result {
-		// formatting has changed
-		if *list {
-			fmt.Fprintln(r, filename)
+	return c.emitResult(filename, info, src, input, result, r)
+}
+
+func (c *cliRunner) emitResult(
+	filename string,
+	info fs.FileInfo,
+	src []byte,
+	input string,
+	result string,
+	r *reporter,
+) error {
+	if !c.list && !c.write {
+		if _, werr := r.Write([]byte(result)); werr != nil {
+			return fmt.Errorf("%s: write stdout: %w", filename, werr)
 		}
 
-		if *write {
-			if info == nil {
-				panic("-w should not have been allowed with stdin")
-			}
+		return nil
+	}
 
-			perm := info.Mode().Perm()
-			if err := writeFile(filename, src, []byte(result), perm, info.Size()); err != nil {
-				return err
-			}
+	if input == result {
+		return nil
+	}
+
+	if c.list {
+		fmt.Fprintln(r, filename)
+	}
+
+	if c.write {
+		if info == nil {
+			return errors.New("error: cannot use -w with standard input")
+		}
+
+		perm := info.Mode().Perm()
+		if werr := c.writeFile(filename, src, []byte(result), perm, info.Size()); werr != nil {
+			return werr
 		}
 	}
 
 	return nil
-}
-
-func mustGetLogFile() *os.File {
-	t := time.Now()
-
-	f, err := os.CreateTemp(tmpDir, t.Format("2006-01-02-*"))
-	if err != nil {
-		panic(fmt.Sprintf("Failed to create log file: %v", err))
-	}
-
-	return f
-}
-
-func dumpScript(input string) {
-	n, err := zetasql.ParseScript(input, nil, zetasql.ErrorMessageMultiLineWithCaret)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(2)
-	}
-
-	bqd, err := bqlang.MarshalJSON(n)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(bqd))
-}
-
-func dumpStatements(input string) {
-	loc := zetasql.NewParseResumeLocation(input)
-
-	for {
-		n, eoi, err := zetasql.ParseNextScriptStatement(loc, nil)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(2)
-		}
-
-		bqd, err := bqlang.MarshalJSON(n)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println(string(bqd))
-
-		if eoi {
-			os.Exit(1)
-		}
-
-		fmt.Println("")
-	}
 }
