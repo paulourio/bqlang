@@ -1,8 +1,7 @@
-// Package extensions has a grammar definition that can be seen an as
-// extension o ZetaSQL's.
-// The official ZetaSQL parser ignores white spaces and comments,
-// and this additional parser assists on tracking newlines and comments.
-// The grammar also parses Jinja2-like templates, so that we can format
-// simple templated-queries.
-
+// Package extensions provides a lexical and syntactic scanner extension for
+// GoogleSQL scripts.
+//
+// Because the official GoogleSQL parser discards whitespace and comments and
+// does not recognize Jinja2 templates, this auxiliary parser extracts comment
+// spans and Jinja2 template elements while preserving exact byte offsets.
 package extensions

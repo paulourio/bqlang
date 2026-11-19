@@ -3,12 +3,12 @@ package errors
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/paulourio/bqlang/extensions/token"
 )
 
+// FormatError formats a scanner or parser error with 1-based line/column coordinates and caret context.
 func FormatError(err error, sql string) string {
 	var data string
 
@@ -16,27 +16,22 @@ func FormatError(err error, sql string) string {
 	desc, line, col := findDescription(err, lines)
 
 	if line <= 0 || line > len(lines)+1 {
-		fmt.Fprintln(os.Stderr, "FormatError ERROR! line=", line, " col=", col)
-		fmt.Fprintf(os.Stderr, "FormatError ERROR! %s\n", err.Error())
-		fmt.Fprintln(os.Stderr, "Input:")
-		fmt.Fprintln(os.Stderr, sql)
-		fmt.Fprintln(os.Stderr, "~~~")
-
 		line = 1
 		col = 1
-	} else {
-		if line == len(lines)+1 {
-			data = ""
-		} else {
-			data = lines[line-1]
-		}
+	} else if line <= len(lines) {
+		data = lines[line-1]
 	}
 
-	ind := fmt.Sprintf("%s^", strings.Repeat(" ", col-1))
+	if col < 1 {
+		col = 1
+	}
+
+	ind := strings.Repeat(" ", col-1) + "^"
 
 	return fmt.Sprintf(
 		"ERROR: %s [at %d:%d]\n%s\n%s\n",
-		desc, line, col, data, ind)
+		desc, line, col, data, ind,
+	)
 }
 
 func findDescription(err error, lines []string) (desc string, line, col int) {
@@ -47,12 +42,12 @@ func findDescription(err error, lines []string) (desc string, line, col int) {
 
 	if errors.As(err, &genErr) {
 		if genErr.Err == nil {
-			desc, line, col = tokenError(lines, genErr)
+			desc, line, col = tokenError(genErr)
 		} else {
 			desc, line, col = findDescription(genErr.Err, lines)
 		}
 
-		return
+		return desc, line, col
 	}
 
 	if errors.As(err, &synErr) {
@@ -60,54 +55,43 @@ func findDescription(err error, lines []string) (desc string, line, col int) {
 		line, col = computeLineCol(lines, synErr.Loc.Start)
 	} else {
 		desc = err.Error()
+		line = 1
+		col = 1
 	}
 
-	return
+	return desc, line, col
 }
 
-func tokenError(lines []string, err *Error) (desc string, line, col int) {
+func tokenError(err *Error) (desc string, line, col int) {
 	tokDesc := describeUnexpectedToken(err.ErrorToken)
 
-	if len(err.ExpectedTokens) > 0 {
-		expected := ""
-		if isExpected("JOIN", err.ExpectedTokens) {
-			expected = "keyword JOIN"
-		}
-
-		if expected != "" {
-			desc = fmt.Sprintf("Expected %s but got %s", expected,
-				tokDesc)
-		} else {
-			desc = fmt.Sprintf("Unexpected %s",
-				tokDesc)
-		}
+	if len(err.ExpectedTokens) > 0 && isExpected("JOIN", err.ExpectedTokens) {
+		desc = "Expected keyword JOIN but got " + tokDesc
 	} else {
-		desc = fmt.Sprintf("Unexpected %s", tokDesc)
+		desc = "Unexpected " + tokDesc
 	}
 
-	line = err.ErrorToken.Pos.Line
-	col = err.ErrorToken.Pos.Column
+	line = err.ErrorToken.Line
+	col = err.ErrorToken.Column
 
 	switch err.ErrorToken.Type {
 	case token.INVALID:
 		desc = "Unexpected unknown/invalid token"
 	case token.EOF, token.TokMap.Type("$"):
 		line++
-
 		col = 1
 		desc = "Unexpected end of statement"
 	case token.TokMap.Type("unterminated_escaped_identifier"):
 		desc = "Unclosed identifier literal"
 	default:
 		if isExpected("$", err.ExpectedTokens) {
-			desc = fmt.Sprintf("Expected end of input but got %s",
-				describeUnexpectedToken(err.ErrorToken))
+			desc = "Expected end of input but got " + describeUnexpectedToken(err.ErrorToken)
 		}
 	}
 
 	desc = "Syntax error: " + desc
 
-	return
+	return desc, line, col
 }
 
 func describeUnexpectedToken(tok *token.Token) string {
@@ -138,22 +122,14 @@ func isExpected(elem string, expected []string) bool {
 	return false
 }
 
-func computeMissingWhitespaceLocation(
-	lines []string, tok *token.Token) (line, col int) {
-	// Tokenizer consumes only the first wrong character from input,
-	// so the offset should always be at the end.
-	return computeLineCol(lines, tok.Offset+len(tok.Lit)-1)
-}
-
 func computeLineCol(lines []string, offset int) (line, col int) {
 	for line < len(lines) && offset > len(lines[line])-1 {
 		offset -= len(lines[line]) + 1
 		line++
 	}
 
-	col = offset
-	col++
+	col = offset + 1
 	line++
 
-	return
+	return line, col
 }
