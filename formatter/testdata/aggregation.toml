@@ -415,15 +415,142 @@ SELECT ARRAY_AGG(
 """
 
 [[cases]]
+description = "Multi-level aggregation with single GROUP BY key."
 input = """
-select array_agg(x having min y clamped between 1 and 2 limit 1 offset 2) as a from T;
+select max(x group by y) as a from T;
+"""
+formatted = """
+SELECT MAX(x GROUP BY y) AS a
+  FROM T
+"""
+
+[[cases]]
+description = "Multi-level aggregation with multiple GROUP BY keys."
+input = """
+select max(x group by y, z) as a from T;
+"""
+formatted = """
+SELECT MAX(x GROUP BY y, z) AS a
+  FROM T
+"""
+
+[[cases]]
+description = "Nested multi-level aggregation."
+input = """
+select avg(sum(x group by y, z) group by y) as avg_sum from T;
+"""
+formatted = """
+SELECT AVG(SUM(x GROUP BY y, z) GROUP BY y) AS avg_sum
+  FROM T
+"""
+
+[[cases]]
+description = "Multi-level aggregation inside scalar wrapper."
+input = """
+select round(avg(sum(revenue_amt) group by date(sale_ts)), 2) as avg_sales from sales group by product_nm;
+"""
+formatted = """
+SELECT ROUND(AVG(SUM(revenue_amt) GROUP BY DATE(sale_ts)), 2) AS avg_sales
+  FROM sales
+ GROUP BY product_nm
+"""
+
+[[cases]]
+description = "Pipe AGGREGATE with ordered selection and grouping items."
+input = """
+from T |> aggregate array_agg(x group by k) as a desc nulls last group and order by y desc nulls last, z asc nulls first;
+"""
+formatted = """
+FROM T
+|> AGGREGATE ARRAY_AGG(x GROUP BY k) AS a DESC NULLS LAST GROUP AND ORDER BY y DESC NULLS LAST, z ASC NULLS FIRST
+"""
+
+[[cases]]
+description = "Aggregate WHERE filter modifier on single line."
+input = """
+select sum(x where x > 0) as s from T;
+"""
+formatted = """
+SELECT SUM(x WHERE x > 0) AS s
+  FROM T
+"""
+
+[[cases]]
+description = "Aggregate WHERE filter with compound AND predicate."
+input = """
+select sum(x where a = 1 and b = 2) as s from T;
+"""
+formatted = """
+SELECT SUM(x WHERE a = 1 AND b = 2) AS s
+  FROM T
+"""
+
+[[cases]]
+description = "Aggregate with empty argument list and multiple modifiers."
+input = """
+select count(where x > 0 group by y) as c from T;
+"""
+formatted = """
+SELECT COUNT(
+         WHERE x > 0
+         GROUP BY y
+       ) AS c
+  FROM T
+"""
+
+[[cases]]
+description = "Multi-level aggregation with post-group HAVING filter."
+input = """
+select avg(sum(revenue_amt) group by date(sale_ts) having sum(revenue_amt) >= 120) as a from sales;
+"""
+formatted = """
+SELECT AVG(
+         SUM(revenue_amt)
+         GROUP BY DATE(sale_ts)
+         HAVING SUM(revenue_amt) >= 120
+       ) AS a
+  FROM sales
+"""
+
+[[cases]]
+description = "Aggregate call with full canonical modifier sequence."
+input = """
+select array_agg(distinct x ignore nulls where x > 0 having max y group by z having count(*) > 1 clamped between 0 and 10 with report (format = 'JSON') order by z desc limit 5 offset 1) as a from T;
 """
 formatted = """
 SELECT ARRAY_AGG(
+         DISTINCT
          x
-         HAVING MIN y
-         CLAMPED BETWEEN 1 AND 2
-         LIMIT 1 OFFSET 2
+         IGNORE NULLS
+         WHERE x > 0
+         HAVING MAX y
+         GROUP BY z
+         HAVING COUNT(*) > 1
+         CLAMPED BETWEEN 0 AND 10
+         WITH REPORT (format='JSON')
+         ORDER BY z DESC
+         LIMIT 5 OFFSET 1
        ) AS a
   FROM T
+"""
+
+[[cases]]
+description = "GROUP BY GROUPING SETS, CUBE, and empty grouping item."
+input = """
+select a, b, sum(x) as s from T group by grouping sets ((a, b), (a), ()), cube (a, b), ();
+"""
+formatted = """
+SELECT a, b, SUM(x) AS s
+  FROM T
+ GROUP BY GROUPING SETS((a, b), (a), ()), CUBE(a, b), ()
+"""
+
+[[cases]]
+description = "Pipe AGGREGATE with multi-level aggregation."
+input = """
+from order_fact |> aggregate round(avg(sum(order_amt) group by order_dt), 2) as avg_daily_amt group by region_cd;
+"""
+formatted = """
+FROM order_fact
+|> AGGREGATE ROUND(AVG(SUM(order_amt) GROUP BY order_dt), 2) AS avg_daily_amt GROUP BY region_cd
 """

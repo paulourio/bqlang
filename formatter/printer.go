@@ -221,6 +221,9 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTGranteeList]():                        makeVisitor((*printer).visitGranteeList),
 		reflect.TypeFor[*googlesql.ASTGroupBy]():                            makeVisitor((*printer).visitGroupBy),
 		reflect.TypeFor[*googlesql.ASTGroupingItem]():                       makeVisitor((*printer).visitGroupingItem),
+		reflect.TypeFor[*googlesql.ASTGroupingItemOrder]():                  makeVisitor((*printer).visitGroupingItemOrder),
+		reflect.TypeFor[*googlesql.ASTGroupingSet]():                        makeVisitor((*printer).visitGroupingSet),
+		reflect.TypeFor[*googlesql.ASTGroupingSetList]():                    makeVisitor((*printer).visitGroupingSetList),
 		reflect.TypeFor[*googlesql.ASTHaving]():                             makeVisitor((*printer).visitHaving),
 		reflect.TypeFor[*googlesql.ASTHavingModifier]():                     makeVisitor((*printer).visitHavingModifier),
 		reflect.TypeFor[*googlesql.ASTHint]():                               makeVisitor((*printer).visitHint),
@@ -389,6 +392,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTWithModifier]():                       makeVisitor((*printer).visitWithModifier),
 		reflect.TypeFor[*googlesql.ASTWithOffset]():                         makeVisitor((*printer).visitWithOffset),
 		reflect.TypeFor[*googlesql.ASTWithPartitionColumnsClause]():         makeVisitor((*printer).visitWithPartitionColumnsClause),
+		reflect.TypeFor[*googlesql.ASTWithReportModifier]():                 makeVisitor((*printer).visitWithReportModifier),
 		reflect.TypeFor[*googlesql.ASTWithWeight]():                         makeVisitor((*printer).visitWithWeight),
 	}
 }
@@ -847,8 +851,11 @@ func isInsideOfOnClause(n googlesql.ASTNode) bool {
 func isInsideOfWhereClause(n googlesql.ASTNode) bool {
 	for parent := nodeParent(n); nodeDefined(parent); parent = nodeParent(parent) {
 		k := nodeKind(parent)
-		if k == googlesql.ASTNodeKindAstWhereClause ||
-			k == googlesql.ASTNodeKindAstDeleteStatement ||
+		if k == googlesql.ASTNodeKindAstWhereClause {
+			return nodeKind(nodeParent(parent)) != googlesql.ASTNodeKindAstFunctionCall
+		}
+
+		if k == googlesql.ASTNodeKindAstDeleteStatement ||
 			k == googlesql.ASTNodeKindAstUpdateStatement {
 			return true
 		}

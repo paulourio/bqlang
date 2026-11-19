@@ -181,6 +181,10 @@ func (p *printer) visitGroupByItems(n *googlesql.ASTGroupBy, d printerData) {
 	hint, _ := n.Hint()
 	p.accept(hint, d)
 
+	if andOrder, _ := n.AndOrderBy(); andOrder {
+		p.print(p.keyword("AND ORDER"))
+	}
+
 	if allNode, _ := n.All(); nodeDefined(allNode) {
 		p.print(p.keyword("BY ALL"))
 
@@ -197,17 +201,98 @@ func (p *printer) visitGroupByItems(n *googlesql.ASTGroupBy, d printerData) {
 
 func (p *printer) visitGroupingItem(n *googlesql.ASTGroupingItem, d printerData) {
 	p.moveBefore(n)
-	expr, _ := n.Expression()
-	rollup, _ := n.Rollup()
-	cube, _ := n.Cube()
 
-	p.accept(expr, d)
-	p.accept(rollup, d)
-	p.accept(cube, d)
+	if expr, _ := n.Expression(); nodeDefined(expr) {
+		p.accept(expr, d)
 
-	if al, _ := n.Alias(); nodeDefined(al) {
-		p.accept(al, d)
+		if al, _ := n.Alias(); nodeDefined(al) {
+			p.accept(al, d)
+		}
+
+		if order, _ := n.GroupingItemOrder(); nodeDefined(order) {
+			p.accept(order, d)
+		}
+
+		return
 	}
+
+	if rollup, _ := n.Rollup(); nodeDefined(rollup) {
+		p.accept(rollup, d)
+
+		return
+	}
+
+	if cube, _ := n.Cube(); nodeDefined(cube) {
+		p.accept(cube, d)
+
+		return
+	}
+
+	if gsl, _ := n.GroupingSetList(); nodeDefined(gsl) {
+		p.accept(gsl, d)
+
+		return
+	}
+
+	p.print("()")
+}
+
+func (p *printer) visitGroupingItemOrder(n *googlesql.ASTGroupingItemOrder, d printerData) {
+	p.moveBefore(n)
+
+	spec, _ := n.OrderingSpec()
+	switch spec {
+	case googlesql.ASTOrderingExpressionEnums_OrderingSpecNotSet:
+		// Nothing.
+	case googlesql.ASTOrderingExpressionEnums_OrderingSpecAsc:
+		p.print(p.keyword("ASC"))
+	case googlesql.ASTOrderingExpressionEnums_OrderingSpecDesc:
+		p.print(p.keyword("DESC"))
+	}
+
+	if no, _ := n.NullOrder(); nodeDefined(no) {
+		p.accept(no, d)
+	}
+}
+
+func (p *printer) visitGroupingSetList(n *googlesql.ASTGroupingSetList, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("GROUPING SETS"))
+	p.print("(")
+
+	for i, gs := range selectChildrenOfType[*googlesql.ASTGroupingSet](n) {
+		if i > 0 {
+			p.print(",")
+		}
+
+		p.accept(gs, d)
+	}
+
+	p.print(")")
+}
+
+func (p *printer) visitGroupingSet(n *googlesql.ASTGroupingSet, d printerData) {
+	p.moveBefore(n)
+
+	if expr, _ := n.Expression(); nodeDefined(expr) {
+		p.accept(expr, d)
+
+		return
+	}
+
+	if rollup, _ := n.Rollup(); nodeDefined(rollup) {
+		p.accept(rollup, d)
+
+		return
+	}
+
+	if cube, _ := n.Cube(); nodeDefined(cube) {
+		p.accept(cube, d)
+
+		return
+	}
+
+	p.print("()")
 }
 
 func (p *printer) visitCube(n *googlesql.ASTCube, d printerData) {
@@ -497,12 +582,20 @@ func (p *printer) visitOnClause(n *googlesql.ASTOnClause, d printerData) {
 }
 
 func (p *printer) visitOptionsList(n *googlesql.ASTOptionsList, d printerData) {
+	p.printOptionsListBody(n, true, d)
+}
+
+func (p *printer) printOptionsListBody(n *googlesql.ASTOptionsList, withKeyword bool, d printerData) {
 	entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](n)
 	simple := len(entries) <= 1 && allTrue(p.mapIsSimpleOptionsList(n))
 	d.SetBool("options_simple", simple)
 
 	pp := p.nest()
-	pp.print(pp.keyword("OPTIONS") + " (")
+	if withKeyword {
+		pp.print(pp.keyword("OPTIONS") + " (")
+	} else {
+		pp.print("(")
+	}
 
 	if !simple {
 		pp.println("")
@@ -1108,6 +1201,7 @@ func (p *printer) visitSelectAs(n *googlesql.ASTSelectAs, d printerData) {
 func (p *printer) visitSelectColumn(n *googlesql.ASTSelectColumn, d printerData) {
 	expr, _ := n.Expression()
 	alias, _ := n.Alias()
+	order, _ := n.GroupingItemOrder()
 
 	pp := p.nest()
 	pp.accept(expr, d)
@@ -1117,6 +1211,10 @@ func (p *printer) visitSelectColumn(n *googlesql.ASTSelectColumn, d printerData)
 		pp = p.nest()
 		pp.accept(alias, d)
 		p.print(pp.unnest())
+	}
+
+	if nodeDefined(order) {
+		p.accept(order, d)
 	}
 }
 
@@ -1559,6 +1657,12 @@ func (p *printer) visitWhereClause(n *googlesql.ASTWhereClause, d printerData) {
 	p.print(p.keyword("WHERE"))
 
 	e, _ := n.Expression()
+	if nodeKind(nodeParent(n)) == googlesql.ASTNodeKindAstFunctionCall {
+		p.acceptNested(e, d)
+
+		return
+	}
+
 	p.visitWhereExprBody(e, d)
 }
 
@@ -1778,4 +1882,13 @@ func (p *printer) visitWithWeight(n *googlesql.ASTWithWeight, d printerData) {
 
 	p.print(p.keyword("WITH WEIGHT"))
 	p.accept(alias, d)
+}
+
+func (p *printer) visitWithReportModifier(n *googlesql.ASTWithReportModifier, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("WITH REPORT"))
+
+	if ol, _ := n.OptionsList(); nodeDefined(ol) {
+		p.printOptionsListBody(ol, false, d)
+	}
 }

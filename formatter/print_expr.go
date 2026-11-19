@@ -842,7 +842,10 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 	}
 
 	elems := countFunctionCallElements(n)
-	simple := len(callArgs) <= 4 && elems <= 1 && allTrue(p.mapIsSimpleExprs(callArgs))
+	simple := len(callArgs) <= 4 &&
+		elems <= 1 &&
+		allTrue(p.mapIsSimpleExprs(callArgs)) &&
+		!p.hasComplexFunctionModifier(n)
 
 	pp.print(pp.function(expr))
 	pp.print("(")
@@ -884,7 +887,7 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 		}
 	}
 
-	p.printFunctionCallModifiers(pp2, n, simple, d)
+	p.printFunctionCallModifiers(pp2, n, simple, len(callArgs) > 0, d)
 	pp.print(pp2.unnest())
 
 	if !simple {
@@ -893,6 +896,11 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 	}
 
 	pp.print(")")
+
+	if hint, _ := n.Hint(); nodeDefined(hint) {
+		pp.accept(hint, d)
+	}
+
 	pp.printCloseParenIfNeeded(n)
 	p.print(pp.unnest())
 }
@@ -900,39 +908,103 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 func (p *printer) printFunctionCallModifiers(
 	pp2 *printer,
 	n *googlesql.ASTFunctionCall,
-	simple bool,
+	simple, hasArgs bool,
 	d printerData,
 ) {
-	nh, _ := n.NullHandlingModifier()
-	switch nh {
-	case googlesql.ASTFunctionCallEnums_NullHandlingModifierDefaultNullHandling:
-		// Nothing.
-	case googlesql.ASTFunctionCallEnums_NullHandlingModifierIgnoreNulls:
-		if !simple {
-			pp2.println("")
-		}
+	needNewline := hasArgs
 
-		pp2.print(pp2.keyword("IGNORE NULLS"))
-	case googlesql.ASTFunctionCallEnums_NullHandlingModifierRespectNulls:
-		if !simple {
-			pp2.println("")
-		}
-
-		pp2.print(pp2.keyword("RESPECT NULLS"))
+	if kw := nullHandlingKeyword(n); kw != "" {
+		emitFunctionModifier(pp2, nil, simple, &needNewline, func(m *printer) {
+			m.print(m.keyword(kw))
+		})
 	}
 
+	we, _ := n.WhereExpr()
 	hm, _ := n.HavingModifier()
+	gb, _ := n.GroupBy()
+	he, _ := n.HavingExpr()
 	cb, _ := n.ClampedBetweenModifier()
+	wr, _ := n.WithReportModifier()
 	ob, _ := n.OrderBy()
 	lo, _ := n.LimitOffset()
 
-	for _, mod := range []googlesql.ASTNode{hm, cb, ob, lo} {
-		if !simple {
+	p.emitOptionalNodeModifier(pp2, we, simple, &needNewline, d)
+	p.emitOptionalNodeModifier(pp2, hm, simple, &needNewline, d)
+
+	if nodeDefined(gb) {
+		emitFunctionModifier(pp2, gb, simple, &needNewline, func(m *printer) {
+			m.print(m.keyword("GROUP"))
+			m.accept(gb, d)
+		})
+	}
+
+	if nodeDefined(he) {
+		emitFunctionModifier(pp2, he, simple, &needNewline, func(m *printer) {
+			m.print(m.keyword("HAVING"))
+			expr, _ := he.Expression()
+			m.acceptNested(expr, d)
+		})
+	}
+
+	p.emitOptionalNodeModifier(pp2, cb, simple, &needNewline, d)
+	p.emitOptionalNodeModifier(pp2, wr, simple, &needNewline, d)
+	p.emitOptionalNodeModifier(pp2, ob, simple, &needNewline, d)
+	p.emitOptionalNodeModifier(pp2, lo, simple, &needNewline, d)
+}
+
+func nullHandlingKeyword(n *googlesql.ASTFunctionCall) string {
+	nh, _ := n.NullHandlingModifier()
+	switch nh {
+	case googlesql.ASTFunctionCallEnums_NullHandlingModifierDefaultNullHandling:
+		return ""
+	case googlesql.ASTFunctionCallEnums_NullHandlingModifierIgnoreNulls:
+		return "IGNORE NULLS"
+	case googlesql.ASTFunctionCallEnums_NullHandlingModifierRespectNulls:
+		return "RESPECT NULLS"
+	}
+
+	return ""
+}
+
+func (p *printer) emitOptionalNodeModifier(
+	pp2 *printer,
+	mod googlesql.ASTNode,
+	simple bool,
+	needNewline *bool,
+	d printerData,
+) {
+	if !nodeDefined(mod) {
+		return
+	}
+
+	emitFunctionModifier(pp2, mod, simple, needNewline, func(m *printer) {
+		m.accept(mod, d)
+	})
+}
+
+func emitFunctionModifier(
+	pp2 *printer,
+	mod googlesql.ASTNode,
+	simple bool,
+	needNewline *bool,
+	fn func(*printer),
+) {
+	pp2.moveBefore(mod)
+
+	if !simple {
+		if *needNewline {
 			pp2.println("")
 		}
 
-		pp2.accept(mod, d)
+		*needNewline = true
+		m := pp2.nest()
+		fn(m)
+		pp2.print(alignNested(m.String()))
+
+		return
 	}
+
+	fn(pp2)
 }
 
 func (p *printer) visitIdentifier(n *googlesql.ASTIdentifier, _ printerData) {

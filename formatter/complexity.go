@@ -72,7 +72,9 @@ func (p *printer) isSimpleExpr(n googlesql.ASTExpressionNode) bool {
 		args := functionCallArgs(b)
 		elems := countFunctionCallElements(b)
 
-		return len(args) <= 4 && elems <= 1 && allTrue(p.mapIsSimpleExprs2(args))
+		return len(args) <= 4 && elems <= 1 &&
+			allTrue(p.mapIsSimpleExprs2(args)) &&
+			!p.hasComplexFunctionModifier(b)
 	case *googlesql.ASTNamedArgument:
 		expr, _ := b.Expr()
 
@@ -141,7 +143,9 @@ func (p *printer) isSimpleExpr2(n googlesql.ASTExpressionNode) bool {
 			args := functionCallArgs(f)
 			elems := countFunctionCallElements(f)
 
-			return len(args) <= 2 && elems <= 1 && allTrue(p.mapIsSimpleExprs2(args))
+			return len(args) <= 2 && elems <= 1 &&
+				allTrue(p.mapIsSimpleExprs2(args)) &&
+				!p.hasComplexFunctionModifier(f)
 		}
 	default:
 		return false
@@ -162,10 +166,13 @@ func (p *printer) isSimpleAndExpr(n *googlesql.ASTAndExpr) bool {
 		switch nodeKind(parent) {
 		case googlesql.ASTNodeKindAstMergeStatement,
 			googlesql.ASTNodeKindAstMergeWhenClause,
-			googlesql.ASTNodeKindAstWhereClause,
 			googlesql.ASTNodeKindAstDeleteStatement,
 			googlesql.ASTNodeKindAstUpdateStatement:
 			return false
+		case googlesql.ASTNodeKindAstWhereClause:
+			if nodeKind(nodeParent(parent)) != googlesql.ASTNodeKindAstFunctionCall {
+				return false
+			}
 		default:
 			// Continue complexity check.
 		}
@@ -525,7 +532,63 @@ func countFunctionCallElements(n *googlesql.ASTFunctionCall) int {
 		elems++
 	}
 
+	if he, _ := n.HavingExpr(); nodeDefined(he) {
+		elems++
+	}
+
+	if wr, _ := n.WithReportModifier(); nodeDefined(wr) {
+		elems++
+	}
+
 	return elems
+}
+
+func (p *printer) hasComplexFunctionModifier(n *googlesql.ASTFunctionCall) bool {
+	if we, _ := n.WhereExpr(); nodeDefined(we) {
+		if expr, _ := we.Expression(); !p.isSimpleExpr(expr) {
+			return true
+		}
+	}
+
+	if he, _ := n.HavingExpr(); nodeDefined(he) {
+		if expr, _ := he.Expression(); !p.isSimpleExpr(expr) {
+			return true
+		}
+	}
+
+	if gb, _ := n.GroupBy(); nodeDefined(gb) && p.isComplexGroupByModifier(gb) {
+		return true
+	}
+
+	if wr, _ := n.WithReportModifier(); nodeDefined(wr) {
+		if ol, _ := wr.OptionsList(); nodeDefined(ol) {
+			entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](ol)
+			if len(entries) > 1 || !allTrue(p.mapIsSimpleOptionsList(ol)) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (p *printer) isComplexGroupByModifier(gb *googlesql.ASTGroupBy) bool {
+	items := selectChildrenOfType[*googlesql.ASTGroupingItem](gb)
+	if len(items) > 4 {
+		return true
+	}
+
+	for _, item := range items {
+		if gsl, _ := item.GroupingSetList(); nodeDefined(gsl) {
+			return true
+		}
+
+		if expr, _ := item.Expression(); nodeDefined(expr) && !p.isSimpleExpr(expr) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func countWindowSpecElems(n *googlesql.ASTWindowSpecification) int {
