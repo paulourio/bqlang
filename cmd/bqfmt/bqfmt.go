@@ -21,6 +21,7 @@ type cliRunner struct {
 	list   bool
 	write  bool
 	debug  bool
+	cfg    *configLoader
 	fdSem  chan struct{}
 	stdin  io.Reader
 	stderr io.Writer
@@ -44,6 +45,7 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 
 	listFlag := flagSet.Bool("l", false, "list files whose formatting differs from bqfmt's")
 	writeFlag := flagSet.Bool("w", false, "write result to (source) file instead of stdout")
+	configFlag := flagSet.String("config", "", "path to .bqfmt.toml configuration file")
 	debugFlag := flagSet.Bool("debug", false, "emit formatter debug trace to stderr")
 
 	flagSet.Usage = func() {
@@ -59,10 +61,18 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return 2
 	}
 
+	cfgLoader, err := newConfigLoader(*configFlag)
+	if err != nil {
+		fmt.Fprintf(stderr, "bqfmt: %v\n", err)
+
+		return 2
+	}
+
 	runner := &cliRunner{
 		list:   *listFlag,
 		write:  *writeFlag,
 		debug:  *debugFlag,
+		cfg:    cfgLoader,
 		fdSem:  make(chan struct{}, maxOpenFiles),
 		stdin:  stdin,
 		stderr: stderr,
@@ -149,7 +159,10 @@ func (c *cliRunner) processFile(filename string, info fs.FileInfo, in io.Reader,
 		return err
 	}
 
-	printOpts := formatter.DefaultPrintOptions()
+	printOpts, err := c.cfg.optionsFor(filename, info == nil)
+	if err != nil {
+		return err
+	}
 
 	input := string(src)
 
