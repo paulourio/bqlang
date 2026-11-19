@@ -323,18 +323,27 @@ func (p *printer) visitPipeAs(n *googlesql.ASTPipeAs, d printerData) {
 
 func (p *printer) visitPipeSetOperation(n *googlesql.ASTPipeSetOperation, d printerData) {
 	meta, _ := n.Metadata()
-	p.printSetOperationHeader(meta, d)
+	hdr := p.nest()
+	hdr.printSetOperationHeader(meta, d)
+	p.print(strings.ReplaceAll(hdr.String(), "\v", ""))
 
 	inputs := selectChildrenOfType[googlesql.ASTQueryExpressionNode](n)
+	if len(inputs) == 0 {
+		return
+	}
+
+	p.println("")
+	p.incDepth()
+
 	for i, inp := range inputs {
 		if i > 0 {
-			p.print(",")
+			p.println(",")
 		}
 
-		p.print("(")
-		p.acceptNested(inp, d)
-		p.print(")")
+		p.accept(inp, d)
 	}
+
+	p.decDepth()
 }
 
 func (p *printer) visitPipePivot(n *googlesql.ASTPipePivot, d printerData) {

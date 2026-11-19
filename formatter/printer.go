@@ -696,7 +696,7 @@ func (p *printer) function(s string) string {
 	}
 
 	if p.fmt.opts.FunctionCatalog == BigQueryCatalog && p.fmt.bqCatalog != nil {
-		if canon := p.fmt.bqCatalog.GetWithFallback(s, ""); canon != "" {
+		if canon := p.lookupBuiltinFunction(s); canon != "" {
 			switch p.fmt.opts.BuiltinFunctionNameStyle {
 			case AsIs:
 				return s
@@ -709,6 +709,20 @@ func (p *printer) function(s string) string {
 	}
 
 	return p.fallbackFunction(s)
+}
+
+func (p *printer) lookupBuiltinFunction(s string) string {
+	if canon := p.fmt.bqCatalog.GetWithFallback(s, ""); canon != "" {
+		return canon
+	}
+
+	if len(s) > 5 && strings.EqualFold(s[:5], "SAFE.") {
+		if canon := p.fmt.bqCatalog.GetWithFallback(s[5:], ""); canon != "" {
+			return "SAFE." + canon
+		}
+	}
+
+	return ""
 }
 
 func (p *printer) fallbackFunction(s string) string {
