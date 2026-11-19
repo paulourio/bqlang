@@ -1,88 +1,162 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 
-	"github.com/goccy/go-zetasql"
+	"github.com/goccy/go-googlesql"
 
 	"github.com/paulourio/bqlang"
 )
 
 func main() {
-	var input string
+	os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
+}
 
-	file := flag.String("file", "", "filename")
-	mode := flag.String("mode", "script", "mode, script or statement")
-	flag.Parse()
+func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
+	if err := bqlang.Init(); err != nil {
+		fmt.Fprintf(stderr, "bqdump: %v\n", err)
 
-	switch *file {
-	case "":
-		d, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		input = string(d)
-	default:
-		d, err := os.ReadFile(*file)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		input = string(d)
+		return 2
 	}
 
-	switch *mode {
+	flagSet := flag.NewFlagSet("bqdump", flag.ContinueOnError)
+	flagSet.SetOutput(stderr)
+
+	fileFlag := flagSet.String("file", "", "filename")
+	modeFlag := flagSet.String("mode", "script", "mode: script or statement")
+
+	if err := flagSet.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+
+		return 2
+	}
+
+	input, err := readInput(*fileFlag, stdin)
+	if err != nil {
+		fmt.Fprintf(stderr, "bqdump: %v\n", err)
+
+		return 1
+	}
+
+	switch *modeFlag {
 	case "script":
-		dumpScript(input)
+		return dumpScript(input, stdout, stderr)
 	case "statement":
-		dumpStatements(input)
+		return dumpStatements(input, stdout, stderr)
 	default:
-		log.Fatalf("mode must be script or statement, got %s\n", *mode)
-	}
+		fmt.Fprintf(stderr, "bqdump: mode must be script or statement, got %s\n", *modeFlag)
 
+		return 2
+	}
 }
 
-func dumpScript(input string) {
-	n, err := zetasql.ParseScript(input, nil, zetasql.ErrorMessageMultiLineWithCaret)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(2)
+func readInput(filename string, stdin io.Reader) (string, error) {
+	if filename == "" {
+		data, err := io.ReadAll(stdin)
+		if err != nil {
+			return "", fmt.Errorf("read stdin: %w", err)
+		}
+
+		return string(data), nil
 	}
 
-	bqd, err := bqlang.MarshalJSON(n)
+	data, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("read %s: %w", filename, err)
 	}
 
-	fmt.Println(string(bqd))
+	return string(data), nil
 }
 
-func dumpStatements(input string) {
-	loc := zetasql.NewParseResumeLocation(input)
+func dumpScript(input string, stdout, stderr io.Writer) int {
+	out, err := googlesql.ParseScript(
+		input,
+		bqlang.DefaultParserOptions(),
+		bqlang.DefaultErrorMessageOptions(),
+	)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
 
-	for {
-		n, eoi, err := zetasql.ParseNextScriptStatement(loc, nil)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(2)
-		}
-
-		bqd, err := bqlang.MarshalJSON(n)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println(string(bqd))
-
-		if eoi {
-			os.Exit(1)
-		}
-
-		fmt.Println("")
+		return 2
 	}
+
+	script, err := out.Script()
+	if err != nil {
+		fmt.Fprintf(stderr, "bqdump: extract script: %v\n", err)
+
+		return 1
+	}
+
+	bqd, err := bqlang.MarshalJSON(script)
+	if err != nil {
+		fmt.Fprintf(stderr, "bqdump: marshal json: %v\n", err)
+
+		return 1
+	}
+
+	fmt.Fprintln(stdout, string(bqd))
+
+	return 0
+}
+
+func dumpStatements(input string, stdout, stderr io.Writer) int {
+	out, err := googlesql.ParseScript(
+		input,
+		bqlang.DefaultParserOptions(),
+		bqlang.DefaultErrorMessageOptions(),
+	)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+
+		return 2
+	}
+
+	script, err := out.Script()
+	if err != nil {
+		fmt.Fprintf(stderr, "bqdump: extract script: %v\n", err)
+
+		return 1
+	}
+
+	stmtList, err := script.StatementListNode()
+	if err != nil || stmtList == nil {
+		return 0
+	}
+
+	num, err := stmtList.NumChildren()
+	if err != nil {
+		fmt.Fprintf(stderr, "bqdump: statement count: %v\n", err)
+
+		return 1
+	}
+
+	for i := range int(num) {
+		stmt, cerr := stmtList.Child(int32(i))
+		if cerr != nil {
+			fmt.Fprintf(stderr, "bqdump: statement %d: %v\n", i, cerr)
+
+			return 1
+		}
+
+		bqd, merr := bqlang.MarshalJSON(stmt)
+		if merr != nil {
+			fmt.Fprintf(stderr, "bqdump: marshal statement %d: %v\n", i, merr)
+
+			return 1
+		}
+
+		if i > 0 {
+			fmt.Fprintln(stdout)
+		}
+
+		fmt.Fprintln(stdout, string(bqd))
+	}
+
+	return 0
 }
