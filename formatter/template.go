@@ -3,136 +3,178 @@ package formatter
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/paulourio/bqlang/extensions"
 	"github.com/paulourio/bqlang/extensions/ast"
 )
 
-type TemplatePlaceholders struct {
-	// Placeholders map the placeholder to the original contents.
-	Placeholders []*PlaceholderInfo
-
-	counter int
-	input   string
+type templatePlaceholders struct {
+	Placeholders []*placeholderInfo
+	counter      int
 }
 
-type PlaceholderInfo struct {
+type placeholderInfo struct {
 	Element     *extensions.TemplateElement
 	Placeholder string
 	Original    string
 	Recoverable bool
+	revertRe    *regexp.Regexp
 }
 
-func NewTemplatePlaceholders(input string) *TemplatePlaceholders {
-	return &TemplatePlaceholders{
-		Placeholders: make([]*PlaceholderInfo, 0, 5),
-		input:        input,
+func newTemplatePlaceholders() *templatePlaceholders {
+	return &templatePlaceholders{
+		Placeholders: make([]*placeholderInfo, 0, 5),
 	}
 }
 
-// New returns the string t
-func (t *TemplatePlaceholders) New(e *extensions.TemplateElement) *PlaceholderInfo {
-	var r *PlaceholderInfo
+// New creates a placeholderInfo for a single template element.
+func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderInfo {
+	var r *placeholderInfo
 
 	switch e.Kind {
 	case ast.TemplateComment:
 		t.counter++
-
-		// Comments will be reinserted by the comments queue.
-		// Its placeholder is a string of whitespaces.
-		r = &PlaceholderInfo{
+		r = &placeholderInfo{
 			Element:     e,
 			Placeholder: strings.Repeat(" ", e.End-e.Start),
 			Recoverable: false,
 		}
 	case ast.TemplateForBlock, ast.TemplateIfBlock:
 		t.counter++
+		tok := t.makeName()
 
-		// Blocks of for loop should be able to be replaced either by
-		// a simple statement or an identifier.
-		if strings.Contains(e.Image, "SELECT") {
-			r = &PlaceholderInfo{
+		if strings.Contains(strings.ToUpper(e.Image), "SELECT") {
+			r = &placeholderInfo{
 				Element:     e,
-				Placeholder: fmt.Sprintf("SELECT %s", t.makeName()),
+				Placeholder: "SELECT " + tok,
 				Recoverable: true,
+				revertRe:    regexp.MustCompile(`(?i)SELECT\s+` + regexp.QuoteMeta(tok)),
 			}
 		} else {
-			r = &PlaceholderInfo{
+			r = &placeholderInfo{
 				Element:     e,
-				Placeholder: t.makeName(),
+				Placeholder: tok,
 				Recoverable: true,
+				revertRe:    regexp.MustCompile(`(?i)` + regexp.QuoteMeta(tok)),
 			}
 		}
 	case ast.TemplateVariable:
 		t.counter++
+		tok := t.makeName()
 
-		if e.BeginsLine(t.input) && e.EndsLine(t.input) {
-			r = &PlaceholderInfo{
+		if e.AtLineBegin() && e.AtLineEnd() {
+			r = &placeholderInfo{
 				Element:     e,
-				Placeholder: fmt.Sprintf("SELECT %s;", t.makeName()),
+				Placeholder: fmt.Sprintf("SELECT %s;", tok),
 				Recoverable: true,
+				revertRe:    regexp.MustCompile(`(?i)SELECT\s+` + regexp.QuoteMeta(tok) + `\s*;?`),
 			}
 		} else {
-			r = &PlaceholderInfo{
+			r = &placeholderInfo{
 				Element:     e,
-				Placeholder: t.makeName(),
+				Placeholder: tok,
 				Recoverable: true,
+				revertRe:    regexp.MustCompile(`(?i)` + regexp.QuoteMeta(tok)),
 			}
 		}
 	case ast.TemplateSetBlock:
 		t.counter++
+		tok := t.makeName()
 
-		if e.BeginsLine(t.input) && e.EndsLine(t.input) {
-			r = &PlaceholderInfo{
+		if e.AtLineBegin() && e.AtLineEnd() {
+			r = &placeholderInfo{
 				Element:     e,
-				Placeholder: fmt.Sprintf("SET %s = 1;", t.makeName()),
+				Placeholder: fmt.Sprintf("SET %s = 1;", tok),
 				Recoverable: true,
+				revertRe:    regexp.MustCompile(`(?i)SET\s+` + regexp.QuoteMeta(tok) + `\s*=\s*1\s*;?`),
 			}
 		} else {
-			r = &PlaceholderInfo{
+			r = &placeholderInfo{
 				Element:     e,
-				Placeholder: t.makeName(),
+				Placeholder: tok,
 				Recoverable: true,
+				revertRe:    regexp.MustCompile(`(?i)` + regexp.QuoteMeta(tok)),
 			}
 		}
 	default:
-		panic(
-			fmt.Sprintf("TemplatePlaceholders.New: kind %v, type %s, %v",
-				e.Kind.String(), reflect.TypeOf(e), e))
+		panic(fmt.Sprintf("templatePlaceholders.New: unexpected kind %v (%v)",
+			e.Kind.String(), reflect.TypeOf(e)))
 	}
 
-	if r != nil {
-		t.Placeholders = append(t.Placeholders, r)
-	}
+	t.Placeholders = append(t.Placeholders, r)
 
 	return r
 }
 
-func (t *TemplatePlaceholders) makeName() string {
-	return fmt.Sprintf("__bqfmt_%d", t.counter)
-}
+// ApplyAll replaces all template elements in input with valid SQL placeholders,
+// shifting byte offsets of subsequent template elements and comments whenever a
+// short template element expands to a longer placeholder.
+func (t *templatePlaceholders) ApplyAll(
+	input string,
+	elems []*extensions.TemplateElement,
+	comms []*extensions.Comment,
+) string {
+	for i, e := range elems {
+		ph := t.New(e)
+		if ph == nil {
+			continue
+		}
 
-func (p *PlaceholderInfo) Apply(input string) string {
-	start, end := p.Element.Start, p.Element.End
-	size := end - start
-	padding := size - len(p.Placeholder)
+		oldEnd := e.End
 
-	if padding < 0 {
-		panic(
-			fmt.Sprintf(
-				"cannot replace template elements by placeholder. "+
-					"Element has %d bytes but placeholder requires %d bytes",
-				size, len(p.Placeholder)))
+		var delta int
+
+		input, delta = ph.applyWithDelta(input)
+
+		if delta != 0 {
+			for j := i + 1; j < len(elems); j++ {
+				elems[j].Start += delta
+				elems[j].End += delta
+			}
+
+			for _, c := range comms {
+				if c.Start >= oldEnd {
+					c.Start += delta
+					c.End += delta
+				}
+			}
+		}
 	}
 
-	pad := strings.Repeat(" ", padding)
-
-	p.Original = input[start:end]
-
-	return input[:start] + p.Placeholder + pad + input[end:]
+	return input
 }
 
-func (p *PlaceholderInfo) Revert(input string) string {
-	return strings.Replace(input, p.Placeholder, p.Original, 1)
+func (t *templatePlaceholders) makeName() string {
+	return fmt.Sprintf("__bqfmt_tmpl_%d__", t.counter)
+}
+
+func (p *placeholderInfo) applyWithDelta(input string) (string, int) {
+	start, end := p.Element.Start, p.Element.End
+	size := end - start
+	p.Original = input[start:end]
+
+	if len(p.Placeholder) <= size {
+		pad := strings.Repeat(" ", size-len(p.Placeholder))
+
+		return input[:start] + p.Placeholder + pad + input[end:], 0
+	}
+
+	delta := len(p.Placeholder) - size
+
+	return input[:start] + p.Placeholder + input[end:], delta
+}
+
+func (p *placeholderInfo) Revert(input string) string {
+	if !p.Recoverable || p.revertRe == nil {
+		return input
+	}
+
+	loc := p.revertRe.FindStringIndex(input)
+	if loc == nil {
+		return strings.Replace(input, p.Placeholder, p.Original, 1)
+	}
+
+	return input[:loc[0]] + p.Original + input[loc[1]:]
 }

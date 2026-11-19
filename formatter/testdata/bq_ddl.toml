@@ -7,7 +7,7 @@ newline_before_clause = true
 align_logical_with_clauses = true
 align_trailing_comments = true
 column_list_trailing_comma = "NEVER"
-indentation = 1
+indentation = 2
 indent_with_clause = true
 min_joins_to_separate_in_blocks = 1
 max_cols_for_single_line_select = 4
@@ -863,19 +863,27 @@ SELECT column_1, column_2, column_3
   FROM `myproject.mydataset.mytable`;
 """
 
-# Not supported by go-zetasql
-# [[cases]]
-# description = "CREATE VIEW statement: create a view with column descriptions"
-# input = """
-# CREATE VIEW `myproject.mydataset.newview` (
-#   column_1_new_name OPTIONS (DESCRIPTION='Description of the column 1 contents'),
-#   column_2_new_name OPTIONS (DESCRIPTION='Description of the column 2 contents'),
-#   column_3_new_name OPTIONS (DESCRIPTION='Description of the column 3 contents')
-# )
-# AS SELECT column_1, column_2, column_3 FROM `myproject.mydataset.mytable;
-# """
-# formatted = """
-# """
+[[cases]]
+description = "CREATE VIEW statement: create a view with column descriptions"
+input = """
+CREATE VIEW `myproject.mydataset.newview` (
+  column_1_new_name OPTIONS (DESCRIPTION='Description of the column 1 contents'),
+  column_2_new_name OPTIONS (DESCRIPTION='Description of the column 2 contents'),
+  column_3_new_name OPTIONS (DESCRIPTION='Description of the column 3 contents')
+)
+AS SELECT column_1, column_2, column_3 FROM `myproject.mydataset.mytable`;
+"""
+formatted = """
+CREATE VIEW `myproject.mydataset.newview`
+(
+  column_1_new_name OPTIONS (description='Description of the column 1 contents'),
+  column_2_new_name OPTIONS (description='Description of the column 2 contents'),
+  column_3_new_name OPTIONS (description='Description of the column 3 contents')
+)
+AS
+SELECT column_1, column_2, column_3
+  FROM `myproject.mydataset.mytable`
+"""
 
 [[cases]]
 description = "CREATE MATERIALIZED VIEW statement"

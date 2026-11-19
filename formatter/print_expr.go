@@ -1,0 +1,1480 @@
+package formatter
+
+import (
+	"maps"
+	"strings"
+	"unicode"
+
+	"github.com/goccy/go-googlesql"
+)
+
+func (p *printer) visitAnalyticFunctionCall(n *googlesql.ASTAnalyticFunctionCall, d printerData) {
+	pp := p.nest()
+	pp.printOpenParenIfNeeded(n)
+
+	fn, _ := n.Function()
+	ws, _ := n.WindowSpec()
+
+	pp.accept(fn, d)
+	pp.print(p.keyword("OVER") + " ")
+
+	elems := countWindowSpecElems(ws)
+	requireParenthesis := true
+
+	if elems == 1 {
+		if wn, _ := ws.BaseWindowName(); nodeDefined(wn) {
+			requireParenthesis = false
+		}
+	}
+
+	if requireParenthesis {
+		pp.print("(")
+	}
+
+	if elems > 1 {
+		pp.println("")
+		pp2 := pp.nest()
+		pp2.incDepth()
+		pp2.accept(ws, d)
+		pp2.decDepth()
+		pp.print(pp2.unnest())
+		pp.println("")
+	} else {
+		pp.accept(ws, d)
+	}
+
+	if requireParenthesis {
+		pp.print(")")
+	}
+
+	pp.printCloseParenIfNeeded(n)
+	p.print(pp.unnest())
+}
+
+func (p *printer) visitAndExpr(n *googlesql.ASTAndExpr, d printerData) {
+	conjuncts := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	inClause := isInsideOfWhereClause(n) || isInsideOfOnClause(n)
+	alignWithClause := p.fmt.opts.AlignLogicalWithClauses && inClause
+	inMerge := isInsideOfMergeStatement(n)
+	simple := p.isSimpleAndExpr(n)
+	ctx := maps.Clone(d)
+
+	budget := d["align_binary_op_budget"]
+	alignAnd := budget > 0
+
+	if simple && alignAnd {
+		d["align_binary_op_budget"]--
+	}
+
+	if alignAnd || inMerge || (!simple && allTrue(p.mapIsAlignable(conjuncts))) {
+		budget = 1
+	}
+
+	pp := p.nest()
+	pp.moveBefore(n)
+
+	if pp.isParenNeeded(n) {
+		if !simple {
+			pp.println("(")
+			pp.incDepth()
+		} else {
+			pp.print("(")
+		}
+	}
+
+	p1 := pp.nest()
+	andLines := pp.formatAndConjuncts(p1, conjuncts, simple, alignWithClause, budget, ctx)
+	s := p1.unnestLeft()
+
+	if alignWithClause {
+		pp.print(prefixAlignedAndLines(s, andLines, pp.keyword("AND")+" "))
+	} else {
+		pp.print(s)
+	}
+
+	pp.closeAndParen(n, simple)
+
+	if alignWithClause {
+		p.print(pp.String())
+	} else {
+		p.print(pp.unnest())
+	}
+}
+
+func (p *printer) formatAndConjuncts(
+	p1 *printer,
+	conjuncts []googlesql.ASTExpressionNode,
+	simple, alignWithClause bool,
+	budget int,
+	ctx printerData,
+) []int {
+	andLines := make([]int, 0, len(conjuncts))
+
+	for i, conjunct := range conjuncts {
+		if i > 0 {
+			if !simple {
+				p1.println("")
+			}
+
+			switch {
+			case alignWithClause:
+				nlines := strings.Count(p1.String(), "\n") + 1
+				andLines = append(andLines, nlines)
+			case !simple:
+				p1.print(p.keyword("AND") + " \v")
+			default:
+				p1.print(p.keyword("AND"))
+			}
+		} else if !simple && !alignWithClause {
+			p1.print("\v")
+		}
+
+		ctx["align_binary_op_budget"] = budget
+
+		if !simple {
+			p1.accept(conjunct, ctx)
+		} else {
+			p1.acceptNested(conjunct, ctx)
+		}
+
+		p1.movePastLine(conjunct)
+	}
+
+	return andLines
+}
+
+func (p *printer) closeAndParen(n *googlesql.ASTAndExpr, simple bool) {
+	if !p.isParenNeeded(n) {
+		return
+	}
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(")")
+}
+
+func prefixAlignedAndLines(s string, andLines []int, andTok string) string {
+	lines := strings.Split(s, "\n")
+
+	for _, idx := range andLines {
+		if idx < len(lines) {
+			lines[idx] = andTok + lines[idx]
+		}
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func (p *printer) visitOrExpr(n *googlesql.ASTOrExpr, d printerData) {
+	disjuncts := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	p1 := p.nest()
+	inClause := isInsideOfWhereClause(n) || isInsideOfOnClause(n)
+	simple := allTrue(p.mapIsSimpleExprs(disjuncts)) && len(disjuncts) < 4
+
+	p.moveBefore(n)
+
+	if p.isParenNeeded(n) {
+		if !simple {
+			p.println("(")
+			p.incDepth()
+		} else {
+			p.print("(")
+		}
+	}
+
+	for i, disjunct := range disjuncts {
+		if i > 0 {
+			switch {
+			case simple && !inClause:
+				p1.print(p1.keyword("OR"))
+			case p1.fmt.opts.AlignLogicalWithClauses && inClause:
+				p.print(p1.unnest())
+				p.printClause(p.keyword("OR"))
+				p1 = p.nest()
+			default:
+				p1.printClause(p1.keyword("OR"))
+			}
+		}
+
+		if nodeKind(disjunct) == googlesql.ASTNodeKindAstAndExpr {
+			p1.accept(disjunct, d)
+		} else {
+			p1.acceptNested(disjunct, d)
+		}
+
+		p1.movePastLine(disjunct)
+	}
+
+	p.print(p1.unnestLeft())
+
+	if p.isParenNeeded(n) {
+		if !simple {
+			p.println("")
+			p.decDepth()
+		}
+
+		p.print(")")
+	}
+}
+
+func (p *printer) visitArrayConstructor(n *googlesql.ASTArrayConstructor, d printerData) {
+	p.moveBefore(n)
+	pp := p.nest()
+
+	if t, _ := n.Type(); nodeDefined(t) {
+		typ := strings.Trim(p.toString(t, d), "\n")
+		pp.print(typ)
+	} else {
+		s := pp.nodeInput(n)
+		if strings.HasPrefix(strings.ToUpper(s), "ARRAY") {
+			pp.print(pp.keyword("ARRAY"))
+		}
+	}
+
+	elems := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	simple := allTrue(p.mapIsSimpleExprs(elems))
+
+	if simple {
+		pp.print("[")
+		printNestedWithSep(pp, elems, d, ",")
+		pp.print("]")
+	} else {
+		pp1 := pp.nest()
+		pp1.println("[")
+		pp1.incDepth()
+
+		pp12 := pp1.nest()
+
+		for i, elem := range elems {
+			if i > 0 {
+				pp12.println(",")
+			}
+
+			pp12.acceptNested(elem, d)
+		}
+
+		pp1.print(pp12.unnestLeft())
+		pp1.println("")
+		pp1.decDepth()
+		pp1.print("]")
+		pp.print(strings.TrimLeft(pp1.unnest(), "\v"))
+	}
+
+	p.print(pp.unnest())
+}
+
+func (p *printer) visitArrayElement(n *googlesql.ASTArrayElement, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+	arr, _ := n.Array()
+	pos, _ := n.Position()
+
+	p.accept(arr, d)
+	p.print("[")
+	p.accept(pos, d)
+	p.print("]")
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) visitBetweenExpression(n *googlesql.ASTBetweenExpression, d printerData) {
+	p.printOpenParenIfNeeded(n)
+
+	lhs, _ := n.Lhs()
+	low, _ := n.Low()
+	high, _ := n.High()
+	isNot, _ := n.IsNot()
+
+	p.accept(lhs, d)
+	p.moveBefore(n)
+
+	if isNot {
+		p.print(p.keyword("NOT BETWEEN") + " ")
+	} else {
+		p.print(p.keyword("BETWEEN") + " ")
+	}
+
+	p.accept(low, d)
+	p.print(p.keyword("AND"))
+	p.accept(high, d)
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) visitBinaryExpression(n *googlesql.ASTBinaryExpression, d printerData) {
+	p.printOpenParenIfNeeded(n)
+
+	var lhsAlign, rhsAlign string
+
+	if capacity := d["align_binary_op_budget"]; capacity > 0 {
+		d["align_binary_op_budget"]--
+		lhsAlign = "\v"
+		rhsAlign = " \v"
+	}
+
+	lhs, _ := n.Lhs()
+	rhs, _ := n.Rhs()
+
+	p.accept(lhs, d)
+	p.movePast(lhs)
+
+	_, b := nodeByteRange(lhs)
+	e, _ := nodeByteRange(rhs)
+	view := p.viewErasedInput(b, e)
+	binPos := indexFunc(view, unicode.IsSpace, false)
+
+	if binPos >= 0 {
+		p.fmt.flushCommentsUpTo(b + binPos)
+	}
+
+	p.printBinaryOp(n, lhsAlign, rhsAlign)
+
+	p.moveBefore(rhs)
+	p.accept(rhs, d)
+	p.movePast(rhs)
+	p.movePast(n)
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) printBinaryOp(n *googlesql.ASTBinaryExpression, lhsAlign, rhsAlign string) {
+	op, _ := n.Op()
+	isNot, _ := n.IsNot()
+
+	switch op {
+	case googlesql.ASTBinaryExpressionEnums_OpNotSet:
+		p.print("<UNKNOWN OPERATOR>")
+	case googlesql.ASTBinaryExpressionEnums_OpLike:
+		if isNot {
+			p.print(lhsAlign + p.keyword("NOT LIKE") + rhsAlign)
+		} else {
+			p.print(lhsAlign + p.keyword("LIKE") + rhsAlign)
+		}
+	case googlesql.ASTBinaryExpressionEnums_OpIs:
+		if isNot {
+			p.print(lhsAlign + p.keyword("IS NOT") + rhsAlign)
+		} else {
+			p.print(lhsAlign + p.keyword("IS") + rhsAlign)
+		}
+	case googlesql.ASTBinaryExpressionEnums_OpEq:
+		p.print(lhsAlign + "=" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpNe:
+		p.print(lhsAlign + "!=" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpNe2:
+		p.print(lhsAlign + "<>" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpGt:
+		p.print(lhsAlign + ">" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpLt:
+		p.print(lhsAlign + "<" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpGe:
+		p.print(lhsAlign + ">=" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpLe:
+		p.print(lhsAlign + "<=" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseOr:
+		p.print(lhsAlign + "|" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseXor:
+		p.print(lhsAlign + "^" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseAnd:
+		p.print(lhsAlign + "&" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpPlus:
+		p.print(lhsAlign + "+" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpMinus:
+		p.print(lhsAlign + "-" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpMultiply:
+		p.print(lhsAlign + "*" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpDivide:
+		p.print(lhsAlign + "/" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpConcatOp:
+		p.print(lhsAlign + "||" + rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpDistinct:
+		if isNot {
+			p.print(lhsAlign + p.keyword("IS NOT DISTINCT FROM") + " " + rhsAlign)
+		} else {
+			p.print(lhsAlign + p.keyword("IS DISTINCT FROM") + " " + rhsAlign)
+		}
+	default:
+		sqlOp, _ := n.GetSQLForOperator()
+		p.print(lhsAlign + p.keyword(sqlOp) + rhsAlign)
+	}
+}
+
+func (p *printer) visitConcatExpr(n *googlesql.ASTConcatExpr, d printerData) {
+	p.printOpenParenIfNeeded(n)
+
+	var lhsAlign, rhsAlign string
+
+	if capacity := d["align_binary_op_budget"]; capacity > 0 {
+		d["align_binary_op_budget"]--
+		lhsAlign = "\v"
+		rhsAlign = " \v"
+	}
+
+	operands := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+
+	for i, operand := range operands {
+		if i > 0 {
+			prev := operands[i-1]
+			_, b := nodeByteRange(prev)
+			e, _ := nodeByteRange(operand)
+			view := p.viewErasedInput(b, e)
+			binPos := indexFunc(view, unicode.IsSpace, false)
+
+			if binPos >= 0 {
+				p.fmt.flushCommentsUpTo(b + binPos)
+			}
+
+			if i == 1 {
+				p.print(lhsAlign + "||" + rhsAlign)
+			} else {
+				p.print("||")
+			}
+		}
+
+		p.moveBefore(operand)
+		p.accept(operand, d)
+		p.movePast(operand)
+	}
+
+	p.movePast(n)
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) visitBitwiseShiftExpression(n *googlesql.ASTBitwiseShiftExpression, d printerData) {
+	p.moveBefore(n)
+	lhs, _ := n.Lhs()
+	rhs, _ := n.Rhs()
+	isLeft, _ := n.IsLeftShift()
+
+	p.accept(lhs, d)
+
+	if isLeft {
+		p.print("<<")
+	} else {
+		p.print(">>")
+	}
+
+	p.accept(rhs, d)
+}
+
+func (p *printer) visitCaseNoValueExpression(n *googlesql.ASTCaseNoValueExpression, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeededWithDepth(n)
+	p.println(p.keyword("CASE"))
+
+	if p.fmt.opts.IndentCaseWhen {
+		p.incDepth()
+	}
+
+	args := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	argsSimple := p.mapIsSimpleExprs(args)
+	simple := allTrue(argsSimple)
+	d.SetBool("simple_case", simple)
+
+	pp := p.nest()
+	p.visitCaseArgs(pp, args, d)
+	p.print(pp.unnest())
+
+	p.println("")
+
+	if p.fmt.opts.IndentCaseWhen {
+		p.decDepth()
+	}
+
+	p.print(p.keyword("END"))
+	p.printCloseParenIfNeededWithDepth(n)
+}
+
+func (p *printer) visitCaseValueExpression(n *googlesql.ASTCaseValueExpression, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeededWithDepth(n)
+	p.print(p.keyword("CASE"))
+
+	args := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	argsSimple := p.mapIsSimpleExprs(args)
+	simple := allTrue(argsSimple)
+	value := args[0]
+	valueSimple := argsSimple[0]
+	indentWhen := p.fmt.opts.IndentCaseWhen
+
+	d.SetBool("simple_case", simple)
+
+	if !simple || !valueSimple {
+		p.println("")
+
+		if indentWhen {
+			p.incDepth()
+		}
+	}
+
+	pv := p.nest()
+	pv.accept(value, d)
+
+	if valueSimple {
+		p.print(strings.TrimLeft(pv.unnest(), "\v"))
+	} else {
+		p.print(pv.unnest())
+	}
+
+	p.println("")
+
+	if simple {
+		p.println("")
+
+		if indentWhen {
+			p.incDepth()
+		}
+	} else {
+		p.println(" ")
+	}
+
+	pp := p.nest()
+	p.visitCaseArgs(pp, args[1:], d)
+	p.print(pp.unnest())
+
+	p.println("")
+
+	if indentWhen {
+		p.decDepth()
+	}
+
+	p.print(p.keyword("END"))
+	p.printCloseParenIfNeededWithDepth(n)
+}
+
+func (p *printer) visitCaseArgs(target *printer, args []googlesql.ASTExpressionNode, d printerData) {
+	pp := target.nest()
+	simple := d.IsEnabled("simple_case")
+	initAlignBinOpBudget := 0
+
+	if simple && p.onlyBinaryExprOnCaseLHS(args) {
+		initAlignBinOpBudget = 1
+	}
+
+	for len(args) >= 2 {
+		lhs, rhs := args[0], args[1]
+		args = args[2:]
+		p.visitCaseWhenPair(pp, target, lhs, rhs, simple, initAlignBinOpBudget, len(args) >= 2, d)
+	}
+
+	if !simple {
+		pp.println(" ")
+	}
+
+	if len(args) == 1 {
+		visitCaseElseArg(pp, args[0], simple, initAlignBinOpBudget, d)
+	}
+
+	target.print(pp.String())
+}
+
+func (p *printer) visitCaseWhenPair(
+	pp *printer,
+	target *printer,
+	lhs googlesql.ASTExpressionNode,
+	rhs googlesql.ASTExpressionNode,
+	simple bool,
+	alignBudget int,
+	hasMorePairs bool,
+	d printerData,
+) {
+	lhsData := maps.Clone(d)
+	if simple {
+		lhsData["align_binary_op_budget"] = alignBudget
+	}
+
+	pp.print(pp.keyword("WHEN"))
+
+	if simple {
+		pp.print("\v")
+	}
+
+	if p.isSimpleExpr(lhs) {
+		lhsFmt := strings.TrimLeft(target.toString(lhs, lhsData), "\v")
+		pp.print(lhsFmt)
+
+		remaining := alignBudget*3 - strings.Count(lhsFmt, "\v")
+		if remaining > 1 {
+			pp.print(strings.Repeat("\v", remaining-1))
+		}
+	} else {
+		pp.println("")
+		pp.incDepth()
+		pp.accept(lhs, lhsData)
+		pp.println("")
+		pp.decDepth()
+	}
+
+	pp.print(pp.keyword("THEN"))
+
+	if simple {
+		pp.print("\v")
+	} else {
+		pp.println("")
+		pp.incDepth()
+	}
+
+	pp.acceptNested(rhs, d)
+
+	if hasMorePairs {
+		pp.println("")
+	}
+
+	if !simple {
+		pp.decDepth()
+		pp.println(" ")
+	}
+}
+
+func visitCaseElseArg(
+	pp *printer,
+	elseExpr googlesql.ASTExpressionNode,
+	simple bool,
+	alignBudget int,
+	d printerData,
+) {
+	pp.println("")
+
+	if simple {
+		pp.print(" ")
+		pp.print(strings.Repeat("\v", 1+alignBudget*2))
+	}
+
+	pp.print(pp.keyword("ELSE"))
+
+	if simple {
+		pp.print("\v")
+	} else {
+		pp.println("")
+		pp.incDepth()
+	}
+
+	p2 := pp.nest()
+	p2.accept(elseExpr, d)
+	pp.print(p2.unnestWithDepth(4))
+
+	if !simple {
+		pp.println("")
+		pp.decDepth()
+		pp.println(" ")
+	}
+}
+
+func (p *printer) onlyBinaryExprOnCaseLHS(args []googlesql.ASTExpressionNode) bool {
+	for i := 0; i < len(args)-1; i += 2 {
+		if !p.isSimpleExpr(args[i]) || nodeKind(args[i]) != googlesql.ASTNodeKindAstBinaryExpression {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (p *printer) visitCastExpression(n *googlesql.ASTCastExpression, d printerData) {
+	pp := p.nest()
+	pp.moveBefore(n)
+
+	isSafe, _ := n.IsSafeCast()
+	if isSafe {
+		pp.print(p.keyword("SAFE_CAST") + "(")
+	} else {
+		pp.print(p.keyword("CAST") + "(")
+	}
+
+	expr, _ := n.Expr()
+	typ, _ := n.Type()
+	fc, _ := n.Format()
+
+	pp.accept(expr, d)
+	pp.print(p.keyword("AS"))
+	pp.accept(typ, d)
+	pp.accept(fc, d)
+	pp.print(")")
+	p.print(pp.unnest())
+}
+
+func (p *printer) visitClampedBetweenModifier(n *googlesql.ASTClampedBetweenModifier, d printerData) {
+	p.moveBefore(n)
+	low, _ := n.Low()
+	high, _ := n.High()
+
+	p.print(p.keyword("CLAMPED BETWEEN"))
+	p.accept(low, d)
+	p.print(p.keyword("AND"))
+	p.accept(high, d)
+}
+
+func (p *printer) visitDotIdentifier(n *googlesql.ASTDotIdentifier, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+	expr, _ := n.Expr()
+	name, _ := n.Name()
+
+	p.accept(expr, d)
+	p.print(".")
+	p.accept(name, d)
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) visitDotGeneralizedField(n *googlesql.ASTDotGeneralizedField, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+	expr, _ := n.Expr()
+	path, _ := n.Path()
+
+	p.accept(expr, d)
+	p.print(".(")
+	p.accept(path, d)
+	p.print(")")
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) visitDotStar(n *googlesql.ASTDotStar, d printerData) {
+	p.moveBefore(n)
+	expr, _ := n.Expr()
+	p.accept(expr, d)
+	p.print(".*")
+}
+
+func (p *printer) visitDotStarWithModifiers(n *googlesql.ASTDotStarWithModifiers, d printerData) {
+	p.moveBefore(n)
+	expr, _ := n.Expr()
+	mods, _ := n.Modifiers()
+
+	p.accept(expr, d)
+	p.print(".*")
+	p.accept(mods, d)
+}
+
+func (p *printer) visitExpressionSubquery(n *googlesql.ASTExpressionSubquery, d printerData) {
+	p.moveBefore(n)
+
+	mod, _ := n.Modifier()
+	switch mod {
+	case googlesql.ASTExpressionSubqueryEnums_ModifierNone:
+		// Nothing.
+	case googlesql.ASTExpressionSubqueryEnums_ModifierArray:
+		p.print(p.keyword("ARRAY"))
+	case googlesql.ASTExpressionSubqueryEnums_ModifierExists:
+		p.print(p.keyword("EXISTS"))
+	case googlesql.ASTExpressionSubqueryEnums_ModifierValue:
+		p.print(p.keyword("VALUE"))
+	}
+
+	hint, _ := n.Hint()
+	q, _ := n.Query()
+
+	p.println("(")
+	p.incDepth()
+	p.accept(hint, d)
+	p.accept(q, d)
+	p.decDepth()
+	p.println("")
+	p.print(")")
+}
+
+func (p *printer) visitExtractExpression(n *googlesql.ASTExtractExpression, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("EXTRACT") + "(")
+
+	simple := p.isSimpleExpr(n)
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	lhs, _ := n.LhsExpr()
+	rhs, _ := n.RhsExpr()
+	tz, _ := n.TimeZoneExpr()
+
+	p.print(p.typename(p.toString(lhs, d)))
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(p.keyword("FROM"))
+
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	p.accept(rhs, d)
+
+	if nodeDefined(tz) {
+		p.print(p.keyword("AT TIME ZONE"))
+		p.accept(tz, d)
+	}
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(")")
+}
+
+func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData) {
+	p.moveBefore(n)
+
+	fn, _ := n.Function()
+	pp := p.nest()
+	pp.acceptNestedString(fn, d)
+
+	signature := p.getFunctionSignature(n)
+	expr := strings.TrimPrefix(pp.unnest(), "\v")
+
+	pp = p.nest()
+	pp.printOpenParenIfNeeded(n)
+
+	allArgs := functionCallArgs(n)
+	chained, _ := n.IsChainedCall()
+	sigOffset := 0
+	callArgs := allArgs
+
+	if chained && len(allArgs) > 0 {
+		pp.accept(allArgs[0], d)
+		pp.print(".")
+
+		callArgs = allArgs[1:]
+		sigOffset = 1
+	}
+
+	elems := countFunctionCallElements(n)
+	simple := len(callArgs) <= 4 && elems <= 1 && allTrue(p.mapIsSimpleExprs(callArgs))
+
+	pp.print(pp.function(expr))
+	pp.print("(")
+
+	if !simple {
+		pp.println("")
+		pp.incDepth()
+	}
+
+	if distinct, _ := n.Distinct(); distinct {
+		pp.print(pp.keyword("DISTINCT"))
+
+		if !simple {
+			pp.println("")
+		}
+	}
+
+	pp2 := pp.nest()
+
+	for i, arg := range callArgs {
+		if i > 0 {
+			pp2.print(",")
+
+			if !simple {
+				pp2.println("")
+			}
+		}
+
+		printedArg := strings.Trim(pp2.toString(arg, d), "\n")
+		if strings.Contains(printedArg, "\n") {
+			pp2.println("")
+		}
+
+		if _, ok := arg.(*googlesql.ASTPathExpression); ok {
+			sigStyle := signature.PrintCaseAt(i + sigOffset)
+			pp2.print(pp2.identifierWithCase(printedArg, sigStyle))
+		} else {
+			pp2.print(printedArg)
+		}
+	}
+
+	p.printFunctionCallModifiers(pp2, n, simple, d)
+	pp.print(pp2.unnest())
+
+	if !simple {
+		pp.println("")
+		pp.decDepth()
+	}
+
+	pp.print(")")
+	pp.printCloseParenIfNeeded(n)
+	p.print(pp.unnest())
+}
+
+func (p *printer) printFunctionCallModifiers(
+	pp2 *printer,
+	n *googlesql.ASTFunctionCall,
+	simple bool,
+	d printerData,
+) {
+	nh, _ := n.NullHandlingModifier()
+	switch nh {
+	case googlesql.ASTFunctionCallEnums_NullHandlingModifierDefaultNullHandling:
+		// Nothing.
+	case googlesql.ASTFunctionCallEnums_NullHandlingModifierIgnoreNulls:
+		if !simple {
+			pp2.println("")
+		}
+
+		pp2.print(pp2.keyword("IGNORE NULLS"))
+	case googlesql.ASTFunctionCallEnums_NullHandlingModifierRespectNulls:
+		if !simple {
+			pp2.println("")
+		}
+
+		pp2.print(pp2.keyword("RESPECT NULLS"))
+	}
+
+	hm, _ := n.HavingModifier()
+	cb, _ := n.ClampedBetweenModifier()
+	ob, _ := n.OrderBy()
+	lo, _ := n.LimitOffset()
+
+	for _, mod := range []googlesql.ASTNode{hm, cb, ob, lo} {
+		if !simple {
+			pp2.println("")
+		}
+
+		pp2.accept(mod, d)
+	}
+}
+
+func (p *printer) visitIdentifier(n *googlesql.ASTIdentifier, _ printerData) {
+	p.moveBefore(n)
+
+	raw := p.rawIdentifier(n)
+	parent := nodeParent(n)
+
+	if p.fmt.opts.TableNameStyle != Unspecified &&
+		nodeKind(parent) == googlesql.ASTNodeKindAstPathExpression &&
+		isTablePathParent(nodeParent(parent)) {
+		p.print(p.identifierWithCase(raw, p.fmt.opts.TableNameStyle))
+
+		return
+	}
+
+	p.print(p.identifier(raw))
+}
+
+func (p *printer) rawIdentifier(n *googlesql.ASTIdentifier) string {
+	start, end := nodeByteRange(n)
+
+	if start < end && p.viewInput(start, start+1) != "`" && start > 0 && viewStringAt(p.input, start-1) == '`' {
+		start--
+		end++
+	}
+
+	return p.viewInput(start, end)
+}
+
+func isTablePathParent(n googlesql.ASTNode) bool {
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstTablePathExpression,
+		googlesql.ASTNodeKindAstCreateTableStatement,
+		googlesql.ASTNodeKindAstCreateViewStatement,
+		googlesql.ASTNodeKindAstCreateMaterializedViewStatement,
+		googlesql.ASTNodeKindAstCreateExternalTableStatement,
+		googlesql.ASTNodeKindAstCreateSnapshotTableStatement,
+		googlesql.ASTNodeKindAstAlterTableStatement,
+		googlesql.ASTNodeKindAstAlterViewStatement,
+		googlesql.ASTNodeKindAstAlterMaterializedViewStatement,
+		googlesql.ASTNodeKindAstInsertStatement,
+		googlesql.ASTNodeKindAstDeleteStatement,
+		googlesql.ASTNodeKindAstUpdateStatement,
+		googlesql.ASTNodeKindAstMergeStatement,
+		googlesql.ASTNodeKindAstTruncateStatement:
+		return true
+	default:
+		return false
+	}
+}
+
+func (p *printer) visitIdentifierList(n *googlesql.ASTIdentifierList, d printerData) {
+	p.moveBefore(n)
+	ids := selectChildrenOfType[*googlesql.ASTIdentifier](n)
+	printNestedWithSep(p, ids, d, ",")
+}
+
+func (p *printer) visitInExpression(n *googlesql.ASTInExpression, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+
+	lhs, _ := n.Lhs()
+	isNot, _ := n.IsNot()
+	hint, _ := n.Hint()
+	inList, _ := n.InList()
+	unnest, _ := n.UnnestExpr()
+	q, _ := n.Query()
+
+	p.accept(lhs, d)
+
+	if isNot {
+		p.print(p.keyword("NOT IN"))
+	} else {
+		p.print(p.keyword("IN"))
+	}
+
+	p.accept(hint, d)
+	p.accept(inList, d)
+	p.accept(unnest, d)
+
+	if nodeDefined(q) {
+		p.println("(")
+		p.incDepth()
+		p.accept(q, d)
+		p.decDepth()
+		p.println("")
+		p.print(")")
+	}
+
+	p.printCloseParenIfNeeded(n)
+	p.movePast(n)
+}
+
+func (p *printer) visitInList(n *googlesql.ASTInList, d printerData) {
+	p.moveBefore(n)
+	p.print("(")
+
+	elems := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	simple := allTrue(p.mapIsSimpleExprs(elems))
+
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	for i, elem := range elems {
+		if i > 0 {
+			p.print(",")
+
+			if !simple {
+				p.println("")
+			}
+		}
+
+		p.accept(elem, d)
+	}
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(")")
+}
+
+func (p *printer) visitIntervalExpr(n *googlesql.ASTIntervalExpr, d printerData) {
+	p.moveBefore(n)
+	val, _ := n.IntervalValue()
+	dp, _ := n.DatePartName()
+	dpTo, _ := n.DatePartNameTo()
+
+	p.print(p.keyword("INTERVAL"))
+	p.accept(val, d)
+
+	pp := p.nest()
+	pp.accept(dp, d)
+
+	if nodeDefined(dpTo) {
+		pp.print(pp.keyword("TO"))
+		pp.accept(dpTo, d)
+	}
+
+	p.print(p.keyword(pp.unnest()))
+	p.movePast(n)
+}
+
+func (p *printer) visitLambda(n *googlesql.ASTLambda, d printerData) {
+	p.moveBefore(n)
+	args, _ := n.ArgumentList()
+	body, _ := n.Body()
+
+	p.accept(args, d)
+	p.print("->")
+	p.accept(body, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitNamedArgument(n *googlesql.ASTNamedArgument, d printerData) {
+	p.moveBefore(n)
+	name, _ := n.Name()
+	expr, _ := n.Expr()
+
+	p.accept(name, d)
+	p.print("=>")
+
+	simple := p.isSimpleExpr(expr)
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	p.accept(expr, d)
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+}
+
+func (p *printer) visitParameterExpr(n *googlesql.ASTParameterExpr, d printerData) {
+	p.moveBefore(n)
+	pos, _ := n.Position()
+
+	if pos == 0 {
+		name, _ := n.Name()
+
+		p.print("@")
+
+		if p.fmt.opts.QueryParameterStyle != Unspecified && nodeDefined(name) {
+			p.moveBefore(name)
+			p.print(p.identifierWithCase(p.rawIdentifier(name), p.fmt.opts.QueryParameterStyle))
+		} else {
+			p.accept(name, d)
+		}
+	} else {
+		p.print("?")
+	}
+}
+
+func (p *printer) visitPathExpression(n *googlesql.ASTPathExpression, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+
+	for i, name := range selectChildrenOfType[*googlesql.ASTIdentifier](n) {
+		if i > 0 {
+			p.print(".")
+		}
+
+		p.accept(name, d)
+	}
+
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) visitPathExpressionList(n *googlesql.ASTPathExpressionList, d printerData) {
+	p.moveBefore(n)
+
+	exprs := selectChildrenOfType[*googlesql.ASTPathExpression](n)
+	parens := len(exprs) > 1
+
+	if parens {
+		p.print("(")
+	}
+
+	simple := allTrue(p.mapIsSimplePathExpressionList(n))
+
+	for i, name := range exprs {
+		if i > 0 {
+			p.print(",")
+
+			if !simple {
+				p.println("")
+			}
+		}
+
+		p.accept(name, d)
+	}
+
+	if parens {
+		p.print(")")
+	}
+}
+
+func (p *printer) visitStar(n *googlesql.ASTStar, _ printerData) {
+	p.moveBefore(n)
+	img, _ := n.Image()
+	p.print(img)
+}
+
+func (p *printer) visitStarModifiers(n *googlesql.ASTStarModifiers, d printerData) {
+	if el, _ := n.ExceptList(); nodeDefined(el) {
+		p.print(p.keyword("EXCEPT"))
+		p.print("(")
+
+		for i, e := range selectChildrenOfType[*googlesql.ASTIdentifier](el) {
+			if i > 0 {
+				p.print(",")
+			}
+
+			p.accept(e, d)
+		}
+
+		p.print(")")
+	}
+
+	items := selectChildrenOfType[*googlesql.ASTStarReplaceItem](n)
+	if len(items) > 0 {
+		p.println("")
+		p.print(p.keyword("REPLACE"))
+		p.println("(")
+		p.incDepth()
+
+		for i, e := range items {
+			if i > 0 {
+				p.print(",")
+				p.println("")
+			}
+
+			p.accept(e, d)
+		}
+
+		p.decDepth()
+		p.println("")
+		p.print(")")
+	}
+}
+
+func (p *printer) visitStarReplaceItem(n *googlesql.ASTStarReplaceItem, d printerData) {
+	expr, _ := n.Expression()
+	alias, _ := n.Alias()
+
+	p.accept(expr, d)
+
+	if nodeDefined(alias) {
+		p.print(p.keyword("AS"))
+		p.accept(alias, d)
+	}
+}
+
+func (p *printer) visitStarWithModifiers(n *googlesql.ASTStarWithModifiers, d printerData) {
+	p.moveBefore(n)
+	mods, _ := n.Modifiers()
+
+	p.print("*")
+	p.accept(mods, d)
+}
+
+func (p *printer) visitStructColumnField(n *googlesql.ASTStructColumnField, d printerData) {
+	p.moveBefore(n)
+	name, _ := n.Name()
+	sc, _ := n.Schema()
+
+	p.accept(name, d)
+	p.accept(sc, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitStructConstructorArg(n *googlesql.ASTStructConstructorArg, d printerData) {
+	p.moveBefore(n)
+	expr, _ := n.Expression()
+	alias, _ := n.Alias()
+
+	p.accept(expr, d)
+	p.accept(alias, d)
+}
+
+func (p *printer) visitStructConstructorWithKeyword(n *googlesql.ASTStructConstructorWithKeyword, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeededWithDepth(n)
+
+	if st, _ := n.StructType(); nodeDefined(st) {
+		pp := p.nest()
+		pp.accept(st, d)
+		p.print(pp.unnest() + "(")
+	} else {
+		p.print(p.keyword("STRUCT") + "(")
+	}
+
+	fields := selectChildrenOfType[*googlesql.ASTStructConstructorArg](n)
+	simple := allTrue(p.mapIsSimpleStructConstructorArg(fields))
+
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	for i, e := range fields {
+		if i > 0 {
+			p.print(",")
+
+			if !simple {
+				p.println("")
+			}
+		}
+
+		p.accept(e, d)
+	}
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(")")
+	p.printCloseParenIfNeededWithDepth(n)
+}
+
+func (p *printer) visitStructConstructorWithParens(n *googlesql.ASTStructConstructorWithParens, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeededWithDepth(n)
+	p.print("(")
+
+	fields := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	simple := allTrue(p.mapIsSimpleExprs(fields))
+
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	for i, e := range fields {
+		if i > 0 {
+			p.print(",")
+
+			if !simple {
+				p.println("")
+			}
+		}
+
+		p.accept(e, d)
+	}
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(")")
+	p.printCloseParenIfNeededWithDepth(n)
+}
+
+func (p *printer) visitSystemVariableExpr(n *googlesql.ASTSystemVariableExpr, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+	path, _ := n.Path()
+
+	p.print("@@")
+
+	if p.fmt.opts.SystemVariableStyle != Unspecified && nodeDefined(path) {
+		p.moveBefore(path)
+
+		for i, seg := range selectChildrenOfType[*googlesql.ASTIdentifier](path) {
+			if i > 0 {
+				p.print(".")
+			}
+
+			p.moveBefore(seg)
+			p.print(p.identifierWithCase(p.rawIdentifier(seg), p.fmt.opts.SystemVariableStyle))
+		}
+	} else {
+		p.accept(path, d)
+	}
+
+	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) visitUnaryExpression(n *googlesql.ASTUnaryExpression, d printerData) {
+	p.moveBefore(n)
+
+	op, _ := n.Op()
+	switch op {
+	case googlesql.ASTUnaryExpressionEnums_OpNotSet:
+		p.fmt.addUnary(p.keyword("<UNKNOWN OPERATOR>"))
+	case googlesql.ASTUnaryExpressionEnums_OpNot:
+		p.fmt.addUnary(p.keyword("NOT"))
+	case googlesql.ASTUnaryExpressionEnums_OpBitwiseNot:
+		p.fmt.addUnary("~")
+	case googlesql.ASTUnaryExpressionEnums_OpMinus:
+		p.fmt.addUnary("-")
+	case googlesql.ASTUnaryExpressionEnums_OpPlus:
+		p.fmt.addUnary("+")
+	case googlesql.ASTUnaryExpressionEnums_OpIsUnknown,
+		googlesql.ASTUnaryExpressionEnums_OpIsNotUnknown:
+		// Postfix unary handled after operand.
+	}
+
+	operand, _ := n.Operand()
+	p.accept(operand, d)
+
+	switch op {
+	case googlesql.ASTUnaryExpressionEnums_OpIsUnknown:
+		p.fmt.addUnary(p.keyword("IS UNKNOWN"))
+	case googlesql.ASTUnaryExpressionEnums_OpIsNotUnknown:
+		p.fmt.addUnary(p.keyword("IS NOT UNKNOWN"))
+	default:
+		// Prefix unary handled before operand.
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitUnnestExpression(n *googlesql.ASTUnnestExpression, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("UNNEST") + "(")
+
+	if expr, _ := n.Expression(); nodeDefined(expr) {
+		p.accept(expr, d)
+	} else {
+		exprs := selectChildrenOfType[*googlesql.ASTExpressionWithOptAlias](n)
+		for i, e := range exprs {
+			if i > 0 {
+				p.print(",")
+			}
+
+			ex, _ := e.Expression()
+			al, _ := e.OptionalAlias()
+
+			p.accept(ex, d)
+			p.accept(al, d)
+		}
+
+		if zm, _ := n.ArrayZipMode(); nodeDefined(zm) {
+			p.print(",")
+			p.accept(zm, d)
+		}
+	}
+
+	p.print(")")
+}
+
+func (p *printer) visitWithExpression(n *googlesql.ASTWithExpression, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+
+	vars, _ := n.Variables()
+	expr, _ := n.Expression()
+	cols := selectChildrenOfType[*googlesql.ASTSelectColumn](vars)
+
+	p.print(p.keyword("WITH") + "(")
+
+	simple := len(cols) <= 2 && p.isSimpleExpr(expr)
+	for _, c := range cols {
+		ce, _ := c.Expression()
+		if !p.isSimpleExpr(ce) {
+			simple = false
+
+			break
+		}
+	}
+
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	for _, c := range cols {
+		al, _ := c.Alias()
+		ce, _ := c.Expression()
+
+		if nodeDefined(al) {
+			id, _ := al.Identifier()
+			p.accept(id, d)
+			p.print(p.keyword("AS"))
+		}
+
+		p.acceptNested(ce, d)
+		p.print(",")
+
+		if !simple {
+			p.println("")
+		}
+	}
+
+	p.acceptNested(expr, d)
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(")")
+	p.printCloseParenIfNeeded(n)
+	p.movePast(n)
+}

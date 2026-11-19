@@ -1,227 +1,268 @@
-// This file contains a set of analyzes to help assessing the complexity
-// of a AST sub-tree.
 package formatter
 
 import (
 	"strings"
 
-	"github.com/goccy/go-zetasql/ast"
+	"github.com/goccy/go-googlesql"
+
 	"github.com/paulourio/bqlang/extensions"
 )
 
-func isSimpleType(n ast.TypeNode) bool {
-	switch n.Kind() {
-	case ast.ArrayType:
-		return false
-	case ast.StructType:
-		return false
-	case ast.SimpleType:
-		b := n.(*ast.SimpleTypeNode)
-		if b.TypeParameters() != nil {
-			return false
-		}
-
+func isSimpleType(n googlesql.ASTTypeNode) bool {
+	if !nodeDefined(n) {
 		return true
 	}
 
-	return true
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstArrayType,
+		googlesql.ASTNodeKindAstStructType,
+		googlesql.ASTNodeKindAstRangeType,
+		googlesql.ASTNodeKindAstMapType,
+		googlesql.ASTNodeKindAstFunctionType:
+		return false
+	case googlesql.ASTNodeKindAstSimpleType:
+		if b, ok := n.(*googlesql.ASTSimpleType); ok {
+			tp, _ := b.TypeParameters()
+
+			return !nodeDefined(tp)
+		}
+
+		return true
+	default:
+		return true
+	}
 }
 
-// isSimpleExpr tries to determine if the expression is ok to be
-// rendered in a single line.
-func isSimpleExpr(n ast.ExpressionNode) bool {
-	switch n.Kind() {
-	case ast.AndExpr:
-		return isSimpleAndExpr(n.(*ast.AndExprNode))
-	case ast.OrExpr:
-		return isSimpleOrExpr(n.(*ast.OrExprNode))
-	case ast.PathExpression,
-		ast.Star,
-		ast.BignumericLiteral,
-		ast.BooleanLiteral,
-		ast.DateOrTimeLiteral,
-		ast.FloatLiteral,
-		ast.IntLiteral,
-		ast.NullLiteral,
-		ast.NumericLiteral,
-		ast.ParameterExpr,
-		ast.SystemVariableExpr,
-		ast.Identifier:
+// isSimpleExpr determines whether an expression fits cleanly on a single line.
+func (p *printer) isSimpleExpr(n googlesql.ASTExpressionNode) bool {
+	if !nodeDefined(n) || isSimpleAtomKind(nodeKind(n)) {
 		return true
-	case ast.BytesLiteral:
-		b := n.(*ast.BytesLiteralNode)
-		return !strings.Contains(b.Image(), "\n")
-	case ast.ExtractExpression:
-		b := n.(*ast.ExtractExpressionNode)
-		return isSimpleExpr(b.LhsExpr()) && isSimpleExpr(b.RhsExpr())
-	case ast.StringLiteral:
-		b := n.(*ast.StringLiteralNode)
-		return !strings.Contains(b.Image(), "\n")
-	case ast.BinaryExpression:
-		b := n.(*ast.BinaryExpressionNode)
-		return isSimpleExpr2(b.Lhs()) && isSimpleExpr(b.Rhs())
-	case ast.UnaryExpression:
-		b := n.(*ast.UnaryExpressionNode)
-		return isSimpleExpr2(b.Operand())
-	case ast.IntervalExpr:
-		b := n.(*ast.IntervalExprNode)
-		return isSimpleExpr2(b.InternalValue())
-	case ast.FunctionCall:
-		f := n.(*ast.FunctionCallNode)
-		args := f.Arguments()
-		elems := countFunctionCallElements(f)
+	}
 
-		return len(args) <= 4 && elems <= 1 && allTrue(mapIsSimpleExprs2(args))
-	case ast.NamedArgument:
-		b := n.(*ast.NamedArgumentNode)
-		return isSimpleExpr2(b.Expr())
+	switch b := n.(type) {
+	case *googlesql.ASTAndExpr:
+		return p.isSimpleAndExpr(b)
+	case *googlesql.ASTOrExpr:
+		return p.isSimpleOrExpr(b)
+	case *googlesql.ASTBytesLiteral, *googlesql.ASTStringLiteral:
+		return !strings.Contains(p.nodeInput(n), "\n")
+	case *googlesql.ASTExtractExpression:
+		lhs, _ := b.LhsExpr()
+		rhs, _ := b.RhsExpr()
+
+		return p.isSimpleExpr(lhs) && p.isSimpleExpr(rhs)
+	case *googlesql.ASTBinaryExpression:
+		lhs, _ := b.Lhs()
+		rhs, _ := b.Rhs()
+
+		return p.isSimpleExpr2(lhs) && p.isSimpleExpr(rhs)
+	case *googlesql.ASTConcatExpr:
+		ops := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+
+		return allTrue(p.mapIsSimpleExprs2(ops))
+	case *googlesql.ASTUnaryExpression:
+		op, _ := b.Operand()
+
+		return p.isSimpleExpr2(op)
+	case *googlesql.ASTIntervalExpr:
+		val, _ := b.IntervalValue()
+
+		return p.isSimpleExpr2(val)
+	case *googlesql.ASTFunctionCall:
+		args := functionCallArgs(b)
+		elems := countFunctionCallElements(b)
+
+		return len(args) <= 4 && elems <= 1 && allTrue(p.mapIsSimpleExprs2(args))
+	case *googlesql.ASTNamedArgument:
+		expr, _ := b.Expr()
+
+		return p.isSimpleExpr2(expr)
 	default:
 		return false
 	}
 }
 
-// isSimpleExpr2 tries to determine if the expression is ok to be
-// rendered in a single line.
-func isSimpleExpr2(n ast.ExpressionNode) bool {
-	switch n.Kind() {
-	case ast.PathExpression,
-		ast.Star,
-		ast.BignumericLiteral,
-		ast.BooleanLiteral,
-		ast.BytesLiteral,
-		ast.DateOrTimeLiteral,
-		ast.FloatLiteral,
-		ast.IntLiteral,
-		ast.NullLiteral,
-		ast.NumericLiteral,
-		ast.ParameterExpr,
-		ast.StringLiteral,
-		ast.SystemVariableExpr,
-		ast.Identifier:
+func isSimpleAtomKind(k googlesql.ASTNodeKind) bool {
+	switch k {
+	case googlesql.ASTNodeKindAstPathExpression,
+		googlesql.ASTNodeKindAstStar,
+		googlesql.ASTNodeKindAstBignumericLiteral,
+		googlesql.ASTNodeKindAstBooleanLiteral,
+		googlesql.ASTNodeKindAstDateOrTimeLiteral,
+		googlesql.ASTNodeKindAstFloatLiteral,
+		googlesql.ASTNodeKindAstIntLiteral,
+		googlesql.ASTNodeKindAstJsonLiteral,
+		googlesql.ASTNodeKindAstNullLiteral,
+		googlesql.ASTNodeKindAstNumericLiteral,
+		googlesql.ASTNodeKindAstParameterExpr,
+		googlesql.ASTNodeKindAstSystemVariableExpr,
+		googlesql.ASTNodeKindAstIdentifier:
 		return true
-	case ast.BinaryExpression:
-		parent := n.Parent()
-		if !nodeDefined(parent) || parent.Kind() != ast.BinaryExpression {
-			return true
-		}
-
-		parent = n.Parent()
-		if !nodeDefined(parent) || parent.Kind() != ast.BinaryExpression {
-			return true
-		}
-
-		return false
-	case ast.UnaryExpression:
-		e := n.(*ast.UnaryExpressionNode)
-
-		return isSimpleExpr2(e.Operand())
-	case ast.FunctionCall:
-		f := n.(*ast.FunctionCallNode)
-		args := f.Arguments()
-		elems := countFunctionCallElements(f)
-
-		return len(args) <= 2 && elems <= 1 && allTrue(mapIsSimpleExprs2(args))
 	default:
 		return false
 	}
 }
 
-func isSimpleAndExpr(n *ast.AndExprNode) bool {
-	conjuncts := n.Conjuncts()
-
-	parent := n.Parent()
-	if nodeDefined(parent) {
-		switch parent.Kind() {
-		case ast.MergeStatement, ast.MergeWhenClause:
-			// When inside a MERGE ... ON, force to be handled as a multi-line
-			// AND with aligned equal signs.
-			return false
-		case ast.WhereClause:
-			return false
-		}
-	}
-
-	return len(conjuncts) <= 4 && allTrue(mapIsSimpleExprs2(conjuncts))
-}
-
-func isSimpleOrExpr(n *ast.OrExprNode) bool {
-	disjunct := n.Disjuncts()
-
-	parent := n.Parent()
-	if nodeDefined(parent) {
-		switch parent.Kind() {
-		case ast.MergeStatement, ast.MergeWhenClause:
-			// When inside a MERGE ... ON, force to be handled as a multi-line
-			// OR with aligned equal signs.
-			return false
-		}
-	}
-
-	return len(disjunct) <= 4 && allTrue(mapIsSimpleExprs2(disjunct))
-}
-
-func isSimpleColumnSchema(n *ast.ColumnSchemaNode) bool {
-	num := n.NumChildren()
-
-	switch n.Kind() {
-	case ast.ArrayColumnSchema:
-		if num > 1 {
-			return false
-		}
-
-		return isSimpleColumnSchema2((n.Child(0)))
-	case ast.InferredTypeColumnSchema:
-		return false
-	case ast.SimpleColumnSchema:
+// isSimpleExpr2 applies a stricter single-line complexity check for nested operands.
+func (p *printer) isSimpleExpr2(n googlesql.ASTExpressionNode) bool {
+	if !nodeDefined(n) {
 		return true
-	case ast.StructColumnSchema:
-		if num > 1 {
-			return false
-		}
+	}
 
-		return isSimpleColumnSchema2(n.Child(0))
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstPathExpression,
+		googlesql.ASTNodeKindAstStar,
+		googlesql.ASTNodeKindAstBignumericLiteral,
+		googlesql.ASTNodeKindAstBooleanLiteral,
+		googlesql.ASTNodeKindAstBytesLiteral,
+		googlesql.ASTNodeKindAstDateOrTimeLiteral,
+		googlesql.ASTNodeKindAstFloatLiteral,
+		googlesql.ASTNodeKindAstIntLiteral,
+		googlesql.ASTNodeKindAstJsonLiteral,
+		googlesql.ASTNodeKindAstNullLiteral,
+		googlesql.ASTNodeKindAstNumericLiteral,
+		googlesql.ASTNodeKindAstParameterExpr,
+		googlesql.ASTNodeKindAstStringLiteral,
+		googlesql.ASTNodeKindAstSystemVariableExpr,
+		googlesql.ASTNodeKindAstIdentifier:
+		return true
+	case googlesql.ASTNodeKindAstBinaryExpression, googlesql.ASTNodeKindAstConcatExpr:
+		parent := nodeParent(n)
+
+		return !nodeDefined(parent) || !isBinaryOrConcatKind(nodeKind(parent))
+	case googlesql.ASTNodeKindAstUnaryExpression:
+		if e, ok := n.(*googlesql.ASTUnaryExpression); ok {
+			op, _ := e.Operand()
+
+			return p.isSimpleExpr2(op)
+		}
+	case googlesql.ASTNodeKindAstFunctionCall:
+		if f, ok := n.(*googlesql.ASTFunctionCall); ok {
+			args := functionCallArgs(f)
+			elems := countFunctionCallElements(f)
+
+			return len(args) <= 2 && elems <= 1 && allTrue(p.mapIsSimpleExprs2(args))
+		}
+	default:
+		return false
 	}
 
 	return false
 }
 
-func isSimpleColumnSchema2(n ast.Node) bool {
-	num := n.NumChildren()
+func isBinaryOrConcatKind(k googlesql.ASTNodeKind) bool {
+	return k == googlesql.ASTNodeKindAstBinaryExpression || k == googlesql.ASTNodeKindAstConcatExpr
+}
+
+func (p *printer) isSimpleAndExpr(n *googlesql.ASTAndExpr) bool {
+	conjuncts := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+
+	parent := nodeParent(n)
+	if nodeDefined(parent) {
+		switch nodeKind(parent) {
+		case googlesql.ASTNodeKindAstMergeStatement,
+			googlesql.ASTNodeKindAstMergeWhenClause,
+			googlesql.ASTNodeKindAstWhereClause,
+			googlesql.ASTNodeKindAstDeleteStatement,
+			googlesql.ASTNodeKindAstUpdateStatement:
+			return false
+		default:
+			// Continue complexity check.
+		}
+	}
+
+	return len(conjuncts) <= 4 && allTrue(p.mapIsSimpleExprs2(conjuncts))
+}
+
+func (p *printer) isSimpleOrExpr(n *googlesql.ASTOrExpr) bool {
+	disjuncts := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+
+	parent := nodeParent(n)
+	if nodeDefined(parent) {
+		switch nodeKind(parent) {
+		case googlesql.ASTNodeKindAstMergeStatement, googlesql.ASTNodeKindAstMergeWhenClause:
+			return false
+		default:
+			// Continue complexity check.
+		}
+	}
+
+	return len(disjuncts) <= 4 && allTrue(p.mapIsSimpleExprs2(disjuncts))
+}
+
+func isSimpleColumnSchema(n googlesql.ASTColumnSchemaNode) bool {
+	if !nodeDefined(n) {
+		return true
+	}
+
+	num := nodeNumChildren(n)
+
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstArrayColumnSchema, googlesql.ASTNodeKindAstRangeColumnSchema:
+		if num > 1 {
+			return false
+		}
+
+		return isSimpleColumnSchema2(nodeChild(n, 0))
+	case googlesql.ASTNodeKindAstInferredTypeColumnSchema, googlesql.ASTNodeKindAstMapColumnSchema:
+		return false
+	case googlesql.ASTNodeKindAstSimpleColumnSchema:
+		return true
+	case googlesql.ASTNodeKindAstStructColumnSchema:
+		if num > 1 {
+			return false
+		}
+
+		return isSimpleColumnSchema2(nodeChild(n, 0))
+	default:
+		return false
+	}
+}
+
+func isSimpleColumnSchema2(n googlesql.ASTNode) bool {
+	if !nodeDefined(n) {
+		return false
+	}
+
+	num := nodeNumChildren(n)
 
 	switch cs := n.(type) {
-	case *ast.ColumnSchemaNode:
-		return isSimpleColumnSchema2(cs.Child(0))
-	case *ast.ArrayColumnSchemaNode:
+	case *googlesql.ASTArrayColumnSchema,
+		*googlesql.ASTRangeColumnSchema,
+		*googlesql.ASTMapColumnSchema,
+		*googlesql.ASTInferredTypeColumnSchema:
 		return false
-	case *ast.InferredTypeColumnSchemaNode:
-		return false
-	case *ast.SimpleColumnSchemaNode:
-		return isSimpleColumnSchema(cs.ColumnSchemaNode)
-	case *ast.StructColumnFieldNode:
-		return isSimpleColumnSchema(cs.Schema())
-	case *ast.StructColumnSchemaNode:
+	case *googlesql.ASTSimpleColumnSchema:
+		return true
+	case *googlesql.ASTStructColumnField:
+		schema, _ := cs.Schema()
+
+		return isSimpleColumnSchema(schema)
+	case *googlesql.ASTStructColumnSchema:
 		if num > 1 {
 			return false
 		}
 
-		return isSimpleColumnSchema2(cs.Child(0))
+		return isSimpleColumnSchema2(nodeChild(cs, 0))
+	default:
+		return false
 	}
-
-	return false
 }
 
-// maybeSingleLineColumns inspects a select to determine whether it
-// may be rendered as a single line.
-func (p *Printer) maybeSingleLineColumns(n *ast.SelectNode) bool {
-	cols := n.SelectList().Columns()
+// maybeSingleLineColumns inspects a SELECT to determine whether its columns may
+// be rendered on a single line.
+func (p *printer) maybeSingleLineColumns(n *googlesql.ASTSelect) bool {
+	sl, err := n.SelectList()
+	if err != nil || !nodeDefined(sl) {
+		return false
+	}
 
+	cols := selectChildrenOfType[*googlesql.ASTSelectColumn](sl)
 	if len(cols) > p.fmt.opts.MaxColumnsForSingleLineSelect {
 		return false
 	}
 
-	// We need to disable single-line columns if we have a comment
-	// inside.
-	e := n.ParseLocationRange().End().ByteOffset()
+	_, e := nodeByteRange(n)
 	if lhs, _ := extensions.SplitComments(p.fmt.comments.comments, e); len(lhs) > 0 {
 		return false
 	}
@@ -231,37 +272,38 @@ func (p *Printer) maybeSingleLineColumns(n *ast.SelectNode) bool {
 	aliases := 0
 
 	for _, c := range cols {
-		if !nodeDefined(c.Child(0)) { // Fix to skip bug on JSON literal.
+		expr, _ := c.Expression()
+		if !nodeDefined(expr) {
 			continue
 		}
 
-		e := c.Expression()
-		if e.Kind() == ast.FunctionCall {
+		if nodeKind(expr) == googlesql.ASTNodeKindAstFunctionCall {
 			functions++
 		}
 
-		alias := c.Alias() != nil
-		if alias {
+		if alias, _ := c.Alias(); nodeDefined(alias) {
 			aliases++
 		}
 
-		r = append(r, isSimpleExpr2(e))
+		r = append(r, p.isSimpleExpr2(expr))
 	}
 
 	return functions <= 1 && aliases <= 1 && allTrue(r)
 }
 
-func mapIsAlignable(exprs []ast.ExpressionNode) []bool {
+func (p *printer) mapIsAlignable(exprs []googlesql.ASTExpressionNode) []bool {
 	r := make([]bool, 0, len(exprs))
 
 	for _, e := range exprs {
-		simple := false
+		var simple bool
 
-		switch e.Kind() {
-		case ast.BinaryExpression:
-			simple = isSimpleExpr(e)
-		case ast.UnaryExpression:
+		switch nodeKind(e) {
+		case googlesql.ASTNodeKindAstBinaryExpression, googlesql.ASTNodeKindAstConcatExpr:
+			simple = p.isSimpleExpr(e)
+		case googlesql.ASTNodeKindAstUnaryExpression:
 			simple = true
+		default:
+			simple = false
 		}
 
 		r = append(r, simple)
@@ -270,245 +312,242 @@ func mapIsAlignable(exprs []ast.ExpressionNode) []bool {
 	return r
 }
 
-func mapIsSimpleFunctionParameters(params []*ast.FunctionParameterNode) []bool {
+func mapIsSimpleFunctionParameters(params []*googlesql.ASTFunctionParameter) []bool {
 	r := make([]bool, 0, len(params))
 
-	for _, p := range params {
+	for _, param := range params {
 		simple := false
 
-		if typ := p.Type(); typ != nil {
+		if typ, _ := param.Type(); nodeDefined(typ) {
 			simple = isSimpleType(typ)
-		} else if p.TemplatedParameterType() != nil {
+		} else if tpt, _ := param.TemplatedParameterType(); nodeDefined(tpt) {
 			simple = true
 		}
+
 		r = append(r, simple)
 	}
 
 	return r
 }
 
-func mapIsSimpleTVFSchema(cols []*ast.TVFSchemaColumnNode) []bool {
+func mapIsSimpleTVFSchema(cols []*googlesql.ASTTVFSchemaColumn) []bool {
 	r := make([]bool, 0, len(cols))
 
 	for _, c := range cols {
-		r = append(r, isSimpleType(c.Type()))
+		typ, _ := c.Type()
+		r = append(r, isSimpleType(typ))
 	}
 
 	return r
 }
 
-func mapIsSimpleOptionsList(n *ast.OptionsListNode) []bool {
-	entries := n.OptionsEntries()
+func (p *printer) mapIsSimpleOptionsList(n *googlesql.ASTOptionsList) []bool {
+	entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](n)
 	r := make([]bool, 0, len(entries))
 
 	for _, e := range entries {
-		r = append(r, isSimpleExpr(e.Value()))
+		val, _ := e.Value()
+		r = append(r, p.isSimpleExpr(val))
 	}
 
 	return r
 }
 
-func mapIsSimplePathExpressionList(n *ast.PathExpressionListNode) []bool {
-	num := n.NumChildren()
-	r := make([]bool, 0, num)
+func (p *printer) mapIsSimplePathExpressionList(n *googlesql.ASTPathExpressionList) []bool {
+	paths := selectChildrenOfType[*googlesql.ASTPathExpression](n)
+	r := make([]bool, 0, len(paths))
 
-	for i := 0; i < num; i++ {
-		path := n.Child(i)
-
-		if nodeDefined(path) {
-			r = append(r, isSimpleExpr(path))
-		}
+	for _, path := range paths {
+		r = append(r, p.isSimpleExpr(path))
 	}
 
 	return r
 }
 
-func mapIsSimplePivotExpressionList(n *ast.PivotExpressionListNode) []bool {
-	exprs := n.Expressions()
+func (p *printer) mapIsSimplePivotExpressionList(n *googlesql.ASTPivotExpressionList) []bool {
+	exprs := selectChildrenOfType[*googlesql.ASTPivotExpression](n)
 	r := make([]bool, 0, len(exprs))
 
 	for _, a := range exprs {
-		r = append(r, isSimpleExpr(a.Expression()) && a.Alias() == nil)
+		expr, _ := a.Expression()
+		alias, _ := a.Alias()
+		r = append(r, p.isSimpleExpr(expr) && !nodeDefined(alias))
 	}
 
 	return r
 }
 
-func mapIsSimplePivotForExpression(n *ast.PivotClauseNode) []bool {
-	lhs := n.ForExpression()
-	vl := mustGetPivotValueList(n)
+func (p *printer) mapIsSimplePivotForExpression(n *googlesql.ASTPivotClause) []bool {
+	lhs, _ := n.ForExpression()
+	vl, _ := n.PivotValues()
 
-	lhsSimple := isSimpleExpr(lhs)
-	vlSimple := mapIsSimplePivotValueList(vl)
+	lhsSimple := p.isSimpleExpr(lhs)
+	vlSimple := p.mapIsSimplePivotValueList(vl)
 
 	return append([]bool{lhsSimple}, vlSimple...)
 }
 
-func mapIsSimplePivotValueList(n *ast.PivotValueListNode) []bool {
-	exprs := n.Values()
+func (p *printer) mapIsSimplePivotValueList(n *googlesql.ASTPivotValueList) []bool {
+	if !nodeDefined(n) {
+		return nil
+	}
+
+	exprs := selectChildrenOfType[*googlesql.ASTPivotValue](n)
 	r := make([]bool, 0, len(exprs))
 
 	for _, a := range exprs {
-		r = append(r, isSimpleExpr(a.Value()) && a.Alias() == nil)
+		val, _ := a.Value()
+		alias, _ := a.Alias()
+		r = append(r, p.isSimpleExpr(val) && !nodeDefined(alias))
 	}
 
 	return r
 }
 
-func mapIsSimpleStructConstructorArg(args []*ast.StructConstructorArgNode) []bool {
+func (p *printer) mapIsSimpleStructConstructorArg(args []*googlesql.ASTStructConstructorArg) []bool {
 	r := make([]bool, 0, len(args))
 
-	// Each struct constructor argument has an expression and an optional
-	// alias. We only need to check for the expression.
 	for _, a := range args {
-		r = append(r, isSimpleExpr(a.Expression()))
+		expr, _ := a.Expression()
+		r = append(r, p.isSimpleExpr(expr))
 	}
 
 	return r
 }
 
-func mapIsSimpleStructFields(fields []*ast.StructFieldNode) []bool {
+func mapIsSimpleStructFields(fields []*googlesql.ASTStructField) []bool {
 	r := make([]bool, 0, len(fields))
 
 	for _, f := range fields {
-		r = append(r, isSimpleType(f.Type()))
+		typ, _ := f.Type()
+		r = append(r, isSimpleType(typ))
 	}
 
 	return r
 }
 
-func mapIsSimpleTVFArguments(args []*ast.TVFArgumentNode) []bool {
+func (p *printer) mapIsSimpleTVFArguments(args []*googlesql.ASTTVFArgument) []bool {
 	r := make([]bool, 0, len(args))
 
 	for _, a := range args {
-		r = append(r, isSimpleTVFArgument(a))
+		r = append(r, p.isSimpleTVFArgument(a))
 	}
 
 	return r
 }
 
-func mapIsSimpleUnpivotInItemList(n *ast.UnpivotInItemListNode) []bool {
-	items := n.InItems()
-	num := len(items)
-	r := make([]bool, 0, num)
+func (p *printer) mapIsSimpleUnpivotInItemList(n *googlesql.ASTUnpivotInItemList) []bool {
+	items := selectChildrenOfType[*googlesql.ASTUnpivotInItem](n)
+	r := make([]bool, 0, len(items))
 
 	for _, item := range items {
-		simple := allTrue(mapIsSimplePathExpressionList(item.UnpivotColumns()))
-
-		r = append(r, simple && item.Alias() == nil)
+		cols, _ := item.UnpivotColumns()
+		alias, _ := item.Alias()
+		simple := allTrue(p.mapIsSimplePathExpressionList(cols))
+		r = append(r, simple && !nodeDefined(alias))
 	}
 
 	return r
 }
 
-func isSimpleTVFArgument(n *ast.TVFArgumentNode) bool {
-	if expr := n.Expr(); expr != nil && !isSimpleExpr(expr) {
+func (p *printer) isSimpleTVFArgument(n *googlesql.ASTTVFArgument) bool {
+	if expr, _ := n.Expr(); nodeDefined(expr) && !p.isSimpleExpr(expr) {
 		return false
 	}
 
-	if n.TableClause() != nil {
+	if tc, _ := n.TableClause(); nodeDefined(tc) {
 		return false
 	}
 
-	if n.ModelClause() != nil {
+	if mc, _ := n.ModelClause(); nodeDefined(mc) {
 		return false
 	}
 
-	if n.ConnectionClause() != nil {
+	if cc, _ := n.ConnectionClause(); nodeDefined(cc) {
 		return false
 	}
 
-	if n.Descriptor() != nil {
+	if desc, _ := n.Descriptor(); nodeDefined(desc) {
 		return false
 	}
 
 	return true
 }
 
-func onlySimpleFunctionCallArgs(n *ast.FunctionCallNode) bool {
-	return allTrue(mapIsSimpleExprs(n.Arguments()))
-}
-
-func mapIsSimpleExprs(n []ast.ExpressionNode) []bool {
+func (p *printer) mapIsSimpleExprs(n []googlesql.ASTExpressionNode) []bool {
 	r := make([]bool, 0, len(n))
 
 	for _, e := range n {
-		r = append(r, isSimpleExpr(e))
+		r = append(r, p.isSimpleExpr(e))
 	}
 
 	return r
 }
 
-func mapIsSimpleExprs2(n []ast.ExpressionNode) []bool {
+func (p *printer) mapIsSimpleExprs2(n []googlesql.ASTExpressionNode) []bool {
 	r := make([]bool, 0, len(n))
 
 	for _, e := range n {
-		r = append(r, isSimpleExpr2(e))
+		r = append(r, p.isSimpleExpr2(e))
 	}
 
 	return r
 }
 
-// caseArgsGetIsSimple extract whether each argument is considered simple.
-func caseArgsGetIsSimple[T ast.ExpressionNode](args []T) []bool {
-	r := make([]bool, 0, len(args))
-
-	for _, a := range args {
-		r = append(r, isSimpleExpr(a))
-	}
-
-	return r
-}
-
-func countFunctionCallElements(n *ast.FunctionCallNode) int {
+func countFunctionCallElements(n *googlesql.ASTFunctionCall) int {
 	elems := 0
 
-	// We don't count DISTINCT as an element because we want to allow
-	// COUNT(DISTINCT x ORDER BY y) in a single line.
-
-	if n.NullHandlingModifier() != ast.DefaultNullHandling {
+	if nh, _ := n.NullHandlingModifier(); nh != googlesql.ASTFunctionCallEnums_NullHandlingModifierDefaultNullHandling {
 		elems++
 	}
 
-	if n.HavingModifier() != nil {
+	if hm, _ := n.HavingModifier(); nodeDefined(hm) {
 		elems++
 	}
 
-	if n.ClampedBetweenModifier() != nil {
+	if cb, _ := n.ClampedBetweenModifier(); nodeDefined(cb) {
 		elems++
 	}
 
-	if n.OrderBy() != nil {
+	if ob, _ := n.OrderBy(); nodeDefined(ob) {
 		elems++
 	}
 
-	if n.LimitOffset() != nil {
+	if lo, _ := n.LimitOffset(); nodeDefined(lo) {
 		elems++
 	}
 
-	if n.WithGroupRows() != nil {
+	if gb, _ := n.GroupBy(); nodeDefined(gb) {
+		elems++
+	}
+
+	if we, _ := n.WhereExpr(); nodeDefined(we) {
 		elems++
 	}
 
 	return elems
 }
 
-func countWindowSpecElems(n *ast.WindowSpecificationNode) int {
+func countWindowSpecElems(n *googlesql.ASTWindowSpecification) int {
+	if !nodeDefined(n) {
+		return 0
+	}
+
 	elems := 0
 
-	if n.BaseWindowName() != nil {
+	if wn, _ := n.BaseWindowName(); nodeDefined(wn) {
 		elems++
 	}
 
-	if n.PartitionBy() != nil {
+	if pb, _ := n.PartitionBy(); nodeDefined(pb) {
 		elems++
 	}
 
-	if n.OrderBy() != nil {
+	if ob, _ := n.OrderBy(); nodeDefined(ob) {
 		elems++
 	}
 
-	if n.WindowFrame() != nil {
+	if wf, _ := n.WindowFrame(); nodeDefined(wf) {
 		elems++
 	}
 

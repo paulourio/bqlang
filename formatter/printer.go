@@ -4,28 +4,42 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/goccy/go-zetasql/ast"
-	"github.com/hashicorp/go-multierror"
+	"github.com/goccy/go-googlesql"
 )
 
-type Printer struct {
-	fmt         *Formatter
+type printer struct {
+	fmt         *formatterState
 	input       string
 	erasedInput string
-	tracker     *LocationTracker
-	err         error
+	tracker     *locationTracker
+	logger      *log.Logger
+	errs        *errorQueue
+	visitors    map[reflect.Type]nodeVisitorFunc
 }
 
-type Data map[string]int
+type printerData map[string]int
 
-func (d Data) Enable(key string) {
+type nodeVisitorFunc func(*printer, googlesql.ASTNode, printerData)
+
+type parenthesizableNode interface {
+	googlesql.ASTNode
+	Parenthesized() (bool, error)
+}
+
+const (
+	lineBreakPlaceholder        = "\x21\x1a10"
+	literalLineBreakPlaceholder = "\x21\x1a11"
+)
+
+func (d printerData) Enable(key string) {
 	d[key] = 1
 }
 
-func (d Data) SetBool(key string, value bool) {
+func (d printerData) SetBool(key string, value bool) {
 	if value {
 		d[key] = 1
 	} else {
@@ -33,30 +47,31 @@ func (d Data) SetBool(key string, value bool) {
 	}
 }
 
-func (d Data) IsEnabled(key string) bool {
-	if v, ok := d[key]; ok && v > 0 {
-		return true
-	}
-
-	return false
+func (d printerData) IsEnabled(key string) bool {
+	return d[key] > 0
 }
 
-func (p *Printer) acceptClause(n ast.Node, d Data) {
+func (p *printer) acceptClause(n googlesql.ASTNode, d printerData) {
 	p.visit(n, p.fmt.opts.NewlineBeforeClause, d)
 }
 
-// accept visits a node on current line.
-func (p *Printer) accept(n ast.Node, d Data) {
+func (p *printer) accept(n googlesql.ASTNode, d printerData) {
 	p.visit(n, false, d)
 }
 
-// accept visits a node in a new line. If the node is not defined, no
-// line is created.
-func (p *Printer) lnaccept(n ast.Node, d Data) {
+func (p *printer) lnaccept(n googlesql.ASTNode, d printerData) {
 	p.visit(n, true, d)
 }
 
-func (p *Printer) visit(n ast.Node, newline bool, d Data) {
+func makeVisitor[T googlesql.ASTNode](fn func(*printer, T, printerData)) nodeVisitorFunc {
+	return func(p *printer, n googlesql.ASTNode, d printerData) {
+		if typed, ok := n.(T); ok {
+			fn(p, typed, d)
+		}
+	}
+}
+
+func (p *printer) visit(n googlesql.ASTNode, newline bool, d printerData) {
 	if !nodeDefined(n) {
 		return
 	}
@@ -65,499 +80,367 @@ func (p *Printer) visit(n ast.Node, newline bool, d Data) {
 		p.println("")
 	}
 
-	switch m := n.(type) {
-	case *ast.AddColumnActionNode:
-		p.VisitAddColumnAction(m, d)
-	case *ast.AddConstraintActionNode:
-		p.VisitAddConstraintAction(m, d)
-	case *ast.AliasNode:
-		p.VisitAlias(m, d)
-	case *ast.AlterActionListNode:
-		p.VisitAlterActionList(m, d)
-	case *ast.AlterAllRowAccessPoliciesStatementNode:
-		p.VisitAlterAllRowAccessPoliciesStatement(m, d)
-	case *ast.AlterColumnDropDefaultActionNode:
-		p.VisitAlterColumnDropDefaultAction(m, d)
-	case *ast.AlterColumnDropNotNullActionNode:
-		p.VisitAlterColumnDropNotNullAction(m, d)
-	case *ast.AlterColumnOptionsActionNode:
-		p.VisitAlterColumnOptionsAction(m, d)
-	case *ast.AlterColumnSetDefaultActionNode:
-		p.VisitAlterColumnSetDefaultAction(m, d)
-	case *ast.AlterColumnTypeActionNode:
-		p.VisitAlterColumnTypeAction(m, d)
-	case *ast.AlterConstraintEnforcementActionNode:
-		p.VisitAlterConstraintEnforcementAction(m, d)
-	case *ast.AlterConstraintSetOptionsActionNode:
-		p.VisitAlterConstraintSetOptionsAction(m, d)
-	case *ast.AlterDatabaseStatementNode:
-		p.VisitAlterDatabaseStatement(m, d)
-	case *ast.AlterEntityStatementNode:
-		p.VisitAlterEntityStatement(m, d)
-	case *ast.AlterMaterializedViewStatementNode:
-		p.VisitAlterMaterializedViewStatement(m, d)
-	case *ast.AlterPrivilegeRestrictionStatementNode:
-		p.VisitAlterPrivilegeRestrictionStatement(m, d)
-	case *ast.AlterRowAccessPolicyStatementNode:
-		p.VisitAlterRowAccessPolicyStatement(m, d)
-	case *ast.AlterSchemaStatementNode:
-		p.VisitAlterSchemaStatement(m, d)
-	case *ast.AlterTableStatementNode:
-		p.VisitAlterTableStatement(m, d)
-	case *ast.AlterViewStatementNode:
-		p.VisitAlterViewStatement(m, d)
-	case *ast.AnalyticFunctionCallNode:
-		p.VisitAnalyticFunctionCall(m, d)
-	case *ast.AndExprNode:
-		p.VisitAndExpr(m, d)
-	case *ast.ArrayConstructorNode:
-		p.VisitArrayConstructor(m, d)
-	case *ast.ArrayElementNode:
-		p.VisitArrayElement(m, d)
-	case *ast.ArrayTypeNode:
-		p.VisitArrayType(m, d)
-	case *ast.AssignmentFromStructNode:
-		p.VisitAssignmentFromStruct(m, d)
-	case *ast.BeginEndBlockNode:
-		p.VisitBeginEndBlock(m, d)
-	case *ast.BeginStatementNode:
-		p.VisitBeginStatementNode(m, d)
-	case *ast.BetweenExpressionNode:
-		p.VisitBetweenExpression(m, d)
-	case *ast.BigNumericLiteralNode:
-		p.VisitBigNumericLiteral(m, d)
-	case *ast.BinaryExpressionNode:
-		p.VisitBinaryExpression(m, d)
-	case *ast.BitwiseShiftExpressionNode:
-		p.VisitBitwiseShiftExpression(m, d)
-	case *ast.BooleanLiteralNode:
-		p.VisitBoolLiteral(m, d)
-	case *ast.BytesLiteralNode:
-		p.VisitBytesLiteral(m, d)
-	case *ast.CallStatementNode:
-		p.VisitCallStatement(m, d)
-	case *ast.CaseNoValueExpressionNode:
-		p.VisitCaseNoValueExpression(m, d)
-	case *ast.CaseValueExpressionNode:
-		p.VisitCaseValueExpression(m, d)
-	case *ast.CastExpressionNode:
-		p.VisitCastExpression(m, d)
-	case *ast.ClampedBetweenModifierNode:
-		p.VisitClampedBetweenModifier(m, d)
-	case *ast.CloneDataSourceNode:
-		p.VisitCloneDataSource(m, d)
-	case *ast.ClusterByNode:
-		p.VisitClusterBy(m, d)
-	case *ast.CollateNode:
-		p.VisitCollate(m, d)
-	case *ast.ColumnAttributeListNode:
-		p.VisitColumnAttributeList(m, d)
-	case *ast.ColumnDefinitionNode:
-		p.VisitColumnDefinition(m, d)
-	case *ast.ColumnListNode:
-		p.VisitColumnList(m, d)
-	case *ast.CommitStatementNode:
-		p.VisitCommitStatement(m, d)
-	case *ast.ConnectionClauseNode:
-		p.VisitConnectionClause(m, d)
-	case *ast.ColumnSchemaNode:
-		p.VisitColumnSchema(m, d)
-	case *ast.CopyDataSourceNode:
-		p.VisitCopyDataSource(m, d)
-	case *ast.CreateExternalTableStatementNode:
-		p.VisitCreateExternalTableStatement(m, d)
-	case *ast.CreateFunctionStatementNode:
-		p.VisitCreateFunctionStatement(m, d)
-	case *ast.CreateMaterializedViewStatementNode:
-		p.VisitCreateMaterializedViewStatement(m, d)
-	case *ast.CreateProcedureStatementNode:
-		p.VisitCreateProcedureStatement(m, d)
-	case *ast.CreateRowAccessPolicyStatementNode:
-		p.VisitCreateRowAccessPolicyStatement(m, d)
-	case *ast.CreateSchemaStatementNode:
-		p.VisitCreateSchemaStatement(m, d)
-	case *ast.CreateSnapshotTableStatementNode:
-		p.VisitCreateSnapshotTableStatement(m, d)
-	case *ast.CreateTableStatementNode:
-		p.VisitCreateTableStatement(m, d)
-	case *ast.CreateTableFunctionStatementNode:
-		p.VisitCreateTableFunctionStatement(m, d)
-	case *ast.CreateViewStatementNode:
-		p.VisitCreateViewStatement(m, d)
-	case *ast.DateOrTimeLiteralNode:
-		p.VisitDateOrTimeLiteral(m, d)
-	case *ast.DescriptorNode:
-		p.VisitDescriptor(m, d)
-	case *ast.DescriptorColumnNode:
-		p.VisitDescriptorColumn(m, d)
-	case *ast.DescriptorColumnListNode:
-		p.VisitDescriptorColumnList(m, d)
-	case *ast.DotIdentifierNode:
-		p.VisitDotIdentifier(m, d)
-	case *ast.DotGeneralizedFieldNode:
-		p.VisitDotGeneralizedField(m, d)
-	case *ast.DotStarNode:
-		p.VisitDotStar(m, d)
-	case *ast.DotStarWithModifiersNode:
-		p.VisitDotStarWithModifiers(m, d)
-	case *ast.DropAllRowAccessPoliciesStatementNode:
-		p.VisitDropAllRowAccessPoliciesStatement(m, d)
-	case *ast.DropColumnActionNode:
-		p.VisitDropColumnAction(m, d)
-	case *ast.DropConstraintActionNode:
-		p.VisitDropConstraintAction(m, d)
-	case *ast.DropEntityStatementNode:
-		p.VisitDropEntityStatement(m, d)
-	case *ast.DropFunctionStatementNode:
-		p.VisitDropFunctionStatement(m, d)
-	case *ast.DropMaterializedViewStatementNode:
-		p.VisitDropMaterializedViewStatement(m, d)
-	case *ast.DropPrimaryKeyActionNode:
-		p.VisitDropPrimaryKeyAction(m, d)
-	case *ast.DropPrivilegeRestrictionStatementNode:
-		p.VisitDropPrivilegeRestrictionStatement(m, d)
-	case *ast.DropRowAccessPolicyStatementNode:
-		p.VisitDropRowAccessPolicyStatement(m, d)
-	case *ast.DropSearchIndexStatementNode:
-		p.VisitDropSearchIndexStatement(m, d)
-	case *ast.DropSnapshotTableStatementNode:
-		p.VisitDropSnapshotTableStatement(m, d)
-	case *ast.DropTableFunctionStatementNode:
-		p.VisitDropTableFunctionStatement(m, d)
-	case *ast.DropStatementNode:
-		p.VisitDropStatement(m, d)
-	case *ast.ExceptionHandlerListNode:
-		p.VisitExceptionHandlerListNode(m, d)
-	case *ast.ExceptionHandlerNode:
-		p.VisitExceptionHandlerNode(m, d)
-	case *ast.ExecuteIntoClauseNode:
-		p.VisitExecuteIntoClause(m, d)
-	case *ast.ExecuteImmediateStatementNode:
-		p.VisitExecuteImmediateStatement(m, d)
-	case *ast.ExecuteUsingArgumentNode:
-		p.VisitExecuteUsingArgument(m, d)
-	case *ast.ExecuteUsingClauseNode:
-		p.VisitExecuteUsingClause(m, d)
-	case *ast.ExpressionSubqueryNode:
-		p.VisitExpressionSubquery(m, d)
-	case *ast.ExtractExpressionNode:
-		p.VisitExtractExpression(m, d)
-	case *ast.FloatLiteralNode:
-		p.VisitFloatLiteral(m, d)
-	case *ast.FilterUsingClauseNode:
-		p.VisitFilterUsingClause(m, d)
-	case *ast.ForeignKeyNode:
-		p.VisitForeignKey(m, d)
-	case *ast.ForeignKeyReferenceNode:
-		p.VisitForeignKeyReference(m, d)
-	case *ast.FormatClauseNode:
-		p.VisitFormatClause(m, d)
-	case *ast.ForSystemTimeNode:
-		p.VisitForSystemTime(m, d)
-	case *ast.FromClauseNode:
-		p.VisitFromClause(m, d)
-	case *ast.FunctionCallNode:
-		p.VisitFunctionCall(m, d)
-	case *ast.FunctionDeclarationNode:
-		p.VisitFunctionDeclaration(m, d)
-	case *ast.FunctionParameterNode:
-		p.VisitFunctionParameter(m, d)
-	case *ast.FunctionParametersNode:
-		p.VisitFunctionParameters(m, d)
-	case *ast.GranteeListNode:
-		p.VisitGranteeList(m, d)
-	case *ast.GrantToClauseNode:
-		p.VisitGrantToClause(m, d)
-	case *ast.GroupByNode:
-		p.VisitGroupBy(m, d)
-	case *ast.GroupingItemNode:
-		p.VisitGroupingItem(m, d)
-	case *ast.HavingModifierNode:
-		p.VisitHavingModifier(m, d)
-	case *ast.HavingNode:
-		p.VisitHaving(m, d)
-	case *ast.HintNode:
-		p.VisitHint(m, d)
-	case *ast.HintedStatementNode:
-		p.VisitHintedStatement(m, d)
-	case *ast.IdentifierNode:
-		p.VisitIdentifier(m, d)
-	case *ast.IdentifierListNode:
-		p.VisitIdentifierList(m, d)
-	case *ast.IfStatementNode:
-		p.VisitIfStatement(m, d)
-	case *ast.InExpressionNode:
-		p.VisitInExpression(m, d)
-	case *ast.InListNode:
-		p.VisitInList(m, d)
-	case *ast.IntervalExprNode:
-		p.VisitIntervalExpr(m, d)
-	case *ast.IntLiteralNode:
-		p.VisitIntLiteral(m, d)
-	case *ast.InsertStatementNode:
-		p.VisitInsertStatement(m, d)
-	case *ast.InsertValuesRowListNode:
-		p.VisitInsertValuesRowList(m, d)
-	case *ast.InsertValuesRowNode:
-		p.VisitInsertValuesRow(m, d)
-	case *ast.JoinNode:
-		p.VisitJoin(m, d)
-	case *ast.LimitOffsetNode:
-		p.VisitLimitOffset(m, d)
-	case *ast.MergeActionNode:
-		p.VisitMergeAction(m, d)
-	case *ast.MergeStatementNode:
-		p.VisitMergeStatement(m, d)
-	case *ast.MergeWhenClauseNode:
-		p.VisitMergeWhenClause(m, d)
-	case *ast.MergeWhenClauseListNode:
-		p.VisitMergeWhenClauseList(m, d)
-	case *ast.ModelClauseNode:
-		p.VisitModelClause(m, d)
-	case *ast.NamedArgumentNode:
-		p.VisitNamedArgument(m, d)
-	case *ast.NotNullColumnAttributeNode:
-		p.VisitNotNullColumnAttribute(m, d)
-	case *ast.NullLiteralNode:
-		p.VisitNullLiteral(m, d)
-	case *ast.NullOrderNode:
-		p.VisitNullOrder(m, d)
-	case *ast.NumericLiteralNode:
-		p.VisitNumericLiteral(m, d)
-	case *ast.OnClauseNode:
-		p.VisitOnClause(m, d)
-	case *ast.OptionsListNode:
-		p.VisitOptionsList(m, d)
-	case *ast.OptionsEntryNode:
-		p.VisitOptionsEntry(m, d)
-	case *ast.OrExprNode:
-		p.VisitOrExpr(m, d)
-	case *ast.OrderByNode:
-		p.VisitOrderBy(m, d)
-	case *ast.OrderingExpressionNode:
-		p.VisitOrderingExpression(m, d)
-	case *ast.ParameterAssignmentNode:
-		p.VisitParameterAssignment(m, d)
-	case *ast.ParameterExprNode:
-		p.VisitParameterExpr(m, d)
-	case *ast.ParenthesizedJoinNode:
-		p.VisitParenthesizedJoin(m, d)
-	case *ast.PartitionByNode:
-		p.VisitPartitionBy(m, d)
-	case *ast.PathExpressionListNode:
-		p.VisitPathExpressionList(m, d)
-	case *ast.PathExpressionNode:
-		p.VisitPathExpression(m, d)
-	case *ast.PivotClauseNode:
-		p.VisitPivotClause(m, d)
-	case *ast.PivotExpressionNode:
-		p.VisitPivotExpression(m, d)
-	case *ast.PivotExpressionListNode:
-		p.VisitPivotExpressionList(m, d)
-	case *ast.PivotValueNode:
-		p.VisitPivotValue(m, d)
-	case *ast.PivotValueListNode:
-		p.VisitPivotValueList(m, d)
-	case *ast.PrimaryKeyNode:
-		p.VisitPrimaryKey(m, d)
-	case *ast.PrimaryKeyColumnAttributeNode:
-		p.VisitPrimaryKeyColumnAttribute(m, d)
-	case *ast.QualifyNode:
-		p.VisitQualify(m, d)
-	case *ast.QueryNode:
-		p.VisitQuery(m, d)
-	case *ast.QueryStatementNode:
-		p.VisitQueryStatement(m, d)
-	case *ast.RenameColumnActionNode:
-		p.VisitRenameColumnAction(m, d)
-	case *ast.RenameToClauseNode:
-		p.VisitRenameToClause(m, d)
-	case *ast.RepeatableClauseNode:
-		p.VisitRepeatableClause(m, d)
-	case *ast.ReturnStatementNode:
-		p.VisitReturnStatement(m, d)
-	case *ast.RollbackStatementNode:
-		p.VisitRollbackStatementNode(m, d)
-	case *ast.RollupNode:
-		p.VisitRollup(m, d)
-	case *ast.SampleClauseNode:
-		p.VisitSampleClause(m, d)
-	case *ast.SampleSizeNode:
-		p.VisitSampleSize(m, d)
-	case *ast.SampleSuffixNode:
-		p.VisitSampleSuffix(m, d)
-	case *ast.SetCollateClauseNode:
-		p.VisitSetCollateClause(m, d)
-	case *ast.ScriptBaseNode:
-		p.VisitScript(m, d)
-	case *ast.SelectNode:
-		p.VisitSelect(m, d)
-	case *ast.SelectAsNode:
-		p.VisitSelectAs(m, d)
-	case *ast.SelectColumnNode:
-		p.VisitSelectColumn(m, d)
-	case *ast.SelectListNode:
-		p.VisitSelectList(m, d)
-	case *ast.SetOptionsActionNode:
-		p.VisitSetOptionsAction(m, d)
-	case *ast.SetOperationNode:
-		p.VisitSetOperation(m, d)
-	case *ast.SimpleColumnSchemaNode:
-		p.VisitSimpleColumnSchema(m, d)
-	case *ast.SimpleTypeNode:
-		p.VisitSimpleType(m, d)
-	case *ast.SqlFunctionBodyNode:
-		p.VisitSQLFunctionBody(m, d)
-	case *ast.StarNode:
-		p.VisitStar(m, d)
-	case *ast.StarModifiersNode:
-		p.VisitStarModifiers(m, d)
-	case *ast.StarReplaceItemNode:
-		p.VisitStarReplaceItem(m, d)
-	case *ast.StarWithModifiersNode:
-		p.VisitStarWithModifiers(m, d)
-	case *ast.StatementListNode:
-		p.VisitStatementList(m, d)
-	case *ast.StringLiteralNode:
-		p.VisitStringLiteral(m, d)
-	case *ast.StructColumnFieldNode:
-		p.VisitStructColumnField(m, d)
-	case *ast.StructColumnSchemaNode:
-		p.VisitStructColumnSchema(m, d)
-	case *ast.StructConstructorArgNode:
-		p.VisitStructConstructorArg(m, d)
-	case *ast.StructConstructorWithKeywordNode:
-		p.VisitStructConstructorWithKeyword(m, d)
-	case *ast.StructConstructorWithParensNode:
-		p.VisitStructConstructorWithParens(m, d)
-	case *ast.StructFieldNode:
-		p.VisitStructField(m, d)
-	case *ast.StructTypeNode:
-		p.VisitStructType(m, d)
-	case *ast.SystemVariableAssignmentNode:
-		p.VisitSystemVariableAssignment(m, d)
-	case *ast.SystemVariableExprNode:
-		p.VisitSystemVariableExpr(m, d)
-	case *ast.TableClauseNode:
-		p.VisitTableClause(m, d)
-	case *ast.TableConstraintBaseNode:
-		p.VisitTableConstraint(m, d)
-	case *ast.TableElementListNode:
-		p.VisitTableElementList(m, d)
-	case *ast.TablePathExpressionNode:
-		p.VisitTablePathExpression(m, d)
-	case *ast.TableSubqueryNode:
-		p.VisitTableSubquery(m, d)
-	case *ast.TemplatedParameterTypeNode:
-		p.VisitTemplatedParameterType(m, d)
-	case *ast.TrucateStatementNode:
-		p.VisitTruncateStatement(m, d)
-	case *ast.TVFArgumentNode:
-		p.VisitTVFArgument(m, d)
-	case *ast.TVFNode:
-		p.VisitTVF(m, d)
-	case *ast.TVFSchemaNode:
-		p.VisitTVFSchema(m, d)
-	case *ast.TVFSchemaColumnNode:
-		p.VisitTVFSchemaColumn(m, d)
-	case *ast.TypeParameterListNode:
-		p.VisitTypeParameterList(m, d)
-	case *ast.UnpivotClauseNode:
-		p.VisitUnpivotClause(m, d)
-	case *ast.UnaryExpressionNode:
-		p.VisitUnaryExpression(m, d)
-	case *ast.UnpivotInItemLabelNode:
-		p.VisitUnpivotInItemLabel(m, d)
-	case *ast.UnpivotInItemListNode:
-		p.VisitUnpivotInItemList(m, d)
-	case *ast.UnpivotInItemNode:
-		p.VisitUnpivotInItem(m, d)
-	case *ast.UnnestExpressionNode:
-		p.VisitUnnestExpression(m, d)
-	case *ast.UpdateItemNode:
-		p.VisitUpdateItem(m, d)
-	case *ast.UpdateItemListNode:
-		p.VisitUpdateItemList(m, d)
-	case *ast.UpdateSetValueNode:
-		p.VisitUpdateSetValue(m, d)
-	case *ast.UsingClauseNode:
-		p.VisitUsingClause(m, d)
-	case *ast.VariableDeclarationNode:
-		p.VisitVariableDeclaration(m, d)
-	case *ast.SingleAssignmentNode:
-		p.VisitSingleAssignment(m, d)
-	case *ast.WhereClauseNode:
-		p.VisitWhereClause(m, d)
-	case *ast.WindowClauseNode:
-		p.VisitWindowClause(m, d)
-	case *ast.WindowFrameNode:
-		p.VisitWindowFrame(m, d)
-	case *ast.WindowFrameExprNode:
-		p.VisitWindowFrameExpr(m, d)
-	case *ast.WindowSpecificationNode:
-		p.VisitWindowSpecification(m, d)
-	case *ast.WithClauseNode:
-		p.VisitWithClause(m, d)
-	case *ast.WithClauseEntryNode:
-		p.VisitWithClauseEntry(m, d)
-	case *ast.WithConnectionClauseNode:
-		p.VisitWithConnectionClause(m, d)
-	case *ast.WithOffsetNode:
-		p.VisitWithOffset(m, d)
-	case *ast.WithPartitionColumnsClauseNode:
-		p.VisitWithPartitionColumnsClause(m, d)
-	case *ast.WithWeightNode:
-		p.VisitWithWeight(m, d)
+	if p.visitors == nil {
+		p.visitors = newVisitorMap()
+	}
 
-	default:
-		p.addError(&PrinterError{
-			Err:  nil,
-			Msg:  fmt.Sprintf("not implemented for %#v", n),
-			Node: n,
-		})
+	if handler, ok := p.visitors[reflect.TypeOf(n)]; ok {
+		handler(p, n, d)
+
+		return
+	}
+
+	p.addError(&PrinterError{
+		Msg:   fmt.Sprintf("not implemented for %T", n),
+		Node:  n,
+		Input: &p.input,
+	})
+}
+
+func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
+	return map[reflect.Type]nodeVisitorFunc{
+		reflect.TypeFor[*googlesql.ASTAddColumnAction]():                    makeVisitor((*printer).visitAddColumnAction),
+		reflect.TypeFor[*googlesql.ASTAddConstraintAction]():                makeVisitor((*printer).visitAddConstraintAction),
+		reflect.TypeFor[*googlesql.ASTAlias]():                              makeVisitor((*printer).visitAlias),
+		reflect.TypeFor[*googlesql.ASTAliasedQuery]():                       makeVisitor((*printer).visitAliasedQuery),
+		reflect.TypeFor[*googlesql.ASTAlterActionList]():                    makeVisitor((*printer).visitAlterActionList),
+		reflect.TypeFor[*googlesql.ASTAlterAllRowAccessPoliciesStatement](): makeVisitor((*printer).visitAlterAllRowAccessPoliciesStatement),
+		reflect.TypeFor[*googlesql.ASTAlterColumnDropDefaultAction]():       makeVisitor((*printer).visitAlterColumnDropDefaultAction),
+		reflect.TypeFor[*googlesql.ASTAlterColumnDropNotNullAction]():       makeVisitor((*printer).visitAlterColumnDropNotNullAction),
+		reflect.TypeFor[*googlesql.ASTAlterColumnOptionsAction]():           makeVisitor((*printer).visitAlterColumnOptionsAction),
+		reflect.TypeFor[*googlesql.ASTAlterColumnSetDefaultAction]():        makeVisitor((*printer).visitAlterColumnSetDefaultAction),
+		reflect.TypeFor[*googlesql.ASTAlterColumnTypeAction]():              makeVisitor((*printer).visitAlterColumnTypeAction),
+		reflect.TypeFor[*googlesql.ASTAlterConstraintEnforcementAction]():   makeVisitor((*printer).visitAlterConstraintEnforcementAction),
+		reflect.TypeFor[*googlesql.ASTAlterConstraintSetOptionsAction]():    makeVisitor((*printer).visitAlterConstraintSetOptionsAction),
+		reflect.TypeFor[*googlesql.ASTAlterDatabaseStatement]():             makeVisitor((*printer).visitAlterDatabaseStatement),
+		reflect.TypeFor[*googlesql.ASTAlterEntityStatement]():               makeVisitor((*printer).visitAlterEntityStatement),
+		reflect.TypeFor[*googlesql.ASTAlterMaterializedViewStatement]():     makeVisitor((*printer).visitAlterMaterializedViewStatement),
+		reflect.TypeFor[*googlesql.ASTAlterModelStatement]():                makeVisitor((*printer).visitAlterModelStatement),
+		reflect.TypeFor[*googlesql.ASTAlterPrivilegeRestrictionStatement](): makeVisitor((*printer).visitAlterPrivilegeRestrictionStatement),
+		reflect.TypeFor[*googlesql.ASTAlterRowAccessPolicyStatement]():      makeVisitor((*printer).visitAlterRowAccessPolicyStatement),
+		reflect.TypeFor[*googlesql.ASTAlterSchemaStatement]():               makeVisitor((*printer).visitAlterSchemaStatement),
+		reflect.TypeFor[*googlesql.ASTAlterTableStatement]():                makeVisitor((*printer).visitAlterTableStatement),
+		reflect.TypeFor[*googlesql.ASTAlterViewStatement]():                 makeVisitor((*printer).visitAlterViewStatement),
+		reflect.TypeFor[*googlesql.ASTAnalyticFunctionCall]():               makeVisitor((*printer).visitAnalyticFunctionCall),
+		reflect.TypeFor[*googlesql.ASTAndExpr]():                            makeVisitor((*printer).visitAndExpr),
+		reflect.TypeFor[*googlesql.ASTArrayColumnSchema]():                  makeVisitor((*printer).visitArrayColumnSchema),
+		reflect.TypeFor[*googlesql.ASTArrayConstructor]():                   makeVisitor((*printer).visitArrayConstructor),
+		reflect.TypeFor[*googlesql.ASTArrayElement]():                       makeVisitor((*printer).visitArrayElement),
+		reflect.TypeFor[*googlesql.ASTArrayType]():                          makeVisitor((*printer).visitArrayType),
+		reflect.TypeFor[*googlesql.ASTAssertStatement]():                    makeVisitor((*printer).visitAssertStatement),
+		reflect.TypeFor[*googlesql.ASTAssignmentFromStruct]():               makeVisitor((*printer).visitAssignmentFromStruct),
+		reflect.TypeFor[*googlesql.ASTAuxLoadDataStatement]():               makeVisitor((*printer).visitAuxLoadDataStatement),
+		reflect.TypeFor[*googlesql.ASTBeginEndBlock]():                      makeVisitor((*printer).visitBeginEndBlock),
+		reflect.TypeFor[*googlesql.ASTBeginStatement]():                     makeVisitor((*printer).visitBeginStatementNode),
+		reflect.TypeFor[*googlesql.ASTBetweenExpression]():                  makeVisitor((*printer).visitBetweenExpression),
+		reflect.TypeFor[*googlesql.ASTBigNumericLiteral]():                  makeVisitor((*printer).visitBigNumericLiteral),
+		reflect.TypeFor[*googlesql.ASTBinaryExpression]():                   makeVisitor((*printer).visitBinaryExpression),
+		reflect.TypeFor[*googlesql.ASTBitwiseShiftExpression]():             makeVisitor((*printer).visitBitwiseShiftExpression),
+		reflect.TypeFor[*googlesql.ASTBooleanLiteral]():                     makeVisitor((*printer).visitBoolLiteral),
+		reflect.TypeFor[*googlesql.ASTBreakStatement]():                     makeVisitor((*printer).visitBreakStatement),
+		reflect.TypeFor[*googlesql.ASTBytesLiteral]():                       makeVisitor((*printer).visitBytesLiteral),
+		reflect.TypeFor[*googlesql.ASTCallStatement]():                      makeVisitor((*printer).visitCallStatement),
+		reflect.TypeFor[*googlesql.ASTCaseNoValueExpression]():              makeVisitor((*printer).visitCaseNoValueExpression),
+		reflect.TypeFor[*googlesql.ASTCaseStatement]():                      makeVisitor((*printer).visitCaseStatement),
+		reflect.TypeFor[*googlesql.ASTCaseValueExpression]():                makeVisitor((*printer).visitCaseValueExpression),
+		reflect.TypeFor[*googlesql.ASTCastExpression]():                     makeVisitor((*printer).visitCastExpression),
+		reflect.TypeFor[*googlesql.ASTCheckConstraint]():                    makeVisitor((*printer).visitCheckConstraint),
+		reflect.TypeFor[*googlesql.ASTClampedBetweenModifier]():             makeVisitor((*printer).visitClampedBetweenModifier),
+		reflect.TypeFor[*googlesql.ASTCloneDataSource]():                    makeVisitor((*printer).visitCloneDataSource),
+		reflect.TypeFor[*googlesql.ASTClusterBy]():                          makeVisitor((*printer).visitClusterBy),
+		reflect.TypeFor[*googlesql.ASTCollate]():                            makeVisitor((*printer).visitCollate),
+		reflect.TypeFor[*googlesql.ASTColumnAttributeList]():                makeVisitor((*printer).visitColumnAttributeList),
+		reflect.TypeFor[*googlesql.ASTColumnDefinition]():                   makeVisitor((*printer).visitColumnDefinition),
+		reflect.TypeFor[*googlesql.ASTColumnList]():                         makeVisitor((*printer).visitColumnList),
+		reflect.TypeFor[*googlesql.ASTColumnSchema]():                       makeVisitor((*printer).visitColumnSchema),
+		reflect.TypeFor[*googlesql.ASTColumnWithOptions]():                  makeVisitor((*printer).visitColumnWithOptions),
+		reflect.TypeFor[*googlesql.ASTColumnWithOptionsList]():              makeVisitor((*printer).visitColumnWithOptionsList),
+		reflect.TypeFor[*googlesql.ASTCommitStatement]():                    makeVisitor((*printer).visitCommitStatement),
+		reflect.TypeFor[*googlesql.ASTConcatExpr]():                         makeVisitor((*printer).visitConcatExpr),
+		reflect.TypeFor[*googlesql.ASTConnectionClause]():                   makeVisitor((*printer).visitConnectionClause),
+		reflect.TypeFor[*googlesql.ASTContinueStatement]():                  makeVisitor((*printer).visitContinueStatement),
+		reflect.TypeFor[*googlesql.ASTCopyDataSource]():                     makeVisitor((*printer).visitCopyDataSource),
+		reflect.TypeFor[*googlesql.ASTCreateExternalTableStatement]():       makeVisitor((*printer).visitCreateExternalTableStatement),
+		reflect.TypeFor[*googlesql.ASTCreateFunctionStatement]():            makeVisitor((*printer).visitCreateFunctionStatement),
+		reflect.TypeFor[*googlesql.ASTCreateMaterializedViewStatement]():    makeVisitor((*printer).visitCreateMaterializedViewStatement),
+		reflect.TypeFor[*googlesql.ASTCreateModelStatement]():               makeVisitor((*printer).visitCreateModelStatement),
+		reflect.TypeFor[*googlesql.ASTCreateProcedureStatement]():           makeVisitor((*printer).visitCreateProcedureStatement),
+		reflect.TypeFor[*googlesql.ASTCreateRowAccessPolicyStatement]():     makeVisitor((*printer).visitCreateRowAccessPolicyStatement),
+		reflect.TypeFor[*googlesql.ASTCreateSchemaStatement]():              makeVisitor((*printer).visitCreateSchemaStatement),
+		reflect.TypeFor[*googlesql.ASTCreateSnapshotTableStatement]():       makeVisitor((*printer).visitCreateSnapshotTableStatement),
+		reflect.TypeFor[*googlesql.ASTCreateTableFunctionStatement]():       makeVisitor((*printer).visitCreateTableFunctionStatement),
+		reflect.TypeFor[*googlesql.ASTCreateTableStatement]():               makeVisitor((*printer).visitCreateTableStatement),
+		reflect.TypeFor[*googlesql.ASTCreateViewStatement]():                makeVisitor((*printer).visitCreateViewStatement),
+		reflect.TypeFor[*googlesql.ASTCube]():                               makeVisitor((*printer).visitCube),
+		reflect.TypeFor[*googlesql.ASTDateOrTimeLiteral]():                  makeVisitor((*printer).visitDateOrTimeLiteral),
+		reflect.TypeFor[*googlesql.ASTDeleteStatement]():                    makeVisitor((*printer).visitDeleteStatement),
+		reflect.TypeFor[*googlesql.ASTDescriptor]():                         makeVisitor((*printer).visitDescriptor),
+		reflect.TypeFor[*googlesql.ASTDescriptorColumn]():                   makeVisitor((*printer).visitDescriptorColumn),
+		reflect.TypeFor[*googlesql.ASTDescriptorColumnList]():               makeVisitor((*printer).visitDescriptorColumnList),
+		reflect.TypeFor[*googlesql.ASTDotGeneralizedField]():                makeVisitor((*printer).visitDotGeneralizedField),
+		reflect.TypeFor[*googlesql.ASTDotIdentifier]():                      makeVisitor((*printer).visitDotIdentifier),
+		reflect.TypeFor[*googlesql.ASTDotStar]():                            makeVisitor((*printer).visitDotStar),
+		reflect.TypeFor[*googlesql.ASTDotStarWithModifiers]():               makeVisitor((*printer).visitDotStarWithModifiers),
+		reflect.TypeFor[*googlesql.ASTDropAllRowAccessPoliciesStatement]():  makeVisitor((*printer).visitDropAllRowAccessPoliciesStatement),
+		reflect.TypeFor[*googlesql.ASTDropColumnAction]():                   makeVisitor((*printer).visitDropColumnAction),
+		reflect.TypeFor[*googlesql.ASTDropConstraintAction]():               makeVisitor((*printer).visitDropConstraintAction),
+		reflect.TypeFor[*googlesql.ASTDropEntityStatement]():                makeVisitor((*printer).visitDropEntityStatement),
+		reflect.TypeFor[*googlesql.ASTDropFunctionStatement]():              makeVisitor((*printer).visitDropFunctionStatement),
+		reflect.TypeFor[*googlesql.ASTDropMaterializedViewStatement]():      makeVisitor((*printer).visitDropMaterializedViewStatement),
+		reflect.TypeFor[*googlesql.ASTDropPrimaryKeyAction]():               makeVisitor((*printer).visitDropPrimaryKeyAction),
+		reflect.TypeFor[*googlesql.ASTDropPrivilegeRestrictionStatement]():  makeVisitor((*printer).visitDropPrivilegeRestrictionStatement),
+		reflect.TypeFor[*googlesql.ASTDropRowAccessPolicyStatement]():       makeVisitor((*printer).visitDropRowAccessPolicyStatement),
+		reflect.TypeFor[*googlesql.ASTDropSearchIndexStatement]():           makeVisitor((*printer).visitDropSearchIndexStatement),
+		reflect.TypeFor[*googlesql.ASTDropSnapshotTableStatement]():         makeVisitor((*printer).visitDropSnapshotTableStatement),
+		reflect.TypeFor[*googlesql.ASTDropStatement]():                      makeVisitor((*printer).visitDropStatement),
+		reflect.TypeFor[*googlesql.ASTDropTableFunctionStatement]():         makeVisitor((*printer).visitDropTableFunctionStatement),
+		reflect.TypeFor[*googlesql.ASTExceptionHandler]():                   makeVisitor((*printer).visitExceptionHandlerNode),
+		reflect.TypeFor[*googlesql.ASTExceptionHandlerList]():               makeVisitor((*printer).visitExceptionHandlerListNode),
+		reflect.TypeFor[*googlesql.ASTExecuteImmediateStatement]():          makeVisitor((*printer).visitExecuteImmediateStatement),
+		reflect.TypeFor[*googlesql.ASTExecuteIntoClause]():                  makeVisitor((*printer).visitExecuteIntoClause),
+		reflect.TypeFor[*googlesql.ASTExecuteUsingArgument]():               makeVisitor((*printer).visitExecuteUsingArgument),
+		reflect.TypeFor[*googlesql.ASTExecuteUsingClause]():                 makeVisitor((*printer).visitExecuteUsingClause),
+		reflect.TypeFor[*googlesql.ASTExportDataStatement]():                makeVisitor((*printer).visitExportDataStatement),
+		reflect.TypeFor[*googlesql.ASTExpressionSubquery]():                 makeVisitor((*printer).visitExpressionSubquery),
+		reflect.TypeFor[*googlesql.ASTExtractExpression]():                  makeVisitor((*printer).visitExtractExpression),
+		reflect.TypeFor[*googlesql.ASTFilterUsingClause]():                  makeVisitor((*printer).visitFilterUsingClause),
+		reflect.TypeFor[*googlesql.ASTFloatLiteral]():                       makeVisitor((*printer).visitFloatLiteral),
+		reflect.TypeFor[*googlesql.ASTForInStatement]():                     makeVisitor((*printer).visitForInStatement),
+		reflect.TypeFor[*googlesql.ASTForSystemTime]():                      makeVisitor((*printer).visitForSystemTime),
+		reflect.TypeFor[*googlesql.ASTForeignKey]():                         makeVisitor((*printer).visitForeignKey),
+		reflect.TypeFor[*googlesql.ASTForeignKeyReference]():                makeVisitor((*printer).visitForeignKeyReference),
+		reflect.TypeFor[*googlesql.ASTFormatClause]():                       makeVisitor((*printer).visitFormatClause),
+		reflect.TypeFor[*googlesql.ASTFromClause]():                         makeVisitor((*printer).visitFromClause),
+		reflect.TypeFor[*googlesql.ASTFromQuery]():                          makeVisitor((*printer).visitFromQuery),
+		reflect.TypeFor[*googlesql.ASTFunctionCall]():                       makeVisitor((*printer).visitFunctionCall),
+		reflect.TypeFor[*googlesql.ASTFunctionDeclaration]():                makeVisitor((*printer).visitFunctionDeclaration),
+		reflect.TypeFor[*googlesql.ASTFunctionParameter]():                  makeVisitor((*printer).visitFunctionParameter),
+		reflect.TypeFor[*googlesql.ASTFunctionParameters]():                 makeVisitor((*printer).visitFunctionParameters),
+		reflect.TypeFor[*googlesql.ASTGrantStatement]():                     makeVisitor((*printer).visitGrantStatement),
+		reflect.TypeFor[*googlesql.ASTGrantToClause]():                      makeVisitor((*printer).visitGrantToClause),
+		reflect.TypeFor[*googlesql.ASTGranteeList]():                        makeVisitor((*printer).visitGranteeList),
+		reflect.TypeFor[*googlesql.ASTGroupBy]():                            makeVisitor((*printer).visitGroupBy),
+		reflect.TypeFor[*googlesql.ASTGroupingItem]():                       makeVisitor((*printer).visitGroupingItem),
+		reflect.TypeFor[*googlesql.ASTHaving]():                             makeVisitor((*printer).visitHaving),
+		reflect.TypeFor[*googlesql.ASTHavingModifier]():                     makeVisitor((*printer).visitHavingModifier),
+		reflect.TypeFor[*googlesql.ASTHint]():                               makeVisitor((*printer).visitHint),
+		reflect.TypeFor[*googlesql.ASTHintedStatement]():                    makeVisitor((*printer).visitHintedStatement),
+		reflect.TypeFor[*googlesql.ASTIdentifier]():                         makeVisitor((*printer).visitIdentifier),
+		reflect.TypeFor[*googlesql.ASTIdentifierList]():                     makeVisitor((*printer).visitIdentifierList),
+		reflect.TypeFor[*googlesql.ASTIfStatement]():                        makeVisitor((*printer).visitIfStatement),
+		reflect.TypeFor[*googlesql.ASTInExpression]():                       makeVisitor((*printer).visitInExpression),
+		reflect.TypeFor[*googlesql.ASTInList]():                             makeVisitor((*printer).visitInList),
+		reflect.TypeFor[*googlesql.ASTInferredTypeColumnSchema]():           makeVisitor((*printer).visitInferredTypeColumnSchema),
+		reflect.TypeFor[*googlesql.ASTInsertStatement]():                    makeVisitor((*printer).visitInsertStatement),
+		reflect.TypeFor[*googlesql.ASTInsertValuesRow]():                    makeVisitor((*printer).visitInsertValuesRow),
+		reflect.TypeFor[*googlesql.ASTInsertValuesRowList]():                makeVisitor((*printer).visitInsertValuesRowList),
+		reflect.TypeFor[*googlesql.ASTIntLiteral]():                         makeVisitor((*printer).visitIntLiteral),
+		reflect.TypeFor[*googlesql.ASTIntervalExpr]():                       makeVisitor((*printer).visitIntervalExpr),
+		reflect.TypeFor[*googlesql.ASTJSONLiteral]():                        makeVisitor((*printer).visitJSONLiteral),
+		reflect.TypeFor[*googlesql.ASTJoin]():                               makeVisitor((*printer).visitJoin),
+		reflect.TypeFor[*googlesql.ASTLabel]():                              makeVisitor((*printer).visitLabel),
+		reflect.TypeFor[*googlesql.ASTLambda]():                             makeVisitor((*printer).visitLambda),
+		reflect.TypeFor[*googlesql.ASTLimitOffset]():                        makeVisitor((*printer).visitLimitOffset),
+		reflect.TypeFor[*googlesql.ASTLoopStatement]():                      makeVisitor((*printer).visitLoopStatement),
+		reflect.TypeFor[*googlesql.ASTMapType]():                            makeVisitor((*printer).visitMapType),
+		reflect.TypeFor[*googlesql.ASTMergeAction]():                        makeVisitor((*printer).visitMergeAction),
+		reflect.TypeFor[*googlesql.ASTMergeStatement]():                     makeVisitor((*printer).visitMergeStatement),
+		reflect.TypeFor[*googlesql.ASTMergeWhenClause]():                    makeVisitor((*printer).visitMergeWhenClause),
+		reflect.TypeFor[*googlesql.ASTMergeWhenClauseList]():                makeVisitor((*printer).visitMergeWhenClauseList),
+		reflect.TypeFor[*googlesql.ASTModelClause]():                        makeVisitor((*printer).visitModelClause),
+		reflect.TypeFor[*googlesql.ASTNamedArgument]():                      makeVisitor((*printer).visitNamedArgument),
+		reflect.TypeFor[*googlesql.ASTNotNullColumnAttribute]():             makeVisitor((*printer).visitNotNullColumnAttribute),
+		reflect.TypeFor[*googlesql.ASTNullLiteral]():                        makeVisitor((*printer).visitNullLiteral),
+		reflect.TypeFor[*googlesql.ASTNullOrder]():                          makeVisitor((*printer).visitNullOrder),
+		reflect.TypeFor[*googlesql.ASTNumericLiteral]():                     makeVisitor((*printer).visitNumericLiteral),
+		reflect.TypeFor[*googlesql.ASTOnClause]():                           makeVisitor((*printer).visitOnClause),
+		reflect.TypeFor[*googlesql.ASTOptionsEntry]():                       makeVisitor((*printer).visitOptionsEntry),
+		reflect.TypeFor[*googlesql.ASTOptionsList]():                        makeVisitor((*printer).visitOptionsList),
+		reflect.TypeFor[*googlesql.ASTOrExpr]():                             makeVisitor((*printer).visitOrExpr),
+		reflect.TypeFor[*googlesql.ASTOrderBy]():                            makeVisitor((*printer).visitOrderBy),
+		reflect.TypeFor[*googlesql.ASTOrderingExpression]():                 makeVisitor((*printer).visitOrderingExpression),
+		reflect.TypeFor[*googlesql.ASTParameterAssignment]():                makeVisitor((*printer).visitParameterAssignment),
+		reflect.TypeFor[*googlesql.ASTParameterExpr]():                      makeVisitor((*printer).visitParameterExpr),
+		reflect.TypeFor[*googlesql.ASTParenthesizedJoin]():                  makeVisitor((*printer).visitParenthesizedJoin),
+		reflect.TypeFor[*googlesql.ASTPartitionBy]():                        makeVisitor((*printer).visitPartitionBy),
+		reflect.TypeFor[*googlesql.ASTPathExpression]():                     makeVisitor((*printer).visitPathExpression),
+		reflect.TypeFor[*googlesql.ASTPathExpressionList]():                 makeVisitor((*printer).visitPathExpressionList),
+		reflect.TypeFor[*googlesql.ASTPipeAggregate]():                      makeVisitor((*printer).visitPipeAggregate),
+		reflect.TypeFor[*googlesql.ASTPipeAs]():                             makeVisitor((*printer).visitPipeAs),
+		reflect.TypeFor[*googlesql.ASTPipeAssert]():                         makeVisitor((*printer).visitPipeAssert),
+		reflect.TypeFor[*googlesql.ASTPipeCall]():                           makeVisitor((*printer).visitPipeCall),
+		reflect.TypeFor[*googlesql.ASTPipeCreateTable]():                    makeVisitor((*printer).visitPipeCreateTable),
+		reflect.TypeFor[*googlesql.ASTPipeDescribe]():                       makeVisitor((*printer).visitPipeDescribe),
+		reflect.TypeFor[*googlesql.ASTPipeDistinct]():                       makeVisitor((*printer).visitPipeDistinct),
+		reflect.TypeFor[*googlesql.ASTPipeDrop]():                           makeVisitor((*printer).visitPipeDrop),
+		reflect.TypeFor[*googlesql.ASTPipeExportData]():                     makeVisitor((*printer).visitPipeExportData),
+		reflect.TypeFor[*googlesql.ASTPipeExtend]():                         makeVisitor((*printer).visitPipeExtend),
+		reflect.TypeFor[*googlesql.ASTPipeInsert]():                         makeVisitor((*printer).visitPipeInsert),
+		reflect.TypeFor[*googlesql.ASTPipeJoin]():                           makeVisitor((*printer).visitPipeJoin),
+		reflect.TypeFor[*googlesql.ASTPipeJoinLhsPlaceholder]():             makeVisitor((*printer).visitPipeJoinLHSPlaceholder),
+		reflect.TypeFor[*googlesql.ASTPipeLimitOffset]():                    makeVisitor((*printer).visitPipeLimitOffset),
+		reflect.TypeFor[*googlesql.ASTPipeOrderBy]():                        makeVisitor((*printer).visitPipeOrderBy),
+		reflect.TypeFor[*googlesql.ASTPipePivot]():                          makeVisitor((*printer).visitPipePivot),
+		reflect.TypeFor[*googlesql.ASTPipeRename]():                         makeVisitor((*printer).visitPipeRename),
+		reflect.TypeFor[*googlesql.ASTPipeRenameItem]():                     makeVisitor((*printer).visitPipeRenameItem),
+		reflect.TypeFor[*googlesql.ASTPipeSelect]():                         makeVisitor((*printer).visitPipeSelect),
+		reflect.TypeFor[*googlesql.ASTPipeSet]():                            makeVisitor((*printer).visitPipeSet),
+		reflect.TypeFor[*googlesql.ASTPipeSetItem]():                        makeVisitor((*printer).visitPipeSetItem),
+		reflect.TypeFor[*googlesql.ASTPipeSetOperation]():                   makeVisitor((*printer).visitPipeSetOperation),
+		reflect.TypeFor[*googlesql.ASTPipeStaticDescribe]():                 makeVisitor((*printer).visitPipeStaticDescribe),
+		reflect.TypeFor[*googlesql.ASTPipeTablesample]():                    makeVisitor((*printer).visitPipeTablesample),
+		reflect.TypeFor[*googlesql.ASTPipeUnpivot]():                        makeVisitor((*printer).visitPipeUnpivot),
+		reflect.TypeFor[*googlesql.ASTPipeWhere]():                          makeVisitor((*printer).visitPipeWhere),
+		reflect.TypeFor[*googlesql.ASTPipeWindow]():                         makeVisitor((*printer).visitPipeWindow),
+		reflect.TypeFor[*googlesql.ASTPivotClause]():                        makeVisitor((*printer).visitPivotClause),
+		reflect.TypeFor[*googlesql.ASTPivotExpression]():                    makeVisitor((*printer).visitPivotExpression),
+		reflect.TypeFor[*googlesql.ASTPivotExpressionList]():                makeVisitor((*printer).visitPivotExpressionList),
+		reflect.TypeFor[*googlesql.ASTPivotValue]():                         makeVisitor((*printer).visitPivotValue),
+		reflect.TypeFor[*googlesql.ASTPivotValueList]():                     makeVisitor((*printer).visitPivotValueList),
+		reflect.TypeFor[*googlesql.ASTPrimaryKey]():                         makeVisitor((*printer).visitPrimaryKey),
+		reflect.TypeFor[*googlesql.ASTPrimaryKeyColumnAttribute]():          makeVisitor((*printer).visitPrimaryKeyColumnAttribute),
+		reflect.TypeFor[*googlesql.ASTPrimaryKeyElement]():                  makeVisitor((*printer).visitPrimaryKeyElement),
+		reflect.TypeFor[*googlesql.ASTPrimaryKeyElementList]():              makeVisitor((*printer).visitPrimaryKeyElementList),
+		reflect.TypeFor[*googlesql.ASTQualify]():                            makeVisitor((*printer).visitQualify),
+		reflect.TypeFor[*googlesql.ASTQuery]():                              makeVisitor((*printer).visitQuery),
+		reflect.TypeFor[*googlesql.ASTQueryStatement]():                     makeVisitor((*printer).visitQueryStatement),
+		reflect.TypeFor[*googlesql.ASTRaiseStatement]():                     makeVisitor((*printer).visitRaiseStatement),
+		reflect.TypeFor[*googlesql.ASTRangeColumnSchema]():                  makeVisitor((*printer).visitRangeColumnSchema),
+		reflect.TypeFor[*googlesql.ASTRangeLiteral]():                       makeVisitor((*printer).visitRangeLiteral),
+		reflect.TypeFor[*googlesql.ASTRangeType]():                          makeVisitor((*printer).visitRangeType),
+		reflect.TypeFor[*googlesql.ASTRenameColumnAction]():                 makeVisitor((*printer).visitRenameColumnAction),
+		reflect.TypeFor[*googlesql.ASTRenameToClause]():                     makeVisitor((*printer).visitRenameToClause),
+		reflect.TypeFor[*googlesql.ASTRepeatStatement]():                    makeVisitor((*printer).visitRepeatStatement),
+		reflect.TypeFor[*googlesql.ASTRepeatableClause]():                   makeVisitor((*printer).visitRepeatableClause),
+		reflect.TypeFor[*googlesql.ASTReturnStatement]():                    makeVisitor((*printer).visitReturnStatement),
+		reflect.TypeFor[*googlesql.ASTReturningClause]():                    makeVisitor((*printer).visitReturningClause),
+		reflect.TypeFor[*googlesql.ASTRevokeFromClause]():                   makeVisitor((*printer).visitRevokeFromClause),
+		reflect.TypeFor[*googlesql.ASTRevokeStatement]():                    makeVisitor((*printer).visitRevokeStatement),
+		reflect.TypeFor[*googlesql.ASTRollbackStatement]():                  makeVisitor((*printer).visitRollbackStatementNode),
+		reflect.TypeFor[*googlesql.ASTRollup]():                             makeVisitor((*printer).visitRollup),
+		reflect.TypeFor[*googlesql.ASTSampleClause]():                       makeVisitor((*printer).visitSampleClause),
+		reflect.TypeFor[*googlesql.ASTSampleSize]():                         makeVisitor((*printer).visitSampleSize),
+		reflect.TypeFor[*googlesql.ASTSampleSuffix]():                       makeVisitor((*printer).visitSampleSuffix),
+		reflect.TypeFor[*googlesql.ASTScript]():                             makeVisitor((*printer).visitScript),
+		reflect.TypeFor[*googlesql.ASTSelect]():                             makeVisitor((*printer).visitSelect),
+		reflect.TypeFor[*googlesql.ASTSelectAs]():                           makeVisitor((*printer).visitSelectAs),
+		reflect.TypeFor[*googlesql.ASTSelectColumn]():                       makeVisitor((*printer).visitSelectColumn),
+		reflect.TypeFor[*googlesql.ASTSelectList]():                         makeVisitor((*printer).visitSelectList),
+		reflect.TypeFor[*googlesql.ASTSetCollateClause]():                   makeVisitor((*printer).visitSetCollateClause),
+		reflect.TypeFor[*googlesql.ASTSetOperation]():                       makeVisitor((*printer).visitSetOperation),
+		reflect.TypeFor[*googlesql.ASTSetOptionsAction]():                   makeVisitor((*printer).visitSetOptionsAction),
+		reflect.TypeFor[*googlesql.ASTSimpleColumnSchema]():                 makeVisitor((*printer).visitSimpleColumnSchema),
+		reflect.TypeFor[*googlesql.ASTSimpleType]():                         makeVisitor((*printer).visitSimpleType),
+		reflect.TypeFor[*googlesql.ASTSingleAssignment]():                   makeVisitor((*printer).visitSingleAssignment),
+		reflect.TypeFor[*googlesql.ASTSqlFunctionBody]():                    makeVisitor((*printer).visitSQLFunctionBody),
+		reflect.TypeFor[*googlesql.ASTStar]():                               makeVisitor((*printer).visitStar),
+		reflect.TypeFor[*googlesql.ASTStarModifiers]():                      makeVisitor((*printer).visitStarModifiers),
+		reflect.TypeFor[*googlesql.ASTStarReplaceItem]():                    makeVisitor((*printer).visitStarReplaceItem),
+		reflect.TypeFor[*googlesql.ASTStarWithModifiers]():                  makeVisitor((*printer).visitStarWithModifiers),
+		reflect.TypeFor[*googlesql.ASTStatementList]():                      makeVisitor((*printer).visitStatementList),
+		reflect.TypeFor[*googlesql.ASTStatementWithPipeOperators]():         makeVisitor((*printer).visitStatementWithPipeOperators),
+		reflect.TypeFor[*googlesql.ASTStringLiteral]():                      makeVisitor((*printer).visitStringLiteral),
+		reflect.TypeFor[*googlesql.ASTStructColumnField]():                  makeVisitor((*printer).visitStructColumnField),
+		reflect.TypeFor[*googlesql.ASTStructColumnSchema]():                 makeVisitor((*printer).visitStructColumnSchema),
+		reflect.TypeFor[*googlesql.ASTStructConstructorArg]():               makeVisitor((*printer).visitStructConstructorArg),
+		reflect.TypeFor[*googlesql.ASTStructConstructorWithKeyword]():       makeVisitor((*printer).visitStructConstructorWithKeyword),
+		reflect.TypeFor[*googlesql.ASTStructConstructorWithParens]():        makeVisitor((*printer).visitStructConstructorWithParens),
+		reflect.TypeFor[*googlesql.ASTStructField]():                        makeVisitor((*printer).visitStructField),
+		reflect.TypeFor[*googlesql.ASTStructType]():                         makeVisitor((*printer).visitStructType),
+		reflect.TypeFor[*googlesql.ASTSubpipeline]():                        makeVisitor((*printer).visitSubpipeline),
+		reflect.TypeFor[*googlesql.ASTSubpipelineStatement]():               makeVisitor((*printer).visitSubpipelineStatement),
+		reflect.TypeFor[*googlesql.ASTSystemVariableAssignment]():           makeVisitor((*printer).visitSystemVariableAssignment),
+		reflect.TypeFor[*googlesql.ASTSystemVariableExpr]():                 makeVisitor((*printer).visitSystemVariableExpr),
+		reflect.TypeFor[*googlesql.ASTTVF]():                                makeVisitor((*printer).visitTVF),
+		reflect.TypeFor[*googlesql.ASTTVFArgument]():                        makeVisitor((*printer).visitTVFArgument),
+		reflect.TypeFor[*googlesql.ASTTVFSchema]():                          makeVisitor((*printer).visitTVFSchema),
+		reflect.TypeFor[*googlesql.ASTTVFSchemaColumn]():                    makeVisitor((*printer).visitTVFSchemaColumn),
+		reflect.TypeFor[*googlesql.ASTTableClause]():                        makeVisitor((*printer).visitTableClause),
+		reflect.TypeFor[*googlesql.ASTTableConstraint]():                    makeVisitor((*printer).visitTableConstraint),
+		reflect.TypeFor[*googlesql.ASTTableElementList]():                   makeVisitor((*printer).visitTableElementList),
+		reflect.TypeFor[*googlesql.ASTTablePathExpression]():                makeVisitor((*printer).visitTablePathExpression),
+		reflect.TypeFor[*googlesql.ASTTableSubquery]():                      makeVisitor((*printer).visitTableSubquery),
+		reflect.TypeFor[*googlesql.ASTTemplatedParameterType]():             makeVisitor((*printer).visitTemplatedParameterType),
+		reflect.TypeFor[*googlesql.ASTTruncateStatement]():                  makeVisitor((*printer).visitTruncateStatement),
+		reflect.TypeFor[*googlesql.ASTTypeParameterList]():                  makeVisitor((*printer).visitTypeParameterList),
+		reflect.TypeFor[*googlesql.ASTUnaryExpression]():                    makeVisitor((*printer).visitUnaryExpression),
+		reflect.TypeFor[*googlesql.ASTUndropStatement]():                    makeVisitor((*printer).visitUndropStatement),
+		reflect.TypeFor[*googlesql.ASTUnnestExpression]():                   makeVisitor((*printer).visitUnnestExpression),
+		reflect.TypeFor[*googlesql.ASTUnpivotClause]():                      makeVisitor((*printer).visitUnpivotClause),
+		reflect.TypeFor[*googlesql.ASTUnpivotInItem]():                      makeVisitor((*printer).visitUnpivotInItem),
+		reflect.TypeFor[*googlesql.ASTUnpivotInItemLabel]():                 makeVisitor((*printer).visitUnpivotInItemLabel),
+		reflect.TypeFor[*googlesql.ASTUnpivotInItemList]():                  makeVisitor((*printer).visitUnpivotInItemList),
+		reflect.TypeFor[*googlesql.ASTUpdateItem]():                         makeVisitor((*printer).visitUpdateItem),
+		reflect.TypeFor[*googlesql.ASTUpdateItemList]():                     makeVisitor((*printer).visitUpdateItemList),
+		reflect.TypeFor[*googlesql.ASTUpdateSetValue]():                     makeVisitor((*printer).visitUpdateSetValue),
+		reflect.TypeFor[*googlesql.ASTUpdateStatement]():                    makeVisitor((*printer).visitUpdateStatement),
+		reflect.TypeFor[*googlesql.ASTUsingClause]():                        makeVisitor((*printer).visitUsingClause),
+		reflect.TypeFor[*googlesql.ASTVariableDeclaration]():                makeVisitor((*printer).visitVariableDeclaration),
+		reflect.TypeFor[*googlesql.ASTWhereClause]():                        makeVisitor((*printer).visitWhereClause),
+		reflect.TypeFor[*googlesql.ASTWhileStatement]():                     makeVisitor((*printer).visitWhileStatement),
+		reflect.TypeFor[*googlesql.ASTWindowClause]():                       makeVisitor((*printer).visitWindowClause),
+		reflect.TypeFor[*googlesql.ASTWindowFrame]():                        makeVisitor((*printer).visitWindowFrame),
+		reflect.TypeFor[*googlesql.ASTWindowFrameExpr]():                    makeVisitor((*printer).visitWindowFrameExpr),
+		reflect.TypeFor[*googlesql.ASTWindowSpecification]():                makeVisitor((*printer).visitWindowSpecification),
+		reflect.TypeFor[*googlesql.ASTWithClause]():                         makeVisitor((*printer).visitWithClause),
+		reflect.TypeFor[*googlesql.ASTWithClauseEntry]():                    makeVisitor((*printer).visitWithClauseEntry),
+		reflect.TypeFor[*googlesql.ASTWithConnectionClause]():               makeVisitor((*printer).visitWithConnectionClause),
+		reflect.TypeFor[*googlesql.ASTWithExpression]():                     makeVisitor((*printer).visitWithExpression),
+		reflect.TypeFor[*googlesql.ASTWithModifier]():                       makeVisitor((*printer).visitWithModifier),
+		reflect.TypeFor[*googlesql.ASTWithOffset]():                         makeVisitor((*printer).visitWithOffset),
+		reflect.TypeFor[*googlesql.ASTWithPartitionColumnsClause]():         makeVisitor((*printer).visitWithPartitionColumnsClause),
+		reflect.TypeFor[*googlesql.ASTWithWeight]():                         makeVisitor((*printer).visitWithWeight),
 	}
 }
 
-func (p *Printer) addError(err error) {
-	p.err = multierror.Append(p.err, err)
-	log.Println("[ERROR]", err)
+func (p *printer) addError(err error) {
+	p.errs.append(err)
+
+	if p.logger != nil {
+		p.logger.Println("[ERROR]", err)
+	}
 }
 
-func (p *Printer) String() string {
+func (p *printer) String() string {
 	p.fmt.FlushLine()
+
 	return strings.Trim(p.fmt.formatted.String(), "\n")
 }
 
-func (p *Printer) moveBefore(n ast.Node) {
-	loc := n.ParseLocationRange()
-	p.fmt.flushCommentsUpTo(loc.Start().ByteOffset())
+func (p *printer) moveBefore(n googlesql.ASTNode) {
+	if !nodeDefined(n) {
+		return
+	}
+
+	start, _ := nodeByteRange(n)
+	p.fmt.flushCommentsUpTo(start)
 }
 
-func (p *Printer) movePast(n ast.Node) {
-	loc := n.ParseLocationRange()
-	p.fmt.flushCommentsUpTo(loc.End().ByteOffset())
+func (p *printer) movePast(n googlesql.ASTNode) {
+	if !nodeDefined(n) {
+		return
+	}
+
+	_, end := nodeByteRange(n)
+	p.fmt.flushCommentsUpTo(end)
 }
 
-func (p *Printer) moveAt(pos int) {
+func (p *printer) moveAt(pos int) {
 	p.fmt.flushCommentsUpTo(pos)
 }
 
-// movePastLine scans from the end of a node to the end of the line or
-// until the next node.
-// We do this limited to the end of the parent's end location.
-func (p *Printer) movePastLine(n ast.Node) {
-	loc := n.ParseLocationRange()
-	e := loc.End().ByteOffset()
-	// _, le := p.tracker.Lines.Span(n)
+func (p *printer) movePastLine(n googlesql.ASTNode) {
+	if !nodeDefined(n) {
+		return
+	}
 
+	_, e := nodeByteRange(n)
 	newlinePos := p.tracker.Lines.NextLineBreak(e)
 	b := p.tracker.MaybeNextPos(e)
 
 	if b == -1 || newlinePos == -1 {
-		// Only flush comments if at the top level.
-		parent := n.Parent()
-
-		if parent == nil || parent.Kind() == ast.Script {
+		parent := nodeParent(n)
+		if !nodeDefined(parent) || nodeKind(parent) == googlesql.ASTNodeKindAstScript {
 			if newlinePos > 0 {
 				p.fmt.flushCommentsUpTo(newlinePos)
 			} else {
@@ -571,122 +454,91 @@ func (p *Printer) movePastLine(n ast.Node) {
 	if newlinePos < b {
 		p.fmt.flushCommentsUpTo(newlinePos)
 	}
-
-	// lb, _ := p.tracker.Lines.Span(n)
-
-	// if le == lb {
-	// 	// No tokens are available in the same line, find the next
-	// 	// line break and flush comments until the end of the line.
-
-	// 	p.fmt.flushCommentsUpTo(lb)
-	// }
 }
 
-// moveBeforeSuccessorOf move cursor to before the start of the
-// succeding start position.
-func (p *Printer) moveBeforeSuccessorOf(n ast.Node) {
-	loc := n.ParseLocationRange()
-	e := loc.End().ByteOffset()
-
-	// Limit this kind of comment flush up to the statement level.
-	// A statement list is flat aligned and we will not have problems
-	// with comment indentation at that level or higher.
-	max := e
-	parent := n.Parent()
-
-	for nodeDefined(parent) && parent.Kind() != ast.StatementList {
-		max = parent.ParseLocationRange().End().ByteOffset()
-		parent = parent.Parent()
+func (p *printer) moveBeforeSuccessorOf(n googlesql.ASTNode) {
+	if !nodeDefined(n) {
+		return
 	}
 
-	next := p.tracker.MaybeNextPos(e)
+	_, e := nodeByteRange(n)
+	maxPos := e
+	parent := nodeParent(n)
 
-	if next > max {
-		next = max
+	for nodeDefined(parent) && nodeKind(parent) != googlesql.ASTNodeKindAstStatementList {
+		_, maxPos = nodeByteRange(parent)
+		parent = nodeParent(parent)
 	}
+
+	next := min(p.tracker.MaybeNextPos(e), maxPos)
 
 	if next > 0 {
 		p.fmt.flushCommentsUpTo(next)
 	}
 }
 
-func (p *Printer) print(s string) {
+func (p *printer) print(s string) {
 	p.fmt.Format(s)
 }
 
-func (p *Printer) println(s string) {
+func (p *printer) println(s string) {
 	p.fmt.FormatLine(s)
 }
 
-func (p *Printer) incDepth() {
+func (p *printer) incDepth() {
 	p.fmt.depth++
 }
 
-func (p *Printer) decDepth() {
+func (p *printer) decDepth() {
 	p.fmt.depth--
 }
 
-// nest returns a new printer with the same options to perform printing
-// on a nested section of the tree.
-func (p *Printer) nest() *Printer {
+// nest returns a child printer sharing comment and error queues with p.
+func (p *printer) nest() *printer {
 	buf := p.fmt.buffer.String()
-	currSize := strings.LastIndex(buf, "\n")
-	if currSize < 0 {
-		currSize = len(p.fmt.buffer.String())
+	idx := strings.LastIndex(buf, "\n")
+	currSize := len(buf)
+
+	if idx >= 0 {
+		currSize = len(buf) - idx - 1
 	}
 
-	capacity := p.fmt.opts.SoftMaxColumns - currSize
+	capacity := max(p.fmt.opts.SoftMaxColumns-currSize, 40)
 
-	// Some scripts with lots of nested printers could lead to very
-	// small or even negative maximum length.  We allow at least some
-	// characters per-line at any given nested level.
-	if capacity < 40 {
-		capacity = 40
-	}
-
-	n := &Printer{
-		fmt: &Formatter{
+	return &printer{
+		fmt: &formatterState{
 			opts:      p.fmt.opts,
 			comments:  p.fmt.comments,
+			bqCatalog: p.fmt.bqCatalog,
 			maxLength: capacity,
 		},
 		input:       p.input,
 		erasedInput: p.erasedInput,
 		tracker:     p.tracker,
-		err:         nil,
+		logger:      p.logger,
+		errs:        p.errs,
+		visitors:    p.visitors,
 	}
-
-	return n
 }
 
-// unnest flushes the buffer and returns the strings with alignment
-// symbols at the beginning of each line.
-func (p *Printer) unnest() string {
+func (p *printer) unnest() string {
 	trimmed := p.String()
 	aligned := alignNested(trimmed)
 	aligned = "\v" + aligned
-	aligned = strings.ReplaceAll(aligned, "\n", "\n\v")
 
-	return aligned
+	return strings.ReplaceAll(aligned, "\n", "\n\v")
 }
 
-// unnest flushes the buffer and returns the strings with alignment
-// symbols at the beginning of each line.
-func (p *Printer) unnestWithDepth(d int) string {
+func (p *printer) unnestWithDepth(d int) string {
 	trimmed := p.String()
 	aligned := alignNested(trimmed)
 	aligned = "\v" + aligned
 	alignment := strings.Repeat("\v", d)
-	aligned = strings.ReplaceAll(aligned, "\n", "\n"+alignment)
 
-	return aligned
+	return strings.ReplaceAll(aligned, "\n", "\n"+alignment)
 }
 
-// printNestedWithSep receives a slice of ast.Node items and print each
-// in a nested printer.
-// Since we cannot have generic methods, this is a function that receives
-// a printer as the first argument.  Otherwise, it would be a method.
-func printNestedWithSep[T ast.Node](p *Printer, items []T, d Data, sep string) {
+func printNestedWithSep[T googlesql.ASTNode](p *printer, items []T, d printerData, sep string) {
 	pp := p.nest()
 
 	for i, item := range items {
@@ -700,75 +552,58 @@ func printNestedWithSep[T ast.Node](p *Printer, items []T, d Data, sep string) {
 	p.print(pp.unnest())
 }
 
-// acceptNested visits a node with a nested printer.
-func (p *Printer) acceptNested(n ast.Node, d Data) {
+func (p *printer) acceptNested(n googlesql.ASTNode, d printerData) {
 	pp := p.nest()
 	pp.accept(n, d)
 	p.print(pp.unnest())
 }
 
-// acceptNestedLeft visits a node with a nested printer, and unnests
-// result with left alignment.
-func (p *Printer) acceptNestedLeft(n ast.Node, d Data) {
+func (p *printer) acceptNestedLeft(n googlesql.ASTNode, d printerData) {
 	pp := p.nest()
 	pp.accept(n, d)
 	p.print(pp.unnest())
 }
 
-// acceptNestedString visits a node with a nested printer, and prints
-// result to current printer as a string.
-func (p *Printer) acceptNestedString(n ast.Node, d Data) {
+func (p *printer) acceptNestedString(n googlesql.ASTNode, d printerData) {
 	pp := p.nest()
 	pp.accept(n, d)
 	p.print(pp.String())
 }
 
-// toString visits a node with a nested printer and returns its
-// string contents instead of writing to current printer.
-func (p *Printer) toString(n ast.Node, d Data) string {
+func (p *printer) toString(n googlesql.ASTNode, d printerData) string {
 	pp := p.nest()
 	pp.accept(n, d)
 
 	return pp.String()
 }
 
-// toUnnestedString visits a node with a nested printer and returns its
-// unnested string contents .
-func (p *Printer) toUnnestedString(n ast.Node, d Data) string {
+func (p *printer) toUnnestedString(n googlesql.ASTNode, d printerData) string {
 	pp := p.nest()
 	pp.accept(n, d)
 
 	return pp.unnest()
 }
 
-func debugContent(s string) string {
-	d := strings.ReplaceAll(s, "\v", "|")
-	d = strings.ReplaceAll(d, "\b", "%")
-
-	return d
-}
-
-// unnest flushes the buffer and returns the strings with alignment
-// symbols at the beginning of each line.
-func (p *Printer) unnestLeft() string {
+func (p *printer) unnestLeft() string {
 	aligned := leftAlignNested(p.String())
+
 	return "\v" + strings.ReplaceAll(aligned, "\n", "\n\v")
 }
 
-func (p *Printer) printOpenParenIfNeeded(n ast.QueryExpressionNode) {
+func (p *printer) printOpenParenIfNeeded(n parenthesizableNode) {
 	if p.isParenNeeded(n) {
 		p.print("(")
 
-		if n.IsQueryExpression() {
+		if isQE, _ := n.IsQueryExpression(); isQE {
 			p.println("")
 			p.incDepth()
 		}
 	}
 }
 
-func (p *Printer) printCloseParenIfNeeded(n ast.QueryExpressionNode) {
+func (p *printer) printCloseParenIfNeeded(n parenthesizableNode) {
 	if p.isParenNeeded(n) {
-		if n.IsQueryExpression() {
+		if isQE, _ := n.IsQueryExpression(); isQE {
 			p.println("")
 			p.decDepth()
 		}
@@ -777,7 +612,7 @@ func (p *Printer) printCloseParenIfNeeded(n ast.QueryExpressionNode) {
 	}
 }
 
-func (p *Printer) printOpenParenIfNeededWithDepth(n ast.QueryExpressionNode) {
+func (p *printer) printOpenParenIfNeededWithDepth(n parenthesizableNode) {
 	if p.isParenNeeded(n) {
 		p.print("(")
 		p.println("")
@@ -785,7 +620,7 @@ func (p *Printer) printOpenParenIfNeededWithDepth(n ast.QueryExpressionNode) {
 	}
 }
 
-func (p *Printer) printCloseParenIfNeededWithDepth(n ast.QueryExpressionNode) {
+func (p *printer) printCloseParenIfNeededWithDepth(n parenthesizableNode) {
 	if p.isParenNeeded(n) {
 		p.println("")
 		p.decDepth()
@@ -793,30 +628,23 @@ func (p *Printer) printCloseParenIfNeededWithDepth(n ast.QueryExpressionNode) {
 	}
 }
 
-func (p *Printer) isParenNeeded(n ast.QueryExpressionNode) bool {
-	if n.Parenthesized() {
+func (p *printer) isParenNeeded(n parenthesizableNode) bool {
+	if !nodeDefined(n) {
+		return false
+	}
+
+	if paren, _ := n.Parenthesized(); paren {
 		return true
 	}
 
-	if eval, ok := hasLowerPrecedence(n.Parent(), n); ok && eval {
+	if eval, ok := hasLowerPrecedence(nodeParent(n), n); ok && eval {
 		return true
 	}
 
 	return false
 }
 
-// hasParenAround checks if there is parenthesis just before the start
-// location of a node.
-func (p *Printer) hasParenAround(n ast.Node) bool {
-	s := n.ParseLocationRange().Start().ByteOffset()
-	if s == 0 {
-		return false
-	}
-
-	return p.input[s-1] == '('
-}
-
-func (p *Printer) printClause(s string) {
+func (p *printer) printClause(s string) {
 	if p.fmt.opts.NewlineBeforeClause {
 		p.println("")
 	}
@@ -824,13 +652,30 @@ func (p *Printer) printClause(s string) {
 	p.print(s)
 }
 
-func (p *Printer) identifier(s string) string {
-	if len(s) > 0 && s[0] == '`' {
+func (p *printer) identifier(s string) string {
+	if len(s) == 0 || s[0] == '`' {
 		return s
 	}
 
-	switch p.fmt.opts.IdentifierStyle {
-	case AsIs:
+	if p.fmt.opts.PseudoColumnStyle != Unspecified && isPseudoColumn(s) {
+		return applyPrintCase(s, p.fmt.opts.PseudoColumnStyle)
+	}
+
+	return applyPrintCase(s, p.fmt.opts.IdentifierStyle)
+}
+
+func isPseudoColumn(s string) bool {
+	switch strings.ToUpper(s) {
+	case "_PARTITIONDATE", "_PARTITIONTIME", "_TABLE_SUFFIX", "_DBT_MAX_PARTITION", "_FILE_NAME", "_ROW_TIMESTAMP":
+		return true
+	default:
+		return false
+	}
+}
+
+func applyPrintCase(s string, c PrintCase) string {
+	switch c {
+	case AsIs, Unspecified:
 		return s
 	case UpperCase:
 		return strings.ToUpper(s)
@@ -838,25 +683,32 @@ func (p *Printer) identifier(s string) string {
 		return strings.ToLower(s)
 	}
 
-	return ""
+	return s
 }
 
-func (p *Printer) function(s string) string {
-	if s[0] == '`' {
+func (p *printer) function(s string) string {
+	if len(s) == 0 || s[0] == '`' {
 		return s
 	}
 
-	name := p.fallbackFunction(s)
-
-	if p.fmt.opts.FunctionCatalog == BigQueryCatalog {
-		return bigqueryFunctions.GetWithFallback(s, name)
+	if p.fmt.opts.FunctionCatalog == BigQueryCatalog && p.fmt.bqCatalog != nil {
+		if canon := p.fmt.bqCatalog.GetWithFallback(s, ""); canon != "" {
+			switch p.fmt.opts.BuiltinFunctionNameStyle {
+			case AsIs:
+				return s
+			case LowerCase:
+				return strings.ToLower(canon)
+			case UpperCase, Unspecified:
+				return canon
+			}
+		}
 	}
 
-	return name
+	return p.fallbackFunction(s)
 }
 
-func (p *Printer) fallbackFunction(s string) string {
-	if s[0] == '`' {
+func (p *printer) fallbackFunction(s string) string {
+	if len(s) == 0 || s[0] == '`' {
 		return s
 	}
 
@@ -869,12 +721,12 @@ func (p *Printer) fallbackFunction(s string) string {
 		return strings.ToLower(s)
 	}
 
-	return ""
+	return s
 }
 
-func (p *Printer) keyword(s string) string {
+func (p *printer) keyword(s string) string {
 	switch p.fmt.opts.KeywordStyle {
-	case AsIs:
+	case AsIs, Unspecified:
 		return s
 	case UpperCase:
 		return strings.ToUpper(s)
@@ -882,16 +734,16 @@ func (p *Printer) keyword(s string) string {
 		return strings.ToLower(s)
 	}
 
-	return ""
+	return s
 }
 
-func (p *Printer) typename(s string) string {
+func (p *printer) typename(s string) string {
 	if len(s) == 0 || s[0] == '`' {
 		return s
 	}
 
 	switch p.fmt.opts.TypeStyle {
-	case AsIs:
+	case AsIs, Unspecified:
 		return s
 	case UpperCase:
 		return strings.ToUpper(s)
@@ -899,14 +751,11 @@ func (p *Printer) typename(s string) string {
 		return strings.ToLower(s)
 	}
 
-	return ""
+	return s
 }
 
-// identifierWithCase prints according to specified case, and falls back
-// to default identifier definition.  This is used to render specific
-// function arguments.
-func (p *Printer) identifierWithCase(s string, c PrintCase) string {
-	if s[0] == '`' {
+func (p *printer) identifierWithCase(s string, c PrintCase) string {
+	if len(s) == 0 || s[0] == '`' {
 		return s
 	}
 
@@ -921,43 +770,33 @@ func (p *Printer) identifierWithCase(s string, c PrintCase) string {
 		return p.identifier(s)
 	}
 
-	return ""
+	return s
 }
 
-func (p *Printer) nodeInput(n ast.Node) string {
-	r := n.ParseLocationRange()
-	b := r.Start().ByteOffset()
-	e := r.End().ByteOffset()
+func (p *printer) nodeInput(n googlesql.ASTNode) string {
+	b, e := nodeByteRange(n)
 
 	return p.viewInput(b, e)
 }
 
-func (p *Printer) nodeErasedInput(n ast.Node) string {
-	r := n.ParseLocationRange()
-	b := r.Start().ByteOffset()
-	e := r.End().ByteOffset()
+func (p *printer) nodeErasedInput(n googlesql.ASTNode) string {
+	b, e := nodeByteRange(n)
 
 	return p.viewErasedInput(b, e)
 }
 
-// viewErasedInput safely returns the input within the interval
-// [begin, end). Note that input is not necessarily available, and this
-// method may return empty without an error.
-func (p *Printer) viewErasedInput(begin, end int) string {
-	if end >= len(p.erasedInput) {
-		log.Println("[ERROR] Out of bounds on erased input.")
-
+// viewErasedInput safely slices p.erasedInput[begin:end].
+func (p *printer) viewErasedInput(begin, end int) string {
+	if begin < 0 || begin > end || end > len(p.erasedInput) {
 		return ""
 	}
 
 	return p.erasedInput[begin:end]
 }
 
-// viewInput safely returns the input within the interval [begin, end).
-// Note that input is not necessarily available, and this method may
-// return empty without an error.
-func (p *Printer) viewInput(begin, end int) string {
-	if end >= len(p.input) {
+// viewInput safely slices p.input[begin:end].
+func (p *printer) viewInput(begin, end int) string {
+	if begin < 0 || begin > end || end > len(p.input) {
 		return ""
 	}
 
@@ -968,9 +807,8 @@ func alignNested(s string) string {
 	var buf bytes.Buffer
 
 	w := tabwriter.NewWriter(&buf, 0, 0, 0, ' ', tabwriter.AlignRight)
-
-	fmt.Fprint(w, s)
-	w.Flush()
+	_, _ = fmt.Fprint(w, s)
+	_ = w.Flush()
 
 	return strings.Trim(buf.String(), "\n")
 }
@@ -979,34 +817,26 @@ func leftAlignNested(s string) string {
 	var buf bytes.Buffer
 
 	w := tabwriter.NewWriter(&buf, 0, 0, 0, ' ', 0)
-
-	fmt.Fprint(w, s)
-	w.Flush()
+	_, _ = fmt.Fprint(w, s)
+	_ = w.Flush()
 
 	return strings.Trim(buf.String(), "\n")
 }
 
-// isInsideOfMergeStatement returns true when the current node is is inside
-// of a MERGE statement directly.
-func isInsideOfMergeStatement(n ast.Node) bool {
-	p := n.Parent()
-	if !nodeDefined(p) {
-		return false
-	}
+func isInsideOfMergeStatement(n googlesql.ASTNode) bool {
+	parent := nodeParent(n)
 
-	return p.Kind() == ast.MergeStatement
+	return nodeDefined(parent) && nodeKind(parent) == googlesql.ASTNodeKindAstMergeStatement
 }
 
-// isInsideOfOnClause returns true when the current node is is inside
-// of an ON clause directly. The node can be inside of other AndExpr
-// and OrExpr.
-func isInsideOfOnClause(n ast.Node) bool {
-	for p := n.Parent(); p != nil; p = p.Parent() {
-		if p.Kind() == ast.OnClause {
+func isInsideOfOnClause(n googlesql.ASTNode) bool {
+	for parent := nodeParent(n); nodeDefined(parent); parent = nodeParent(parent) {
+		k := nodeKind(parent)
+		if k == googlesql.ASTNodeKindAstOnClause {
 			return true
 		}
 
-		if p.Kind() != ast.AndExpr && p.Kind() != ast.OrExpr {
+		if k != googlesql.ASTNodeKindAstAndExpr && k != googlesql.ASTNodeKindAstOrExpr {
 			return false
 		}
 	}
@@ -1014,16 +844,16 @@ func isInsideOfOnClause(n ast.Node) bool {
 	return false
 }
 
-// isInsideOfWhereClause returns true when the current node is is inside
-// of a WHERE clause directly. The node can be inside of other AndExpr
-// and OrExpr.
-func isInsideOfWhereClause(n ast.Node) bool {
-	for p := n.Parent(); p != nil; p = p.Parent() {
-		if p.Kind() == ast.WhereClause {
+func isInsideOfWhereClause(n googlesql.ASTNode) bool {
+	for parent := nodeParent(n); nodeDefined(parent); parent = nodeParent(parent) {
+		k := nodeKind(parent)
+		if k == googlesql.ASTNodeKindAstWhereClause ||
+			k == googlesql.ASTNodeKindAstDeleteStatement ||
+			k == googlesql.ASTNodeKindAstUpdateStatement {
 			return true
 		}
 
-		if p.Kind() != ast.AndExpr && p.Kind() != ast.OrExpr {
+		if k != googlesql.ASTNodeKindAstAndExpr && k != googlesql.ASTNodeKindAstOrExpr {
 			return false
 		}
 	}
@@ -1031,103 +861,133 @@ func isInsideOfWhereClause(n ast.Node) bool {
 	return false
 }
 
-// hasLowerPrecedence returns whether child has lower precedence than
-// parent.  This is mainly used to help on determine the necessity
-// for parenthesis when rendering expressions.
-func hasLowerPrecedence(parent, child ast.Node) (eval bool, ok bool) {
+func hasLowerPrecedence(parent, child googlesql.ASTNode) (eval, ok bool) {
+	if !nodeDefined(parent) || !nodeDefined(child) {
+		return false, false
+	}
+
 	p := precedenceNum(parent)
 	c := lowestPrecedenceBelow(child)
 
 	eval = p > 0 && c > 0 && p > c
 	ok = p < 1000 && c < 1000
 
-	return
+	return eval, ok
 }
 
-func lowestPrecedenceBelow(n ast.Node) int {
+func lowestPrecedenceBelow(n googlesql.ASTNode) int {
 	switch t := n.(type) {
-	case *ast.BinaryExpressionNode:
-		var (
-			min int = precedenceNum(n)
-			lhs int = precedenceNum(t.Lhs())
-			rhs int = precedenceNum(t.Rhs())
-		)
+	case *googlesql.ASTBinaryExpression:
+		minPrec := precedenceNum(n)
+		lhsNode, _ := t.Lhs()
+		rhsNode, _ := t.Rhs()
+		lhs := precedenceNum(lhsNode)
+		rhs := precedenceNum(rhsNode)
 
-		if lhs < min {
-			min = lhs
+		if lhs < minPrec {
+			minPrec = lhs
 		}
 
-		if rhs < min {
-			min = rhs
+		if rhs < minPrec {
+			minPrec = rhs
 		}
 
-		return min
+		return minPrec
+	case *googlesql.ASTConcatExpr:
+		minPrec := precedenceNum(n)
+
+		for _, op := range selectChildrenOfType[googlesql.ASTExpressionNode](t) {
+			if p := precedenceNum(op); p < minPrec {
+				minPrec = p
+			}
+		}
+
+		return minPrec
 	default:
 		return 1000
 	}
 }
 
-func precedenceNum(n ast.Node) int {
-	switch n.Kind() {
-	case ast.DotStar:
+func precedenceNum(n googlesql.ASTNode) int {
+	if !nodeDefined(n) {
+		return 1000
+	}
+
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstDotStar:
 		return 1
-	case ast.OrExpr:
+	case googlesql.ASTNodeKindAstOrExpr:
 		return 2
-	case ast.AndExpr:
+	case googlesql.ASTNodeKindAstAndExpr:
 		return 3
-	case ast.UnaryExpression:
-		return precedenceUnaryExpr(n.(*ast.UnaryExpressionNode))
-	case ast.BinaryExpression:
-		return precedenceBinExpr(n.(*ast.BinaryExpressionNode))
-	case ast.BetweenExpression:
-		return 5
-	}
-
-	return 1000
-}
-
-func precedenceBinExpr(n *ast.BinaryExpressionNode) int {
-	switch n.Op() {
-	case ast.NotSetOp:
-		return -1
-	case ast.EqOp, ast.NeOp, ast.Ne2Op,
-		ast.GtOp, ast.GeOp,
-		ast.LtOp, ast.LeOp,
-		ast.LikeOp,
-		ast.DistinctOp,
-		ast.IsOp:
-		return 5
-	case ast.BitwiseOrOp:
-		return 6
-	case ast.BitwiseXorOp:
-		return 7
-	case ast.BitwiseAndOp:
-		return 8
-	case ast.PlusOp, ast.MinusOp:
-		return 9
-	case ast.ConcatOP:
+	case googlesql.ASTNodeKindAstUnaryExpression:
+		if u, ok := n.(*googlesql.ASTUnaryExpression); ok {
+			return precedenceUnaryExpr(u)
+		}
+	case googlesql.ASTNodeKindAstBinaryExpression:
+		if b, ok := n.(*googlesql.ASTBinaryExpression); ok {
+			return precedenceBinExpr(b)
+		}
+	case googlesql.ASTNodeKindAstConcatExpr:
 		return 10
-	case ast.MultiplyOp, ast.DivideOp:
-		return 11
+	case googlesql.ASTNodeKindAstBetweenExpression:
+		return 5
+	default:
+		return 1000
 	}
 
 	return 1000
 }
 
-func precedenceUnaryExpr(n *ast.UnaryExpressionNode) int {
-	switch n.Op() {
-	case ast.NotSetUnaryOp:
+func precedenceBinExpr(n *googlesql.ASTBinaryExpression) int {
+	op, _ := n.Op()
+
+	switch op {
+	case googlesql.ASTBinaryExpressionEnums_OpNotSet:
+		return -1
+	case googlesql.ASTBinaryExpressionEnums_OpEq,
+		googlesql.ASTBinaryExpressionEnums_OpNe,
+		googlesql.ASTBinaryExpressionEnums_OpNe2,
+		googlesql.ASTBinaryExpressionEnums_OpGt,
+		googlesql.ASTBinaryExpressionEnums_OpGe,
+		googlesql.ASTBinaryExpressionEnums_OpLt,
+		googlesql.ASTBinaryExpressionEnums_OpLe,
+		googlesql.ASTBinaryExpressionEnums_OpLike,
+		googlesql.ASTBinaryExpressionEnums_OpDistinct,
+		googlesql.ASTBinaryExpressionEnums_OpIs:
+		return 5
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseOr:
+		return 6
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseXor:
+		return 7
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseAnd:
+		return 8
+	case googlesql.ASTBinaryExpressionEnums_OpPlus, googlesql.ASTBinaryExpressionEnums_OpMinus:
+		return 9
+	case googlesql.ASTBinaryExpressionEnums_OpConcatOp:
+		return 10
+	case googlesql.ASTBinaryExpressionEnums_OpMultiply, googlesql.ASTBinaryExpressionEnums_OpDivide:
+		return 11
+	default:
+		return 1000
+	}
+}
+
+func precedenceUnaryExpr(n *googlesql.ASTUnaryExpression) int {
+	op, _ := n.Op()
+
+	switch op {
+	case googlesql.ASTUnaryExpressionEnums_OpNotSet:
 		return 0
-	case ast.NotUnaryOp:
+	case googlesql.ASTUnaryExpressionEnums_OpNot:
 		return 4
-	case ast.BitwiseNotUnaryOp, ast.MinusUnaryOp,
-		ast.PlusUnaryOp,
-		ast.IsUnknownUnaryOp,
-		ast.IsNotUnknownUnaryOp:
+	case googlesql.ASTUnaryExpressionEnums_OpBitwiseNot,
+		googlesql.ASTUnaryExpressionEnums_OpMinus,
+		googlesql.ASTUnaryExpressionEnums_OpPlus,
+		googlesql.ASTUnaryExpressionEnums_OpIsUnknown,
+		googlesql.ASTUnaryExpressionEnums_OpIsNotUnknown:
 		return 12
 	}
 
 	return -1
 }
-
-var lineBreakPlaceholder = string([]byte{33, 26, '1', '0'})

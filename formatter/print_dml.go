@@ -1,17 +1,15 @@
-// This file contains printing functions specific for
-// Data Definition Language (DDL).
 package formatter
 
 import (
 	"strings"
 
-	"github.com/goccy/go-zetasql/ast"
+	"github.com/goccy/go-googlesql"
 )
 
-func (p *Printer) VisitColumnList(n *ast.ColumnListNode, d Data) {
+func (p *printer) visitColumnList(n *googlesql.ASTColumnList, d printerData) {
 	p.moveBefore(n)
 
-	cols := n.Identifiers()
+	cols := selectChildrenOfType[*googlesql.ASTIdentifier](n)
 	simple := len(cols) <= 4
 
 	p.print("(")
@@ -34,6 +32,10 @@ func (p *Printer) VisitColumnList(n *ast.ColumnListNode, d Data) {
 	}
 
 	if !simple {
+		if len(cols) > 0 && p.fmt.opts.ColumnListTrailingComma == Always {
+			p.print(",")
+		}
+
 		p.println("")
 		p.decDepth()
 	}
@@ -42,13 +44,124 @@ func (p *Printer) VisitColumnList(n *ast.ColumnListNode, d Data) {
 	p.movePast(n)
 }
 
-func (p *Printer) VisitInsertStatement(n *ast.InsertStatementNode, d Data) {
-	cl := n.ColumnList()
+func (p *printer) visitDeleteStatement(n *googlesql.ASTDeleteStatement, d printerData) {
+	p.moveBefore(n)
+
+	pp := p.nest()
+	target, _ := n.TargetPath()
+	begin, _ := nodeByteRange(n)
+	targetBegin, _ := nodeByteRange(target)
+	prefix := strings.ToUpper(p.viewErasedInput(begin, targetBegin))
+
+	pp.print(pp.keyword("DELETE"))
+
+	pTarget := pp.nest()
+	if strings.Contains(prefix, "FROM") {
+		pTarget.print(pTarget.keyword("FROM"))
+	}
+
+	pTarget.accept(target, d)
+
+	if hint, _ := n.Hint(); nodeDefined(hint) {
+		pTarget.accept(hint, d)
+	}
+
+	if alias, _ := n.Alias(); nodeDefined(alias) {
+		pTarget.accept(alias, d)
+	}
+
+	if off, _ := n.Offset(); nodeDefined(off) {
+		pTarget.accept(off, d)
+	}
+
+	pp.print(pTarget.unnest())
+
+	if where, _ := n.Where(); nodeDefined(where) {
+		pp.printClause(pp.keyword("WHERE"))
+		pp.visitWhereExprBody(where, d)
+	}
+
+	p.print(alignNested(pp.String()))
+
+	if ret, _ := n.Returning(); nodeDefined(ret) {
+		p.lnaccept(ret, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitUpdateStatement(n *googlesql.ASTUpdateStatement, d printerData) {
+	p.moveBefore(n)
+
+	pp := p.nest()
+	pp.print(pp.keyword("UPDATE"))
+
+	pTarget := pp.nest()
+	target, _ := n.TargetPath()
+	pTarget.accept(target, d)
+
+	if hint, _ := n.Hint(); nodeDefined(hint) {
+		pTarget.accept(hint, d)
+	}
+
+	if alias, _ := n.Alias(); nodeDefined(alias) {
+		pTarget.accept(alias, d)
+	}
+
+	if off, _ := n.Offset(); nodeDefined(off) {
+		pTarget.accept(off, d)
+	}
+
+	pp.print(pTarget.unnest())
+
+	if items, _ := n.UpdateItemList(); nodeDefined(items) {
+		pp.printClause(pp.keyword("SET"))
+		pp.acceptNested(items, d)
+	}
+
+	if fc, _ := n.FromClause(); nodeDefined(fc) {
+		pp.printClause(pp.keyword("FROM"))
+		pp.acceptNested(fc, d)
+	}
+
+	if where, _ := n.Where(); nodeDefined(where) {
+		pp.printClause(pp.keyword("WHERE"))
+		pp.visitWhereExprBody(where, d)
+	}
+
+	p.print(alignNested(pp.String()))
+
+	if ret, _ := n.Returning(); nodeDefined(ret) {
+		p.lnaccept(ret, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitReturningClause(n *googlesql.ASTReturningClause, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("THEN RETURN"))
+
+	if alias, _ := n.ActionAlias(); nodeDefined(alias) {
+		p.print(p.keyword("WITH ACTION"))
+		p.accept(alias, d)
+	}
+
+	if sl, _ := n.SelectList(); nodeDefined(sl) {
+		p.accept(sl, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitInsertStatement(n *googlesql.ASTInsertStatement, d printerData) {
+	cl, _ := n.ColumnList()
+	target, _ := n.TargetPath()
 
 	p.moveBefore(n)
 
-	begin := n.ParseLocationRange().Start().ByteOffset()
-	end := n.TargetPath().ParseLocationRange().Start().ByteOffset()
+	begin, _ := nodeByteRange(n)
+	end, _ := nodeByteRange(target)
 	input := strings.ToUpper(p.viewErasedInput(begin, end))
 
 	if strings.Contains(input, "INTO") {
@@ -57,35 +170,40 @@ func (p *Printer) VisitInsertStatement(n *ast.InsertStatementNode, d Data) {
 		p.print(p.keyword("INSERT"))
 	}
 
-	p.accept(n.TargetPath(), d)
+	p.accept(target, d)
 
-	if cl != nil {
+	if nodeDefined(cl) {
 		p.println("")
 		p.incDepth()
-		p.accept(n.ColumnList(), d)
+		p.accept(cl, d)
 		p.println("")
 		p.decDepth()
 	}
 
-	if q := n.Query(); q != nil {
+	if q, _ := n.Query(); nodeDefined(q) {
 		p.println("")
 		p.acceptNested(q, d)
-	} else {
+	} else if rows, _ := n.Rows(); nodeDefined(rows) {
 		p.println("")
 		p.println(p.keyword("VALUES"))
 		p.incDepth()
-		p.accept(n.Rows(), d)
+		p.accept(rows, d)
 		p.println("")
 		p.decDepth()
+	}
+
+	if ret, _ := n.Returning(); nodeDefined(ret) {
+		p.lnaccept(ret, d)
 	}
 
 	p.movePast(n)
 }
 
-func (p *Printer) VisitInsertValuesRowList(n *ast.InsertValuesRowListNode, d Data) {
+func (p *printer) visitInsertValuesRowList(n *googlesql.ASTInsertValuesRowList, d printerData) {
 	p.moveBefore(n)
 
-	for i, r := range n.Rows() {
+	rows := selectChildrenOfType[*googlesql.ASTInsertValuesRow](n)
+	for i, r := range rows {
 		if i > 0 {
 			p.println(",")
 		}
@@ -96,11 +214,11 @@ func (p *Printer) VisitInsertValuesRowList(n *ast.InsertValuesRowListNode, d Dat
 	p.movePast(n)
 }
 
-func (p *Printer) VisitInsertValuesRow(n *ast.InsertValuesRowNode, d Data) {
+func (p *printer) visitInsertValuesRow(n *googlesql.ASTInsertValuesRow, d printerData) {
 	p.moveBefore(n)
 
-	values := n.Values()
-	simple := len(values) <= 4 && allTrue(mapIsSimpleExprs(values))
+	values := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	simple := len(values) <= 4 && allTrue(p.mapIsSimpleExprs(values))
 
 	p.print("(")
 
@@ -130,57 +248,59 @@ func (p *Printer) VisitInsertValuesRow(n *ast.InsertValuesRowNode, d Data) {
 	p.movePast(n)
 }
 
-func (p *Printer) VisitMergeStatement(n *ast.MergeStatementNode, d Data) {
+func (p *printer) visitMergeStatement(n *googlesql.ASTMergeStatement, d printerData) {
 	pp := p.nest()
 
 	pp.moveBefore(n)
 	pp.print(pp.keyword("MERGE") + " ")
 
+	target, _ := n.TargetPath()
+	alias, _ := n.Alias()
+	tableExpr, _ := n.TableExpression()
+	cond, _ := n.MergeCondition()
+	whens, _ := n.WhenClauses()
+
 	p1 := pp.nest()
-	// p1.print(p.keyword("INTO"))
-	p1.acceptNested(n.TargetPath(), d)
+	p1.acceptNested(target, d)
 
 	pp.print(p1.unnest())
-	pp.accept(n.Alias(), d)
+	pp.accept(alias, d)
 	pp.println("")
 	pp.print(pp.keyword("USING") + " ")
-	pp.acceptNested(n.TableExpression(), d)
+	pp.acceptNested(tableExpr, d)
 	pp.println("")
 	pp.print(pp.keyword("ON") + " ")
-	pp.acceptNested(n.MergeCondition(), d)
+	pp.acceptNested(cond, d)
 	p.println("")
-	pp.accept(n.WhenClauses(), d)
+	pp.accept(whens, d)
 	pp.movePast(n)
 
 	p.print(pp.unnest())
 }
 
-func (p *Printer) VisitMergeAction(n *ast.MergeActionNode, d Data) {
+func (p *printer) visitMergeAction(n *googlesql.ASTMergeAction, d printerData) {
 	p.moveBefore(n)
+	at, _ := n.ActionType()
 
-	switch n.ActionType() {
-	case ast.MergeActionNotSet:
+	switch at {
+	case googlesql.ASTMergeActionEnums_ActionTypeNotSet:
 		// Nothing.
-	case ast.MergeActionInsert:
+	case googlesql.ASTMergeActionEnums_ActionTypeInsert:
 		p.visitMergeActionInsert(n, d)
-	case ast.MergeActionUpdate:
+	case googlesql.ASTMergeActionEnums_ActionTypeUpdate:
 		p.visitMergeActionUpdate(n, d)
-	case ast.MergeActionDelete:
-		p.visitMergeActionDelete(n, d)
+	case googlesql.ASTMergeActionEnums_ActionTypeDelete:
+		p.println(p.keyword("DELETE"))
 	}
 
 	p.movePast(n)
 }
 
-func (p *Printer) visitMergeActionDelete(n *ast.MergeActionNode, d Data) {
-	p.println(p.keyword("DELETE"))
-}
+func (p *printer) visitMergeActionInsert(n *googlesql.ASTMergeAction, d printerData) {
+	cl, _ := n.InsertColumnList()
+	ir, _ := n.InsertRow()
 
-func (p *Printer) visitMergeActionInsert(n *ast.MergeActionNode, d Data) {
-	cl := n.InsertColumnList()
-	ir := n.InsertRow()
-
-	if cl == nil && ir != nil && ir.NumChildren() == 0 {
+	if !nodeDefined(cl) && nodeDefined(ir) && nodeNumChildren(ir) == 0 {
 		p.println(p.keyword("INSERT ROW"))
 
 		return
@@ -188,35 +308,37 @@ func (p *Printer) visitMergeActionInsert(n *ast.MergeActionNode, d Data) {
 
 	p.println(p.keyword("INSERT"))
 
-	if cl != nil {
+	if nodeDefined(cl) {
 		p.incDepth()
-		p.accept(n.InsertColumnList(), d)
+		p.accept(cl, d)
 		p.println("")
 		p.decDepth()
 	}
 
-	if ir != nil {
+	if nodeDefined(ir) {
 		p.println("")
 		p.println(p.keyword("VALUES"))
 		p.incDepth()
-		p.accept(n.InsertRow(), d)
+		p.accept(ir, d)
 		p.println("")
 		p.decDepth()
 	}
 }
 
-func (p *Printer) visitMergeActionUpdate(n *ast.MergeActionNode, d Data) {
+func (p *printer) visitMergeActionUpdate(n *googlesql.ASTMergeAction, d printerData) {
+	uil, _ := n.UpdateItemList()
+
 	p.println(p.keyword("UPDATE SET"))
 	p.incDepth()
-	p.accept(n.UpdateItemList(), d)
+	p.accept(uil, d)
 	p.println("")
 	p.decDepth()
 }
 
-func (p *Printer) VisitMergeWhenClauseList(n *ast.MergeWhenClauseListNode, d Data) {
+func (p *printer) visitMergeWhenClauseList(n *googlesql.ASTMergeWhenClauseList, d printerData) {
 	p.moveBefore(n)
 
-	for _, c := range n.ClauseList() {
+	for _, c := range selectChildrenOfType[*googlesql.ASTMergeWhenClause](n) {
 		p.println("")
 		p.print(p.keyword("WHEN") + " ")
 		p.acceptNested(c, d)
@@ -226,19 +348,22 @@ func (p *Printer) VisitMergeWhenClauseList(n *ast.MergeWhenClauseListNode, d Dat
 	p.movePast(n)
 }
 
-func (p *Printer) VisitMergeWhenClause(n *ast.MergeWhenClauseNode, d Data) {
+func (p *printer) visitMergeWhenClause(n *googlesql.ASTMergeWhenClause, d printerData) {
 	p.moveBefore(n)
 
-	switch n.MatchType() {
-	case ast.MergeMatchNotSet:
+	mt, _ := n.MatchType()
+	action, _ := n.Action()
+
+	switch mt {
+	case googlesql.ASTMergeWhenClauseEnums_MatchTypeNotSet:
 		// Nothing.
-	case ast.MergeMatched:
+	case googlesql.ASTMergeWhenClauseEnums_MatchTypeMatched:
 		p.print(p.keyword("MATCHED"))
-	case ast.MergeNotMatchedBySource:
+	case googlesql.ASTMergeWhenClauseEnums_MatchTypeNotMatchedBySource:
 		p.print(p.keyword("NOT MATCHED BY SOURCE"))
-	case ast.MergeNotMatchedByTarget:
-		start := n.ParseLocationRange().Start().ByteOffset()
-		next := n.Action().ParseLocationRange().Start().ByteOffset()
+	case googlesql.ASTMergeWhenClauseEnums_MatchTypeNotMatchedByTarget:
+		start, _ := nodeByteRange(n)
+		next, _ := nodeByteRange(action)
 		input := strings.ToUpper(p.viewErasedInput(start, next))
 
 		if strings.Contains(input, "TARGET") {
@@ -248,9 +373,8 @@ func (p *Printer) VisitMergeWhenClause(n *ast.MergeWhenClauseNode, d Data) {
 		}
 	}
 
-	if cond := n.SearchCondition(); cond != nil {
-
-		if isSimpleExpr(cond) {
+	if cond, _ := n.SearchCondition(); nodeDefined(cond) {
+		if p.isSimpleExpr(cond) {
 			p.print(p.keyword("AND"))
 			p.accept(cond, d)
 		} else {
@@ -264,30 +388,32 @@ func (p *Printer) VisitMergeWhenClause(n *ast.MergeWhenClauseNode, d Data) {
 	}
 
 	p.println(p.keyword("THEN"))
-	p.accept(n.Action(), d)
+	p.accept(action, d)
 
 	p.movePast(n)
 }
 
-func (p *Printer) VisitTruncateStatement(n *ast.TrucateStatementNode, d Data) {
+func (p *printer) visitTruncateStatement(n *googlesql.ASTTruncateStatement, d printerData) {
 	p.moveBefore(n)
 	p.print(p.keyword("TRUNCATE TABLE"))
-	p.accept(n.TargetPath(), d)
 
-	if w := n.Where(); w != nil {
+	target, _ := n.TargetPath()
+	p.accept(target, d)
+
+	if w, _ := n.Where(); nodeDefined(w) {
 		p.println("")
 		p.print(p.keyword("WHERE"))
-		p.accept(n.Where(), d)
+		p.accept(w, d)
 	}
 
 	p.movePast(n)
 }
 
-func (p *Printer) VisitUpdateItemList(n *ast.UpdateItemListNode, d Data) {
+func (p *printer) visitUpdateItemList(n *googlesql.ASTUpdateItemList, d printerData) {
 	p.moveBefore(n)
 
 	pp := p.nest()
-	items := n.UpdateItems()
+	items := selectChildrenOfType[*googlesql.ASTUpdateItem](n)
 
 	for i, item := range items {
 		if i > 0 {
@@ -301,23 +427,32 @@ func (p *Printer) VisitUpdateItemList(n *ast.UpdateItemListNode, d Data) {
 	p.movePast(n)
 }
 
-func (p *Printer) VisitUpdateItem(n *ast.UpdateItemNode, d Data) {
+func (p *printer) visitUpdateItem(n *googlesql.ASTUpdateItem, d printerData) {
 	p.moveBefore(n)
-	p.accept(n.SetValue(), d)
-	p.accept(n.InsertStatement(), d)
-	p.accept(n.DeleteStatement(), d)
-	p.accept(n.UpdateStatement(), d)
+
+	sv, _ := n.SetValue()
+	ins, _ := n.InsertStatement()
+	del, _ := n.DeleteStatement()
+	upd, _ := n.UpdateStatement()
+
+	p.accept(sv, d)
+	p.accept(ins, d)
+	p.accept(del, d)
+	p.accept(upd, d)
 	p.movePast(n)
 }
 
-func (p *Printer) VisitUpdateSetValue(n *ast.UpdateSetValueNode, d Data) {
+func (p *printer) visitUpdateSetValue(n *googlesql.ASTUpdateSetValue, d printerData) {
 	p.moveBefore(n)
-	p.accept(n.Path(), d)
+
+	path, _ := n.Path()
+	val, _ := n.Value()
+
+	p.accept(path, d)
 
 	pp := p.nest()
 	pp.print("=")
-
-	pp.acceptNested(n.Value(), d)
+	pp.acceptNested(val, d)
 	p.print(pp.unnest())
 	p.movePast(n)
 }

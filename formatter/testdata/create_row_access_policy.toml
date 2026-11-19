@@ -5,7 +5,7 @@ soft_max_cols = 80
 newline_before_clause = true
 align_logical_with_clauses = true
 column_list_trailing_comma = "AUTO"
-indentation = 1
+indentation = 2
 min_joins_to_separate_in_blocks = 2
 max_cols_for_single_line_select = 4
 function_name_style = "UPPER_CASE"
@@ -35,7 +35,7 @@ create row access policy p1 on t1 grant to ('mdbuser/bar') filter using(c2 = 'fo
 """
 formatted = """
 CREATE ROW ACCESS POLICY p1
-ON p1
+ON t1
 GRANT TO ('mdbuser/bar')
 FILTER USING (c2 = 'foo')
 """
@@ -90,7 +90,7 @@ create row access policy p1 on t1 filter using(true);
 """
 formatted = """
 CREATE ROW ACCESS POLICY p1
-ON p1
+ON t1
 FILTER USING (TRUE)
 """
 
@@ -103,7 +103,7 @@ using (region = "us");
 """
 formatted = """
 CREATE ROW ACCESS POLICY p1
-ON p1
+ON t1
 GRANT TO ("bar@google.com")
 FILTER USING (region = "us")
 """

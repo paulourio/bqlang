@@ -7,43 +7,36 @@ import (
 	"github.com/paulourio/bqlang/extensions"
 )
 
-type Formatter struct {
+type formatterState struct {
 	opts                   *PrintOptions
-	comments               *CommentsQueue
+	comments               *commentsQueue
+	bqCatalog              stringMapSet
 	buffer                 strings.Builder
 	formatted              strings.Builder
 	maxLength              int
 	depth                  int
 	last                   rune
 	lastWasSingleCharUnary bool
-	// noFlushInNextFormat disables line flushing in the next call to Format()
+	// noFlushInNextFormat disables line flushing in the next call to Format().
 	noFlushInNextFormat bool
 	lastWasNewLine      bool
 }
 
-// Format formats the string automatically according to the context.
-//  1. Inserts necessary space between tokens.
-//  2. Calls FlushLine() when a line reaches column limit and it is at
-//     some point appropriate to break.
-//
-// Param s should not contain any leading or trailing whitespace, such
-// as ' ' and '\n'.
-func (p *Formatter) Format(s string) {
+// Format formats token s into the line buffer, inserting spaces between tokens
+// and flushing lines when soft column limits are reached at separator points.
+func (p *formatterState) Format(s string) {
 	if len(s) == 0 {
 		return
 	}
 
-	// At the end we check whether the buffer should be flushed to
-	// the formatted buffer.
 	defer func() {
+		noFlush := p.noFlushInNextFormat
 		p.lastWasNewLine = false
 		p.lastWasSingleCharUnary = false
 		p.noFlushInNextFormat = false
 
 		l := p.buffer.Len() - strings.LastIndex(p.buffer.String(), "\n")
-		if l >= p.maxLength &&
-			p.lastIsSeparator() &&
-			!p.noFlushInNextFormat {
+		if l >= p.maxLength && p.lastIsSeparator() && !noFlush {
 			p.FlushLine()
 		}
 	}()
@@ -63,71 +56,61 @@ func (p *Formatter) Format(s string) {
 	case '(', '[', '@', '.', '~', ' ', '\v', '\b':
 		p.writeRunes(data)
 	default:
-		if p.lastWasSingleCharUnary {
-			p.writeRunes(data)
-
-			return
-		}
-
-		curr := data[0]
-		if curr == '(' {
-			// Inserts a space if last token is a separator, otherwise
-			// regards it as a function call.
-			if p.lastIsSeparator() {
-				p.writeRunes(append([]rune{' '}, data...))
-			} else {
-				p.writeRunes(data)
-			}
-
-			return
-		}
-
-		if curr == ';' && p.lastWasNewLine {
-			p.writeRunes(append([]rune{'\n'}, data...))
-
-			return
-		}
-
-		if curr == ')' ||
-			curr == '[' ||
-			curr == ']' ||
-			// To avoid case like "SELECT 1e10,.1e10"
-			(curr == '.' && p.last != ',') ||
-			(curr == ';' && p.last != '\n') ||
-			curr == ',' {
-
-			p.writeRunes(data)
-
-			return
-		}
-
-		if p.last == ' ' && data[0] == ' ' {
-			p.writeRunes(data)
-		} else {
-			p.writeRunes(append([]rune{' '}, data...))
-		}
+		p.formatAfterToken(data)
 	}
 }
 
-// FormatLine is like Format, except always calls FlushLine.
-// Use this if you explicitly wants to break the line after this string.
-// For example:
-//  1. To put a newline after SELECT:
-//     FormatLine("SELECT")
-//  2. To put close parenthesis on a separate line:
-//     FormatLine("")
-//     FormatLine(")")
-func (p *Formatter) FormatLine(s string) {
+func (p *formatterState) formatAfterToken(data []rune) {
+	if p.lastWasSingleCharUnary {
+		p.writeRunes(data)
+
+		return
+	}
+
+	curr := data[0]
+	if curr == '(' {
+		if p.lastIsSeparator() {
+			p.writeRunes(append([]rune{' '}, data...))
+		} else {
+			p.writeRunes(data)
+		}
+
+		return
+	}
+
+	if curr == ';' && p.lastWasNewLine {
+		p.writeRunes(append([]rune{'\n'}, data...))
+
+		return
+	}
+
+	if curr == ')' ||
+		curr == '[' ||
+		curr == ']' ||
+		(curr == '.' && p.last != ',') ||
+		(curr == ';' && p.last != '\n') ||
+		curr == ',' {
+		p.writeRunes(data)
+
+		return
+	}
+
+	if p.last == ' ' && data[0] == ' ' {
+		p.writeRunes(data)
+	} else {
+		p.writeRunes(append([]rune{' '}, data...))
+	}
+}
+
+// FormatLine formats s and unconditionally flushes the line.
+func (p *formatterState) FormatLine(s string) {
 	p.Format(s)
 	p.FlushLine()
 }
 
-// FlushLine flushes buffer to formatted, with a line break at the end.
-// It will do nothing if it is a new line and buffer is empty, to avoid
-// empty lines.
-// Remember to call FlushLine once after the whole process is over in
-// case some content remains in buffer.
-func (p *Formatter) FlushLine() {
+// FlushLine flushes buffer to formatted with a trailing newline, skipping
+// duplicate empty lines when buffer is empty.
+func (p *formatterState) FlushLine() {
 	sfmt := p.formatted.String()
 	sz := len(sfmt)
 
@@ -142,15 +125,11 @@ func (p *Formatter) FlushLine() {
 	p.last = '\n'
 }
 
-// flushCommentsUpTo returns the number of comments flushed, and an
-// indicator whether the last character is a newline.
-func (p *Formatter) flushCommentsUpTo(pos int) {
+func (p *formatterState) flushCommentsUpTo(pos int) {
 	lhs, rhs := extensions.SplitComments(p.comments.comments, pos)
 	p.comments.comments = rhs
 
 	for i, c := range lhs {
-		// Contiguous comments will always be rendered on separate
-		// lines.
 		if i > 0 || c.IsOneline() {
 			p.FlushLine()
 		}
@@ -160,20 +139,18 @@ func (p *Formatter) flushCommentsUpTo(pos int) {
 			image = strings.ReplaceAll(c.Image, "\n", lineBreakPlaceholder)
 		}
 
-		if c.AtLineBegin() && p.buffer.Len() > 0 {
+		switch {
+		case c.AtLineBegin() && p.buffer.Len() > 0:
 			p.FlushLine()
 			p.Format(strings.TrimRight(image, "\n"))
-		} else if !c.AtLineBegin() && (p.formatted.Len()+p.buffer.Len()) > 0 {
-			// Add one additional space between line contents and
-			// the comment at the final of current line.
+		case !c.AtLineBegin() && (p.formatted.Len()+p.buffer.Len()) > 0:
 			sp := " "
-
 			if p.buffer.Len() == 0 || p.bufferEndsWithWhitespace() {
 				sp = ""
 			}
 
 			p.Format(sp + strings.TrimRight(image, "\n"))
-		} else {
+		default:
 			p.Format(strings.TrimRight(image, "\n"))
 		}
 
@@ -183,7 +160,7 @@ func (p *Formatter) flushCommentsUpTo(pos int) {
 	}
 }
 
-func (p *Formatter) bufferEndsWithWhitespace() bool {
+func (p *formatterState) bufferEndsWithWhitespace() bool {
 	n := p.buffer.Len()
 	if n == 0 {
 		return false
@@ -195,28 +172,26 @@ func (p *Formatter) bufferEndsWithWhitespace() bool {
 	return last == '\n' || unicode.IsSpace(rune(last))
 }
 
-func (p *Formatter) lastIsSeparator() bool {
+func (p *formatterState) lastIsSeparator() bool {
 	if p.buffer.Len() == 0 {
 		return false
 	}
 
-	if !isAlphanum(byte(p.last)) {
-		return nonWordSeparators[p.last]
+	if p.last < 0 || p.last > 127 || !isAlphanum(byte(p.last)) {
+		return isNonWordSeparator(p.last)
 	}
 
 	buf := p.buffer.String()
-
 	i := len(buf) - 1
+
 	for i >= 0 && isAlphanum(buf[i]) {
 		i--
 	}
 
-	lastTok := buf[i+1:]
-
-	return wordSeparators[lastTok]
+	return isWordSeparator(buf[i+1:])
 }
 
-func (p *Formatter) addUnary(s string) {
+func (p *formatterState) addUnary(s string) {
 	if p.lastWasSingleCharUnary && p.last == '-' && s == "-" {
 		p.lastWasSingleCharUnary = false
 	}
@@ -225,15 +200,23 @@ func (p *Formatter) addUnary(s string) {
 	p.lastWasSingleCharUnary = len(s) == 1
 }
 
-func (p *Formatter) writeIndent() {
-	p.buffer.WriteString(strings.Repeat(" ", p.depth*2))
+func (p *formatterState) indentWidth() int {
+	if p.opts != nil && p.opts.Indentation > 0 {
+		return p.opts.Indentation
+	}
+
+	return 2
+}
+
+func (p *formatterState) writeIndent() {
+	p.buffer.WriteString(strings.Repeat(" ", p.depth*p.indentWidth()))
 
 	if p.depth > 0 {
 		p.last = ' '
 	}
 }
 
-func (p *Formatter) writeRunes(d []rune) {
+func (p *formatterState) writeRunes(d []rune) {
 	p.buffer.WriteString(string(d))
 	p.last = d[len(d)-1]
 }
@@ -246,21 +229,20 @@ func isAlphanum(c byte) bool {
 	return isLetter(c) || ('0' <= c && c <= '9') || (c == '_')
 }
 
-var wordSeparators = map[string]bool{
-	"AND": true,
-	"OR":  true,
-	"ON":  true,
-	"IN":  true,
+func isWordSeparator(tok string) bool {
+	switch strings.ToUpper(tok) {
+	case "AND", "OR", "ON", "IN":
+		return true
+	default:
+		return false
+	}
 }
 
-var nonWordSeparators = map[rune]bool{
-	',': true,
-	'<': true,
-	'>': true,
-	'-': true,
-	'+': true,
-	'=': true,
-	'*': true,
-	'/': true,
-	'%': true,
+func isNonWordSeparator(r rune) bool {
+	switch r {
+	case ',', '<', '>', '-', '+', '=', '*', '/', '%':
+		return true
+	default:
+		return false
+	}
 }

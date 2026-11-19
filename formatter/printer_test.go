@@ -6,60 +6,73 @@ import (
 	"log"
 	"os"
 	"path"
+	"sync/atomic"
 	"testing"
 
-	zetasql "github.com/goccy/go-zetasql"
+	"github.com/goccy/go-googlesql"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/formatter"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestPrinter(t *testing.T) {
 	t.Parallel()
 
-	files, err := os.ReadDir("testdata")
-	assert.NoError(t, err)
+	require.NoError(t, bqlang.Init())
 
-	nerr := 0
+	files, err := os.ReadDir("testdata")
+	require.NoError(t, err)
+
+	var nerr atomic.Int32
 
 	for _, file := range files {
-		s := MustReadTest(path.Join("testdata", file.Name()))
+		if file.IsDir() {
+			continue
+		}
+
+		s := MustReadTest(t, path.Join("testdata", file.Name()))
 
 		for i, c := range s.Cases {
 			name := fmt.Sprintf("%s:case %d", file.Name(), i)
+
 			t.Run(name, func(t *testing.T) {
+				t.Parallel()
+
+				if nerr.Load() > 10 {
+					t.Skipf("skipping after %d failures", nerr.Load())
+				}
+
 				if !testCase(t, s, c) {
-					nerr++
+					nerr.Add(1)
 				}
 			})
-
-			if nerr > 2 {
-				t.Fatal("stopping due too many errors")
-			}
 		}
 	}
 }
 
 func testCase(t *testing.T, f *TestDataFile, c *Case) bool {
-	input := ExtractScriptInfo(c.Input)
+	t.Helper()
+
+	parserOpts := getParserOpts(f)
+	input := ExtractScriptInfo(c.Input, parserOpts)
 
 	var logBuf bytes.Buffer
-
-	logBuf.Grow(len(c.Input) * 20)
-
+	logBuf.Grow(len(c.Input) * 10)
 	logger := log.New(&logBuf, "", 0)
 
 	bqfmt := formatter.NewBigQueryFormatter(
 		formatter.WithLogger(logger),
-		formatter.WithParserOptions(getParserOpts(f)),
+		formatter.WithParserOptions(parserOpts),
 		formatter.WithPrintOptions(f.Setup.PrintOptions),
 	)
 
 	fmtScript, ferr := bqfmt.Format(c.Input)
-	formatted := ExtractScriptInfo(fmtScript)
+	formatted := ExtractScriptInfo(fmtScript, parserOpts)
 
 	fmtScriptAgain, ferr2 := bqfmt.Format(fmtScript)
-	formattedAgain := ExtractScriptInfo(fmtScriptAgain)
+	formattedAgain := ExtractScriptInfo(fmtScriptAgain, parserOpts)
 
 	cr := &CaseResult{
 		Case:           c,
@@ -71,18 +84,13 @@ func testCase(t *testing.T, f *TestDataFile, c *Case) bool {
 	msg := cr.String()
 
 	if assert.NoError(t, ferr, msg) && assert.NoError(t, ferr2, "[SECOND PASS] "+msg) {
-		// No error, continue to check formatted result.
 		if assert.Equal(t, c.Formatted, formatted.Script, msg) {
-			// Formatted result is as expected, now check the AST
-			// remains the same.
 			if assert.Equal(
 				t,
 				cr.Formatted.debugStringClean,
 				cr.FormattedAgain.debugStringClean,
 				"Debug string must match before and after formatting.\n\n"+msg,
 			) {
-				// Formatting is validated, now we check reformatting
-				// the formatted code will cause no changes.
 				if assert.Equal(
 					t,
 					cr.Formatted.Script,
@@ -98,21 +106,23 @@ func testCase(t *testing.T, f *TestDataFile, c *Case) bool {
 	return false
 }
 
-func getParserOpts(f *TestDataFile) *zetasql.ParserOptions {
+func getParserOpts(f *TestDataFile) *googlesql.ParserOptions {
 	parser := bqlang.DefaultParserOptions()
 
-	if f.Setup.LanguageOptions == nil {
+	if f.Setup == nil || f.Setup.LanguageOptions == nil {
 		return parser
 	}
 
-	lang := parser.LanguageOptions()
-	opts := f.Setup.LanguageOptions
-
-	if opts.DisableQualifyAsKeyword {
-		lang.EnableReservableKeyword("QUALIFY", false)
+	lang, err := parser.LanguageOptions()
+	if err != nil {
+		return parser
 	}
 
-	parser.SetLanguageOptions(lang)
+	if f.Setup.LanguageOptions.DisableQualifyAsKeyword {
+		_ = lang.EnableReservableKeyword("QUALIFY", false)
+	}
+
+	_ = parser.SetLanguageOptions(lang)
 
 	return parser
 }

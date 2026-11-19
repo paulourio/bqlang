@@ -2,15 +2,13 @@ package formatter
 
 import (
 	"strings"
-	"unicode/utf8"
 )
 
-// StringMapSet is a mapping for case-insensitive keys to case-sensitive
-// values.
-type StringMapSet map[string]string
+// stringMapSet maps case-insensitive keys to canonical case-sensitive values.
+type stringMapSet map[string]string
 
-func NewStringMapSet(keys ...string) StringMapSet {
-	s := make(StringMapSet, len(keys))
+func newStringMapSet(keys ...string) stringMapSet {
+	s := make(stringMapSet, len(keys))
 
 	for _, k := range keys {
 		s[strings.ToLower(k)] = k
@@ -19,15 +17,17 @@ func NewStringMapSet(keys ...string) StringMapSet {
 	return s
 }
 
-// Get returns the mapping for a key.  If the key is not present,
-// returns itself.
-func (s StringMapSet) Get(key string) string {
+// Get returns the mapping for a key, or key itself if absent.
+func (s stringMapSet) Get(key string) string {
 	return s.GetWithFallback(key, key)
 }
 
-// Get returns the mapping for a key.  If the key is not present,
-// returns the default/fallback value.
-func (s StringMapSet) GetWithFallback(key, def string) string {
+// GetWithFallback returns the mapping for a key, or def if absent.
+func (s stringMapSet) GetWithFallback(key, def string) string {
+	if s == nil {
+		return def
+	}
+
 	if val, ok := s[strings.ToLower(key)]; ok {
 		return val
 	}
@@ -37,15 +37,15 @@ func (s StringMapSet) GetWithFallback(key, def string) string {
 
 func viewString(s string, begin, end int) string {
 	n := len(s)
-	if n == 0 {
+	if n == 0 || begin < 0 || begin > end {
 		return ""
 	}
 
 	if begin >= n {
-		begin = n - 1
+		return ""
 	}
 
-	if end >= n {
+	if end > n {
 		end = n
 	}
 
@@ -53,6 +53,10 @@ func viewString(s string, begin, end int) string {
 }
 
 func viewStringAt(s string, pos int) rune {
+	if pos < 0 || pos >= len(s) {
+		return rune(0)
+	}
+
 	at := viewString(s, pos, pos+1)
 	if at == "" {
 		return rune(0)
@@ -61,25 +65,10 @@ func viewStringAt(s string, pos int) rune {
 	return []rune(at)[0]
 }
 
-// indexFunc returns the index into s of the first Unicode
-// code point satisfying f(c) equals truth, or -1 if none do.
+// indexFunc returns the byte index into s of the first Unicode code point
+// satisfying f(c) == truth, or -1 if none do.
 func indexFunc(s string, f func(rune) bool, truth bool) int {
 	for i, r := range s {
-		if f(r) == truth {
-			return i
-		}
-	}
-
-	return -1
-}
-
-// lastIndexFunc returns the index into s of the last
-// Unicode code point satisfying f(c) equals truth, or -1 if none do.
-func lastIndexFunc(s string, f func(rune) bool, truth bool) int {
-	for i := len(s); i > 0; {
-		r, size := utf8.DecodeLastRuneInString(s[0:i])
-		i -= size
-
 		if f(r) == truth {
 			return i
 		}

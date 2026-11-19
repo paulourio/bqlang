@@ -1,21 +1,121 @@
-// This file has as set of functions to help navigating on ZetaSQL's AST.
+// Package formatter formats GoogleSQL and BigQuery scripts, including comments
+// and Jinja2 templates.
 package formatter
 
 import (
+	"math"
 	"reflect"
 
-	"github.com/goccy/go-zetasql/ast"
+	"github.com/goccy/go-googlesql"
 )
 
-// selectChildrenOfType filters children nodes from a node according to a function.
-// The argument cap may be used to set an initial expectation for the
-// size of the resulting slice.
-func selectChildrenOfType[T ast.Node](n ast.Node, cap int) []T {
-	r := make([]T, 0, cap)
-	num := n.NumChildren()
+// nodeDefined returns whether an ASTNode interface is non-nil and wraps a
+// non-nil concrete pointer.
+func nodeDefined(n googlesql.ASTNode) bool {
+	if n == nil {
+		return false
+	}
 
-	for i := 0; i < num; i++ {
-		c := n.Child(i)
+	v := reflect.ValueOf(n)
+
+	return v.Kind() != reflect.Pointer || !v.IsNil()
+}
+
+func nodeKind(n googlesql.ASTNode) googlesql.ASTNodeKind {
+	if !nodeDefined(n) {
+		return googlesql.ASTNodeKindKUnknownAstNodeKind
+	}
+
+	k, err := n.NodeKind()
+	if err != nil {
+		return googlesql.ASTNodeKindKUnknownAstNodeKind
+	}
+
+	return k
+}
+
+func nodeParent(n googlesql.ASTNode) googlesql.ASTNode {
+	if !nodeDefined(n) {
+		return nil
+	}
+
+	parent, err := n.Parent()
+	if err != nil || !nodeDefined(parent) {
+		return nil
+	}
+
+	return parent
+}
+
+func nodeByteRange(n googlesql.ASTNode) (start, end int) {
+	if !nodeDefined(n) {
+		return 0, 0
+	}
+
+	loc, err := n.Location()
+	if err != nil || loc == nil {
+		return 0, 0
+	}
+
+	sp, err := loc.Start()
+	if err == nil && sp != nil {
+		b, berr := sp.GetByteOffset()
+		if berr == nil {
+			start = int(b)
+		}
+	}
+
+	ep, err := loc.End()
+	if err == nil && ep != nil {
+		b, berr := ep.GetByteOffset()
+		if berr == nil {
+			end = int(b)
+		}
+	}
+
+	return start, end
+}
+
+func nodeNumChildren(n googlesql.ASTNode) int {
+	if !nodeDefined(n) {
+		return 0
+	}
+
+	num, err := n.NumChildren()
+	if err != nil || num < 0 {
+		return 0
+	}
+
+	return int(num)
+}
+
+func nodeChild(n googlesql.ASTNode, idx int) googlesql.ASTNode {
+	if !nodeDefined(n) || idx < 0 || idx > math.MaxInt32 {
+		return nil
+	}
+
+	c, err := n.Child(int32(idx))
+	if err != nil || !nodeDefined(c) {
+		return nil
+	}
+
+	return c
+}
+
+// selectChildrenOfType extracts all direct children of n matching type T.
+func selectChildrenOfType[T googlesql.ASTNode](n googlesql.ASTNode) []T {
+	num := nodeNumChildren(n)
+	if num == 0 {
+		return nil
+	}
+
+	r := make([]T, 0, num)
+
+	for i := range num {
+		c := nodeChild(n, i)
+		if !nodeDefined(c) {
+			continue
+		}
 
 		if ct, ok := c.(T); ok {
 			r = append(r, ct)
@@ -25,55 +125,77 @@ func selectChildrenOfType[T ast.Node](n ast.Node, cap int) []T {
 	return r
 }
 
-func mustGetPivotExpressionList(n *ast.PivotClauseNode) *ast.PivotExpressionListNode {
-	el, ok := n.Child(0).(*ast.PivotExpressionListNode)
-	if !ok {
-		panic(&PrinterError{
-			Msg:  "invalid pivot clause structure",
-			Node: n,
-		})
+// functionCallArgs extracts expression arguments of an ASTFunctionCall,
+// skipping child 0 (which is the function name ASTPathExpression).
+func functionCallArgs(n *googlesql.ASTFunctionCall) []googlesql.ASTExpressionNode {
+	num := nodeNumChildren(n)
+	if num <= 1 {
+		return nil
 	}
 
-	return el
-}
+	args := make([]googlesql.ASTExpressionNode, 0, num-1)
 
-func mustGetPivotValueList(n *ast.PivotClauseNode) *ast.PivotValueListNode {
-	pv, ok := n.Child(2).(*ast.PivotValueListNode)
-	if !ok {
-		panic(&PrinterError{
-			Msg:  "invalid pivot clause structure",
-			Node: n,
-		})
+	for i := 1; i < num; i++ {
+		c := nodeChild(n, i)
+		if !nodeDefined(c) {
+			continue
+		}
+
+		isExpr, err := c.IsExpression()
+		if err != nil || !isExpr {
+			continue
+		}
+
+		if expr, ok := c.(googlesql.ASTExpressionNode); ok {
+			args = append(args, expr)
+		}
 	}
 
-	return pv
+	return args
 }
 
 // locationRange returns the minimum and maximum parse location range
-// that covers all nodes in the arguments.  If no nodes are passed,
-// the range [0, 0) is returned.
-func locationRange(nodes ...ast.Node) (start int, end int) {
-	for i, n := range nodes {
+// that covers all defined nodes in the arguments. If no defined nodes are
+// passed, [0, 0) is returned.
+func locationRange(nodes ...googlesql.ASTNode) (start, end int) {
+	initialized := false
+
+	for _, n := range nodes {
 		if !nodeDefined(n) {
 			continue
 		}
 
-		s := n.ParseLocationRange().Start().ByteOffset()
-		e := n.ParseLocationRange().End().ByteOffset()
+		s, e := nodeByteRange(n)
 
-		if i == 0 || s < start {
+		if !initialized || s < start {
 			start = s
 		}
 
-		if i == 0 || e > end {
+		if !initialized || e > end {
 			end = e
+		}
+
+		initialized = true
+	}
+
+	return start, end
+}
+
+func walkAST(n googlesql.ASTNode, cb func(googlesql.ASTNode) error) error {
+	if !nodeDefined(n) {
+		return nil
+	}
+
+	if err := cb(n); err != nil {
+		return err
+	}
+
+	num := nodeNumChildren(n)
+	for i := range num {
+		if err := walkAST(nodeChild(n, i), cb); err != nil {
+			return err
 		}
 	}
 
-	return
-}
-
-// nodeDefined returns whether a node is not nil.
-func nodeDefined(n ast.Node) bool {
-	return n != nil && !reflect.ValueOf(n).IsNil()
+	return nil
 }

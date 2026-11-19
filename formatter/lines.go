@@ -1,17 +1,18 @@
-// Functions to map on which lines a node spans.
 package formatter
 
 import (
 	"sort"
 	"strings"
 
-	"github.com/goccy/go-zetasql/ast"
+	"github.com/goccy/go-googlesql"
 )
 
+// LineTracker indexes newline byte offsets to map byte positions to 0-based line numbers.
 type LineTracker struct {
 	StartPos []int
 }
 
+// NewLineTracker builds a LineTracker for input.
 func NewLineTracker(input string) *LineTracker {
 	t := &LineTracker{}
 	t.initialize(input)
@@ -20,23 +21,20 @@ func NewLineTracker(input string) *LineTracker {
 }
 
 // Span returns the range of lines a node spans.
-func (t *LineTracker) Span(n ast.Node) (start int, end int) {
-	p := n.ParseLocationRange()
-	start = t.LineOf(p.Start().ByteOffset())
-	end = t.LineOf(p.End().ByteOffset())
+func (t *LineTracker) Span(n googlesql.ASTNode) (start, end int) {
+	b, e := nodeByteRange(n)
 
-	return
+	return t.LineOf(b), t.LineOf(e)
 }
 
-// SpanPos returns the line a specific byte offset is located in.
+// LineOf returns the 0-based line index a specific byte offset is located in.
 func (t *LineTracker) LineOf(b int) int {
 	return sort.Search(len(t.StartPos), func(i int) bool {
 		return t.StartPos[i] >= b
 	})
 }
 
-// NextLineBreak returns the byte offset of the next line break or
-// -1 if not found.
+// NextLineBreak returns the byte offset of the next line break or -1 if none.
 func (t *LineTracker) NextLineBreak(offset int) int {
 	i := t.LineOf(offset)
 
@@ -52,8 +50,8 @@ func (t *LineTracker) initialize(s string) {
 	t.StartPos = make([]int, n)
 	offset := 0
 
-	for i := 0; i < n; i++ {
-		pos := strings.Index(s, "\n")
+	for i := range n {
+		pos := strings.IndexByte(s, '\n')
 		t.StartPos[i] = offset + pos
 		s = s[pos+1:]
 		offset += pos + 1

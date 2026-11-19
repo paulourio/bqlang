@@ -1,36 +1,91 @@
-// Functions to print types and schemas.
 package formatter
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/goccy/go-zetasql/ast"
+	"github.com/goccy/go-googlesql"
 )
 
-func (p *Printer) VisitArrayColumnSchema(n *ast.ArrayColumnSchemaNode, d Data) {
-	p.moveBefore(n)
-	p.visitArrayColumnSchema(n.ColumnSchemaNode, d)
+func (p *printer) visitArrayColumnSchema(n *googlesql.ASTArrayColumnSchema, d printerData) {
+	p.visitElementTypeColumnSchema("ARRAY", n, d)
 }
 
-func (p *Printer) VisitArrayType(n *ast.ArrayTypeNode, d Data) {
+func (p *printer) visitRangeColumnSchema(n *googlesql.ASTRangeColumnSchema, d printerData) {
+	p.visitElementTypeColumnSchema("RANGE", n, d)
+}
+
+func (p *printer) visitElementTypeColumnSchema(
+	kw string,
+	n googlesql.ASTElementTypeColumnSchemaNode,
+	d printerData,
+) {
+	p.moveBefore(n)
+
+	pp := p.nest()
+	simple := isSimpleColumnSchema(n)
+
+	elem, _ := n.ElementSchema()
+	p2 := pp.nest()
+	p2.accept(elem, d)
+	typ := p2.unnestLeft()
+
+	collate, _ := n.Collate()
+	attrs, _ := n.Attributes()
+	opts, _ := n.OptionsList()
+
+	if simple {
+		pp.print(p.keyword(kw) + "<" + typ + ">")
+		pp.accept(collate, d)
+		pp.accept(attrs, d)
+		pp.accept(opts, d)
+	} else {
+		p1 := pp.nest()
+		p1.println(p1.keyword(kw) + "<")
+		p1.incDepth()
+		p1.println(typ)
+		p1.decDepth()
+		p1.print(">")
+		p1.accept(collate, d)
+		p1.accept(attrs, d)
+		p1.accept(opts, d)
+		pp.print(p1.unnestLeft())
+	}
+
+	p.print(pp.unnestLeft())
+	p.movePast(n)
+}
+
+func (p *printer) visitArrayType(n *googlesql.ASTArrayType, d printerData) {
+	et, _ := n.ElementType()
+	collate, _ := n.Collate()
+	p.visitParameterizedContainerType("ARRAY", n, et, collate, d)
+}
+
+func (p *printer) visitRangeType(n *googlesql.ASTRangeType, d printerData) {
+	et, _ := n.ElementType()
+	collate, _ := n.Collate()
+	p.visitParameterizedContainerType("RANGE", n, et, collate, d)
+}
+
+func (p *printer) visitParameterizedContainerType(
+	kw string,
+	n googlesql.ASTNode,
+	et googlesql.ASTTypeNode,
+	collate *googlesql.ASTCollate,
+	d printerData,
+) {
 	pp := p.nest()
 	pp.moveBefore(n)
 
-	simple := true
-
-	if et := n.ElementType(); et != nil {
-		simple = isSimpleType(et)
-	}
-
+	simple := isSimpleType(et)
 	pp2 := pp.nest()
-	pp2.accept(n.ElementType(), d)
+	pp2.accept(et, d)
 
 	if simple {
 		elemType := strings.Trim(pp2.String(), "\n")
-		pp.print(pp.keyword("ARRAY") + "<" + elemType + ">")
+		pp.print(pp.keyword(kw) + "<" + elemType + ">")
 	} else {
-		pp.println(pp.keyword("ARRAY") + "<")
+		pp.println(pp.keyword(kw) + "<")
 		pp.incDepth()
 		pp.print(pp2.unnest())
 		pp.println("")
@@ -38,144 +93,94 @@ func (p *Printer) VisitArrayType(n *ast.ArrayTypeNode, d Data) {
 		pp.print(">")
 	}
 
-	pp.accept(n.Collate(), d)
+	pp.accept(collate, d)
 	p.print(pp.String())
 }
 
-func (p *Printer) visitArrayColumnSchema(n *ast.ColumnSchemaNode, d Data) {
-	p.moveBefore(n)
-
-	// Here we may have a child that is a StructColumnSchema.
+func (p *printer) visitMapType(n *googlesql.ASTMapType, d printerData) {
 	pp := p.nest()
-	simple := isSimpleColumnSchema(n)
+	pp.moveBefore(n)
 
-	p2 := pp.nest()
-	p2.accept(n.Child(0), d)
+	kt, _ := n.KeyType()
+	vt, _ := n.ValueType()
+	collate, _ := n.Collate()
 
-	typ := p2.unnestLeft()
-
-	if simple {
-		pp.print(p.keyword("ARRAY") + "<" + typ + ">")
-	} else {
-		p1 := pp.nest()
-		p1.println(p1.keyword("ARRAY") + "<")
-		p1.incDepth()
-		p1.println(typ)
-		p1.decDepth()
-		p1.print(">")
-		p1.accept(n.Collate(), d)
-		p1.accept(n.Attributes(), d)
-		p1.accept(n.OptionsList(), d)
-		pp.print(p1.unnestLeft())
-	}
-
-	p.print(pp.unnestLeft())
+	keyStr := strings.Trim(pp.toString(kt, d), "\n")
+	valStr := strings.Trim(pp.toString(vt, d), "\n")
+	pp.print(pp.keyword("MAP") + "<" + keyStr + ", " + valStr + ">")
+	pp.accept(collate, d)
+	p.print(pp.String())
 }
 
-func (p *Printer) VisitColumnDefinition(n *ast.ColumnDefinitionNode, d Data) {
+func (p *printer) visitColumnDefinition(n *googlesql.ASTColumnDefinition, d printerData) {
 	p.moveBefore(n)
-	p.accept(n.Name(), d)
+
+	name, _ := n.Name()
+	schema, _ := n.Schema()
+
+	p.accept(name, d)
 	p.print("\v")
-	p.acceptNestedString(n.Schema(), d)
+	p.acceptNestedString(schema, d)
 }
 
-func (p *Printer) VisitColumnSchema(n *ast.ColumnSchemaNode, d Data) {
-	p.moveBefore(n)
-
-	// In ZetaSQL, ASTColumnSchema is an abstract class, and its
-	// extensions are
-	//
-	//   - ASTArrayColumnSchema
-	//   - ASTInferredTypeColumnSchema
-	//   - ASTSimpleColumnSchema
-	//   - ASTStructColumnSchema
-	//
-	// However, in Go bindings, we have a struct ast.ColumnSchemaNode
-	// and ast.Nodes's of kind ast.ArrayColumnSchema,
-	// ast.InferredTypeColumnSchema, ast.StructColumnSchema, and
-	// ast.StructColumnSchema are mapped to *ast.ColumnSchemaNode.
-	//
-	// Effectively, we cannot reach any of ast.ArrayColumnSchemaNode,
-	// ast.InferredTypeColumnSchemaNode, ast.StructColumnSchemaNode,
-	// or ast.ArrayColumnSchemaNode by walking with Child() methods.
-	//
-	// Issue: https://github.com/goccy/go-zetasql/issues/30
-	//
-	// We circumvent this issue by checking the node's kind and handling
-	// children accordingly.
-
-	switch n.Kind() {
-	case ast.ArrayColumnSchema:
-		p.visitArrayColumnSchema(n, d)
-	case ast.InferredTypeColumnSchema:
-		p.visitInferredTypeColumnSchema(n, d)
-	case ast.SimpleColumnSchema:
-		p.visitSimpleColumnSchema(n, d)
-	case ast.StructColumnSchema:
-		p.visitStructColumnSchema(n, d)
-	default:
-		panic(&PrinterError{
-			Msg:  "unexpected kind for column schema node",
-			Node: n,
-		})
-	}
-
-	p.movePast(n)
-}
-
-func (p *Printer) visitInferredTypeColumnSchema(n *ast.ColumnSchemaNode, d Data) {
+func (p *printer) visitColumnSchema(n *googlesql.ASTColumnSchema, _ printerData) {
 	p.addError(&PrinterError{
-		Msg:  "not implemented",
-		Node: n,
+		Msg:   "unexpected abstract column schema node",
+		Node:  n,
+		Input: &p.input,
 	})
 }
 
-func (p *Printer) visitSimpleColumnSchema(n *ast.ColumnSchemaNode, d Data) {
+func (p *printer) visitInferredTypeColumnSchema(n *googlesql.ASTInferredTypeColumnSchema, d printerData) {
+	p.moveBefore(n)
+	attrs, _ := n.Attributes()
+	opts, _ := n.OptionsList()
+
+	p.accept(attrs, d)
+	p.accept(opts, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitSimpleColumnSchema(n *googlesql.ASTSimpleColumnSchema, d printerData) {
 	p.moveBefore(n)
 
+	typeName, _ := n.TypeName()
+	tp, _ := n.TypeParameters()
+	collate, _ := n.Collate()
+	attrs, _ := n.Attributes()
+	opts, _ := n.OptionsList()
+
 	pp := p.nest()
-	pp.print(p.typename(pp.toString(n.Child(0), d)))
-	pp.accept(n.TypeParameters(), d)
-	pp.accept(n.Collate(), d)
-	pp.accept(n.Attributes(), d)
-	pp.accept(n.OptionsList(), d)
+	pp.print(p.typename(pp.toString(typeName, d)))
+	pp.accept(tp, d)
+	pp.accept(collate, d)
+	pp.accept(attrs, d)
+	pp.accept(opts, d)
 
 	p.print(pp.unnest())
 	p.movePast(n)
 }
 
-func (p *Printer) VisitSimpleColumnSchema(n *ast.SimpleColumnSchemaNode, d Data) {
+func (p *printer) visitSimpleType(n *googlesql.ASTSimpleType, d printerData) {
 	p.moveBefore(n)
 
-	pp := p.nest()
-	pp.print(p.typename(pp.toString(n.Child(0), d)))
-	pp.accept(n.TypeParameters(), d)
-	pp.accept(n.Collate(), d)
-	pp.accept(n.Attributes(), d)
-	pp.accept(n.OptionsList(), d)
+	typeName, _ := n.TypeName()
+	tp, _ := n.TypeParameters()
+	collate, _ := n.Collate()
 
-	p.print(pp.unnest())
-	p.movePast(n)
+	p.print(p.typename(p.toString(typeName, d)))
+	p.accept(tp, d)
+	p.accept(collate, d)
 }
 
-func (p *Printer) VisitSimpleType(n *ast.SimpleTypeNode, d Data) {
+func (p *printer) visitStructColumnSchema(n *googlesql.ASTStructColumnSchema, d printerData) {
 	p.moveBefore(n)
-	// n.TypeName() does not return the actual type name.  Instead,
-	// we render the name which is the node's first child.
-	p.print(p.typename(p.toString(n.Child(0), d)))
-	p.accept(n.TypeParameters(), d)
-	p.accept(n.Collate(), d)
-}
 
-func (p *Printer) visitStructColumnSchema(n *ast.ColumnSchemaNode, d Data) {
 	pp := p.nest()
 	simple := isSimpleColumnSchema(n)
-
 	p1 := pp.nest()
 
-	num := n.NumChildren()
-	fields := selectChildrenOfType[*ast.StructColumnFieldNode](n, num)
-
+	fields := selectChildrenOfType[*googlesql.ASTStructColumnField](n)
 	for i, f := range fields {
 		if i > 0 {
 			p1.println(",")
@@ -194,29 +199,32 @@ func (p *Printer) visitStructColumnSchema(n *ast.ColumnSchemaNode, d Data) {
 		pp.print(pp.keyword("STRUCT") + "<" + p1.unnestLeft() + ">")
 	}
 
-	attrs := selectChildrenOfType[*ast.ColumnAttributeListNode](n, num)
-	if len(attrs) > 0 {
-		printNestedWithSep(pp, attrs, d, "")
-	}
+	collate, _ := n.Collate()
+	attrs, _ := n.Attributes()
+	opts, _ := n.OptionsList()
+
+	pp.accept(collate, d)
+	pp.accept(attrs, d)
+	pp.accept(opts, d)
 
 	p.print(pp.unnestLeft())
+	p.movePast(n)
 }
 
-func (p *Printer) VisitStructColumnSchema(n *ast.StructColumnSchemaNode, d Data) {
-	p.visitStructColumnSchema(n.ColumnSchemaNode, d)
-}
-
-func (p *Printer) VisitStructField(n *ast.StructFieldNode, d Data) {
+func (p *printer) visitStructField(n *googlesql.ASTStructField, d printerData) {
 	p.moveBefore(n)
-	p.accept(n.Name(), d)
-	p.acceptNested(n.Type(), d)
+	name, _ := n.Name()
+	typ, _ := n.Type()
+
+	p.accept(name, d)
+	p.acceptNested(typ, d)
 }
 
-func (p *Printer) VisitStructType(n *ast.StructTypeNode, d Data) {
+func (p *printer) visitStructType(n *googlesql.ASTStructType, d printerData) {
 	pp := p.nest()
 	pp.moveBefore(n)
 
-	fields := n.StructFields()
+	fields := selectChildrenOfType[*googlesql.ASTStructField](n)
 	simple := allTrue(mapIsSimpleStructFields(fields))
 	pp2 := pp.nest()
 
@@ -246,61 +254,40 @@ func (p *Printer) VisitStructType(n *ast.StructTypeNode, d Data) {
 		pp.print(">")
 	}
 
-	pp.accept(n.TypeParameters(), d)
-	pp.accept(n.Collate(), d)
+	tp, _ := n.TypeParameters()
+	collate, _ := n.Collate()
+
+	pp.accept(tp, d)
+	pp.accept(collate, d)
 	p.print(pp.unnest())
 }
 
-func (p *Printer) VisitTemplatedParameterType(n *ast.TemplatedParameterTypeNode, d Data) {
+func (p *printer) visitTemplatedParameterType(n *googlesql.ASTTemplatedParameterType, _ printerData) {
 	p.moveBefore(n)
+	kind, _ := n.Kind()
 
-	switch n.TemplatedKind() {
-	case ast.TemplatedUninitialized:
-		p.print(p.keyword("<UNINITIALIZED TEMPLATED KIND>"))
-	case ast.TemplatedAnyType:
-		p.print(p.keyword("ANY TYPE"))
-	case ast.TemplatedAnyProto:
-		p.print(p.keyword("ANY PROTO"))
-	case ast.TemplatedAnyEnum:
-		p.print(p.keyword("ANY ENUM"))
-	case ast.TemplatedAnyStruct:
-		p.print(p.keyword("ANY STRUCT"))
-	case ast.TemplatedAnyArray:
-		p.print(p.keyword("ANY ARRAY"))
-	case ast.TemplatedAnyTable:
-		p.print(p.keyword("ANY TABLE"))
+	switch kind {
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindUninitialized:
+		p.print(p.typename("ANY TYPE"))
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyType:
+		p.print(p.typename("ANY TYPE"))
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyProto:
+		p.print(p.typename("ANY PROTO"))
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyEnum:
+		p.print(p.typename("ANY ENUM"))
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyStruct:
+		p.print(p.typename("ANY STRUCT"))
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyArray:
+		p.print(p.typename("ANY ARRAY"))
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyTable:
+		p.print(p.typename("ANY TABLE"))
 	}
 
 	p.movePast(n)
 }
 
-// This is a patch to format TemplatedParameterTypes and Table types,
-// which are not accessible in go-zetasql for now.
-func (p *Printer) patchedVisitTemplatedParameterType(n *ast.FunctionParameterNode) {
-	input := p.nodeErasedInput(n)
-	inputUpcase := strings.ToUpper(input)
-	field := p.toString(n.Name(), nil)
-
-	i := strings.Index(inputUpcase, strings.ToUpper(field))
-
-	// We just print whatever we find after the field name as a typename.
-	p.print(p.typename(strings.TrimSpace(input[i+len(field)+1:])))
-
-	// Check if this is one of the expected bug.
-	types := []string{"ANY TYPE", "ANY PROTO", "ANY ENUM", "ANY STRUCT",
-		"ANY ARRAY", "ANY TABLE", "TABLE"}
-
-	for _, candidate := range types {
-		if strings.Contains(inputUpcase, candidate) {
-			return
-		}
-	}
-
-	panic(fmt.Sprintf("Unsupported type in input %#v", input))
-}
-
-func (p *Printer) VisitTVFSchema(n *ast.TVFSchemaNode, d Data) {
-	cols := n.Columns()
+func (p *printer) visitTVFSchema(n *googlesql.ASTTVFSchema, d printerData) {
+	cols := selectChildrenOfType[*googlesql.ASTTVFSchemaColumn](n)
 	simple := len(cols) <= 4 && allTrue(mapIsSimpleTVFSchema(cols))
 
 	pp := p.nest()
@@ -320,29 +307,51 @@ func (p *Printer) VisitTVFSchema(n *ast.TVFSchemaNode, d Data) {
 		p1.accept(e, d)
 	}
 
-	pp.print(pp.keyword("RETURNS"))
+	parent := nodeParent(n)
+	isReturnSchema := nodeDefined(parent) && nodeKind(parent) == googlesql.ASTNodeKindAstCreateTableFunctionStatement
+
+	if isReturnSchema {
+		pp.print(pp.keyword("RETURNS"))
+	}
 
 	if simple {
 		pp.print(pp.keyword("TABLE") + "<" + p1.unnestLeft() + ">")
 	} else {
-		pp.println("")
-		pp.incDepth()
+		if isReturnSchema {
+			pp.println("")
+			pp.incDepth()
+		}
+
 		pp.println(pp.keyword("TABLE") + "<")
 		pp.incDepth()
 		pp.println(p1.unnestLeft())
 		pp.decDepth()
 		pp.print(">")
-		pp.incDepth()
-		pp.decDepth()
+
+		if isReturnSchema {
+			pp.decDepth()
+		}
 	}
 
 	p.print(pp.unnestLeft())
 }
 
-func (p *Printer) VisitTVFSchemaColumn(n *ast.TVFSchemaColumnNode, d Data) {
+func (p *printer) visitTVFSchemaColumn(n *googlesql.ASTTVFSchemaColumn, d printerData) {
 	pp := p.nest()
 	pp.moveBefore(n)
-	pp.accept(n.Name(), d)
-	pp.acceptNested(n.Type(), d)
+	name, _ := n.Name()
+	typ, _ := n.Type()
+
+	pp.accept(name, d)
+	pp.acceptNested(typ, d)
 	p.print(pp.String())
+}
+
+func (p *printer) visitTypeParameterList(n *googlesql.ASTTypeParameterList, d printerData) {
+	p.moveBefore(n)
+	p.print("(")
+
+	params := selectChildrenOfType[googlesql.ASTLeafNode](n)
+	printNestedWithSep(p, params, d, ",")
+	p.print(")")
 }

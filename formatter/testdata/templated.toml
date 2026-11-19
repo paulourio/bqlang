@@ -5,7 +5,7 @@ soft_max_cols = 80
 newline_before_clause = true
 align_logical_with_clauses = true
 column_list_trailing_comma = "AUTO"
-indentation = 1
+indentation = 2
 min_joins_to_separate_in_blocks = 2
 function_name_style = "UPPER_CASE"
 identifier_style = "AS_IS"
@@ -27,51 +27,75 @@ SELECT *  {# comment #}
   FROM t
 """
 
-# [[cases]]
-# input = """
-# {% set = value -%}
+[[cases]]
+description = "7-byte Jinja2 comment does not collide with 7-space SELECT indentation"
+input = """
+{# x #}
+select col_a, col_b from my_table
+"""
+formatted = """
+{# x #}
+SELECT col_a,
+       col_b
+  FROM my_table
+"""
 
-# {{  statement  }}
+[[cases]]
+description = "Short template variables shorter than internal placeholder"
+input = """
+select {{ a }}, {{ b }} from {{ t }} where x = {{ v }} -- keep comment
+"""
+formatted = """
+SELECT {{ a }},
+       {{ b }}
+  FROM {{ t }}
+ WHERE x = {{ v }}  -- keep comment
+"""
 
-# with t as (
-# {% for a in list %}
-#   {% for b in list %}
-#     SELECT 1
-#     {% if not loop.last %}  {% endif %}
-#   {% endfor -%}
-#   {%- if not loop.last %} value {% else %} {% endif %}
-# {% endfor %}
-# )
-# select case when coalesce(a.key, /* param => */ 'abc')   = b then '2' else '3' end
-# from {{ abc }}
-# """
-# dump = """
-# Script [6-155]
+[[cases]]
+description = "Standalone set, standalone variable, and CTE for-loop"
+input = """
+{% set x = value -%}
 
-# """
+{{ statement }}
 
-# [[cases]]
-# input = """{% set = value.2 -%}
-# {% set = value.2 -%}
-# declare g_bookmark timestamp default current_timestmap();
+with t as (
+{% for a in list %}
+  SELECT {{ a }}
+  {% if not loop.last %} UNION ALL {% endif %}
+{% endfor %}
+)
+select case when coalesce(a.key, 'abc') = b then '2' else '3' end
+from {{ abc }}
+"""
+formatted = """
+{% set x = value -%}
 
-# select concat(p.key, '00') as key,
-#        min(date_trunc(day, month)  )as month,
-#       array_agg(
-#          x having min {{ my_constant }} clamped between 1 and 2
-#          limit 1 offset @my_param       ) as a
-#   FROM {{ table_id(foo.bar)|id }}
-#        pivot( max({{ col }}) for x in ('a', 'b', 'c'))
-#        where true
-# qualify row_number() over ( /* partition by 1 */ order by rand()  ) = 1
-# ;
+{{ statement }}
 
+WITH
+t AS (
+{% for a in list %}
+  SELECT {{ a }}
+  {% if not loop.last %} UNION ALL {% endif %}
+{% endfor %}
+)
+SELECT CASE
+         WHEN COALESCE(a.key, 'abc') = b THEN '2'
+                                         ELSE '3'
+       END
+  FROM {{ abc }};
+"""
 
-# merge into t using d on t.key=b.key
-# when matched and t.hash_diff != d.hashdiff then update set value = d.value,
-# hash_diff = d.hash_diff, updated_at = d.updated_at;
-
-# """
-# formatted = """
-
-# """
+[[cases]]
+description = "If / elif / else template blocks with SQL operators"
+input = """
+select id,
+       {% if mode == 1 %} a % 2 {% elif mode == 2 %} b != 0 {% else %} c + 1 {% endif %} as val
+  from {{ source('raw', 'events') }}
+"""
+formatted = """
+SELECT id,
+       {% if mode == 1 %} a % 2 {% elif mode == 2 %} b != 0 {% else %} c + 1 {% endif %} AS val
+  FROM {{ source('raw', 'events') }}
+"""

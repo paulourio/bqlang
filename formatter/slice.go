@@ -9,15 +9,3 @@ func allTrue(args []bool) bool {
 
 	return true
 }
-
-func sliceCountTrue(args []bool) int {
-	i := 0
-
-	for _, a := range args {
-		if a {
-			i++
-		}
-	}
-
-	return i
-}
