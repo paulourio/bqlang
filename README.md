@@ -1,176 +1,158 @@
-# bqlang - tooling for ZetaSQL
+# bqlang: Pure-Go GoogleSQL and BigQuery Tooling
 
-I develop this tooling mainly for use with BigQuery.
+The `bqlang` module provides a deterministic SQL formatter (`bqfmt`), an AST JSON exporter (`bqdump`), and Go library packages for GoogleSQL and BigQuery scripts. The parser runs on [`github.com/goccy/go-googlesql`](https://github.com/goccy/go-googlesql), which compiles the upstream C++ GoogleSQL parser to pure Go ahead of time via `wasm2go`. Building and running `bqlang` requires only a standard Go toolchain without `cgo`, Bazel, or C++ system libraries.
 
-## Formatter - bqfmt
+Because GoogleSQL discards comments during AST construction and rejects unrendered template tags, `bqlang` pairs the GoogleSQL parser with a dedicated Gocc scanner and parser in `extensions/`. Before parsing SQL, the formatter extracts line comments, block comments, and Jinja2 template constructs in a single pass, substitutes recoverable SQL placeholders for template blocks, aligns tokens through nested `text/tabwriter` cells, and re-injects comments and original template expressions at their tracked source coordinates.
 
-### Status support
+## Installation
 
-#### Supported features
+Install both command-line utilities with Go:
 
-- [x] Qualify
-- [x] `IS DISTINCT FROM`
-- [x] Consecutive `ON ...`
-- [x] `JSON` type
+```bash
+go install github.com/paulourio/bqlang/cmd/bqfmt@latest
+go install github.com/paulourio/bqlang/cmd/bqdump@latest
+```
 
-    The `JSON` type is partially supported is select column lists, but not in other places.
+To add the library packages to an existing Go module:
 
-- [x] Allow dashes in table name (ie, `FROM project-name.dataset.table` without escaping)
-- [x] Create view with column list (`CREATE VIEW vw(field1, field2)`)
-- [x] Remote Functions
+```bash
+go get github.com/paulourio/bqlang@latest
+```
 
-#### Types
+## Command-Line Tools
 
-- [x] Simple types:  BIGNUMERIC, BOOL, BYTES, BYTES, DATE, DATETIME, FLOAT64, INT64, INTERVAL, NUMERIC, STRING, TIME, TIMESTAMP
-- [x] ARRAY
-- [x] STRUCT
-- [x] GEOGRAPHY
-- [x] Templated types
+### `bqfmt`
 
-    Not supported ideally, but it works on my machine.
-    Currently, go-zetasql has a bug to parse these types but we have a workaround to make it work.
+The `bqfmt` CLI formats GoogleSQL and BigQuery scripts. Every formatting run verifies two invariants before emitting output: re-parsing must succeed without syntax errors, and a second formatting pass must produce byte-identical SQL.
 
-#### Literals
+```bash
+# Format standard input to standard output
+bqfmt < query.sql
 
-All literals for all types are supported.
+# List files whose formatting differs from bqfmt output
+bqfmt -l queries/
 
-#### Comments
+# Format files in place across a directory tree
+bqfmt -w queries/
 
-Google's ZetaSQL parser ignores comments.
-Current experimental implementation of `bqfmt` tries the best to format maintaining comments at the closest position possible from the input.
-Formatting without comment is always idempotent, but formatting code preserving comments is not guaranteed to be idempotent.
+# Format with an explicit configuration file
+bqfmt -config .bqfmt.toml -w queries/
+```
 
-#### Expressions
+When given a directory path, `bqfmt` walks the directory tree and processes files ending in `.sql`, `.bql`, `.sql.j2`, and `.bql.j2`.
 
-- [x] Field access operator (`expression.fieldname[...]`)
-- [x] Array subscript operator (`array_expression[array_subscript_specifier]`)
-- [x] JSON subscript operator (`json_expression[array_element_id]`, `json_expression[field_name]`)
-- [x] Arithmetic operators (`X + Y`, `X - Y`, `X * Y`, `X / Y`, `+X`, `-X`).
-- [x] Bitwise operators (`~X`,  `X | Y`, `X ^ Y`, `X & Y`, `X << Y`, `X >> Y`)
-- [x] Comparison operators (`=`, `!=`, `<>`, `>`, `<`, `>=`, `<=`, `[NOT] LIKE`, `IS [NOT]`, `IN`, `IS [NOT] DISTINCT FROM`).
-- [x] Conditional expressions (`CASE`, `COALESCE`, `IF`, `IFNULL`, `NULLIF`, )
-- [x] Logical operators (`AND`, `OR`, `NOT`)
-- [x] EXISTS operator (`EXIST(subquery)`)
-- [x] IN operator (`search_value [NOT] IN value_set`)
-- [x] IS operator
-- [x] Concatenation operator `X || Y`
-- [x] Function calls (SQL functions, UDFs, named arguments)
-- [x] Aggregate function calls (`function_name([DISTINCT] args [...modifiers]) OVER over_clause`)
-- [x] Window function calls (`function_name([argument_list]) OVER over_clause`)
-- [x] Subqueries
+| Flag | Description |
+| :--- | :--- |
+| `-l` | Print paths of files whose formatting differs from `bqfmt` output. |
+| `-w` | Write formatted output back to source files instead of `stdout`. |
+| `-config <path>` | Read print options from the specified TOML file. |
+| `-debug` | Write formatter trace diagnostics to `stderr`. |
 
-#### Statements
+#### Configuration (`.bqfmt.toml`)
 
-##### Data Definition Language (DDL)
+When `-config` is omitted, `bqfmt` searches upward from each target file's directory (or the current working directory when reading from standard input) to the filesystem root for `.bqfmt.toml`.
 
-- Statements
-    - [x] CREATE SCHEMA
-    - [x] CREATE TABLE
-    - [x] CREATE TABLE LIKE
-    - [x] CREATE TABLE COPY
-    - [x] CREATE SNAPSHOT TABLE
-    - [x] CREATE TABLE CLONE
-    - [x] CREATE VIEW
-    - [ ] CREATE VIEW defined with column list with options (`CREATE VIEW t(field OPTIONS(...))`) - not supported by go-zetasql
-    - [x] CREATE MATERIALIZED VIEW
-    - [x] CREATE EXTERNAL TABLE
-    - [x] CREATE EXTERNAL TABLE WITH CONNECTION
-    - [x] CREATE FUNCTION
-    - [x] CREATE TABLE FUNCTION
-    - [x] CREATE PROCEDURE
-    - [x] CREATE ROW ACCESS POLICY
-    - [ ] CREATE CAPACITY - not supported by go-zetasql
-    - [ ] CREATE RESERVATION - not supported by go-zetasql
-    - [ ] CREATE ASSIGNMENT - not supported by go-zetasql
-    - [ ] CREATE SEARCH INDEX - not supported by go-zetasql
-    - [x] ALTER SCHEMA
-    - [x] ALTER TABLE
-    - [x] ALTER COLUMN
-    - [x] ALTER VIEW
-    - [x] ALTER MATERIALIZED VIEW
-    - [ ] ALTER ORGANIZATION - not supported by go-zetaslq
-    - [ ] ALTER PROJECT - not supported by go-zetaslq
-    - [ ] ALTER BI_CAPACITY - not supported by go-zetaslq
-    - [ ] ALTER CAPACITY - not supported by go-zetaslq
-    - [x] DROP SCHEMA
-    - [x] DROP TABLE
-    - [x] DROP SNAPSHOT TABLE
-    - [x] DROP EXTERNAL TABLE
-    - [x] DROP VIEW
-    - [x] DROP MATERIALIZED VIEW
-    - [x] DROP FUNCTION
-    - [x] DROP TABLE FUNCTION
-    - [x] DROP PROCEDURE
-    - [x] DROP ROW ACCESS POLICY
-    - [ ] DROP CAPACITY - not supported by go-zetasql
-    - [ ] DROP RESERVATION - not supported by go-zetasql
-    - [ ] DROP ASSIGNMENT - not supported by go-zetasql
-    - [x] DROP SEARCH INDEX
+Configuration files support named style profiles with optional `regex` or `include` filename filters, as well as flat top-level option tables:
 
-#### Data Manipulation Language (DML)
+```toml
+default_style = "default"
 
-- [x] INSERT
-- [x] DELETE
-- [x] TRUNCATE TABLE
-- [x] UPDATE
-- [x] MERGE
+[[styles]]
+name = "default"
 
-#### Data Control Language (DCL)
+[styles.options]
+soft_max_cols = 120
+newline_before_clause = true
+align_logical_with_clauses = true
+align_trailing_comments = true
+column_list_trailing_comma = "AUTO"
+indentation = 2
+indent_case_when = true
+indent_with_clause = true
+indent_with_entries = false
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+max_params_for_single_line_function = 2
+function_catalog = "BIGQUERY"
+builtin_function_name_style = "UPPER_CASE"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+pseudo_column_style = "UPPER_CASE"
+table_name_style = "AS_IS"
+query_parameter_style = "AS_IS"
+system_variable_style = "AS_IS"
+hex_style = "UPPER_CASE"
+numeric_style = "LOWER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+```
 
-- [ ] GRANT
-- [ ] REVOKE
+### `bqdump`
 
-#### Procedural language
+The `bqdump` CLI parses GoogleSQL input and serializes the concrete syntax tree as indented JSON, including node kinds, byte offsets, debug strings, and statement classification flags.
 
-- [x] DECLARE
-- [x] SET
-- [x] EXECUTE IMMEDIATE
-- [x] BEGIN...END
-- [x] BEGIN...EXCEPTION...END
-- [ ] CASE [search_expression]
-- [x] IF
-- [ ] Labels
-- [ ] Loops
-    - [ ] LOOP
-    - [ ] REPEAT
-    - [ ] WHILE
-    - [ ] BREAK
-    - [ ] LEAVE
-    - [ ] CONTINUE
-    - [ ] ITERATE
-    - [ ] FOR...IN
-- [x] Transactions
-    - [x] BEGIN TRANSACTION
-    - [x] COMMIT TRANSACTION
-    - [x] ROLLBACK TRANSACTION
-- [ ] RAISE
-- [ ] RETURN
-- [x] CALL
+```bash
+# Dump the full ASTScript tree from standard input
+bqdump -mode script < query.sql
 
-#### Export and load statements
+# Dump each top-level statement as a separate JSON object
+bqdump -mode statement -file script.sql
+```
 
-- [ ] EXPORT DATA
-- [ ] LOAD DATA
+## Go Library Usage
 
-#### Debugging statements
+Format a SQL script directly in Go with `formatter.Format` or configure a reusable `formatter.SQLFormatter`:
 
-- [ ] ASSERT
+```go
+package main
 
-#### BigQuery ML SQL
+import (
+	"fmt"
+	"log"
 
-- [ ] CREATE MODEL
+	"github.com/paulourio/bqlang/formatter"
+)
 
-#### Extensions
+func main() {
+	opts := formatter.DefaultPrintOptions()
+	opts.SoftMaxColumns = 100
 
-##### Jinja2
+	sql := "select user_id, count(*) as total from events group by all |> order by total desc"
+	formatted, err := formatter.Format(sql, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-- [x] Template variable (`{{ variable }}`)
-- [x] Template blocks
-    - [x] For loop (`{% for expr in iterable %}...{% endfor %}`)
-    - [x] If-endif statement (`{% if cond %}...{% endif %}`)
-    - [x] If-else-endif statement (`{% if cond %}...{% else %}...{% endif %}`)
-    - [x] If-elif-endif statement (`{% if cond %}...{% else %}...{% endif %}`)
-    - [x] If-elif-else-endif statement (`{% if cond %}...{% elif ... %}...{% else %}...{% endif %}`)
+	fmt.Print(formatted)
+}
+```
 
-Currently, templates should be replaceable by an identifier or query statement so that the resulting query is a valid ZetaSQL script.
-If you follow this rule, you can use quite a lot of templates without losing the ability to format the SQL code before rendering.
+## Supported SQL and Template Surface
+
+### Query Syntax and Expressions
+
+- Standard `SELECT` projections, `WITH` / `WITH RECURSIVE` CTEs, set operations (`UNION`, `INTERSECT`, `EXCEPT` with `CORRESPONDING` / `BY NAME`), `GROUP BY` (`ROLLUP`, `CUBE`, `GROUPING SETS`, `GROUP BY ALL`), `HAVING`, `QUALIFY`, `WINDOW`, `PIVOT`, `UNPIVOT`, and `TABLESAMPLE`.
+- GoogleSQL Pipe syntax (`FROM ... |> WHERE ... |> EXTEND ... |> AGGREGATE ... |> SET ... |> RENAME ... |> DROP ... |> JOIN ... |> CALL ...`).
+- Dot-chained function calls (`(col).TRIM().LOWER()`) and inline `WITH(var AS expr, result)` scoped expressions.
+- Scalar, aggregate, analytic/window, lambda (`x -> expr`), `SAFE.`-prefixed, and templated (`ANY TYPE`, `ANY TABLE`) function calls.
+- All BigQuery data types and literals: scalar types, parameterized types, `ARRAY`, `STRUCT`, `JSON`, `GEOGRAPHY`, `INTERVAL`, and `RANGE`.
+
+### DDL, DML, DCL, and Data Movement
+
+- **DDL**: `CREATE`, `ALTER`, and `DROP` statements for schemas, databases, tables (`LIKE`, `CLONE`, `COPY`, `SNAPSHOT`, `EXTERNAL`), views (including column lists with `OPTIONS`), materialized views, functions, table functions, procedures, BigQuery ML models (`CREATE MODEL` with `TRANSFORM`), row access policies, search indexes, and `UNDROP`, plus `PRIMARY KEY`, `FOREIGN KEY`, and `CHECK` constraints (`ENFORCED` / `NOT ENFORCED`).
+- **DML**: `INSERT`, `DELETE`, `UPDATE`, `MERGE`, and `TRUNCATE TABLE`, including `THEN RETURN` (`WITH ACTION`) clauses.
+- **DCL**: `GRANT` and `REVOKE` privilege statements.
+- **Data Movement**: `EXPORT DATA` and `LOAD DATA INTO` / `LOAD DATA OVERWRITE` (`FROM FILES`).
+
+### Procedural Scripting
+
+- Variable and system declarations (`DECLARE`, `SET`), block scopes (`BEGIN ... EXCEPTION WHEN ERROR THEN ... END`), conditionals (`IF ... ELSEIF ... ELSE ... END IF`, `CASE ... WHEN ... END CASE`), loops and labels (`LOOP`, `WHILE`, `REPEAT ... UNTIL`, `FOR ... IN`, `BREAK`, `LEAVE`, `CONTINUE`, `ITERATE`), control transfers (`CALL`, `RETURN`, `RAISE`, `EXECUTE IMMEDIATE`, `ASSERT`), and multi-statement transactions (`BEGIN`, `COMMIT`, `ROLLBACK`).
+
+### Comments and Jinja2 Templates
+
+- Preserves SQL line comments (`--`, `#`), block comments (`/* ... */`), and Jinja2 comments (`{# ... #}`).
+- Preserves Jinja2 variable expressions (`{{ expr }}`) and control blocks (`{% if %} ... {% elif %} ... {% else %} ... {% endif %}`, `{% for %} ... {% endfor %}`) when each template expression occupies a valid identifier or statement position.
