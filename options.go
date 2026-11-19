@@ -66,6 +66,23 @@ func DefaultLanguageOptions() *googlesql.LanguageOptions {
 		panic(fmt.Errorf("DefaultLanguageOptions: enable GRAPH_TABLE: %w", err))
 	}
 
+	entityTypes := []string{
+		"ASSIGNMENT",
+		"BI_CAPACITY",
+		"CAPACITY",
+		"DATA_POLICY",
+		"ORGANIZATION",
+		"PROJECT",
+		"RESERVATION",
+	}
+	if err := lang.SetSupportedGenericEntityTypes(entityTypes); err != nil {
+		panic(fmt.Errorf("DefaultLanguageOptions: set generic entity types: %w", err))
+	}
+
+	if err := lang.SetSupportedGenericSubEntityTypes([]string{"REPLICA"}); err != nil {
+		panic(fmt.Errorf("DefaultLanguageOptions: set generic sub-entity types: %w", err))
+	}
+
 	return lang
 }
 
@@ -116,6 +133,17 @@ func defaultEnabledFeatures() []googlesql.LanguageFeature {
 		googlesql.LanguageFeatureFeatureV12SafeFunctionCall,
 		googlesql.LanguageFeatureFeatureV12WeekWithWeekday,
 		googlesql.LanguageFeatureFeatureV12GeneratedColumns,
+		googlesql.LanguageFeatureFeatureGeneratedByDefault,
+		googlesql.LanguageFeatureFeatureIdentityColumns,
+		googlesql.LanguageFeatureFeatureAlterColumnSetGeneratedAsIdentity,
+		googlesql.LanguageFeatureFeatureAlterColumnDropGenerated,
+		googlesql.LanguageFeatureFeatureEnableAlterTableAddColumnGeneratedExpr,
+		googlesql.LanguageFeatureFeatureExternalSchemaDdl,
+		googlesql.LanguageFeatureFeatureCreateIndexPartitionBy,
+		googlesql.LanguageFeatureFeatureCreateTableWithConnection,
+		googlesql.LanguageFeatureFeatureCreateMaterializedViewAsReplicaOf,
+		googlesql.LanguageFeatureFeatureAlterViewsAlterColumnSetOptions,
+		googlesql.LanguageFeatureFeatureAlterMaterializedViewAlterColumnSetOptions,
 		googlesql.LanguageFeatureFeatureV13AllowConsecutiveOn,
 		googlesql.LanguageFeatureFeatureV13AllowDashesInTableName,
 		googlesql.LanguageFeatureFeatureV13IsDistinct,

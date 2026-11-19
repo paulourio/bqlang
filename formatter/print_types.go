@@ -29,15 +29,9 @@ func (p *printer) visitElementTypeColumnSchema(
 	p2.accept(elem, d)
 	typ := p2.unnestLeft()
 
-	collate, _ := n.Collate()
-	attrs, _ := n.Attributes()
-	opts, _ := n.OptionsList()
-
 	if simple {
 		pp.print(p.keyword(kw) + "<" + typ + ">")
-		pp.accept(collate, d)
-		pp.accept(attrs, d)
-		pp.accept(opts, d)
+		pp.printColumnSchemaTail(n, false, d)
 	} else {
 		p1 := pp.nest()
 		p1.println(p1.keyword(kw) + "<")
@@ -45,9 +39,7 @@ func (p *printer) visitElementTypeColumnSchema(
 		p1.println(typ)
 		p1.decDepth()
 		p1.print(">")
-		p1.accept(collate, d)
-		p1.accept(attrs, d)
-		p1.accept(opts, d)
+		p1.printColumnSchemaTail(n, false, d)
 		pp.print(p1.unnestLeft())
 	}
 
@@ -131,13 +123,57 @@ func (p *printer) visitColumnSchema(n *googlesql.ASTColumnSchema, _ printerData)
 	})
 }
 
-func (p *printer) visitInferredTypeColumnSchema(n *googlesql.ASTInferredTypeColumnSchema, d printerData) {
-	p.moveBefore(n)
+func (p *printer) printColumnSchemaTail(
+	n googlesql.ASTColumnSchemaNode,
+	includeTypeParams bool,
+	d printerData,
+) {
+	if includeTypeParams {
+		tp, _ := n.TypeParameters()
+		p.accept(tp, d)
+	}
+
+	collate, _ := n.Collate()
+	gen, _ := n.GeneratedColumnInfo()
+	def, _ := n.DefaultExpression()
 	attrs, _ := n.Attributes()
 	opts, _ := n.OptionsList()
 
+	p.accept(collate, d)
+	p.accept(gen, d)
+
+	if nodeDefined(def) {
+		p.print(p.keyword("DEFAULT"))
+		p.acceptNested(def, d)
+	}
+
 	p.accept(attrs, d)
 	p.accept(opts, d)
+}
+
+func (p *printer) visitMapColumnSchema(n *googlesql.ASTMapColumnSchema, d printerData) {
+	p.moveBefore(n)
+
+	ks, _ := n.KeySchema()
+	vs, _ := n.ValueSchema()
+
+	pp := p.nest()
+	keyStr := strings.Trim(pp.toString(ks, d), "\n")
+	valStr := strings.Trim(pp.toString(vs, d), "\n")
+
+	pp.print(pp.keyword("MAP") + "<" + keyStr + ", " + valStr + ">")
+	pp.printColumnSchemaTail(n, false, d)
+
+	p.print(pp.unnestLeft())
+	p.movePast(n)
+}
+
+func (p *printer) visitInferredTypeColumnSchema(n *googlesql.ASTInferredTypeColumnSchema, d printerData) {
+	p.moveBefore(n)
+
+	pp := p.nest()
+	pp.printColumnSchemaTail(n, false, d)
+	p.print(strings.TrimPrefix(pp.unnest(), "\v"))
 	p.movePast(n)
 }
 
@@ -145,17 +181,10 @@ func (p *printer) visitSimpleColumnSchema(n *googlesql.ASTSimpleColumnSchema, d 
 	p.moveBefore(n)
 
 	typeName, _ := n.TypeName()
-	tp, _ := n.TypeParameters()
-	collate, _ := n.Collate()
-	attrs, _ := n.Attributes()
-	opts, _ := n.OptionsList()
 
 	pp := p.nest()
 	pp.print(p.typename(pp.toString(typeName, d)))
-	pp.accept(tp, d)
-	pp.accept(collate, d)
-	pp.accept(attrs, d)
-	pp.accept(opts, d)
+	pp.printColumnSchemaTail(n, true, d)
 
 	p.print(pp.unnest())
 	p.movePast(n)
@@ -199,13 +228,7 @@ func (p *printer) visitStructColumnSchema(n *googlesql.ASTStructColumnSchema, d 
 		pp.print(pp.keyword("STRUCT") + "<" + p1.unnestLeft() + ">")
 	}
 
-	collate, _ := n.Collate()
-	attrs, _ := n.Attributes()
-	opts, _ := n.OptionsList()
-
-	pp.accept(collate, d)
-	pp.accept(attrs, d)
-	pp.accept(opts, d)
+	pp.printColumnSchemaTail(n, false, d)
 
 	p.print(pp.unnestLeft())
 	p.movePast(n)

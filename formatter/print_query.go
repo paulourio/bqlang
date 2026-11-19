@@ -694,6 +694,11 @@ func (p *printer) visitOrderingExpression(n *googlesql.ASTOrderingExpression, d 
 	}
 
 	p.accept(no, d)
+
+	if opt, _ := n.OptionList(); nodeDefined(opt) {
+		p.accept(opt, d)
+	}
+
 	p.movePast(n)
 }
 
@@ -1893,4 +1898,19 @@ func (p *printer) visitWithReportModifier(n *googlesql.ASTWithReportModifier, d 
 	if ol, _ := n.OptionsList(); nodeDefined(ol) {
 		p.printOptionsListBody(ol, false, d)
 	}
+}
+
+func (p *printer) visitUnnestExpressionWithOptAliasAndOffset(
+	n *googlesql.ASTUnnestExpressionWithOptAliasAndOffset,
+	d printerData,
+) {
+	p.moveBefore(n)
+	ue, _ := n.UnnestExpression()
+	al, _ := n.OptionalAlias()
+	wo, _ := n.OptionalWithOffset()
+
+	p.accept(ue, d)
+	p.accept(al, d)
+	p.accept(wo, d)
+	p.movePast(n)
 }
