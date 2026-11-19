@@ -5,15 +5,18 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/paulourio/bqlang/extensions/ast"
 	"github.com/paulourio/bqlang/extensions/errors"
 	"github.com/paulourio/bqlang/extensions/lexer"
 	"github.com/paulourio/bqlang/extensions/parser"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestParser(t *testing.T) {
-	tests := MustReadTest("testdata/comments.toml")
+	t.Parallel()
+
+	tests := MustReadTest(t, "testdata/comments.toml")
 
 	for i, tcase := range tests.Cases {
 		var name string
@@ -25,24 +28,22 @@ func TestParser(t *testing.T) {
 		}
 
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			var b strings.Builder
 
-			c := tcase //nolint:loopclosure
+			b.Grow(len(tcase.Input) * 2)
+			fmt.Fprintf(&b, "Input (%d bytes):\n%s\n\n", len(tcase.Input), tcase.Input)
+			fmt.Fprintf(&b, "Expected Dump (%d bytes):\n%s\n\n", len(tcase.Dump), tcase.Dump)
 
-			b.Grow(len(c.Input) * 2)
-			b.WriteString(
-				fmt.Sprintf("Input (%d bytes):\n%s\n\n", len(c.Input), c.Input))
-			b.WriteString(
-				fmt.Sprintf("Expected Dump (%d bytes):\n%s\n\n", len(c.Dump), c.Dump))
-
-			l := lexer.NewLexer([]byte(c.Input))
+			l := lexer.NewLexer([]byte(tcase.Input))
 			p := parser.NewParser()
 
 			res, err := p.Parse(l)
 			if err != nil {
-				msg := errors.FormatError(err, c.Input)
+				msg := errors.FormatError(err, tcase.Input)
 
-				b.WriteString(fmt.Sprintf("Parse error:\n%s\n\n", msg))
+				fmt.Fprintf(&b, "Parse error:\n%s\n\n", msg)
 				assert.NoError(t, err, b.String())
 
 				return
@@ -56,10 +57,9 @@ func TestParser(t *testing.T) {
 				dump = fmt.Sprintf("%#v", res)
 			}
 
-			b.WriteString(
-				fmt.Sprintf("Result Dump (%d bytes):\n%s\n\n", len(dump), dump))
+			fmt.Fprintf(&b, "Result Dump (%d bytes):\n%s\n\n", len(dump), dump)
 
-			assert.Equal(t, c.Dump, dump, b.String())
+			assert.Equal(t, tcase.Dump, dump, b.String())
 		})
 	}
 }

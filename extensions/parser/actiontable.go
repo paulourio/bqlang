@@ -13,1947 +13,20462 @@ type (
 var actionTab = actionTable{
 	actionRow{ // S0
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(10),shift(11),shift(12),shift(13),shift(14),shift(15),shift(16),shift(17),shift(18),shift(19),shift(20),shift(21),shift(22),shift(23),shift(24),shift(25),shift(26),shift(27),shift(28),shift(29),shift(30),shift(31),shift(32),shift(33),shift(34),shift(35),shift(36),shift(37),shift(38),shift(39),shift(40),shift(41),shift(42),shift(43),shift(44),shift(45),shift(46),shift(47),shift(48),shift(49),shift(50),shift(51),shift(52),shift(53),nil,shift(55),shift(62),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			shift(10), // identifier
+			shift(11), // bytes_literal
+			shift(12), // string_literal
+			shift(13), // integer_literal
+			shift(14), // floating_point_literal
+			shift(15), // newline
+			shift(16), // dollar
+			shift(17), // *
+			shift(18), // [
+			shift(19), // ]
+			shift(20), // (
+			shift(21), // )
+			shift(22), // ,
+			shift(23), // .
+			shift(24), // :
+			shift(25), // %
+			shift(26), // !
+			shift(27), // |
+			shift(28), // |>
+			shift(29), // ^
+			shift(30), // &
+			shift(31), // <<
+			shift(32), // >>
+			shift(33), // =>
+			shift(34), // ->
+			shift(35), // /
+			shift(36), // +
+			shift(37), // -
+			shift(38), // ||
+			shift(39), // <>
+			shift(40), // !=
+			shift(41), // =
+			shift(42), // <
+			shift(43), // <=
+			shift(44), // >
+			shift(45), // >=
+			shift(46), // ;
+			shift(47), // @
+			shift(48), // {
+			shift(49), // }
+			shift(50), // ~
+			shift(51), // ?
+			shift(52), // else
+			shift(53), // if
+			shift(54), // for
+			shift(55), // endfor
+			shift(56), // elif
+			shift(57), // endif
+			shift(58), // set
+			shift(59), // comment
+			nil,       // template_block_end
+			shift(61), // template_block_start
+			shift(69), // template_comment
+			nil,       // template_variable_end
+			shift(71), // template_variable_start
 		},
 	},
 	actionRow{ // S1
 		canRecover: false,
-		actions: [numSymbols]action{nil,accept(true),shift(10),shift(11),shift(12),shift(13),shift(14),shift(15),shift(16),shift(17),shift(18),shift(19),shift(20),shift(21),shift(22),shift(23),shift(24),shift(25),shift(26),shift(27),shift(28),shift(29),shift(30),shift(31),shift(32),shift(33),shift(34),shift(35),shift(36),shift(37),shift(38),shift(39),shift(40),shift(41),shift(42),shift(43),shift(44),shift(45),shift(46),shift(47),shift(48),shift(49),shift(50),shift(51),shift(52),shift(53),nil,shift(55),shift(62),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,          // INVALID
+			accept(true), // ␚
+			shift(10),    // identifier
+			shift(11),    // bytes_literal
+			shift(12),    // string_literal
+			shift(13),    // integer_literal
+			shift(14),    // floating_point_literal
+			shift(15),    // newline
+			shift(16),    // dollar
+			shift(17),    // *
+			shift(18),    // [
+			shift(19),    // ]
+			shift(20),    // (
+			shift(21),    // )
+			shift(22),    // ,
+			shift(23),    // .
+			shift(24),    // :
+			shift(25),    // %
+			shift(26),    // !
+			shift(27),    // |
+			shift(28),    // |>
+			shift(29),    // ^
+			shift(30),    // &
+			shift(31),    // <<
+			shift(32),    // >>
+			shift(33),    // =>
+			shift(34),    // ->
+			shift(35),    // /
+			shift(36),    // +
+			shift(37),    // -
+			shift(38),    // ||
+			shift(39),    // <>
+			shift(40),    // !=
+			shift(41),    // =
+			shift(42),    // <
+			shift(43),    // <=
+			shift(44),    // >
+			shift(45),    // >=
+			shift(46),    // ;
+			shift(47),    // @
+			shift(48),    // {
+			shift(49),    // }
+			shift(50),    // ~
+			shift(51),    // ?
+			shift(52),    // else
+			shift(53),    // if
+			shift(54),    // for
+			shift(55),    // endfor
+			shift(56),    // elif
+			shift(57),    // endif
+			shift(58),    // set
+			shift(59),    // comment
+			nil,          // template_block_end
+			shift(61),    // template_block_start
+			shift(69),    // template_comment
+			nil,          // template_variable_end
+			shift(71),    // template_variable_start
 		},
 	},
 	actionRow{ // S2
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),reduce(1),nil,reduce(1),reduce(1),nil,reduce(1),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(1), // ␚, reduce: Script
+			reduce(1), // identifier, reduce: Script
+			reduce(1), // bytes_literal, reduce: Script
+			reduce(1), // string_literal, reduce: Script
+			reduce(1), // integer_literal, reduce: Script
+			reduce(1), // floating_point_literal, reduce: Script
+			reduce(1), // newline, reduce: Script
+			reduce(1), // dollar, reduce: Script
+			reduce(1), // *, reduce: Script
+			reduce(1), // [, reduce: Script
+			reduce(1), // ], reduce: Script
+			reduce(1), // (, reduce: Script
+			reduce(1), // ), reduce: Script
+			reduce(1), // ,, reduce: Script
+			reduce(1), // ., reduce: Script
+			reduce(1), // :, reduce: Script
+			reduce(1), // %, reduce: Script
+			reduce(1), // !, reduce: Script
+			reduce(1), // |, reduce: Script
+			reduce(1), // |>, reduce: Script
+			reduce(1), // ^, reduce: Script
+			reduce(1), // &, reduce: Script
+			reduce(1), // <<, reduce: Script
+			reduce(1), // >>, reduce: Script
+			reduce(1), // =>, reduce: Script
+			reduce(1), // ->, reduce: Script
+			reduce(1), // /, reduce: Script
+			reduce(1), // +, reduce: Script
+			reduce(1), // -, reduce: Script
+			reduce(1), // ||, reduce: Script
+			reduce(1), // <>, reduce: Script
+			reduce(1), // !=, reduce: Script
+			reduce(1), // =, reduce: Script
+			reduce(1), // <, reduce: Script
+			reduce(1), // <=, reduce: Script
+			reduce(1), // >, reduce: Script
+			reduce(1), // >=, reduce: Script
+			reduce(1), // ;, reduce: Script
+			reduce(1), // @, reduce: Script
+			reduce(1), // {, reduce: Script
+			reduce(1), // }, reduce: Script
+			reduce(1), // ~, reduce: Script
+			reduce(1), // ?, reduce: Script
+			reduce(1), // else, reduce: Script
+			reduce(1), // if, reduce: Script
+			reduce(1), // for, reduce: Script
+			reduce(1), // endfor, reduce: Script
+			reduce(1), // elif, reduce: Script
+			reduce(1), // endif, reduce: Script
+			reduce(1), // set, reduce: Script
+			reduce(1), // comment, reduce: Script
+			nil,       // template_block_end
+			reduce(1), // template_block_start, reduce: Script
+			reduce(1), // template_comment, reduce: Script
+			nil,       // template_variable_end
+			reduce(1), // template_variable_start, reduce: Script
 		},
 	},
 	actionRow{ // S3
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),nil,reduce(11),reduce(11),nil,reduce(11),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(3), // ␚, reduce: Element
+			reduce(3), // identifier, reduce: Element
+			reduce(3), // bytes_literal, reduce: Element
+			reduce(3), // string_literal, reduce: Element
+			reduce(3), // integer_literal, reduce: Element
+			reduce(3), // floating_point_literal, reduce: Element
+			reduce(3), // newline, reduce: Element
+			reduce(3), // dollar, reduce: Element
+			reduce(3), // *, reduce: Element
+			reduce(3), // [, reduce: Element
+			reduce(3), // ], reduce: Element
+			reduce(3), // (, reduce: Element
+			reduce(3), // ), reduce: Element
+			reduce(3), // ,, reduce: Element
+			reduce(3), // ., reduce: Element
+			reduce(3), // :, reduce: Element
+			reduce(3), // %, reduce: Element
+			reduce(3), // !, reduce: Element
+			reduce(3), // |, reduce: Element
+			reduce(3), // |>, reduce: Element
+			reduce(3), // ^, reduce: Element
+			reduce(3), // &, reduce: Element
+			reduce(3), // <<, reduce: Element
+			reduce(3), // >>, reduce: Element
+			reduce(3), // =>, reduce: Element
+			reduce(3), // ->, reduce: Element
+			reduce(3), // /, reduce: Element
+			reduce(3), // +, reduce: Element
+			reduce(3), // -, reduce: Element
+			reduce(3), // ||, reduce: Element
+			reduce(3), // <>, reduce: Element
+			reduce(3), // !=, reduce: Element
+			reduce(3), // =, reduce: Element
+			reduce(3), // <, reduce: Element
+			reduce(3), // <=, reduce: Element
+			reduce(3), // >, reduce: Element
+			reduce(3), // >=, reduce: Element
+			reduce(3), // ;, reduce: Element
+			reduce(3), // @, reduce: Element
+			reduce(3), // {, reduce: Element
+			reduce(3), // }, reduce: Element
+			reduce(3), // ~, reduce: Element
+			reduce(3), // ?, reduce: Element
+			reduce(3), // else, reduce: Element
+			reduce(3), // if, reduce: Element
+			reduce(3), // for, reduce: Element
+			reduce(3), // endfor, reduce: Element
+			reduce(3), // elif, reduce: Element
+			reduce(3), // endif, reduce: Element
+			reduce(3), // set, reduce: Element
+			reduce(3), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(3), // template_block_start, reduce: Element
+			reduce(3), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(3), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S4
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),nil,reduce(8),reduce(8),nil,reduce(8),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(4), // ␚, reduce: Element
+			reduce(4), // identifier, reduce: Element
+			reduce(4), // bytes_literal, reduce: Element
+			reduce(4), // string_literal, reduce: Element
+			reduce(4), // integer_literal, reduce: Element
+			reduce(4), // floating_point_literal, reduce: Element
+			reduce(4), // newline, reduce: Element
+			reduce(4), // dollar, reduce: Element
+			reduce(4), // *, reduce: Element
+			reduce(4), // [, reduce: Element
+			reduce(4), // ], reduce: Element
+			reduce(4), // (, reduce: Element
+			reduce(4), // ), reduce: Element
+			reduce(4), // ,, reduce: Element
+			reduce(4), // ., reduce: Element
+			reduce(4), // :, reduce: Element
+			reduce(4), // %, reduce: Element
+			reduce(4), // !, reduce: Element
+			reduce(4), // |, reduce: Element
+			reduce(4), // |>, reduce: Element
+			reduce(4), // ^, reduce: Element
+			reduce(4), // &, reduce: Element
+			reduce(4), // <<, reduce: Element
+			reduce(4), // >>, reduce: Element
+			reduce(4), // =>, reduce: Element
+			reduce(4), // ->, reduce: Element
+			reduce(4), // /, reduce: Element
+			reduce(4), // +, reduce: Element
+			reduce(4), // -, reduce: Element
+			reduce(4), // ||, reduce: Element
+			reduce(4), // <>, reduce: Element
+			reduce(4), // !=, reduce: Element
+			reduce(4), // =, reduce: Element
+			reduce(4), // <, reduce: Element
+			reduce(4), // <=, reduce: Element
+			reduce(4), // >, reduce: Element
+			reduce(4), // >=, reduce: Element
+			reduce(4), // ;, reduce: Element
+			reduce(4), // @, reduce: Element
+			reduce(4), // {, reduce: Element
+			reduce(4), // }, reduce: Element
+			reduce(4), // ~, reduce: Element
+			reduce(4), // ?, reduce: Element
+			reduce(4), // else, reduce: Element
+			reduce(4), // if, reduce: Element
+			reduce(4), // for, reduce: Element
+			reduce(4), // endfor, reduce: Element
+			reduce(4), // elif, reduce: Element
+			reduce(4), // endif, reduce: Element
+			reduce(4), // set, reduce: Element
+			reduce(4), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(4), // template_block_start, reduce: Element
+			reduce(4), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(4), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S5
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),nil,reduce(9),reduce(9),nil,reduce(9),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(5), // ␚, reduce: Element
+			reduce(5), // identifier, reduce: Element
+			reduce(5), // bytes_literal, reduce: Element
+			reduce(5), // string_literal, reduce: Element
+			reduce(5), // integer_literal, reduce: Element
+			reduce(5), // floating_point_literal, reduce: Element
+			reduce(5), // newline, reduce: Element
+			reduce(5), // dollar, reduce: Element
+			reduce(5), // *, reduce: Element
+			reduce(5), // [, reduce: Element
+			reduce(5), // ], reduce: Element
+			reduce(5), // (, reduce: Element
+			reduce(5), // ), reduce: Element
+			reduce(5), // ,, reduce: Element
+			reduce(5), // ., reduce: Element
+			reduce(5), // :, reduce: Element
+			reduce(5), // %, reduce: Element
+			reduce(5), // !, reduce: Element
+			reduce(5), // |, reduce: Element
+			reduce(5), // |>, reduce: Element
+			reduce(5), // ^, reduce: Element
+			reduce(5), // &, reduce: Element
+			reduce(5), // <<, reduce: Element
+			reduce(5), // >>, reduce: Element
+			reduce(5), // =>, reduce: Element
+			reduce(5), // ->, reduce: Element
+			reduce(5), // /, reduce: Element
+			reduce(5), // +, reduce: Element
+			reduce(5), // -, reduce: Element
+			reduce(5), // ||, reduce: Element
+			reduce(5), // <>, reduce: Element
+			reduce(5), // !=, reduce: Element
+			reduce(5), // =, reduce: Element
+			reduce(5), // <, reduce: Element
+			reduce(5), // <=, reduce: Element
+			reduce(5), // >, reduce: Element
+			reduce(5), // >=, reduce: Element
+			reduce(5), // ;, reduce: Element
+			reduce(5), // @, reduce: Element
+			reduce(5), // {, reduce: Element
+			reduce(5), // }, reduce: Element
+			reduce(5), // ~, reduce: Element
+			reduce(5), // ?, reduce: Element
+			reduce(5), // else, reduce: Element
+			reduce(5), // if, reduce: Element
+			reduce(5), // for, reduce: Element
+			reduce(5), // endfor, reduce: Element
+			reduce(5), // elif, reduce: Element
+			reduce(5), // endif, reduce: Element
+			reduce(5), // set, reduce: Element
+			reduce(5), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(5), // template_block_start, reduce: Element
+			reduce(5), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(5), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S6
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),nil,reduce(10),reduce(10),nil,reduce(10),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(6), // ␚, reduce: Element
+			reduce(6), // identifier, reduce: Element
+			reduce(6), // bytes_literal, reduce: Element
+			reduce(6), // string_literal, reduce: Element
+			reduce(6), // integer_literal, reduce: Element
+			reduce(6), // floating_point_literal, reduce: Element
+			reduce(6), // newline, reduce: Element
+			reduce(6), // dollar, reduce: Element
+			reduce(6), // *, reduce: Element
+			reduce(6), // [, reduce: Element
+			reduce(6), // ], reduce: Element
+			reduce(6), // (, reduce: Element
+			reduce(6), // ), reduce: Element
+			reduce(6), // ,, reduce: Element
+			reduce(6), // ., reduce: Element
+			reduce(6), // :, reduce: Element
+			reduce(6), // %, reduce: Element
+			reduce(6), // !, reduce: Element
+			reduce(6), // |, reduce: Element
+			reduce(6), // |>, reduce: Element
+			reduce(6), // ^, reduce: Element
+			reduce(6), // &, reduce: Element
+			reduce(6), // <<, reduce: Element
+			reduce(6), // >>, reduce: Element
+			reduce(6), // =>, reduce: Element
+			reduce(6), // ->, reduce: Element
+			reduce(6), // /, reduce: Element
+			reduce(6), // +, reduce: Element
+			reduce(6), // -, reduce: Element
+			reduce(6), // ||, reduce: Element
+			reduce(6), // <>, reduce: Element
+			reduce(6), // !=, reduce: Element
+			reduce(6), // =, reduce: Element
+			reduce(6), // <, reduce: Element
+			reduce(6), // <=, reduce: Element
+			reduce(6), // >, reduce: Element
+			reduce(6), // >=, reduce: Element
+			reduce(6), // ;, reduce: Element
+			reduce(6), // @, reduce: Element
+			reduce(6), // {, reduce: Element
+			reduce(6), // }, reduce: Element
+			reduce(6), // ~, reduce: Element
+			reduce(6), // ?, reduce: Element
+			reduce(6), // else, reduce: Element
+			reduce(6), // if, reduce: Element
+			reduce(6), // for, reduce: Element
+			reduce(6), // endfor, reduce: Element
+			reduce(6), // elif, reduce: Element
+			reduce(6), // endif, reduce: Element
+			reduce(6), // set, reduce: Element
+			reduce(6), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(6), // template_block_start, reduce: Element
+			reduce(6), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(6), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S7
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),nil,reduce(12),reduce(12),nil,reduce(12),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(7), // ␚, reduce: Element
+			reduce(7), // identifier, reduce: Element
+			reduce(7), // bytes_literal, reduce: Element
+			reduce(7), // string_literal, reduce: Element
+			reduce(7), // integer_literal, reduce: Element
+			reduce(7), // floating_point_literal, reduce: Element
+			reduce(7), // newline, reduce: Element
+			reduce(7), // dollar, reduce: Element
+			reduce(7), // *, reduce: Element
+			reduce(7), // [, reduce: Element
+			reduce(7), // ], reduce: Element
+			reduce(7), // (, reduce: Element
+			reduce(7), // ), reduce: Element
+			reduce(7), // ,, reduce: Element
+			reduce(7), // ., reduce: Element
+			reduce(7), // :, reduce: Element
+			reduce(7), // %, reduce: Element
+			reduce(7), // !, reduce: Element
+			reduce(7), // |, reduce: Element
+			reduce(7), // |>, reduce: Element
+			reduce(7), // ^, reduce: Element
+			reduce(7), // &, reduce: Element
+			reduce(7), // <<, reduce: Element
+			reduce(7), // >>, reduce: Element
+			reduce(7), // =>, reduce: Element
+			reduce(7), // ->, reduce: Element
+			reduce(7), // /, reduce: Element
+			reduce(7), // +, reduce: Element
+			reduce(7), // -, reduce: Element
+			reduce(7), // ||, reduce: Element
+			reduce(7), // <>, reduce: Element
+			reduce(7), // !=, reduce: Element
+			reduce(7), // =, reduce: Element
+			reduce(7), // <, reduce: Element
+			reduce(7), // <=, reduce: Element
+			reduce(7), // >, reduce: Element
+			reduce(7), // >=, reduce: Element
+			reduce(7), // ;, reduce: Element
+			reduce(7), // @, reduce: Element
+			reduce(7), // {, reduce: Element
+			reduce(7), // }, reduce: Element
+			reduce(7), // ~, reduce: Element
+			reduce(7), // ?, reduce: Element
+			reduce(7), // else, reduce: Element
+			reduce(7), // if, reduce: Element
+			reduce(7), // for, reduce: Element
+			reduce(7), // endfor, reduce: Element
+			reduce(7), // elif, reduce: Element
+			reduce(7), // endif, reduce: Element
+			reduce(7), // set, reduce: Element
+			reduce(7), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(7), // template_block_start, reduce: Element
+			reduce(7), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(7), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S8
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),nil,reduce(13),reduce(13),nil,reduce(13),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(8), // ␚, reduce: Element
+			reduce(8), // identifier, reduce: Element
+			reduce(8), // bytes_literal, reduce: Element
+			reduce(8), // string_literal, reduce: Element
+			reduce(8), // integer_literal, reduce: Element
+			reduce(8), // floating_point_literal, reduce: Element
+			reduce(8), // newline, reduce: Element
+			reduce(8), // dollar, reduce: Element
+			reduce(8), // *, reduce: Element
+			reduce(8), // [, reduce: Element
+			reduce(8), // ], reduce: Element
+			reduce(8), // (, reduce: Element
+			reduce(8), // ), reduce: Element
+			reduce(8), // ,, reduce: Element
+			reduce(8), // ., reduce: Element
+			reduce(8), // :, reduce: Element
+			reduce(8), // %, reduce: Element
+			reduce(8), // !, reduce: Element
+			reduce(8), // |, reduce: Element
+			reduce(8), // |>, reduce: Element
+			reduce(8), // ^, reduce: Element
+			reduce(8), // &, reduce: Element
+			reduce(8), // <<, reduce: Element
+			reduce(8), // >>, reduce: Element
+			reduce(8), // =>, reduce: Element
+			reduce(8), // ->, reduce: Element
+			reduce(8), // /, reduce: Element
+			reduce(8), // +, reduce: Element
+			reduce(8), // -, reduce: Element
+			reduce(8), // ||, reduce: Element
+			reduce(8), // <>, reduce: Element
+			reduce(8), // !=, reduce: Element
+			reduce(8), // =, reduce: Element
+			reduce(8), // <, reduce: Element
+			reduce(8), // <=, reduce: Element
+			reduce(8), // >, reduce: Element
+			reduce(8), // >=, reduce: Element
+			reduce(8), // ;, reduce: Element
+			reduce(8), // @, reduce: Element
+			reduce(8), // {, reduce: Element
+			reduce(8), // }, reduce: Element
+			reduce(8), // ~, reduce: Element
+			reduce(8), // ?, reduce: Element
+			reduce(8), // else, reduce: Element
+			reduce(8), // if, reduce: Element
+			reduce(8), // for, reduce: Element
+			reduce(8), // endfor, reduce: Element
+			reduce(8), // elif, reduce: Element
+			reduce(8), // endif, reduce: Element
+			reduce(8), // set, reduce: Element
+			reduce(8), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(8), // template_block_start, reduce: Element
+			reduce(8), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(8), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S9
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),nil,reduce(14),reduce(14),nil,reduce(14),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(9), // ␚, reduce: Element2
+			reduce(9), // identifier, reduce: Element2
+			reduce(9), // bytes_literal, reduce: Element2
+			reduce(9), // string_literal, reduce: Element2
+			reduce(9), // integer_literal, reduce: Element2
+			reduce(9), // floating_point_literal, reduce: Element2
+			reduce(9), // newline, reduce: Element2
+			reduce(9), // dollar, reduce: Element2
+			reduce(9), // *, reduce: Element2
+			reduce(9), // [, reduce: Element2
+			reduce(9), // ], reduce: Element2
+			reduce(9), // (, reduce: Element2
+			reduce(9), // ), reduce: Element2
+			reduce(9), // ,, reduce: Element2
+			reduce(9), // ., reduce: Element2
+			reduce(9), // :, reduce: Element2
+			reduce(9), // %, reduce: Element2
+			reduce(9), // !, reduce: Element2
+			reduce(9), // |, reduce: Element2
+			reduce(9), // |>, reduce: Element2
+			reduce(9), // ^, reduce: Element2
+			reduce(9), // &, reduce: Element2
+			reduce(9), // <<, reduce: Element2
+			reduce(9), // >>, reduce: Element2
+			reduce(9), // =>, reduce: Element2
+			reduce(9), // ->, reduce: Element2
+			reduce(9), // /, reduce: Element2
+			reduce(9), // +, reduce: Element2
+			reduce(9), // -, reduce: Element2
+			reduce(9), // ||, reduce: Element2
+			reduce(9), // <>, reduce: Element2
+			reduce(9), // !=, reduce: Element2
+			reduce(9), // =, reduce: Element2
+			reduce(9), // <, reduce: Element2
+			reduce(9), // <=, reduce: Element2
+			reduce(9), // >, reduce: Element2
+			reduce(9), // >=, reduce: Element2
+			reduce(9), // ;, reduce: Element2
+			reduce(9), // @, reduce: Element2
+			reduce(9), // {, reduce: Element2
+			reduce(9), // }, reduce: Element2
+			reduce(9), // ~, reduce: Element2
+			reduce(9), // ?, reduce: Element2
+			reduce(9), // else, reduce: Element2
+			reduce(9), // if, reduce: Element2
+			reduce(9), // for, reduce: Element2
+			reduce(9), // endfor, reduce: Element2
+			reduce(9), // elif, reduce: Element2
+			reduce(9), // endif, reduce: Element2
+			reduce(9), // set, reduce: Element2
+			reduce(9), // comment, reduce: Element2
+			nil,       // template_block_end
+			reduce(9), // template_block_start, reduce: Element2
+			reduce(9), // template_comment, reduce: Element2
+			nil,       // template_variable_end
+			reduce(9), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S10
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),nil,reduce(15),reduce(15),nil,reduce(15),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(10), // ␚, reduce: Element2
+			reduce(10), // identifier, reduce: Element2
+			reduce(10), // bytes_literal, reduce: Element2
+			reduce(10), // string_literal, reduce: Element2
+			reduce(10), // integer_literal, reduce: Element2
+			reduce(10), // floating_point_literal, reduce: Element2
+			reduce(10), // newline, reduce: Element2
+			reduce(10), // dollar, reduce: Element2
+			reduce(10), // *, reduce: Element2
+			reduce(10), // [, reduce: Element2
+			reduce(10), // ], reduce: Element2
+			reduce(10), // (, reduce: Element2
+			reduce(10), // ), reduce: Element2
+			reduce(10), // ,, reduce: Element2
+			reduce(10), // ., reduce: Element2
+			reduce(10), // :, reduce: Element2
+			reduce(10), // %, reduce: Element2
+			reduce(10), // !, reduce: Element2
+			reduce(10), // |, reduce: Element2
+			reduce(10), // |>, reduce: Element2
+			reduce(10), // ^, reduce: Element2
+			reduce(10), // &, reduce: Element2
+			reduce(10), // <<, reduce: Element2
+			reduce(10), // >>, reduce: Element2
+			reduce(10), // =>, reduce: Element2
+			reduce(10), // ->, reduce: Element2
+			reduce(10), // /, reduce: Element2
+			reduce(10), // +, reduce: Element2
+			reduce(10), // -, reduce: Element2
+			reduce(10), // ||, reduce: Element2
+			reduce(10), // <>, reduce: Element2
+			reduce(10), // !=, reduce: Element2
+			reduce(10), // =, reduce: Element2
+			reduce(10), // <, reduce: Element2
+			reduce(10), // <=, reduce: Element2
+			reduce(10), // >, reduce: Element2
+			reduce(10), // >=, reduce: Element2
+			reduce(10), // ;, reduce: Element2
+			reduce(10), // @, reduce: Element2
+			reduce(10), // {, reduce: Element2
+			reduce(10), // }, reduce: Element2
+			reduce(10), // ~, reduce: Element2
+			reduce(10), // ?, reduce: Element2
+			reduce(10), // else, reduce: Element2
+			reduce(10), // if, reduce: Element2
+			reduce(10), // for, reduce: Element2
+			reduce(10), // endfor, reduce: Element2
+			reduce(10), // elif, reduce: Element2
+			reduce(10), // endif, reduce: Element2
+			reduce(10), // set, reduce: Element2
+			reduce(10), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(10), // template_block_start, reduce: Element2
+			reduce(10), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(10), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S11
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),nil,reduce(16),reduce(16),nil,reduce(16),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(11), // ␚, reduce: Element2
+			reduce(11), // identifier, reduce: Element2
+			reduce(11), // bytes_literal, reduce: Element2
+			reduce(11), // string_literal, reduce: Element2
+			reduce(11), // integer_literal, reduce: Element2
+			reduce(11), // floating_point_literal, reduce: Element2
+			reduce(11), // newline, reduce: Element2
+			reduce(11), // dollar, reduce: Element2
+			reduce(11), // *, reduce: Element2
+			reduce(11), // [, reduce: Element2
+			reduce(11), // ], reduce: Element2
+			reduce(11), // (, reduce: Element2
+			reduce(11), // ), reduce: Element2
+			reduce(11), // ,, reduce: Element2
+			reduce(11), // ., reduce: Element2
+			reduce(11), // :, reduce: Element2
+			reduce(11), // %, reduce: Element2
+			reduce(11), // !, reduce: Element2
+			reduce(11), // |, reduce: Element2
+			reduce(11), // |>, reduce: Element2
+			reduce(11), // ^, reduce: Element2
+			reduce(11), // &, reduce: Element2
+			reduce(11), // <<, reduce: Element2
+			reduce(11), // >>, reduce: Element2
+			reduce(11), // =>, reduce: Element2
+			reduce(11), // ->, reduce: Element2
+			reduce(11), // /, reduce: Element2
+			reduce(11), // +, reduce: Element2
+			reduce(11), // -, reduce: Element2
+			reduce(11), // ||, reduce: Element2
+			reduce(11), // <>, reduce: Element2
+			reduce(11), // !=, reduce: Element2
+			reduce(11), // =, reduce: Element2
+			reduce(11), // <, reduce: Element2
+			reduce(11), // <=, reduce: Element2
+			reduce(11), // >, reduce: Element2
+			reduce(11), // >=, reduce: Element2
+			reduce(11), // ;, reduce: Element2
+			reduce(11), // @, reduce: Element2
+			reduce(11), // {, reduce: Element2
+			reduce(11), // }, reduce: Element2
+			reduce(11), // ~, reduce: Element2
+			reduce(11), // ?, reduce: Element2
+			reduce(11), // else, reduce: Element2
+			reduce(11), // if, reduce: Element2
+			reduce(11), // for, reduce: Element2
+			reduce(11), // endfor, reduce: Element2
+			reduce(11), // elif, reduce: Element2
+			reduce(11), // endif, reduce: Element2
+			reduce(11), // set, reduce: Element2
+			reduce(11), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(11), // template_block_start, reduce: Element2
+			reduce(11), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(11), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S12
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),nil,reduce(17),reduce(17),nil,reduce(17),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(12), // ␚, reduce: Element2
+			reduce(12), // identifier, reduce: Element2
+			reduce(12), // bytes_literal, reduce: Element2
+			reduce(12), // string_literal, reduce: Element2
+			reduce(12), // integer_literal, reduce: Element2
+			reduce(12), // floating_point_literal, reduce: Element2
+			reduce(12), // newline, reduce: Element2
+			reduce(12), // dollar, reduce: Element2
+			reduce(12), // *, reduce: Element2
+			reduce(12), // [, reduce: Element2
+			reduce(12), // ], reduce: Element2
+			reduce(12), // (, reduce: Element2
+			reduce(12), // ), reduce: Element2
+			reduce(12), // ,, reduce: Element2
+			reduce(12), // ., reduce: Element2
+			reduce(12), // :, reduce: Element2
+			reduce(12), // %, reduce: Element2
+			reduce(12), // !, reduce: Element2
+			reduce(12), // |, reduce: Element2
+			reduce(12), // |>, reduce: Element2
+			reduce(12), // ^, reduce: Element2
+			reduce(12), // &, reduce: Element2
+			reduce(12), // <<, reduce: Element2
+			reduce(12), // >>, reduce: Element2
+			reduce(12), // =>, reduce: Element2
+			reduce(12), // ->, reduce: Element2
+			reduce(12), // /, reduce: Element2
+			reduce(12), // +, reduce: Element2
+			reduce(12), // -, reduce: Element2
+			reduce(12), // ||, reduce: Element2
+			reduce(12), // <>, reduce: Element2
+			reduce(12), // !=, reduce: Element2
+			reduce(12), // =, reduce: Element2
+			reduce(12), // <, reduce: Element2
+			reduce(12), // <=, reduce: Element2
+			reduce(12), // >, reduce: Element2
+			reduce(12), // >=, reduce: Element2
+			reduce(12), // ;, reduce: Element2
+			reduce(12), // @, reduce: Element2
+			reduce(12), // {, reduce: Element2
+			reduce(12), // }, reduce: Element2
+			reduce(12), // ~, reduce: Element2
+			reduce(12), // ?, reduce: Element2
+			reduce(12), // else, reduce: Element2
+			reduce(12), // if, reduce: Element2
+			reduce(12), // for, reduce: Element2
+			reduce(12), // endfor, reduce: Element2
+			reduce(12), // elif, reduce: Element2
+			reduce(12), // endif, reduce: Element2
+			reduce(12), // set, reduce: Element2
+			reduce(12), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(12), // template_block_start, reduce: Element2
+			reduce(12), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(12), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S13
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),nil,reduce(18),reduce(18),nil,reduce(18),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(13), // ␚, reduce: Element2
+			reduce(13), // identifier, reduce: Element2
+			reduce(13), // bytes_literal, reduce: Element2
+			reduce(13), // string_literal, reduce: Element2
+			reduce(13), // integer_literal, reduce: Element2
+			reduce(13), // floating_point_literal, reduce: Element2
+			reduce(13), // newline, reduce: Element2
+			reduce(13), // dollar, reduce: Element2
+			reduce(13), // *, reduce: Element2
+			reduce(13), // [, reduce: Element2
+			reduce(13), // ], reduce: Element2
+			reduce(13), // (, reduce: Element2
+			reduce(13), // ), reduce: Element2
+			reduce(13), // ,, reduce: Element2
+			reduce(13), // ., reduce: Element2
+			reduce(13), // :, reduce: Element2
+			reduce(13), // %, reduce: Element2
+			reduce(13), // !, reduce: Element2
+			reduce(13), // |, reduce: Element2
+			reduce(13), // |>, reduce: Element2
+			reduce(13), // ^, reduce: Element2
+			reduce(13), // &, reduce: Element2
+			reduce(13), // <<, reduce: Element2
+			reduce(13), // >>, reduce: Element2
+			reduce(13), // =>, reduce: Element2
+			reduce(13), // ->, reduce: Element2
+			reduce(13), // /, reduce: Element2
+			reduce(13), // +, reduce: Element2
+			reduce(13), // -, reduce: Element2
+			reduce(13), // ||, reduce: Element2
+			reduce(13), // <>, reduce: Element2
+			reduce(13), // !=, reduce: Element2
+			reduce(13), // =, reduce: Element2
+			reduce(13), // <, reduce: Element2
+			reduce(13), // <=, reduce: Element2
+			reduce(13), // >, reduce: Element2
+			reduce(13), // >=, reduce: Element2
+			reduce(13), // ;, reduce: Element2
+			reduce(13), // @, reduce: Element2
+			reduce(13), // {, reduce: Element2
+			reduce(13), // }, reduce: Element2
+			reduce(13), // ~, reduce: Element2
+			reduce(13), // ?, reduce: Element2
+			reduce(13), // else, reduce: Element2
+			reduce(13), // if, reduce: Element2
+			reduce(13), // for, reduce: Element2
+			reduce(13), // endfor, reduce: Element2
+			reduce(13), // elif, reduce: Element2
+			reduce(13), // endif, reduce: Element2
+			reduce(13), // set, reduce: Element2
+			reduce(13), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(13), // template_block_start, reduce: Element2
+			reduce(13), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(13), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S14
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),nil,reduce(19),reduce(19),nil,reduce(19),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(14), // ␚, reduce: Element2
+			reduce(14), // identifier, reduce: Element2
+			reduce(14), // bytes_literal, reduce: Element2
+			reduce(14), // string_literal, reduce: Element2
+			reduce(14), // integer_literal, reduce: Element2
+			reduce(14), // floating_point_literal, reduce: Element2
+			reduce(14), // newline, reduce: Element2
+			reduce(14), // dollar, reduce: Element2
+			reduce(14), // *, reduce: Element2
+			reduce(14), // [, reduce: Element2
+			reduce(14), // ], reduce: Element2
+			reduce(14), // (, reduce: Element2
+			reduce(14), // ), reduce: Element2
+			reduce(14), // ,, reduce: Element2
+			reduce(14), // ., reduce: Element2
+			reduce(14), // :, reduce: Element2
+			reduce(14), // %, reduce: Element2
+			reduce(14), // !, reduce: Element2
+			reduce(14), // |, reduce: Element2
+			reduce(14), // |>, reduce: Element2
+			reduce(14), // ^, reduce: Element2
+			reduce(14), // &, reduce: Element2
+			reduce(14), // <<, reduce: Element2
+			reduce(14), // >>, reduce: Element2
+			reduce(14), // =>, reduce: Element2
+			reduce(14), // ->, reduce: Element2
+			reduce(14), // /, reduce: Element2
+			reduce(14), // +, reduce: Element2
+			reduce(14), // -, reduce: Element2
+			reduce(14), // ||, reduce: Element2
+			reduce(14), // <>, reduce: Element2
+			reduce(14), // !=, reduce: Element2
+			reduce(14), // =, reduce: Element2
+			reduce(14), // <, reduce: Element2
+			reduce(14), // <=, reduce: Element2
+			reduce(14), // >, reduce: Element2
+			reduce(14), // >=, reduce: Element2
+			reduce(14), // ;, reduce: Element2
+			reduce(14), // @, reduce: Element2
+			reduce(14), // {, reduce: Element2
+			reduce(14), // }, reduce: Element2
+			reduce(14), // ~, reduce: Element2
+			reduce(14), // ?, reduce: Element2
+			reduce(14), // else, reduce: Element2
+			reduce(14), // if, reduce: Element2
+			reduce(14), // for, reduce: Element2
+			reduce(14), // endfor, reduce: Element2
+			reduce(14), // elif, reduce: Element2
+			reduce(14), // endif, reduce: Element2
+			reduce(14), // set, reduce: Element2
+			reduce(14), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(14), // template_block_start, reduce: Element2
+			reduce(14), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(14), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S15
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),nil,reduce(20),reduce(20),nil,reduce(20),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(15), // ␚, reduce: Element2
+			reduce(15), // identifier, reduce: Element2
+			reduce(15), // bytes_literal, reduce: Element2
+			reduce(15), // string_literal, reduce: Element2
+			reduce(15), // integer_literal, reduce: Element2
+			reduce(15), // floating_point_literal, reduce: Element2
+			reduce(15), // newline, reduce: Element2
+			reduce(15), // dollar, reduce: Element2
+			reduce(15), // *, reduce: Element2
+			reduce(15), // [, reduce: Element2
+			reduce(15), // ], reduce: Element2
+			reduce(15), // (, reduce: Element2
+			reduce(15), // ), reduce: Element2
+			reduce(15), // ,, reduce: Element2
+			reduce(15), // ., reduce: Element2
+			reduce(15), // :, reduce: Element2
+			reduce(15), // %, reduce: Element2
+			reduce(15), // !, reduce: Element2
+			reduce(15), // |, reduce: Element2
+			reduce(15), // |>, reduce: Element2
+			reduce(15), // ^, reduce: Element2
+			reduce(15), // &, reduce: Element2
+			reduce(15), // <<, reduce: Element2
+			reduce(15), // >>, reduce: Element2
+			reduce(15), // =>, reduce: Element2
+			reduce(15), // ->, reduce: Element2
+			reduce(15), // /, reduce: Element2
+			reduce(15), // +, reduce: Element2
+			reduce(15), // -, reduce: Element2
+			reduce(15), // ||, reduce: Element2
+			reduce(15), // <>, reduce: Element2
+			reduce(15), // !=, reduce: Element2
+			reduce(15), // =, reduce: Element2
+			reduce(15), // <, reduce: Element2
+			reduce(15), // <=, reduce: Element2
+			reduce(15), // >, reduce: Element2
+			reduce(15), // >=, reduce: Element2
+			reduce(15), // ;, reduce: Element2
+			reduce(15), // @, reduce: Element2
+			reduce(15), // {, reduce: Element2
+			reduce(15), // }, reduce: Element2
+			reduce(15), // ~, reduce: Element2
+			reduce(15), // ?, reduce: Element2
+			reduce(15), // else, reduce: Element2
+			reduce(15), // if, reduce: Element2
+			reduce(15), // for, reduce: Element2
+			reduce(15), // endfor, reduce: Element2
+			reduce(15), // elif, reduce: Element2
+			reduce(15), // endif, reduce: Element2
+			reduce(15), // set, reduce: Element2
+			reduce(15), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(15), // template_block_start, reduce: Element2
+			reduce(15), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(15), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S16
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),nil,reduce(21),reduce(21),nil,reduce(21),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(16), // ␚, reduce: Element2
+			reduce(16), // identifier, reduce: Element2
+			reduce(16), // bytes_literal, reduce: Element2
+			reduce(16), // string_literal, reduce: Element2
+			reduce(16), // integer_literal, reduce: Element2
+			reduce(16), // floating_point_literal, reduce: Element2
+			reduce(16), // newline, reduce: Element2
+			reduce(16), // dollar, reduce: Element2
+			reduce(16), // *, reduce: Element2
+			reduce(16), // [, reduce: Element2
+			reduce(16), // ], reduce: Element2
+			reduce(16), // (, reduce: Element2
+			reduce(16), // ), reduce: Element2
+			reduce(16), // ,, reduce: Element2
+			reduce(16), // ., reduce: Element2
+			reduce(16), // :, reduce: Element2
+			reduce(16), // %, reduce: Element2
+			reduce(16), // !, reduce: Element2
+			reduce(16), // |, reduce: Element2
+			reduce(16), // |>, reduce: Element2
+			reduce(16), // ^, reduce: Element2
+			reduce(16), // &, reduce: Element2
+			reduce(16), // <<, reduce: Element2
+			reduce(16), // >>, reduce: Element2
+			reduce(16), // =>, reduce: Element2
+			reduce(16), // ->, reduce: Element2
+			reduce(16), // /, reduce: Element2
+			reduce(16), // +, reduce: Element2
+			reduce(16), // -, reduce: Element2
+			reduce(16), // ||, reduce: Element2
+			reduce(16), // <>, reduce: Element2
+			reduce(16), // !=, reduce: Element2
+			reduce(16), // =, reduce: Element2
+			reduce(16), // <, reduce: Element2
+			reduce(16), // <=, reduce: Element2
+			reduce(16), // >, reduce: Element2
+			reduce(16), // >=, reduce: Element2
+			reduce(16), // ;, reduce: Element2
+			reduce(16), // @, reduce: Element2
+			reduce(16), // {, reduce: Element2
+			reduce(16), // }, reduce: Element2
+			reduce(16), // ~, reduce: Element2
+			reduce(16), // ?, reduce: Element2
+			reduce(16), // else, reduce: Element2
+			reduce(16), // if, reduce: Element2
+			reduce(16), // for, reduce: Element2
+			reduce(16), // endfor, reduce: Element2
+			reduce(16), // elif, reduce: Element2
+			reduce(16), // endif, reduce: Element2
+			reduce(16), // set, reduce: Element2
+			reduce(16), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(16), // template_block_start, reduce: Element2
+			reduce(16), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(16), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S17
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),nil,reduce(22),reduce(22),nil,reduce(22),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(17), // ␚, reduce: Element2
+			reduce(17), // identifier, reduce: Element2
+			reduce(17), // bytes_literal, reduce: Element2
+			reduce(17), // string_literal, reduce: Element2
+			reduce(17), // integer_literal, reduce: Element2
+			reduce(17), // floating_point_literal, reduce: Element2
+			reduce(17), // newline, reduce: Element2
+			reduce(17), // dollar, reduce: Element2
+			reduce(17), // *, reduce: Element2
+			reduce(17), // [, reduce: Element2
+			reduce(17), // ], reduce: Element2
+			reduce(17), // (, reduce: Element2
+			reduce(17), // ), reduce: Element2
+			reduce(17), // ,, reduce: Element2
+			reduce(17), // ., reduce: Element2
+			reduce(17), // :, reduce: Element2
+			reduce(17), // %, reduce: Element2
+			reduce(17), // !, reduce: Element2
+			reduce(17), // |, reduce: Element2
+			reduce(17), // |>, reduce: Element2
+			reduce(17), // ^, reduce: Element2
+			reduce(17), // &, reduce: Element2
+			reduce(17), // <<, reduce: Element2
+			reduce(17), // >>, reduce: Element2
+			reduce(17), // =>, reduce: Element2
+			reduce(17), // ->, reduce: Element2
+			reduce(17), // /, reduce: Element2
+			reduce(17), // +, reduce: Element2
+			reduce(17), // -, reduce: Element2
+			reduce(17), // ||, reduce: Element2
+			reduce(17), // <>, reduce: Element2
+			reduce(17), // !=, reduce: Element2
+			reduce(17), // =, reduce: Element2
+			reduce(17), // <, reduce: Element2
+			reduce(17), // <=, reduce: Element2
+			reduce(17), // >, reduce: Element2
+			reduce(17), // >=, reduce: Element2
+			reduce(17), // ;, reduce: Element2
+			reduce(17), // @, reduce: Element2
+			reduce(17), // {, reduce: Element2
+			reduce(17), // }, reduce: Element2
+			reduce(17), // ~, reduce: Element2
+			reduce(17), // ?, reduce: Element2
+			reduce(17), // else, reduce: Element2
+			reduce(17), // if, reduce: Element2
+			reduce(17), // for, reduce: Element2
+			reduce(17), // endfor, reduce: Element2
+			reduce(17), // elif, reduce: Element2
+			reduce(17), // endif, reduce: Element2
+			reduce(17), // set, reduce: Element2
+			reduce(17), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(17), // template_block_start, reduce: Element2
+			reduce(17), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(17), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S18
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),nil,reduce(23),reduce(23),nil,reduce(23),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(18), // ␚, reduce: Element2
+			reduce(18), // identifier, reduce: Element2
+			reduce(18), // bytes_literal, reduce: Element2
+			reduce(18), // string_literal, reduce: Element2
+			reduce(18), // integer_literal, reduce: Element2
+			reduce(18), // floating_point_literal, reduce: Element2
+			reduce(18), // newline, reduce: Element2
+			reduce(18), // dollar, reduce: Element2
+			reduce(18), // *, reduce: Element2
+			reduce(18), // [, reduce: Element2
+			reduce(18), // ], reduce: Element2
+			reduce(18), // (, reduce: Element2
+			reduce(18), // ), reduce: Element2
+			reduce(18), // ,, reduce: Element2
+			reduce(18), // ., reduce: Element2
+			reduce(18), // :, reduce: Element2
+			reduce(18), // %, reduce: Element2
+			reduce(18), // !, reduce: Element2
+			reduce(18), // |, reduce: Element2
+			reduce(18), // |>, reduce: Element2
+			reduce(18), // ^, reduce: Element2
+			reduce(18), // &, reduce: Element2
+			reduce(18), // <<, reduce: Element2
+			reduce(18), // >>, reduce: Element2
+			reduce(18), // =>, reduce: Element2
+			reduce(18), // ->, reduce: Element2
+			reduce(18), // /, reduce: Element2
+			reduce(18), // +, reduce: Element2
+			reduce(18), // -, reduce: Element2
+			reduce(18), // ||, reduce: Element2
+			reduce(18), // <>, reduce: Element2
+			reduce(18), // !=, reduce: Element2
+			reduce(18), // =, reduce: Element2
+			reduce(18), // <, reduce: Element2
+			reduce(18), // <=, reduce: Element2
+			reduce(18), // >, reduce: Element2
+			reduce(18), // >=, reduce: Element2
+			reduce(18), // ;, reduce: Element2
+			reduce(18), // @, reduce: Element2
+			reduce(18), // {, reduce: Element2
+			reduce(18), // }, reduce: Element2
+			reduce(18), // ~, reduce: Element2
+			reduce(18), // ?, reduce: Element2
+			reduce(18), // else, reduce: Element2
+			reduce(18), // if, reduce: Element2
+			reduce(18), // for, reduce: Element2
+			reduce(18), // endfor, reduce: Element2
+			reduce(18), // elif, reduce: Element2
+			reduce(18), // endif, reduce: Element2
+			reduce(18), // set, reduce: Element2
+			reduce(18), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(18), // template_block_start, reduce: Element2
+			reduce(18), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(18), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S19
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),nil,reduce(24),reduce(24),nil,reduce(24),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(19), // ␚, reduce: Element2
+			reduce(19), // identifier, reduce: Element2
+			reduce(19), // bytes_literal, reduce: Element2
+			reduce(19), // string_literal, reduce: Element2
+			reduce(19), // integer_literal, reduce: Element2
+			reduce(19), // floating_point_literal, reduce: Element2
+			reduce(19), // newline, reduce: Element2
+			reduce(19), // dollar, reduce: Element2
+			reduce(19), // *, reduce: Element2
+			reduce(19), // [, reduce: Element2
+			reduce(19), // ], reduce: Element2
+			reduce(19), // (, reduce: Element2
+			reduce(19), // ), reduce: Element2
+			reduce(19), // ,, reduce: Element2
+			reduce(19), // ., reduce: Element2
+			reduce(19), // :, reduce: Element2
+			reduce(19), // %, reduce: Element2
+			reduce(19), // !, reduce: Element2
+			reduce(19), // |, reduce: Element2
+			reduce(19), // |>, reduce: Element2
+			reduce(19), // ^, reduce: Element2
+			reduce(19), // &, reduce: Element2
+			reduce(19), // <<, reduce: Element2
+			reduce(19), // >>, reduce: Element2
+			reduce(19), // =>, reduce: Element2
+			reduce(19), // ->, reduce: Element2
+			reduce(19), // /, reduce: Element2
+			reduce(19), // +, reduce: Element2
+			reduce(19), // -, reduce: Element2
+			reduce(19), // ||, reduce: Element2
+			reduce(19), // <>, reduce: Element2
+			reduce(19), // !=, reduce: Element2
+			reduce(19), // =, reduce: Element2
+			reduce(19), // <, reduce: Element2
+			reduce(19), // <=, reduce: Element2
+			reduce(19), // >, reduce: Element2
+			reduce(19), // >=, reduce: Element2
+			reduce(19), // ;, reduce: Element2
+			reduce(19), // @, reduce: Element2
+			reduce(19), // {, reduce: Element2
+			reduce(19), // }, reduce: Element2
+			reduce(19), // ~, reduce: Element2
+			reduce(19), // ?, reduce: Element2
+			reduce(19), // else, reduce: Element2
+			reduce(19), // if, reduce: Element2
+			reduce(19), // for, reduce: Element2
+			reduce(19), // endfor, reduce: Element2
+			reduce(19), // elif, reduce: Element2
+			reduce(19), // endif, reduce: Element2
+			reduce(19), // set, reduce: Element2
+			reduce(19), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(19), // template_block_start, reduce: Element2
+			reduce(19), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(19), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S20
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),nil,reduce(25),reduce(25),nil,reduce(25),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(20), // ␚, reduce: Element2
+			reduce(20), // identifier, reduce: Element2
+			reduce(20), // bytes_literal, reduce: Element2
+			reduce(20), // string_literal, reduce: Element2
+			reduce(20), // integer_literal, reduce: Element2
+			reduce(20), // floating_point_literal, reduce: Element2
+			reduce(20), // newline, reduce: Element2
+			reduce(20), // dollar, reduce: Element2
+			reduce(20), // *, reduce: Element2
+			reduce(20), // [, reduce: Element2
+			reduce(20), // ], reduce: Element2
+			reduce(20), // (, reduce: Element2
+			reduce(20), // ), reduce: Element2
+			reduce(20), // ,, reduce: Element2
+			reduce(20), // ., reduce: Element2
+			reduce(20), // :, reduce: Element2
+			reduce(20), // %, reduce: Element2
+			reduce(20), // !, reduce: Element2
+			reduce(20), // |, reduce: Element2
+			reduce(20), // |>, reduce: Element2
+			reduce(20), // ^, reduce: Element2
+			reduce(20), // &, reduce: Element2
+			reduce(20), // <<, reduce: Element2
+			reduce(20), // >>, reduce: Element2
+			reduce(20), // =>, reduce: Element2
+			reduce(20), // ->, reduce: Element2
+			reduce(20), // /, reduce: Element2
+			reduce(20), // +, reduce: Element2
+			reduce(20), // -, reduce: Element2
+			reduce(20), // ||, reduce: Element2
+			reduce(20), // <>, reduce: Element2
+			reduce(20), // !=, reduce: Element2
+			reduce(20), // =, reduce: Element2
+			reduce(20), // <, reduce: Element2
+			reduce(20), // <=, reduce: Element2
+			reduce(20), // >, reduce: Element2
+			reduce(20), // >=, reduce: Element2
+			reduce(20), // ;, reduce: Element2
+			reduce(20), // @, reduce: Element2
+			reduce(20), // {, reduce: Element2
+			reduce(20), // }, reduce: Element2
+			reduce(20), // ~, reduce: Element2
+			reduce(20), // ?, reduce: Element2
+			reduce(20), // else, reduce: Element2
+			reduce(20), // if, reduce: Element2
+			reduce(20), // for, reduce: Element2
+			reduce(20), // endfor, reduce: Element2
+			reduce(20), // elif, reduce: Element2
+			reduce(20), // endif, reduce: Element2
+			reduce(20), // set, reduce: Element2
+			reduce(20), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(20), // template_block_start, reduce: Element2
+			reduce(20), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(20), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S21
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),nil,reduce(26),reduce(26),nil,reduce(26),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(21), // ␚, reduce: Element2
+			reduce(21), // identifier, reduce: Element2
+			reduce(21), // bytes_literal, reduce: Element2
+			reduce(21), // string_literal, reduce: Element2
+			reduce(21), // integer_literal, reduce: Element2
+			reduce(21), // floating_point_literal, reduce: Element2
+			reduce(21), // newline, reduce: Element2
+			reduce(21), // dollar, reduce: Element2
+			reduce(21), // *, reduce: Element2
+			reduce(21), // [, reduce: Element2
+			reduce(21), // ], reduce: Element2
+			reduce(21), // (, reduce: Element2
+			reduce(21), // ), reduce: Element2
+			reduce(21), // ,, reduce: Element2
+			reduce(21), // ., reduce: Element2
+			reduce(21), // :, reduce: Element2
+			reduce(21), // %, reduce: Element2
+			reduce(21), // !, reduce: Element2
+			reduce(21), // |, reduce: Element2
+			reduce(21), // |>, reduce: Element2
+			reduce(21), // ^, reduce: Element2
+			reduce(21), // &, reduce: Element2
+			reduce(21), // <<, reduce: Element2
+			reduce(21), // >>, reduce: Element2
+			reduce(21), // =>, reduce: Element2
+			reduce(21), // ->, reduce: Element2
+			reduce(21), // /, reduce: Element2
+			reduce(21), // +, reduce: Element2
+			reduce(21), // -, reduce: Element2
+			reduce(21), // ||, reduce: Element2
+			reduce(21), // <>, reduce: Element2
+			reduce(21), // !=, reduce: Element2
+			reduce(21), // =, reduce: Element2
+			reduce(21), // <, reduce: Element2
+			reduce(21), // <=, reduce: Element2
+			reduce(21), // >, reduce: Element2
+			reduce(21), // >=, reduce: Element2
+			reduce(21), // ;, reduce: Element2
+			reduce(21), // @, reduce: Element2
+			reduce(21), // {, reduce: Element2
+			reduce(21), // }, reduce: Element2
+			reduce(21), // ~, reduce: Element2
+			reduce(21), // ?, reduce: Element2
+			reduce(21), // else, reduce: Element2
+			reduce(21), // if, reduce: Element2
+			reduce(21), // for, reduce: Element2
+			reduce(21), // endfor, reduce: Element2
+			reduce(21), // elif, reduce: Element2
+			reduce(21), // endif, reduce: Element2
+			reduce(21), // set, reduce: Element2
+			reduce(21), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(21), // template_block_start, reduce: Element2
+			reduce(21), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(21), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S22
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),nil,reduce(27),reduce(27),nil,reduce(27),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(22), // ␚, reduce: Element2
+			reduce(22), // identifier, reduce: Element2
+			reduce(22), // bytes_literal, reduce: Element2
+			reduce(22), // string_literal, reduce: Element2
+			reduce(22), // integer_literal, reduce: Element2
+			reduce(22), // floating_point_literal, reduce: Element2
+			reduce(22), // newline, reduce: Element2
+			reduce(22), // dollar, reduce: Element2
+			reduce(22), // *, reduce: Element2
+			reduce(22), // [, reduce: Element2
+			reduce(22), // ], reduce: Element2
+			reduce(22), // (, reduce: Element2
+			reduce(22), // ), reduce: Element2
+			reduce(22), // ,, reduce: Element2
+			reduce(22), // ., reduce: Element2
+			reduce(22), // :, reduce: Element2
+			reduce(22), // %, reduce: Element2
+			reduce(22), // !, reduce: Element2
+			reduce(22), // |, reduce: Element2
+			reduce(22), // |>, reduce: Element2
+			reduce(22), // ^, reduce: Element2
+			reduce(22), // &, reduce: Element2
+			reduce(22), // <<, reduce: Element2
+			reduce(22), // >>, reduce: Element2
+			reduce(22), // =>, reduce: Element2
+			reduce(22), // ->, reduce: Element2
+			reduce(22), // /, reduce: Element2
+			reduce(22), // +, reduce: Element2
+			reduce(22), // -, reduce: Element2
+			reduce(22), // ||, reduce: Element2
+			reduce(22), // <>, reduce: Element2
+			reduce(22), // !=, reduce: Element2
+			reduce(22), // =, reduce: Element2
+			reduce(22), // <, reduce: Element2
+			reduce(22), // <=, reduce: Element2
+			reduce(22), // >, reduce: Element2
+			reduce(22), // >=, reduce: Element2
+			reduce(22), // ;, reduce: Element2
+			reduce(22), // @, reduce: Element2
+			reduce(22), // {, reduce: Element2
+			reduce(22), // }, reduce: Element2
+			reduce(22), // ~, reduce: Element2
+			reduce(22), // ?, reduce: Element2
+			reduce(22), // else, reduce: Element2
+			reduce(22), // if, reduce: Element2
+			reduce(22), // for, reduce: Element2
+			reduce(22), // endfor, reduce: Element2
+			reduce(22), // elif, reduce: Element2
+			reduce(22), // endif, reduce: Element2
+			reduce(22), // set, reduce: Element2
+			reduce(22), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(22), // template_block_start, reduce: Element2
+			reduce(22), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(22), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S23
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),nil,reduce(28),reduce(28),nil,reduce(28),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(23), // ␚, reduce: Element2
+			reduce(23), // identifier, reduce: Element2
+			reduce(23), // bytes_literal, reduce: Element2
+			reduce(23), // string_literal, reduce: Element2
+			reduce(23), // integer_literal, reduce: Element2
+			reduce(23), // floating_point_literal, reduce: Element2
+			reduce(23), // newline, reduce: Element2
+			reduce(23), // dollar, reduce: Element2
+			reduce(23), // *, reduce: Element2
+			reduce(23), // [, reduce: Element2
+			reduce(23), // ], reduce: Element2
+			reduce(23), // (, reduce: Element2
+			reduce(23), // ), reduce: Element2
+			reduce(23), // ,, reduce: Element2
+			reduce(23), // ., reduce: Element2
+			reduce(23), // :, reduce: Element2
+			reduce(23), // %, reduce: Element2
+			reduce(23), // !, reduce: Element2
+			reduce(23), // |, reduce: Element2
+			reduce(23), // |>, reduce: Element2
+			reduce(23), // ^, reduce: Element2
+			reduce(23), // &, reduce: Element2
+			reduce(23), // <<, reduce: Element2
+			reduce(23), // >>, reduce: Element2
+			reduce(23), // =>, reduce: Element2
+			reduce(23), // ->, reduce: Element2
+			reduce(23), // /, reduce: Element2
+			reduce(23), // +, reduce: Element2
+			reduce(23), // -, reduce: Element2
+			reduce(23), // ||, reduce: Element2
+			reduce(23), // <>, reduce: Element2
+			reduce(23), // !=, reduce: Element2
+			reduce(23), // =, reduce: Element2
+			reduce(23), // <, reduce: Element2
+			reduce(23), // <=, reduce: Element2
+			reduce(23), // >, reduce: Element2
+			reduce(23), // >=, reduce: Element2
+			reduce(23), // ;, reduce: Element2
+			reduce(23), // @, reduce: Element2
+			reduce(23), // {, reduce: Element2
+			reduce(23), // }, reduce: Element2
+			reduce(23), // ~, reduce: Element2
+			reduce(23), // ?, reduce: Element2
+			reduce(23), // else, reduce: Element2
+			reduce(23), // if, reduce: Element2
+			reduce(23), // for, reduce: Element2
+			reduce(23), // endfor, reduce: Element2
+			reduce(23), // elif, reduce: Element2
+			reduce(23), // endif, reduce: Element2
+			reduce(23), // set, reduce: Element2
+			reduce(23), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(23), // template_block_start, reduce: Element2
+			reduce(23), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(23), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S24
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),nil,reduce(29),reduce(29),nil,reduce(29),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(24), // ␚, reduce: Element2
+			reduce(24), // identifier, reduce: Element2
+			reduce(24), // bytes_literal, reduce: Element2
+			reduce(24), // string_literal, reduce: Element2
+			reduce(24), // integer_literal, reduce: Element2
+			reduce(24), // floating_point_literal, reduce: Element2
+			reduce(24), // newline, reduce: Element2
+			reduce(24), // dollar, reduce: Element2
+			reduce(24), // *, reduce: Element2
+			reduce(24), // [, reduce: Element2
+			reduce(24), // ], reduce: Element2
+			reduce(24), // (, reduce: Element2
+			reduce(24), // ), reduce: Element2
+			reduce(24), // ,, reduce: Element2
+			reduce(24), // ., reduce: Element2
+			reduce(24), // :, reduce: Element2
+			reduce(24), // %, reduce: Element2
+			reduce(24), // !, reduce: Element2
+			reduce(24), // |, reduce: Element2
+			reduce(24), // |>, reduce: Element2
+			reduce(24), // ^, reduce: Element2
+			reduce(24), // &, reduce: Element2
+			reduce(24), // <<, reduce: Element2
+			reduce(24), // >>, reduce: Element2
+			reduce(24), // =>, reduce: Element2
+			reduce(24), // ->, reduce: Element2
+			reduce(24), // /, reduce: Element2
+			reduce(24), // +, reduce: Element2
+			reduce(24), // -, reduce: Element2
+			reduce(24), // ||, reduce: Element2
+			reduce(24), // <>, reduce: Element2
+			reduce(24), // !=, reduce: Element2
+			reduce(24), // =, reduce: Element2
+			reduce(24), // <, reduce: Element2
+			reduce(24), // <=, reduce: Element2
+			reduce(24), // >, reduce: Element2
+			reduce(24), // >=, reduce: Element2
+			reduce(24), // ;, reduce: Element2
+			reduce(24), // @, reduce: Element2
+			reduce(24), // {, reduce: Element2
+			reduce(24), // }, reduce: Element2
+			reduce(24), // ~, reduce: Element2
+			reduce(24), // ?, reduce: Element2
+			reduce(24), // else, reduce: Element2
+			reduce(24), // if, reduce: Element2
+			reduce(24), // for, reduce: Element2
+			reduce(24), // endfor, reduce: Element2
+			reduce(24), // elif, reduce: Element2
+			reduce(24), // endif, reduce: Element2
+			reduce(24), // set, reduce: Element2
+			reduce(24), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(24), // template_block_start, reduce: Element2
+			reduce(24), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(24), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S25
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),nil,reduce(30),reduce(30),nil,reduce(30),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(25), // ␚, reduce: Element2
+			reduce(25), // identifier, reduce: Element2
+			reduce(25), // bytes_literal, reduce: Element2
+			reduce(25), // string_literal, reduce: Element2
+			reduce(25), // integer_literal, reduce: Element2
+			reduce(25), // floating_point_literal, reduce: Element2
+			reduce(25), // newline, reduce: Element2
+			reduce(25), // dollar, reduce: Element2
+			reduce(25), // *, reduce: Element2
+			reduce(25), // [, reduce: Element2
+			reduce(25), // ], reduce: Element2
+			reduce(25), // (, reduce: Element2
+			reduce(25), // ), reduce: Element2
+			reduce(25), // ,, reduce: Element2
+			reduce(25), // ., reduce: Element2
+			reduce(25), // :, reduce: Element2
+			reduce(25), // %, reduce: Element2
+			reduce(25), // !, reduce: Element2
+			reduce(25), // |, reduce: Element2
+			reduce(25), // |>, reduce: Element2
+			reduce(25), // ^, reduce: Element2
+			reduce(25), // &, reduce: Element2
+			reduce(25), // <<, reduce: Element2
+			reduce(25), // >>, reduce: Element2
+			reduce(25), // =>, reduce: Element2
+			reduce(25), // ->, reduce: Element2
+			reduce(25), // /, reduce: Element2
+			reduce(25), // +, reduce: Element2
+			reduce(25), // -, reduce: Element2
+			reduce(25), // ||, reduce: Element2
+			reduce(25), // <>, reduce: Element2
+			reduce(25), // !=, reduce: Element2
+			reduce(25), // =, reduce: Element2
+			reduce(25), // <, reduce: Element2
+			reduce(25), // <=, reduce: Element2
+			reduce(25), // >, reduce: Element2
+			reduce(25), // >=, reduce: Element2
+			reduce(25), // ;, reduce: Element2
+			reduce(25), // @, reduce: Element2
+			reduce(25), // {, reduce: Element2
+			reduce(25), // }, reduce: Element2
+			reduce(25), // ~, reduce: Element2
+			reduce(25), // ?, reduce: Element2
+			reduce(25), // else, reduce: Element2
+			reduce(25), // if, reduce: Element2
+			reduce(25), // for, reduce: Element2
+			reduce(25), // endfor, reduce: Element2
+			reduce(25), // elif, reduce: Element2
+			reduce(25), // endif, reduce: Element2
+			reduce(25), // set, reduce: Element2
+			reduce(25), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(25), // template_block_start, reduce: Element2
+			reduce(25), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(25), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S26
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),nil,reduce(31),reduce(31),nil,reduce(31),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(26), // ␚, reduce: Element2
+			reduce(26), // identifier, reduce: Element2
+			reduce(26), // bytes_literal, reduce: Element2
+			reduce(26), // string_literal, reduce: Element2
+			reduce(26), // integer_literal, reduce: Element2
+			reduce(26), // floating_point_literal, reduce: Element2
+			reduce(26), // newline, reduce: Element2
+			reduce(26), // dollar, reduce: Element2
+			reduce(26), // *, reduce: Element2
+			reduce(26), // [, reduce: Element2
+			reduce(26), // ], reduce: Element2
+			reduce(26), // (, reduce: Element2
+			reduce(26), // ), reduce: Element2
+			reduce(26), // ,, reduce: Element2
+			reduce(26), // ., reduce: Element2
+			reduce(26), // :, reduce: Element2
+			reduce(26), // %, reduce: Element2
+			reduce(26), // !, reduce: Element2
+			reduce(26), // |, reduce: Element2
+			reduce(26), // |>, reduce: Element2
+			reduce(26), // ^, reduce: Element2
+			reduce(26), // &, reduce: Element2
+			reduce(26), // <<, reduce: Element2
+			reduce(26), // >>, reduce: Element2
+			reduce(26), // =>, reduce: Element2
+			reduce(26), // ->, reduce: Element2
+			reduce(26), // /, reduce: Element2
+			reduce(26), // +, reduce: Element2
+			reduce(26), // -, reduce: Element2
+			reduce(26), // ||, reduce: Element2
+			reduce(26), // <>, reduce: Element2
+			reduce(26), // !=, reduce: Element2
+			reduce(26), // =, reduce: Element2
+			reduce(26), // <, reduce: Element2
+			reduce(26), // <=, reduce: Element2
+			reduce(26), // >, reduce: Element2
+			reduce(26), // >=, reduce: Element2
+			reduce(26), // ;, reduce: Element2
+			reduce(26), // @, reduce: Element2
+			reduce(26), // {, reduce: Element2
+			reduce(26), // }, reduce: Element2
+			reduce(26), // ~, reduce: Element2
+			reduce(26), // ?, reduce: Element2
+			reduce(26), // else, reduce: Element2
+			reduce(26), // if, reduce: Element2
+			reduce(26), // for, reduce: Element2
+			reduce(26), // endfor, reduce: Element2
+			reduce(26), // elif, reduce: Element2
+			reduce(26), // endif, reduce: Element2
+			reduce(26), // set, reduce: Element2
+			reduce(26), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(26), // template_block_start, reduce: Element2
+			reduce(26), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(26), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S27
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),nil,reduce(32),reduce(32),nil,reduce(32),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(27), // ␚, reduce: Element2
+			reduce(27), // identifier, reduce: Element2
+			reduce(27), // bytes_literal, reduce: Element2
+			reduce(27), // string_literal, reduce: Element2
+			reduce(27), // integer_literal, reduce: Element2
+			reduce(27), // floating_point_literal, reduce: Element2
+			reduce(27), // newline, reduce: Element2
+			reduce(27), // dollar, reduce: Element2
+			reduce(27), // *, reduce: Element2
+			reduce(27), // [, reduce: Element2
+			reduce(27), // ], reduce: Element2
+			reduce(27), // (, reduce: Element2
+			reduce(27), // ), reduce: Element2
+			reduce(27), // ,, reduce: Element2
+			reduce(27), // ., reduce: Element2
+			reduce(27), // :, reduce: Element2
+			reduce(27), // %, reduce: Element2
+			reduce(27), // !, reduce: Element2
+			reduce(27), // |, reduce: Element2
+			reduce(27), // |>, reduce: Element2
+			reduce(27), // ^, reduce: Element2
+			reduce(27), // &, reduce: Element2
+			reduce(27), // <<, reduce: Element2
+			reduce(27), // >>, reduce: Element2
+			reduce(27), // =>, reduce: Element2
+			reduce(27), // ->, reduce: Element2
+			reduce(27), // /, reduce: Element2
+			reduce(27), // +, reduce: Element2
+			reduce(27), // -, reduce: Element2
+			reduce(27), // ||, reduce: Element2
+			reduce(27), // <>, reduce: Element2
+			reduce(27), // !=, reduce: Element2
+			reduce(27), // =, reduce: Element2
+			reduce(27), // <, reduce: Element2
+			reduce(27), // <=, reduce: Element2
+			reduce(27), // >, reduce: Element2
+			reduce(27), // >=, reduce: Element2
+			reduce(27), // ;, reduce: Element2
+			reduce(27), // @, reduce: Element2
+			reduce(27), // {, reduce: Element2
+			reduce(27), // }, reduce: Element2
+			reduce(27), // ~, reduce: Element2
+			reduce(27), // ?, reduce: Element2
+			reduce(27), // else, reduce: Element2
+			reduce(27), // if, reduce: Element2
+			reduce(27), // for, reduce: Element2
+			reduce(27), // endfor, reduce: Element2
+			reduce(27), // elif, reduce: Element2
+			reduce(27), // endif, reduce: Element2
+			reduce(27), // set, reduce: Element2
+			reduce(27), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(27), // template_block_start, reduce: Element2
+			reduce(27), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(27), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S28
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),nil,reduce(33),reduce(33),nil,reduce(33),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(28), // ␚, reduce: Element2
+			reduce(28), // identifier, reduce: Element2
+			reduce(28), // bytes_literal, reduce: Element2
+			reduce(28), // string_literal, reduce: Element2
+			reduce(28), // integer_literal, reduce: Element2
+			reduce(28), // floating_point_literal, reduce: Element2
+			reduce(28), // newline, reduce: Element2
+			reduce(28), // dollar, reduce: Element2
+			reduce(28), // *, reduce: Element2
+			reduce(28), // [, reduce: Element2
+			reduce(28), // ], reduce: Element2
+			reduce(28), // (, reduce: Element2
+			reduce(28), // ), reduce: Element2
+			reduce(28), // ,, reduce: Element2
+			reduce(28), // ., reduce: Element2
+			reduce(28), // :, reduce: Element2
+			reduce(28), // %, reduce: Element2
+			reduce(28), // !, reduce: Element2
+			reduce(28), // |, reduce: Element2
+			reduce(28), // |>, reduce: Element2
+			reduce(28), // ^, reduce: Element2
+			reduce(28), // &, reduce: Element2
+			reduce(28), // <<, reduce: Element2
+			reduce(28), // >>, reduce: Element2
+			reduce(28), // =>, reduce: Element2
+			reduce(28), // ->, reduce: Element2
+			reduce(28), // /, reduce: Element2
+			reduce(28), // +, reduce: Element2
+			reduce(28), // -, reduce: Element2
+			reduce(28), // ||, reduce: Element2
+			reduce(28), // <>, reduce: Element2
+			reduce(28), // !=, reduce: Element2
+			reduce(28), // =, reduce: Element2
+			reduce(28), // <, reduce: Element2
+			reduce(28), // <=, reduce: Element2
+			reduce(28), // >, reduce: Element2
+			reduce(28), // >=, reduce: Element2
+			reduce(28), // ;, reduce: Element2
+			reduce(28), // @, reduce: Element2
+			reduce(28), // {, reduce: Element2
+			reduce(28), // }, reduce: Element2
+			reduce(28), // ~, reduce: Element2
+			reduce(28), // ?, reduce: Element2
+			reduce(28), // else, reduce: Element2
+			reduce(28), // if, reduce: Element2
+			reduce(28), // for, reduce: Element2
+			reduce(28), // endfor, reduce: Element2
+			reduce(28), // elif, reduce: Element2
+			reduce(28), // endif, reduce: Element2
+			reduce(28), // set, reduce: Element2
+			reduce(28), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(28), // template_block_start, reduce: Element2
+			reduce(28), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(28), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S29
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),nil,reduce(34),reduce(34),nil,reduce(34),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(29), // ␚, reduce: Element2
+			reduce(29), // identifier, reduce: Element2
+			reduce(29), // bytes_literal, reduce: Element2
+			reduce(29), // string_literal, reduce: Element2
+			reduce(29), // integer_literal, reduce: Element2
+			reduce(29), // floating_point_literal, reduce: Element2
+			reduce(29), // newline, reduce: Element2
+			reduce(29), // dollar, reduce: Element2
+			reduce(29), // *, reduce: Element2
+			reduce(29), // [, reduce: Element2
+			reduce(29), // ], reduce: Element2
+			reduce(29), // (, reduce: Element2
+			reduce(29), // ), reduce: Element2
+			reduce(29), // ,, reduce: Element2
+			reduce(29), // ., reduce: Element2
+			reduce(29), // :, reduce: Element2
+			reduce(29), // %, reduce: Element2
+			reduce(29), // !, reduce: Element2
+			reduce(29), // |, reduce: Element2
+			reduce(29), // |>, reduce: Element2
+			reduce(29), // ^, reduce: Element2
+			reduce(29), // &, reduce: Element2
+			reduce(29), // <<, reduce: Element2
+			reduce(29), // >>, reduce: Element2
+			reduce(29), // =>, reduce: Element2
+			reduce(29), // ->, reduce: Element2
+			reduce(29), // /, reduce: Element2
+			reduce(29), // +, reduce: Element2
+			reduce(29), // -, reduce: Element2
+			reduce(29), // ||, reduce: Element2
+			reduce(29), // <>, reduce: Element2
+			reduce(29), // !=, reduce: Element2
+			reduce(29), // =, reduce: Element2
+			reduce(29), // <, reduce: Element2
+			reduce(29), // <=, reduce: Element2
+			reduce(29), // >, reduce: Element2
+			reduce(29), // >=, reduce: Element2
+			reduce(29), // ;, reduce: Element2
+			reduce(29), // @, reduce: Element2
+			reduce(29), // {, reduce: Element2
+			reduce(29), // }, reduce: Element2
+			reduce(29), // ~, reduce: Element2
+			reduce(29), // ?, reduce: Element2
+			reduce(29), // else, reduce: Element2
+			reduce(29), // if, reduce: Element2
+			reduce(29), // for, reduce: Element2
+			reduce(29), // endfor, reduce: Element2
+			reduce(29), // elif, reduce: Element2
+			reduce(29), // endif, reduce: Element2
+			reduce(29), // set, reduce: Element2
+			reduce(29), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(29), // template_block_start, reduce: Element2
+			reduce(29), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(29), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S30
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),nil,reduce(35),reduce(35),nil,reduce(35),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(30), // ␚, reduce: Element2
+			reduce(30), // identifier, reduce: Element2
+			reduce(30), // bytes_literal, reduce: Element2
+			reduce(30), // string_literal, reduce: Element2
+			reduce(30), // integer_literal, reduce: Element2
+			reduce(30), // floating_point_literal, reduce: Element2
+			reduce(30), // newline, reduce: Element2
+			reduce(30), // dollar, reduce: Element2
+			reduce(30), // *, reduce: Element2
+			reduce(30), // [, reduce: Element2
+			reduce(30), // ], reduce: Element2
+			reduce(30), // (, reduce: Element2
+			reduce(30), // ), reduce: Element2
+			reduce(30), // ,, reduce: Element2
+			reduce(30), // ., reduce: Element2
+			reduce(30), // :, reduce: Element2
+			reduce(30), // %, reduce: Element2
+			reduce(30), // !, reduce: Element2
+			reduce(30), // |, reduce: Element2
+			reduce(30), // |>, reduce: Element2
+			reduce(30), // ^, reduce: Element2
+			reduce(30), // &, reduce: Element2
+			reduce(30), // <<, reduce: Element2
+			reduce(30), // >>, reduce: Element2
+			reduce(30), // =>, reduce: Element2
+			reduce(30), // ->, reduce: Element2
+			reduce(30), // /, reduce: Element2
+			reduce(30), // +, reduce: Element2
+			reduce(30), // -, reduce: Element2
+			reduce(30), // ||, reduce: Element2
+			reduce(30), // <>, reduce: Element2
+			reduce(30), // !=, reduce: Element2
+			reduce(30), // =, reduce: Element2
+			reduce(30), // <, reduce: Element2
+			reduce(30), // <=, reduce: Element2
+			reduce(30), // >, reduce: Element2
+			reduce(30), // >=, reduce: Element2
+			reduce(30), // ;, reduce: Element2
+			reduce(30), // @, reduce: Element2
+			reduce(30), // {, reduce: Element2
+			reduce(30), // }, reduce: Element2
+			reduce(30), // ~, reduce: Element2
+			reduce(30), // ?, reduce: Element2
+			reduce(30), // else, reduce: Element2
+			reduce(30), // if, reduce: Element2
+			reduce(30), // for, reduce: Element2
+			reduce(30), // endfor, reduce: Element2
+			reduce(30), // elif, reduce: Element2
+			reduce(30), // endif, reduce: Element2
+			reduce(30), // set, reduce: Element2
+			reduce(30), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(30), // template_block_start, reduce: Element2
+			reduce(30), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(30), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S31
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),nil,reduce(36),reduce(36),nil,reduce(36),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(31), // ␚, reduce: Element2
+			reduce(31), // identifier, reduce: Element2
+			reduce(31), // bytes_literal, reduce: Element2
+			reduce(31), // string_literal, reduce: Element2
+			reduce(31), // integer_literal, reduce: Element2
+			reduce(31), // floating_point_literal, reduce: Element2
+			reduce(31), // newline, reduce: Element2
+			reduce(31), // dollar, reduce: Element2
+			reduce(31), // *, reduce: Element2
+			reduce(31), // [, reduce: Element2
+			reduce(31), // ], reduce: Element2
+			reduce(31), // (, reduce: Element2
+			reduce(31), // ), reduce: Element2
+			reduce(31), // ,, reduce: Element2
+			reduce(31), // ., reduce: Element2
+			reduce(31), // :, reduce: Element2
+			reduce(31), // %, reduce: Element2
+			reduce(31), // !, reduce: Element2
+			reduce(31), // |, reduce: Element2
+			reduce(31), // |>, reduce: Element2
+			reduce(31), // ^, reduce: Element2
+			reduce(31), // &, reduce: Element2
+			reduce(31), // <<, reduce: Element2
+			reduce(31), // >>, reduce: Element2
+			reduce(31), // =>, reduce: Element2
+			reduce(31), // ->, reduce: Element2
+			reduce(31), // /, reduce: Element2
+			reduce(31), // +, reduce: Element2
+			reduce(31), // -, reduce: Element2
+			reduce(31), // ||, reduce: Element2
+			reduce(31), // <>, reduce: Element2
+			reduce(31), // !=, reduce: Element2
+			reduce(31), // =, reduce: Element2
+			reduce(31), // <, reduce: Element2
+			reduce(31), // <=, reduce: Element2
+			reduce(31), // >, reduce: Element2
+			reduce(31), // >=, reduce: Element2
+			reduce(31), // ;, reduce: Element2
+			reduce(31), // @, reduce: Element2
+			reduce(31), // {, reduce: Element2
+			reduce(31), // }, reduce: Element2
+			reduce(31), // ~, reduce: Element2
+			reduce(31), // ?, reduce: Element2
+			reduce(31), // else, reduce: Element2
+			reduce(31), // if, reduce: Element2
+			reduce(31), // for, reduce: Element2
+			reduce(31), // endfor, reduce: Element2
+			reduce(31), // elif, reduce: Element2
+			reduce(31), // endif, reduce: Element2
+			reduce(31), // set, reduce: Element2
+			reduce(31), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(31), // template_block_start, reduce: Element2
+			reduce(31), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(31), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S32
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),nil,reduce(37),reduce(37),nil,reduce(37),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(32), // ␚, reduce: Element2
+			reduce(32), // identifier, reduce: Element2
+			reduce(32), // bytes_literal, reduce: Element2
+			reduce(32), // string_literal, reduce: Element2
+			reduce(32), // integer_literal, reduce: Element2
+			reduce(32), // floating_point_literal, reduce: Element2
+			reduce(32), // newline, reduce: Element2
+			reduce(32), // dollar, reduce: Element2
+			reduce(32), // *, reduce: Element2
+			reduce(32), // [, reduce: Element2
+			reduce(32), // ], reduce: Element2
+			reduce(32), // (, reduce: Element2
+			reduce(32), // ), reduce: Element2
+			reduce(32), // ,, reduce: Element2
+			reduce(32), // ., reduce: Element2
+			reduce(32), // :, reduce: Element2
+			reduce(32), // %, reduce: Element2
+			reduce(32), // !, reduce: Element2
+			reduce(32), // |, reduce: Element2
+			reduce(32), // |>, reduce: Element2
+			reduce(32), // ^, reduce: Element2
+			reduce(32), // &, reduce: Element2
+			reduce(32), // <<, reduce: Element2
+			reduce(32), // >>, reduce: Element2
+			reduce(32), // =>, reduce: Element2
+			reduce(32), // ->, reduce: Element2
+			reduce(32), // /, reduce: Element2
+			reduce(32), // +, reduce: Element2
+			reduce(32), // -, reduce: Element2
+			reduce(32), // ||, reduce: Element2
+			reduce(32), // <>, reduce: Element2
+			reduce(32), // !=, reduce: Element2
+			reduce(32), // =, reduce: Element2
+			reduce(32), // <, reduce: Element2
+			reduce(32), // <=, reduce: Element2
+			reduce(32), // >, reduce: Element2
+			reduce(32), // >=, reduce: Element2
+			reduce(32), // ;, reduce: Element2
+			reduce(32), // @, reduce: Element2
+			reduce(32), // {, reduce: Element2
+			reduce(32), // }, reduce: Element2
+			reduce(32), // ~, reduce: Element2
+			reduce(32), // ?, reduce: Element2
+			reduce(32), // else, reduce: Element2
+			reduce(32), // if, reduce: Element2
+			reduce(32), // for, reduce: Element2
+			reduce(32), // endfor, reduce: Element2
+			reduce(32), // elif, reduce: Element2
+			reduce(32), // endif, reduce: Element2
+			reduce(32), // set, reduce: Element2
+			reduce(32), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(32), // template_block_start, reduce: Element2
+			reduce(32), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(32), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S33
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),nil,reduce(38),reduce(38),nil,reduce(38),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(33), // ␚, reduce: Element2
+			reduce(33), // identifier, reduce: Element2
+			reduce(33), // bytes_literal, reduce: Element2
+			reduce(33), // string_literal, reduce: Element2
+			reduce(33), // integer_literal, reduce: Element2
+			reduce(33), // floating_point_literal, reduce: Element2
+			reduce(33), // newline, reduce: Element2
+			reduce(33), // dollar, reduce: Element2
+			reduce(33), // *, reduce: Element2
+			reduce(33), // [, reduce: Element2
+			reduce(33), // ], reduce: Element2
+			reduce(33), // (, reduce: Element2
+			reduce(33), // ), reduce: Element2
+			reduce(33), // ,, reduce: Element2
+			reduce(33), // ., reduce: Element2
+			reduce(33), // :, reduce: Element2
+			reduce(33), // %, reduce: Element2
+			reduce(33), // !, reduce: Element2
+			reduce(33), // |, reduce: Element2
+			reduce(33), // |>, reduce: Element2
+			reduce(33), // ^, reduce: Element2
+			reduce(33), // &, reduce: Element2
+			reduce(33), // <<, reduce: Element2
+			reduce(33), // >>, reduce: Element2
+			reduce(33), // =>, reduce: Element2
+			reduce(33), // ->, reduce: Element2
+			reduce(33), // /, reduce: Element2
+			reduce(33), // +, reduce: Element2
+			reduce(33), // -, reduce: Element2
+			reduce(33), // ||, reduce: Element2
+			reduce(33), // <>, reduce: Element2
+			reduce(33), // !=, reduce: Element2
+			reduce(33), // =, reduce: Element2
+			reduce(33), // <, reduce: Element2
+			reduce(33), // <=, reduce: Element2
+			reduce(33), // >, reduce: Element2
+			reduce(33), // >=, reduce: Element2
+			reduce(33), // ;, reduce: Element2
+			reduce(33), // @, reduce: Element2
+			reduce(33), // {, reduce: Element2
+			reduce(33), // }, reduce: Element2
+			reduce(33), // ~, reduce: Element2
+			reduce(33), // ?, reduce: Element2
+			reduce(33), // else, reduce: Element2
+			reduce(33), // if, reduce: Element2
+			reduce(33), // for, reduce: Element2
+			reduce(33), // endfor, reduce: Element2
+			reduce(33), // elif, reduce: Element2
+			reduce(33), // endif, reduce: Element2
+			reduce(33), // set, reduce: Element2
+			reduce(33), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(33), // template_block_start, reduce: Element2
+			reduce(33), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(33), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S34
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),nil,reduce(39),reduce(39),nil,reduce(39),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(34), // ␚, reduce: Element2
+			reduce(34), // identifier, reduce: Element2
+			reduce(34), // bytes_literal, reduce: Element2
+			reduce(34), // string_literal, reduce: Element2
+			reduce(34), // integer_literal, reduce: Element2
+			reduce(34), // floating_point_literal, reduce: Element2
+			reduce(34), // newline, reduce: Element2
+			reduce(34), // dollar, reduce: Element2
+			reduce(34), // *, reduce: Element2
+			reduce(34), // [, reduce: Element2
+			reduce(34), // ], reduce: Element2
+			reduce(34), // (, reduce: Element2
+			reduce(34), // ), reduce: Element2
+			reduce(34), // ,, reduce: Element2
+			reduce(34), // ., reduce: Element2
+			reduce(34), // :, reduce: Element2
+			reduce(34), // %, reduce: Element2
+			reduce(34), // !, reduce: Element2
+			reduce(34), // |, reduce: Element2
+			reduce(34), // |>, reduce: Element2
+			reduce(34), // ^, reduce: Element2
+			reduce(34), // &, reduce: Element2
+			reduce(34), // <<, reduce: Element2
+			reduce(34), // >>, reduce: Element2
+			reduce(34), // =>, reduce: Element2
+			reduce(34), // ->, reduce: Element2
+			reduce(34), // /, reduce: Element2
+			reduce(34), // +, reduce: Element2
+			reduce(34), // -, reduce: Element2
+			reduce(34), // ||, reduce: Element2
+			reduce(34), // <>, reduce: Element2
+			reduce(34), // !=, reduce: Element2
+			reduce(34), // =, reduce: Element2
+			reduce(34), // <, reduce: Element2
+			reduce(34), // <=, reduce: Element2
+			reduce(34), // >, reduce: Element2
+			reduce(34), // >=, reduce: Element2
+			reduce(34), // ;, reduce: Element2
+			reduce(34), // @, reduce: Element2
+			reduce(34), // {, reduce: Element2
+			reduce(34), // }, reduce: Element2
+			reduce(34), // ~, reduce: Element2
+			reduce(34), // ?, reduce: Element2
+			reduce(34), // else, reduce: Element2
+			reduce(34), // if, reduce: Element2
+			reduce(34), // for, reduce: Element2
+			reduce(34), // endfor, reduce: Element2
+			reduce(34), // elif, reduce: Element2
+			reduce(34), // endif, reduce: Element2
+			reduce(34), // set, reduce: Element2
+			reduce(34), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(34), // template_block_start, reduce: Element2
+			reduce(34), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(34), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S35
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),nil,reduce(40),reduce(40),nil,reduce(40),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(35), // ␚, reduce: Element2
+			reduce(35), // identifier, reduce: Element2
+			reduce(35), // bytes_literal, reduce: Element2
+			reduce(35), // string_literal, reduce: Element2
+			reduce(35), // integer_literal, reduce: Element2
+			reduce(35), // floating_point_literal, reduce: Element2
+			reduce(35), // newline, reduce: Element2
+			reduce(35), // dollar, reduce: Element2
+			reduce(35), // *, reduce: Element2
+			reduce(35), // [, reduce: Element2
+			reduce(35), // ], reduce: Element2
+			reduce(35), // (, reduce: Element2
+			reduce(35), // ), reduce: Element2
+			reduce(35), // ,, reduce: Element2
+			reduce(35), // ., reduce: Element2
+			reduce(35), // :, reduce: Element2
+			reduce(35), // %, reduce: Element2
+			reduce(35), // !, reduce: Element2
+			reduce(35), // |, reduce: Element2
+			reduce(35), // |>, reduce: Element2
+			reduce(35), // ^, reduce: Element2
+			reduce(35), // &, reduce: Element2
+			reduce(35), // <<, reduce: Element2
+			reduce(35), // >>, reduce: Element2
+			reduce(35), // =>, reduce: Element2
+			reduce(35), // ->, reduce: Element2
+			reduce(35), // /, reduce: Element2
+			reduce(35), // +, reduce: Element2
+			reduce(35), // -, reduce: Element2
+			reduce(35), // ||, reduce: Element2
+			reduce(35), // <>, reduce: Element2
+			reduce(35), // !=, reduce: Element2
+			reduce(35), // =, reduce: Element2
+			reduce(35), // <, reduce: Element2
+			reduce(35), // <=, reduce: Element2
+			reduce(35), // >, reduce: Element2
+			reduce(35), // >=, reduce: Element2
+			reduce(35), // ;, reduce: Element2
+			reduce(35), // @, reduce: Element2
+			reduce(35), // {, reduce: Element2
+			reduce(35), // }, reduce: Element2
+			reduce(35), // ~, reduce: Element2
+			reduce(35), // ?, reduce: Element2
+			reduce(35), // else, reduce: Element2
+			reduce(35), // if, reduce: Element2
+			reduce(35), // for, reduce: Element2
+			reduce(35), // endfor, reduce: Element2
+			reduce(35), // elif, reduce: Element2
+			reduce(35), // endif, reduce: Element2
+			reduce(35), // set, reduce: Element2
+			reduce(35), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(35), // template_block_start, reduce: Element2
+			reduce(35), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(35), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S36
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),nil,reduce(41),reduce(41),nil,reduce(41),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(36), // ␚, reduce: Element2
+			reduce(36), // identifier, reduce: Element2
+			reduce(36), // bytes_literal, reduce: Element2
+			reduce(36), // string_literal, reduce: Element2
+			reduce(36), // integer_literal, reduce: Element2
+			reduce(36), // floating_point_literal, reduce: Element2
+			reduce(36), // newline, reduce: Element2
+			reduce(36), // dollar, reduce: Element2
+			reduce(36), // *, reduce: Element2
+			reduce(36), // [, reduce: Element2
+			reduce(36), // ], reduce: Element2
+			reduce(36), // (, reduce: Element2
+			reduce(36), // ), reduce: Element2
+			reduce(36), // ,, reduce: Element2
+			reduce(36), // ., reduce: Element2
+			reduce(36), // :, reduce: Element2
+			reduce(36), // %, reduce: Element2
+			reduce(36), // !, reduce: Element2
+			reduce(36), // |, reduce: Element2
+			reduce(36), // |>, reduce: Element2
+			reduce(36), // ^, reduce: Element2
+			reduce(36), // &, reduce: Element2
+			reduce(36), // <<, reduce: Element2
+			reduce(36), // >>, reduce: Element2
+			reduce(36), // =>, reduce: Element2
+			reduce(36), // ->, reduce: Element2
+			reduce(36), // /, reduce: Element2
+			reduce(36), // +, reduce: Element2
+			reduce(36), // -, reduce: Element2
+			reduce(36), // ||, reduce: Element2
+			reduce(36), // <>, reduce: Element2
+			reduce(36), // !=, reduce: Element2
+			reduce(36), // =, reduce: Element2
+			reduce(36), // <, reduce: Element2
+			reduce(36), // <=, reduce: Element2
+			reduce(36), // >, reduce: Element2
+			reduce(36), // >=, reduce: Element2
+			reduce(36), // ;, reduce: Element2
+			reduce(36), // @, reduce: Element2
+			reduce(36), // {, reduce: Element2
+			reduce(36), // }, reduce: Element2
+			reduce(36), // ~, reduce: Element2
+			reduce(36), // ?, reduce: Element2
+			reduce(36), // else, reduce: Element2
+			reduce(36), // if, reduce: Element2
+			reduce(36), // for, reduce: Element2
+			reduce(36), // endfor, reduce: Element2
+			reduce(36), // elif, reduce: Element2
+			reduce(36), // endif, reduce: Element2
+			reduce(36), // set, reduce: Element2
+			reduce(36), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(36), // template_block_start, reduce: Element2
+			reduce(36), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(36), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S37
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),nil,reduce(42),reduce(42),nil,reduce(42),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(37), // ␚, reduce: Element2
+			reduce(37), // identifier, reduce: Element2
+			reduce(37), // bytes_literal, reduce: Element2
+			reduce(37), // string_literal, reduce: Element2
+			reduce(37), // integer_literal, reduce: Element2
+			reduce(37), // floating_point_literal, reduce: Element2
+			reduce(37), // newline, reduce: Element2
+			reduce(37), // dollar, reduce: Element2
+			reduce(37), // *, reduce: Element2
+			reduce(37), // [, reduce: Element2
+			reduce(37), // ], reduce: Element2
+			reduce(37), // (, reduce: Element2
+			reduce(37), // ), reduce: Element2
+			reduce(37), // ,, reduce: Element2
+			reduce(37), // ., reduce: Element2
+			reduce(37), // :, reduce: Element2
+			reduce(37), // %, reduce: Element2
+			reduce(37), // !, reduce: Element2
+			reduce(37), // |, reduce: Element2
+			reduce(37), // |>, reduce: Element2
+			reduce(37), // ^, reduce: Element2
+			reduce(37), // &, reduce: Element2
+			reduce(37), // <<, reduce: Element2
+			reduce(37), // >>, reduce: Element2
+			reduce(37), // =>, reduce: Element2
+			reduce(37), // ->, reduce: Element2
+			reduce(37), // /, reduce: Element2
+			reduce(37), // +, reduce: Element2
+			reduce(37), // -, reduce: Element2
+			reduce(37), // ||, reduce: Element2
+			reduce(37), // <>, reduce: Element2
+			reduce(37), // !=, reduce: Element2
+			reduce(37), // =, reduce: Element2
+			reduce(37), // <, reduce: Element2
+			reduce(37), // <=, reduce: Element2
+			reduce(37), // >, reduce: Element2
+			reduce(37), // >=, reduce: Element2
+			reduce(37), // ;, reduce: Element2
+			reduce(37), // @, reduce: Element2
+			reduce(37), // {, reduce: Element2
+			reduce(37), // }, reduce: Element2
+			reduce(37), // ~, reduce: Element2
+			reduce(37), // ?, reduce: Element2
+			reduce(37), // else, reduce: Element2
+			reduce(37), // if, reduce: Element2
+			reduce(37), // for, reduce: Element2
+			reduce(37), // endfor, reduce: Element2
+			reduce(37), // elif, reduce: Element2
+			reduce(37), // endif, reduce: Element2
+			reduce(37), // set, reduce: Element2
+			reduce(37), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(37), // template_block_start, reduce: Element2
+			reduce(37), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(37), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S38
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),nil,reduce(44),reduce(44),nil,reduce(44),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(38), // ␚, reduce: Element2
+			reduce(38), // identifier, reduce: Element2
+			reduce(38), // bytes_literal, reduce: Element2
+			reduce(38), // string_literal, reduce: Element2
+			reduce(38), // integer_literal, reduce: Element2
+			reduce(38), // floating_point_literal, reduce: Element2
+			reduce(38), // newline, reduce: Element2
+			reduce(38), // dollar, reduce: Element2
+			reduce(38), // *, reduce: Element2
+			reduce(38), // [, reduce: Element2
+			reduce(38), // ], reduce: Element2
+			reduce(38), // (, reduce: Element2
+			reduce(38), // ), reduce: Element2
+			reduce(38), // ,, reduce: Element2
+			reduce(38), // ., reduce: Element2
+			reduce(38), // :, reduce: Element2
+			reduce(38), // %, reduce: Element2
+			reduce(38), // !, reduce: Element2
+			reduce(38), // |, reduce: Element2
+			reduce(38), // |>, reduce: Element2
+			reduce(38), // ^, reduce: Element2
+			reduce(38), // &, reduce: Element2
+			reduce(38), // <<, reduce: Element2
+			reduce(38), // >>, reduce: Element2
+			reduce(38), // =>, reduce: Element2
+			reduce(38), // ->, reduce: Element2
+			reduce(38), // /, reduce: Element2
+			reduce(38), // +, reduce: Element2
+			reduce(38), // -, reduce: Element2
+			reduce(38), // ||, reduce: Element2
+			reduce(38), // <>, reduce: Element2
+			reduce(38), // !=, reduce: Element2
+			reduce(38), // =, reduce: Element2
+			reduce(38), // <, reduce: Element2
+			reduce(38), // <=, reduce: Element2
+			reduce(38), // >, reduce: Element2
+			reduce(38), // >=, reduce: Element2
+			reduce(38), // ;, reduce: Element2
+			reduce(38), // @, reduce: Element2
+			reduce(38), // {, reduce: Element2
+			reduce(38), // }, reduce: Element2
+			reduce(38), // ~, reduce: Element2
+			reduce(38), // ?, reduce: Element2
+			reduce(38), // else, reduce: Element2
+			reduce(38), // if, reduce: Element2
+			reduce(38), // for, reduce: Element2
+			reduce(38), // endfor, reduce: Element2
+			reduce(38), // elif, reduce: Element2
+			reduce(38), // endif, reduce: Element2
+			reduce(38), // set, reduce: Element2
+			reduce(38), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(38), // template_block_start, reduce: Element2
+			reduce(38), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(38), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S39
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),nil,reduce(46),reduce(46),nil,reduce(46),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(39), // ␚, reduce: Element2
+			reduce(39), // identifier, reduce: Element2
+			reduce(39), // bytes_literal, reduce: Element2
+			reduce(39), // string_literal, reduce: Element2
+			reduce(39), // integer_literal, reduce: Element2
+			reduce(39), // floating_point_literal, reduce: Element2
+			reduce(39), // newline, reduce: Element2
+			reduce(39), // dollar, reduce: Element2
+			reduce(39), // *, reduce: Element2
+			reduce(39), // [, reduce: Element2
+			reduce(39), // ], reduce: Element2
+			reduce(39), // (, reduce: Element2
+			reduce(39), // ), reduce: Element2
+			reduce(39), // ,, reduce: Element2
+			reduce(39), // ., reduce: Element2
+			reduce(39), // :, reduce: Element2
+			reduce(39), // %, reduce: Element2
+			reduce(39), // !, reduce: Element2
+			reduce(39), // |, reduce: Element2
+			reduce(39), // |>, reduce: Element2
+			reduce(39), // ^, reduce: Element2
+			reduce(39), // &, reduce: Element2
+			reduce(39), // <<, reduce: Element2
+			reduce(39), // >>, reduce: Element2
+			reduce(39), // =>, reduce: Element2
+			reduce(39), // ->, reduce: Element2
+			reduce(39), // /, reduce: Element2
+			reduce(39), // +, reduce: Element2
+			reduce(39), // -, reduce: Element2
+			reduce(39), // ||, reduce: Element2
+			reduce(39), // <>, reduce: Element2
+			reduce(39), // !=, reduce: Element2
+			reduce(39), // =, reduce: Element2
+			reduce(39), // <, reduce: Element2
+			reduce(39), // <=, reduce: Element2
+			reduce(39), // >, reduce: Element2
+			reduce(39), // >=, reduce: Element2
+			reduce(39), // ;, reduce: Element2
+			reduce(39), // @, reduce: Element2
+			reduce(39), // {, reduce: Element2
+			reduce(39), // }, reduce: Element2
+			reduce(39), // ~, reduce: Element2
+			reduce(39), // ?, reduce: Element2
+			reduce(39), // else, reduce: Element2
+			reduce(39), // if, reduce: Element2
+			reduce(39), // for, reduce: Element2
+			reduce(39), // endfor, reduce: Element2
+			reduce(39), // elif, reduce: Element2
+			reduce(39), // endif, reduce: Element2
+			reduce(39), // set, reduce: Element2
+			reduce(39), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(39), // template_block_start, reduce: Element2
+			reduce(39), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(39), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S40
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),nil,reduce(47),reduce(47),nil,reduce(47),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(40), // ␚, reduce: Element2
+			reduce(40), // identifier, reduce: Element2
+			reduce(40), // bytes_literal, reduce: Element2
+			reduce(40), // string_literal, reduce: Element2
+			reduce(40), // integer_literal, reduce: Element2
+			reduce(40), // floating_point_literal, reduce: Element2
+			reduce(40), // newline, reduce: Element2
+			reduce(40), // dollar, reduce: Element2
+			reduce(40), // *, reduce: Element2
+			reduce(40), // [, reduce: Element2
+			reduce(40), // ], reduce: Element2
+			reduce(40), // (, reduce: Element2
+			reduce(40), // ), reduce: Element2
+			reduce(40), // ,, reduce: Element2
+			reduce(40), // ., reduce: Element2
+			reduce(40), // :, reduce: Element2
+			reduce(40), // %, reduce: Element2
+			reduce(40), // !, reduce: Element2
+			reduce(40), // |, reduce: Element2
+			reduce(40), // |>, reduce: Element2
+			reduce(40), // ^, reduce: Element2
+			reduce(40), // &, reduce: Element2
+			reduce(40), // <<, reduce: Element2
+			reduce(40), // >>, reduce: Element2
+			reduce(40), // =>, reduce: Element2
+			reduce(40), // ->, reduce: Element2
+			reduce(40), // /, reduce: Element2
+			reduce(40), // +, reduce: Element2
+			reduce(40), // -, reduce: Element2
+			reduce(40), // ||, reduce: Element2
+			reduce(40), // <>, reduce: Element2
+			reduce(40), // !=, reduce: Element2
+			reduce(40), // =, reduce: Element2
+			reduce(40), // <, reduce: Element2
+			reduce(40), // <=, reduce: Element2
+			reduce(40), // >, reduce: Element2
+			reduce(40), // >=, reduce: Element2
+			reduce(40), // ;, reduce: Element2
+			reduce(40), // @, reduce: Element2
+			reduce(40), // {, reduce: Element2
+			reduce(40), // }, reduce: Element2
+			reduce(40), // ~, reduce: Element2
+			reduce(40), // ?, reduce: Element2
+			reduce(40), // else, reduce: Element2
+			reduce(40), // if, reduce: Element2
+			reduce(40), // for, reduce: Element2
+			reduce(40), // endfor, reduce: Element2
+			reduce(40), // elif, reduce: Element2
+			reduce(40), // endif, reduce: Element2
+			reduce(40), // set, reduce: Element2
+			reduce(40), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(40), // template_block_start, reduce: Element2
+			reduce(40), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(40), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S41
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),nil,reduce(49),reduce(49),nil,reduce(49),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(41), // ␚, reduce: Element2
+			reduce(41), // identifier, reduce: Element2
+			reduce(41), // bytes_literal, reduce: Element2
+			reduce(41), // string_literal, reduce: Element2
+			reduce(41), // integer_literal, reduce: Element2
+			reduce(41), // floating_point_literal, reduce: Element2
+			reduce(41), // newline, reduce: Element2
+			reduce(41), // dollar, reduce: Element2
+			reduce(41), // *, reduce: Element2
+			reduce(41), // [, reduce: Element2
+			reduce(41), // ], reduce: Element2
+			reduce(41), // (, reduce: Element2
+			reduce(41), // ), reduce: Element2
+			reduce(41), // ,, reduce: Element2
+			reduce(41), // ., reduce: Element2
+			reduce(41), // :, reduce: Element2
+			reduce(41), // %, reduce: Element2
+			reduce(41), // !, reduce: Element2
+			reduce(41), // |, reduce: Element2
+			reduce(41), // |>, reduce: Element2
+			reduce(41), // ^, reduce: Element2
+			reduce(41), // &, reduce: Element2
+			reduce(41), // <<, reduce: Element2
+			reduce(41), // >>, reduce: Element2
+			reduce(41), // =>, reduce: Element2
+			reduce(41), // ->, reduce: Element2
+			reduce(41), // /, reduce: Element2
+			reduce(41), // +, reduce: Element2
+			reduce(41), // -, reduce: Element2
+			reduce(41), // ||, reduce: Element2
+			reduce(41), // <>, reduce: Element2
+			reduce(41), // !=, reduce: Element2
+			reduce(41), // =, reduce: Element2
+			reduce(41), // <, reduce: Element2
+			reduce(41), // <=, reduce: Element2
+			reduce(41), // >, reduce: Element2
+			reduce(41), // >=, reduce: Element2
+			reduce(41), // ;, reduce: Element2
+			reduce(41), // @, reduce: Element2
+			reduce(41), // {, reduce: Element2
+			reduce(41), // }, reduce: Element2
+			reduce(41), // ~, reduce: Element2
+			reduce(41), // ?, reduce: Element2
+			reduce(41), // else, reduce: Element2
+			reduce(41), // if, reduce: Element2
+			reduce(41), // for, reduce: Element2
+			reduce(41), // endfor, reduce: Element2
+			reduce(41), // elif, reduce: Element2
+			reduce(41), // endif, reduce: Element2
+			reduce(41), // set, reduce: Element2
+			reduce(41), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(41), // template_block_start, reduce: Element2
+			reduce(41), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(41), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S42
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),nil,reduce(50),reduce(50),nil,reduce(50),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(42), // ␚, reduce: Element2
+			reduce(42), // identifier, reduce: Element2
+			reduce(42), // bytes_literal, reduce: Element2
+			reduce(42), // string_literal, reduce: Element2
+			reduce(42), // integer_literal, reduce: Element2
+			reduce(42), // floating_point_literal, reduce: Element2
+			reduce(42), // newline, reduce: Element2
+			reduce(42), // dollar, reduce: Element2
+			reduce(42), // *, reduce: Element2
+			reduce(42), // [, reduce: Element2
+			reduce(42), // ], reduce: Element2
+			reduce(42), // (, reduce: Element2
+			reduce(42), // ), reduce: Element2
+			reduce(42), // ,, reduce: Element2
+			reduce(42), // ., reduce: Element2
+			reduce(42), // :, reduce: Element2
+			reduce(42), // %, reduce: Element2
+			reduce(42), // !, reduce: Element2
+			reduce(42), // |, reduce: Element2
+			reduce(42), // |>, reduce: Element2
+			reduce(42), // ^, reduce: Element2
+			reduce(42), // &, reduce: Element2
+			reduce(42), // <<, reduce: Element2
+			reduce(42), // >>, reduce: Element2
+			reduce(42), // =>, reduce: Element2
+			reduce(42), // ->, reduce: Element2
+			reduce(42), // /, reduce: Element2
+			reduce(42), // +, reduce: Element2
+			reduce(42), // -, reduce: Element2
+			reduce(42), // ||, reduce: Element2
+			reduce(42), // <>, reduce: Element2
+			reduce(42), // !=, reduce: Element2
+			reduce(42), // =, reduce: Element2
+			reduce(42), // <, reduce: Element2
+			reduce(42), // <=, reduce: Element2
+			reduce(42), // >, reduce: Element2
+			reduce(42), // >=, reduce: Element2
+			reduce(42), // ;, reduce: Element2
+			reduce(42), // @, reduce: Element2
+			reduce(42), // {, reduce: Element2
+			reduce(42), // }, reduce: Element2
+			reduce(42), // ~, reduce: Element2
+			reduce(42), // ?, reduce: Element2
+			reduce(42), // else, reduce: Element2
+			reduce(42), // if, reduce: Element2
+			reduce(42), // for, reduce: Element2
+			reduce(42), // endfor, reduce: Element2
+			reduce(42), // elif, reduce: Element2
+			reduce(42), // endif, reduce: Element2
+			reduce(42), // set, reduce: Element2
+			reduce(42), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(42), // template_block_start, reduce: Element2
+			reduce(42), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(42), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S43
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),nil,reduce(51),reduce(51),nil,reduce(51),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(43), // ␚, reduce: Element2
+			reduce(43), // identifier, reduce: Element2
+			reduce(43), // bytes_literal, reduce: Element2
+			reduce(43), // string_literal, reduce: Element2
+			reduce(43), // integer_literal, reduce: Element2
+			reduce(43), // floating_point_literal, reduce: Element2
+			reduce(43), // newline, reduce: Element2
+			reduce(43), // dollar, reduce: Element2
+			reduce(43), // *, reduce: Element2
+			reduce(43), // [, reduce: Element2
+			reduce(43), // ], reduce: Element2
+			reduce(43), // (, reduce: Element2
+			reduce(43), // ), reduce: Element2
+			reduce(43), // ,, reduce: Element2
+			reduce(43), // ., reduce: Element2
+			reduce(43), // :, reduce: Element2
+			reduce(43), // %, reduce: Element2
+			reduce(43), // !, reduce: Element2
+			reduce(43), // |, reduce: Element2
+			reduce(43), // |>, reduce: Element2
+			reduce(43), // ^, reduce: Element2
+			reduce(43), // &, reduce: Element2
+			reduce(43), // <<, reduce: Element2
+			reduce(43), // >>, reduce: Element2
+			reduce(43), // =>, reduce: Element2
+			reduce(43), // ->, reduce: Element2
+			reduce(43), // /, reduce: Element2
+			reduce(43), // +, reduce: Element2
+			reduce(43), // -, reduce: Element2
+			reduce(43), // ||, reduce: Element2
+			reduce(43), // <>, reduce: Element2
+			reduce(43), // !=, reduce: Element2
+			reduce(43), // =, reduce: Element2
+			reduce(43), // <, reduce: Element2
+			reduce(43), // <=, reduce: Element2
+			reduce(43), // >, reduce: Element2
+			reduce(43), // >=, reduce: Element2
+			reduce(43), // ;, reduce: Element2
+			reduce(43), // @, reduce: Element2
+			reduce(43), // {, reduce: Element2
+			reduce(43), // }, reduce: Element2
+			reduce(43), // ~, reduce: Element2
+			reduce(43), // ?, reduce: Element2
+			reduce(43), // else, reduce: Element2
+			reduce(43), // if, reduce: Element2
+			reduce(43), // for, reduce: Element2
+			reduce(43), // endfor, reduce: Element2
+			reduce(43), // elif, reduce: Element2
+			reduce(43), // endif, reduce: Element2
+			reduce(43), // set, reduce: Element2
+			reduce(43), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(43), // template_block_start, reduce: Element2
+			reduce(43), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(43), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S44
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),nil,reduce(52),reduce(52),nil,reduce(52),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(44), // ␚, reduce: Element2
+			reduce(44), // identifier, reduce: Element2
+			reduce(44), // bytes_literal, reduce: Element2
+			reduce(44), // string_literal, reduce: Element2
+			reduce(44), // integer_literal, reduce: Element2
+			reduce(44), // floating_point_literal, reduce: Element2
+			reduce(44), // newline, reduce: Element2
+			reduce(44), // dollar, reduce: Element2
+			reduce(44), // *, reduce: Element2
+			reduce(44), // [, reduce: Element2
+			reduce(44), // ], reduce: Element2
+			reduce(44), // (, reduce: Element2
+			reduce(44), // ), reduce: Element2
+			reduce(44), // ,, reduce: Element2
+			reduce(44), // ., reduce: Element2
+			reduce(44), // :, reduce: Element2
+			reduce(44), // %, reduce: Element2
+			reduce(44), // !, reduce: Element2
+			reduce(44), // |, reduce: Element2
+			reduce(44), // |>, reduce: Element2
+			reduce(44), // ^, reduce: Element2
+			reduce(44), // &, reduce: Element2
+			reduce(44), // <<, reduce: Element2
+			reduce(44), // >>, reduce: Element2
+			reduce(44), // =>, reduce: Element2
+			reduce(44), // ->, reduce: Element2
+			reduce(44), // /, reduce: Element2
+			reduce(44), // +, reduce: Element2
+			reduce(44), // -, reduce: Element2
+			reduce(44), // ||, reduce: Element2
+			reduce(44), // <>, reduce: Element2
+			reduce(44), // !=, reduce: Element2
+			reduce(44), // =, reduce: Element2
+			reduce(44), // <, reduce: Element2
+			reduce(44), // <=, reduce: Element2
+			reduce(44), // >, reduce: Element2
+			reduce(44), // >=, reduce: Element2
+			reduce(44), // ;, reduce: Element2
+			reduce(44), // @, reduce: Element2
+			reduce(44), // {, reduce: Element2
+			reduce(44), // }, reduce: Element2
+			reduce(44), // ~, reduce: Element2
+			reduce(44), // ?, reduce: Element2
+			reduce(44), // else, reduce: Element2
+			reduce(44), // if, reduce: Element2
+			reduce(44), // for, reduce: Element2
+			reduce(44), // endfor, reduce: Element2
+			reduce(44), // elif, reduce: Element2
+			reduce(44), // endif, reduce: Element2
+			reduce(44), // set, reduce: Element2
+			reduce(44), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(44), // template_block_start, reduce: Element2
+			reduce(44), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(44), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S45
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),nil,reduce(53),reduce(53),nil,reduce(53),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(45), // ␚, reduce: Element2
+			reduce(45), // identifier, reduce: Element2
+			reduce(45), // bytes_literal, reduce: Element2
+			reduce(45), // string_literal, reduce: Element2
+			reduce(45), // integer_literal, reduce: Element2
+			reduce(45), // floating_point_literal, reduce: Element2
+			reduce(45), // newline, reduce: Element2
+			reduce(45), // dollar, reduce: Element2
+			reduce(45), // *, reduce: Element2
+			reduce(45), // [, reduce: Element2
+			reduce(45), // ], reduce: Element2
+			reduce(45), // (, reduce: Element2
+			reduce(45), // ), reduce: Element2
+			reduce(45), // ,, reduce: Element2
+			reduce(45), // ., reduce: Element2
+			reduce(45), // :, reduce: Element2
+			reduce(45), // %, reduce: Element2
+			reduce(45), // !, reduce: Element2
+			reduce(45), // |, reduce: Element2
+			reduce(45), // |>, reduce: Element2
+			reduce(45), // ^, reduce: Element2
+			reduce(45), // &, reduce: Element2
+			reduce(45), // <<, reduce: Element2
+			reduce(45), // >>, reduce: Element2
+			reduce(45), // =>, reduce: Element2
+			reduce(45), // ->, reduce: Element2
+			reduce(45), // /, reduce: Element2
+			reduce(45), // +, reduce: Element2
+			reduce(45), // -, reduce: Element2
+			reduce(45), // ||, reduce: Element2
+			reduce(45), // <>, reduce: Element2
+			reduce(45), // !=, reduce: Element2
+			reduce(45), // =, reduce: Element2
+			reduce(45), // <, reduce: Element2
+			reduce(45), // <=, reduce: Element2
+			reduce(45), // >, reduce: Element2
+			reduce(45), // >=, reduce: Element2
+			reduce(45), // ;, reduce: Element2
+			reduce(45), // @, reduce: Element2
+			reduce(45), // {, reduce: Element2
+			reduce(45), // }, reduce: Element2
+			reduce(45), // ~, reduce: Element2
+			reduce(45), // ?, reduce: Element2
+			reduce(45), // else, reduce: Element2
+			reduce(45), // if, reduce: Element2
+			reduce(45), // for, reduce: Element2
+			reduce(45), // endfor, reduce: Element2
+			reduce(45), // elif, reduce: Element2
+			reduce(45), // endif, reduce: Element2
+			reduce(45), // set, reduce: Element2
+			reduce(45), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(45), // template_block_start, reduce: Element2
+			reduce(45), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(45), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S46
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),nil,reduce(54),reduce(54),nil,reduce(54),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(46), // ␚, reduce: Element2
+			reduce(46), // identifier, reduce: Element2
+			reduce(46), // bytes_literal, reduce: Element2
+			reduce(46), // string_literal, reduce: Element2
+			reduce(46), // integer_literal, reduce: Element2
+			reduce(46), // floating_point_literal, reduce: Element2
+			reduce(46), // newline, reduce: Element2
+			reduce(46), // dollar, reduce: Element2
+			reduce(46), // *, reduce: Element2
+			reduce(46), // [, reduce: Element2
+			reduce(46), // ], reduce: Element2
+			reduce(46), // (, reduce: Element2
+			reduce(46), // ), reduce: Element2
+			reduce(46), // ,, reduce: Element2
+			reduce(46), // ., reduce: Element2
+			reduce(46), // :, reduce: Element2
+			reduce(46), // %, reduce: Element2
+			reduce(46), // !, reduce: Element2
+			reduce(46), // |, reduce: Element2
+			reduce(46), // |>, reduce: Element2
+			reduce(46), // ^, reduce: Element2
+			reduce(46), // &, reduce: Element2
+			reduce(46), // <<, reduce: Element2
+			reduce(46), // >>, reduce: Element2
+			reduce(46), // =>, reduce: Element2
+			reduce(46), // ->, reduce: Element2
+			reduce(46), // /, reduce: Element2
+			reduce(46), // +, reduce: Element2
+			reduce(46), // -, reduce: Element2
+			reduce(46), // ||, reduce: Element2
+			reduce(46), // <>, reduce: Element2
+			reduce(46), // !=, reduce: Element2
+			reduce(46), // =, reduce: Element2
+			reduce(46), // <, reduce: Element2
+			reduce(46), // <=, reduce: Element2
+			reduce(46), // >, reduce: Element2
+			reduce(46), // >=, reduce: Element2
+			reduce(46), // ;, reduce: Element2
+			reduce(46), // @, reduce: Element2
+			reduce(46), // {, reduce: Element2
+			reduce(46), // }, reduce: Element2
+			reduce(46), // ~, reduce: Element2
+			reduce(46), // ?, reduce: Element2
+			reduce(46), // else, reduce: Element2
+			reduce(46), // if, reduce: Element2
+			reduce(46), // for, reduce: Element2
+			reduce(46), // endfor, reduce: Element2
+			reduce(46), // elif, reduce: Element2
+			reduce(46), // endif, reduce: Element2
+			reduce(46), // set, reduce: Element2
+			reduce(46), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(46), // template_block_start, reduce: Element2
+			reduce(46), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(46), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S47
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),nil,reduce(55),reduce(55),nil,reduce(55),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(47), // ␚, reduce: Element2
+			reduce(47), // identifier, reduce: Element2
+			reduce(47), // bytes_literal, reduce: Element2
+			reduce(47), // string_literal, reduce: Element2
+			reduce(47), // integer_literal, reduce: Element2
+			reduce(47), // floating_point_literal, reduce: Element2
+			reduce(47), // newline, reduce: Element2
+			reduce(47), // dollar, reduce: Element2
+			reduce(47), // *, reduce: Element2
+			reduce(47), // [, reduce: Element2
+			reduce(47), // ], reduce: Element2
+			reduce(47), // (, reduce: Element2
+			reduce(47), // ), reduce: Element2
+			reduce(47), // ,, reduce: Element2
+			reduce(47), // ., reduce: Element2
+			reduce(47), // :, reduce: Element2
+			reduce(47), // %, reduce: Element2
+			reduce(47), // !, reduce: Element2
+			reduce(47), // |, reduce: Element2
+			reduce(47), // |>, reduce: Element2
+			reduce(47), // ^, reduce: Element2
+			reduce(47), // &, reduce: Element2
+			reduce(47), // <<, reduce: Element2
+			reduce(47), // >>, reduce: Element2
+			reduce(47), // =>, reduce: Element2
+			reduce(47), // ->, reduce: Element2
+			reduce(47), // /, reduce: Element2
+			reduce(47), // +, reduce: Element2
+			reduce(47), // -, reduce: Element2
+			reduce(47), // ||, reduce: Element2
+			reduce(47), // <>, reduce: Element2
+			reduce(47), // !=, reduce: Element2
+			reduce(47), // =, reduce: Element2
+			reduce(47), // <, reduce: Element2
+			reduce(47), // <=, reduce: Element2
+			reduce(47), // >, reduce: Element2
+			reduce(47), // >=, reduce: Element2
+			reduce(47), // ;, reduce: Element2
+			reduce(47), // @, reduce: Element2
+			reduce(47), // {, reduce: Element2
+			reduce(47), // }, reduce: Element2
+			reduce(47), // ~, reduce: Element2
+			reduce(47), // ?, reduce: Element2
+			reduce(47), // else, reduce: Element2
+			reduce(47), // if, reduce: Element2
+			reduce(47), // for, reduce: Element2
+			reduce(47), // endfor, reduce: Element2
+			reduce(47), // elif, reduce: Element2
+			reduce(47), // endif, reduce: Element2
+			reduce(47), // set, reduce: Element2
+			reduce(47), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(47), // template_block_start, reduce: Element2
+			reduce(47), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(47), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S48
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),nil,reduce(56),reduce(56),nil,reduce(56),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(48), // ␚, reduce: Element2
+			reduce(48), // identifier, reduce: Element2
+			reduce(48), // bytes_literal, reduce: Element2
+			reduce(48), // string_literal, reduce: Element2
+			reduce(48), // integer_literal, reduce: Element2
+			reduce(48), // floating_point_literal, reduce: Element2
+			reduce(48), // newline, reduce: Element2
+			reduce(48), // dollar, reduce: Element2
+			reduce(48), // *, reduce: Element2
+			reduce(48), // [, reduce: Element2
+			reduce(48), // ], reduce: Element2
+			reduce(48), // (, reduce: Element2
+			reduce(48), // ), reduce: Element2
+			reduce(48), // ,, reduce: Element2
+			reduce(48), // ., reduce: Element2
+			reduce(48), // :, reduce: Element2
+			reduce(48), // %, reduce: Element2
+			reduce(48), // !, reduce: Element2
+			reduce(48), // |, reduce: Element2
+			reduce(48), // |>, reduce: Element2
+			reduce(48), // ^, reduce: Element2
+			reduce(48), // &, reduce: Element2
+			reduce(48), // <<, reduce: Element2
+			reduce(48), // >>, reduce: Element2
+			reduce(48), // =>, reduce: Element2
+			reduce(48), // ->, reduce: Element2
+			reduce(48), // /, reduce: Element2
+			reduce(48), // +, reduce: Element2
+			reduce(48), // -, reduce: Element2
+			reduce(48), // ||, reduce: Element2
+			reduce(48), // <>, reduce: Element2
+			reduce(48), // !=, reduce: Element2
+			reduce(48), // =, reduce: Element2
+			reduce(48), // <, reduce: Element2
+			reduce(48), // <=, reduce: Element2
+			reduce(48), // >, reduce: Element2
+			reduce(48), // >=, reduce: Element2
+			reduce(48), // ;, reduce: Element2
+			reduce(48), // @, reduce: Element2
+			reduce(48), // {, reduce: Element2
+			reduce(48), // }, reduce: Element2
+			reduce(48), // ~, reduce: Element2
+			reduce(48), // ?, reduce: Element2
+			reduce(48), // else, reduce: Element2
+			reduce(48), // if, reduce: Element2
+			reduce(48), // for, reduce: Element2
+			reduce(48), // endfor, reduce: Element2
+			reduce(48), // elif, reduce: Element2
+			reduce(48), // endif, reduce: Element2
+			reduce(48), // set, reduce: Element2
+			reduce(48), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(48), // template_block_start, reduce: Element2
+			reduce(48), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(48), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S49
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),nil,reduce(57),reduce(57),nil,reduce(57),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(49), // ␚, reduce: Element2
+			reduce(49), // identifier, reduce: Element2
+			reduce(49), // bytes_literal, reduce: Element2
+			reduce(49), // string_literal, reduce: Element2
+			reduce(49), // integer_literal, reduce: Element2
+			reduce(49), // floating_point_literal, reduce: Element2
+			reduce(49), // newline, reduce: Element2
+			reduce(49), // dollar, reduce: Element2
+			reduce(49), // *, reduce: Element2
+			reduce(49), // [, reduce: Element2
+			reduce(49), // ], reduce: Element2
+			reduce(49), // (, reduce: Element2
+			reduce(49), // ), reduce: Element2
+			reduce(49), // ,, reduce: Element2
+			reduce(49), // ., reduce: Element2
+			reduce(49), // :, reduce: Element2
+			reduce(49), // %, reduce: Element2
+			reduce(49), // !, reduce: Element2
+			reduce(49), // |, reduce: Element2
+			reduce(49), // |>, reduce: Element2
+			reduce(49), // ^, reduce: Element2
+			reduce(49), // &, reduce: Element2
+			reduce(49), // <<, reduce: Element2
+			reduce(49), // >>, reduce: Element2
+			reduce(49), // =>, reduce: Element2
+			reduce(49), // ->, reduce: Element2
+			reduce(49), // /, reduce: Element2
+			reduce(49), // +, reduce: Element2
+			reduce(49), // -, reduce: Element2
+			reduce(49), // ||, reduce: Element2
+			reduce(49), // <>, reduce: Element2
+			reduce(49), // !=, reduce: Element2
+			reduce(49), // =, reduce: Element2
+			reduce(49), // <, reduce: Element2
+			reduce(49), // <=, reduce: Element2
+			reduce(49), // >, reduce: Element2
+			reduce(49), // >=, reduce: Element2
+			reduce(49), // ;, reduce: Element2
+			reduce(49), // @, reduce: Element2
+			reduce(49), // {, reduce: Element2
+			reduce(49), // }, reduce: Element2
+			reduce(49), // ~, reduce: Element2
+			reduce(49), // ?, reduce: Element2
+			reduce(49), // else, reduce: Element2
+			reduce(49), // if, reduce: Element2
+			reduce(49), // for, reduce: Element2
+			reduce(49), // endfor, reduce: Element2
+			reduce(49), // elif, reduce: Element2
+			reduce(49), // endif, reduce: Element2
+			reduce(49), // set, reduce: Element2
+			reduce(49), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(49), // template_block_start, reduce: Element2
+			reduce(49), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(49), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S50
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),nil,reduce(58),reduce(58),nil,reduce(58),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(50), // ␚, reduce: Element2
+			reduce(50), // identifier, reduce: Element2
+			reduce(50), // bytes_literal, reduce: Element2
+			reduce(50), // string_literal, reduce: Element2
+			reduce(50), // integer_literal, reduce: Element2
+			reduce(50), // floating_point_literal, reduce: Element2
+			reduce(50), // newline, reduce: Element2
+			reduce(50), // dollar, reduce: Element2
+			reduce(50), // *, reduce: Element2
+			reduce(50), // [, reduce: Element2
+			reduce(50), // ], reduce: Element2
+			reduce(50), // (, reduce: Element2
+			reduce(50), // ), reduce: Element2
+			reduce(50), // ,, reduce: Element2
+			reduce(50), // ., reduce: Element2
+			reduce(50), // :, reduce: Element2
+			reduce(50), // %, reduce: Element2
+			reduce(50), // !, reduce: Element2
+			reduce(50), // |, reduce: Element2
+			reduce(50), // |>, reduce: Element2
+			reduce(50), // ^, reduce: Element2
+			reduce(50), // &, reduce: Element2
+			reduce(50), // <<, reduce: Element2
+			reduce(50), // >>, reduce: Element2
+			reduce(50), // =>, reduce: Element2
+			reduce(50), // ->, reduce: Element2
+			reduce(50), // /, reduce: Element2
+			reduce(50), // +, reduce: Element2
+			reduce(50), // -, reduce: Element2
+			reduce(50), // ||, reduce: Element2
+			reduce(50), // <>, reduce: Element2
+			reduce(50), // !=, reduce: Element2
+			reduce(50), // =, reduce: Element2
+			reduce(50), // <, reduce: Element2
+			reduce(50), // <=, reduce: Element2
+			reduce(50), // >, reduce: Element2
+			reduce(50), // >=, reduce: Element2
+			reduce(50), // ;, reduce: Element2
+			reduce(50), // @, reduce: Element2
+			reduce(50), // {, reduce: Element2
+			reduce(50), // }, reduce: Element2
+			reduce(50), // ~, reduce: Element2
+			reduce(50), // ?, reduce: Element2
+			reduce(50), // else, reduce: Element2
+			reduce(50), // if, reduce: Element2
+			reduce(50), // for, reduce: Element2
+			reduce(50), // endfor, reduce: Element2
+			reduce(50), // elif, reduce: Element2
+			reduce(50), // endif, reduce: Element2
+			reduce(50), // set, reduce: Element2
+			reduce(50), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(50), // template_block_start, reduce: Element2
+			reduce(50), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(50), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S51
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),nil,reduce(59),reduce(59),nil,reduce(59),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(51), // ␚, reduce: Element2
+			reduce(51), // identifier, reduce: Element2
+			reduce(51), // bytes_literal, reduce: Element2
+			reduce(51), // string_literal, reduce: Element2
+			reduce(51), // integer_literal, reduce: Element2
+			reduce(51), // floating_point_literal, reduce: Element2
+			reduce(51), // newline, reduce: Element2
+			reduce(51), // dollar, reduce: Element2
+			reduce(51), // *, reduce: Element2
+			reduce(51), // [, reduce: Element2
+			reduce(51), // ], reduce: Element2
+			reduce(51), // (, reduce: Element2
+			reduce(51), // ), reduce: Element2
+			reduce(51), // ,, reduce: Element2
+			reduce(51), // ., reduce: Element2
+			reduce(51), // :, reduce: Element2
+			reduce(51), // %, reduce: Element2
+			reduce(51), // !, reduce: Element2
+			reduce(51), // |, reduce: Element2
+			reduce(51), // |>, reduce: Element2
+			reduce(51), // ^, reduce: Element2
+			reduce(51), // &, reduce: Element2
+			reduce(51), // <<, reduce: Element2
+			reduce(51), // >>, reduce: Element2
+			reduce(51), // =>, reduce: Element2
+			reduce(51), // ->, reduce: Element2
+			reduce(51), // /, reduce: Element2
+			reduce(51), // +, reduce: Element2
+			reduce(51), // -, reduce: Element2
+			reduce(51), // ||, reduce: Element2
+			reduce(51), // <>, reduce: Element2
+			reduce(51), // !=, reduce: Element2
+			reduce(51), // =, reduce: Element2
+			reduce(51), // <, reduce: Element2
+			reduce(51), // <=, reduce: Element2
+			reduce(51), // >, reduce: Element2
+			reduce(51), // >=, reduce: Element2
+			reduce(51), // ;, reduce: Element2
+			reduce(51), // @, reduce: Element2
+			reduce(51), // {, reduce: Element2
+			reduce(51), // }, reduce: Element2
+			reduce(51), // ~, reduce: Element2
+			reduce(51), // ?, reduce: Element2
+			reduce(51), // else, reduce: Element2
+			reduce(51), // if, reduce: Element2
+			reduce(51), // for, reduce: Element2
+			reduce(51), // endfor, reduce: Element2
+			reduce(51), // elif, reduce: Element2
+			reduce(51), // endif, reduce: Element2
+			reduce(51), // set, reduce: Element2
+			reduce(51), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(51), // template_block_start, reduce: Element2
+			reduce(51), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(51), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S52
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),nil,reduce(60),reduce(60),nil,reduce(60),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(52), // ␚, reduce: Element2
+			reduce(52), // identifier, reduce: Element2
+			reduce(52), // bytes_literal, reduce: Element2
+			reduce(52), // string_literal, reduce: Element2
+			reduce(52), // integer_literal, reduce: Element2
+			reduce(52), // floating_point_literal, reduce: Element2
+			reduce(52), // newline, reduce: Element2
+			reduce(52), // dollar, reduce: Element2
+			reduce(52), // *, reduce: Element2
+			reduce(52), // [, reduce: Element2
+			reduce(52), // ], reduce: Element2
+			reduce(52), // (, reduce: Element2
+			reduce(52), // ), reduce: Element2
+			reduce(52), // ,, reduce: Element2
+			reduce(52), // ., reduce: Element2
+			reduce(52), // :, reduce: Element2
+			reduce(52), // %, reduce: Element2
+			reduce(52), // !, reduce: Element2
+			reduce(52), // |, reduce: Element2
+			reduce(52), // |>, reduce: Element2
+			reduce(52), // ^, reduce: Element2
+			reduce(52), // &, reduce: Element2
+			reduce(52), // <<, reduce: Element2
+			reduce(52), // >>, reduce: Element2
+			reduce(52), // =>, reduce: Element2
+			reduce(52), // ->, reduce: Element2
+			reduce(52), // /, reduce: Element2
+			reduce(52), // +, reduce: Element2
+			reduce(52), // -, reduce: Element2
+			reduce(52), // ||, reduce: Element2
+			reduce(52), // <>, reduce: Element2
+			reduce(52), // !=, reduce: Element2
+			reduce(52), // =, reduce: Element2
+			reduce(52), // <, reduce: Element2
+			reduce(52), // <=, reduce: Element2
+			reduce(52), // >, reduce: Element2
+			reduce(52), // >=, reduce: Element2
+			reduce(52), // ;, reduce: Element2
+			reduce(52), // @, reduce: Element2
+			reduce(52), // {, reduce: Element2
+			reduce(52), // }, reduce: Element2
+			reduce(52), // ~, reduce: Element2
+			reduce(52), // ?, reduce: Element2
+			reduce(52), // else, reduce: Element2
+			reduce(52), // if, reduce: Element2
+			reduce(52), // for, reduce: Element2
+			reduce(52), // endfor, reduce: Element2
+			reduce(52), // elif, reduce: Element2
+			reduce(52), // endif, reduce: Element2
+			reduce(52), // set, reduce: Element2
+			reduce(52), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(52), // template_block_start, reduce: Element2
+			reduce(52), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(52), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S53
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),nil,reduce(61),reduce(61),nil,reduce(61),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(53), // ␚, reduce: Element2
+			reduce(53), // identifier, reduce: Element2
+			reduce(53), // bytes_literal, reduce: Element2
+			reduce(53), // string_literal, reduce: Element2
+			reduce(53), // integer_literal, reduce: Element2
+			reduce(53), // floating_point_literal, reduce: Element2
+			reduce(53), // newline, reduce: Element2
+			reduce(53), // dollar, reduce: Element2
+			reduce(53), // *, reduce: Element2
+			reduce(53), // [, reduce: Element2
+			reduce(53), // ], reduce: Element2
+			reduce(53), // (, reduce: Element2
+			reduce(53), // ), reduce: Element2
+			reduce(53), // ,, reduce: Element2
+			reduce(53), // ., reduce: Element2
+			reduce(53), // :, reduce: Element2
+			reduce(53), // %, reduce: Element2
+			reduce(53), // !, reduce: Element2
+			reduce(53), // |, reduce: Element2
+			reduce(53), // |>, reduce: Element2
+			reduce(53), // ^, reduce: Element2
+			reduce(53), // &, reduce: Element2
+			reduce(53), // <<, reduce: Element2
+			reduce(53), // >>, reduce: Element2
+			reduce(53), // =>, reduce: Element2
+			reduce(53), // ->, reduce: Element2
+			reduce(53), // /, reduce: Element2
+			reduce(53), // +, reduce: Element2
+			reduce(53), // -, reduce: Element2
+			reduce(53), // ||, reduce: Element2
+			reduce(53), // <>, reduce: Element2
+			reduce(53), // !=, reduce: Element2
+			reduce(53), // =, reduce: Element2
+			reduce(53), // <, reduce: Element2
+			reduce(53), // <=, reduce: Element2
+			reduce(53), // >, reduce: Element2
+			reduce(53), // >=, reduce: Element2
+			reduce(53), // ;, reduce: Element2
+			reduce(53), // @, reduce: Element2
+			reduce(53), // {, reduce: Element2
+			reduce(53), // }, reduce: Element2
+			reduce(53), // ~, reduce: Element2
+			reduce(53), // ?, reduce: Element2
+			reduce(53), // else, reduce: Element2
+			reduce(53), // if, reduce: Element2
+			reduce(53), // for, reduce: Element2
+			reduce(53), // endfor, reduce: Element2
+			reduce(53), // elif, reduce: Element2
+			reduce(53), // endif, reduce: Element2
+			reduce(53), // set, reduce: Element2
+			reduce(53), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(53), // template_block_start, reduce: Element2
+			reduce(53), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(53), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S54
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(79),shift(80),shift(81),shift(82),shift(83),shift(84),shift(85),shift(86),shift(87),shift(88),shift(89),shift(90),shift(91),shift(92),shift(93),shift(94),shift(95),shift(96),shift(97),shift(98),shift(99),shift(100),shift(101),shift(102),shift(103),shift(104),shift(105),shift(106),shift(107),shift(108),shift(109),shift(110),shift(111),shift(112),shift(113),shift(114),shift(115),shift(116),shift(117),shift(118),shift(119),shift(120),shift(121),shift(122),shift(124),shift(55),shift(127),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(54), // ␚, reduce: Element2
+			reduce(54), // identifier, reduce: Element2
+			reduce(54), // bytes_literal, reduce: Element2
+			reduce(54), // string_literal, reduce: Element2
+			reduce(54), // integer_literal, reduce: Element2
+			reduce(54), // floating_point_literal, reduce: Element2
+			reduce(54), // newline, reduce: Element2
+			reduce(54), // dollar, reduce: Element2
+			reduce(54), // *, reduce: Element2
+			reduce(54), // [, reduce: Element2
+			reduce(54), // ], reduce: Element2
+			reduce(54), // (, reduce: Element2
+			reduce(54), // ), reduce: Element2
+			reduce(54), // ,, reduce: Element2
+			reduce(54), // ., reduce: Element2
+			reduce(54), // :, reduce: Element2
+			reduce(54), // %, reduce: Element2
+			reduce(54), // !, reduce: Element2
+			reduce(54), // |, reduce: Element2
+			reduce(54), // |>, reduce: Element2
+			reduce(54), // ^, reduce: Element2
+			reduce(54), // &, reduce: Element2
+			reduce(54), // <<, reduce: Element2
+			reduce(54), // >>, reduce: Element2
+			reduce(54), // =>, reduce: Element2
+			reduce(54), // ->, reduce: Element2
+			reduce(54), // /, reduce: Element2
+			reduce(54), // +, reduce: Element2
+			reduce(54), // -, reduce: Element2
+			reduce(54), // ||, reduce: Element2
+			reduce(54), // <>, reduce: Element2
+			reduce(54), // !=, reduce: Element2
+			reduce(54), // =, reduce: Element2
+			reduce(54), // <, reduce: Element2
+			reduce(54), // <=, reduce: Element2
+			reduce(54), // >, reduce: Element2
+			reduce(54), // >=, reduce: Element2
+			reduce(54), // ;, reduce: Element2
+			reduce(54), // @, reduce: Element2
+			reduce(54), // {, reduce: Element2
+			reduce(54), // }, reduce: Element2
+			reduce(54), // ~, reduce: Element2
+			reduce(54), // ?, reduce: Element2
+			reduce(54), // else, reduce: Element2
+			reduce(54), // if, reduce: Element2
+			reduce(54), // for, reduce: Element2
+			reduce(54), // endfor, reduce: Element2
+			reduce(54), // elif, reduce: Element2
+			reduce(54), // endif, reduce: Element2
+			reduce(54), // set, reduce: Element2
+			reduce(54), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(54), // template_block_start, reduce: Element2
+			reduce(54), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(54), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S55
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),nil,nil,nil,shift(131),nil,nil,nil,nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(55), // ␚, reduce: Element2
+			reduce(55), // identifier, reduce: Element2
+			reduce(55), // bytes_literal, reduce: Element2
+			reduce(55), // string_literal, reduce: Element2
+			reduce(55), // integer_literal, reduce: Element2
+			reduce(55), // floating_point_literal, reduce: Element2
+			reduce(55), // newline, reduce: Element2
+			reduce(55), // dollar, reduce: Element2
+			reduce(55), // *, reduce: Element2
+			reduce(55), // [, reduce: Element2
+			reduce(55), // ], reduce: Element2
+			reduce(55), // (, reduce: Element2
+			reduce(55), // ), reduce: Element2
+			reduce(55), // ,, reduce: Element2
+			reduce(55), // ., reduce: Element2
+			reduce(55), // :, reduce: Element2
+			reduce(55), // %, reduce: Element2
+			reduce(55), // !, reduce: Element2
+			reduce(55), // |, reduce: Element2
+			reduce(55), // |>, reduce: Element2
+			reduce(55), // ^, reduce: Element2
+			reduce(55), // &, reduce: Element2
+			reduce(55), // <<, reduce: Element2
+			reduce(55), // >>, reduce: Element2
+			reduce(55), // =>, reduce: Element2
+			reduce(55), // ->, reduce: Element2
+			reduce(55), // /, reduce: Element2
+			reduce(55), // +, reduce: Element2
+			reduce(55), // -, reduce: Element2
+			reduce(55), // ||, reduce: Element2
+			reduce(55), // <>, reduce: Element2
+			reduce(55), // !=, reduce: Element2
+			reduce(55), // =, reduce: Element2
+			reduce(55), // <, reduce: Element2
+			reduce(55), // <=, reduce: Element2
+			reduce(55), // >, reduce: Element2
+			reduce(55), // >=, reduce: Element2
+			reduce(55), // ;, reduce: Element2
+			reduce(55), // @, reduce: Element2
+			reduce(55), // {, reduce: Element2
+			reduce(55), // }, reduce: Element2
+			reduce(55), // ~, reduce: Element2
+			reduce(55), // ?, reduce: Element2
+			reduce(55), // else, reduce: Element2
+			reduce(55), // if, reduce: Element2
+			reduce(55), // for, reduce: Element2
+			reduce(55), // endfor, reduce: Element2
+			reduce(55), // elif, reduce: Element2
+			reduce(55), // endif, reduce: Element2
+			reduce(55), // set, reduce: Element2
+			reduce(55), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(55), // template_block_start, reduce: Element2
+			reduce(55), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(55), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S56
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(185),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(56), // ␚, reduce: Element2
+			reduce(56), // identifier, reduce: Element2
+			reduce(56), // bytes_literal, reduce: Element2
+			reduce(56), // string_literal, reduce: Element2
+			reduce(56), // integer_literal, reduce: Element2
+			reduce(56), // floating_point_literal, reduce: Element2
+			reduce(56), // newline, reduce: Element2
+			reduce(56), // dollar, reduce: Element2
+			reduce(56), // *, reduce: Element2
+			reduce(56), // [, reduce: Element2
+			reduce(56), // ], reduce: Element2
+			reduce(56), // (, reduce: Element2
+			reduce(56), // ), reduce: Element2
+			reduce(56), // ,, reduce: Element2
+			reduce(56), // ., reduce: Element2
+			reduce(56), // :, reduce: Element2
+			reduce(56), // %, reduce: Element2
+			reduce(56), // !, reduce: Element2
+			reduce(56), // |, reduce: Element2
+			reduce(56), // |>, reduce: Element2
+			reduce(56), // ^, reduce: Element2
+			reduce(56), // &, reduce: Element2
+			reduce(56), // <<, reduce: Element2
+			reduce(56), // >>, reduce: Element2
+			reduce(56), // =>, reduce: Element2
+			reduce(56), // ->, reduce: Element2
+			reduce(56), // /, reduce: Element2
+			reduce(56), // +, reduce: Element2
+			reduce(56), // -, reduce: Element2
+			reduce(56), // ||, reduce: Element2
+			reduce(56), // <>, reduce: Element2
+			reduce(56), // !=, reduce: Element2
+			reduce(56), // =, reduce: Element2
+			reduce(56), // <, reduce: Element2
+			reduce(56), // <=, reduce: Element2
+			reduce(56), // >, reduce: Element2
+			reduce(56), // >=, reduce: Element2
+			reduce(56), // ;, reduce: Element2
+			reduce(56), // @, reduce: Element2
+			reduce(56), // {, reduce: Element2
+			reduce(56), // }, reduce: Element2
+			reduce(56), // ~, reduce: Element2
+			reduce(56), // ?, reduce: Element2
+			reduce(56), // else, reduce: Element2
+			reduce(56), // if, reduce: Element2
+			reduce(56), // for, reduce: Element2
+			reduce(56), // endfor, reduce: Element2
+			reduce(56), // elif, reduce: Element2
+			reduce(56), // endif, reduce: Element2
+			reduce(56), // set, reduce: Element2
+			reduce(56), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(56), // template_block_start, reduce: Element2
+			reduce(56), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(56), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S57
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),reduce(68),nil,reduce(68),reduce(68),nil,reduce(68),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(57), // ␚, reduce: Element2
+			reduce(57), // identifier, reduce: Element2
+			reduce(57), // bytes_literal, reduce: Element2
+			reduce(57), // string_literal, reduce: Element2
+			reduce(57), // integer_literal, reduce: Element2
+			reduce(57), // floating_point_literal, reduce: Element2
+			reduce(57), // newline, reduce: Element2
+			reduce(57), // dollar, reduce: Element2
+			reduce(57), // *, reduce: Element2
+			reduce(57), // [, reduce: Element2
+			reduce(57), // ], reduce: Element2
+			reduce(57), // (, reduce: Element2
+			reduce(57), // ), reduce: Element2
+			reduce(57), // ,, reduce: Element2
+			reduce(57), // ., reduce: Element2
+			reduce(57), // :, reduce: Element2
+			reduce(57), // %, reduce: Element2
+			reduce(57), // !, reduce: Element2
+			reduce(57), // |, reduce: Element2
+			reduce(57), // |>, reduce: Element2
+			reduce(57), // ^, reduce: Element2
+			reduce(57), // &, reduce: Element2
+			reduce(57), // <<, reduce: Element2
+			reduce(57), // >>, reduce: Element2
+			reduce(57), // =>, reduce: Element2
+			reduce(57), // ->, reduce: Element2
+			reduce(57), // /, reduce: Element2
+			reduce(57), // +, reduce: Element2
+			reduce(57), // -, reduce: Element2
+			reduce(57), // ||, reduce: Element2
+			reduce(57), // <>, reduce: Element2
+			reduce(57), // !=, reduce: Element2
+			reduce(57), // =, reduce: Element2
+			reduce(57), // <, reduce: Element2
+			reduce(57), // <=, reduce: Element2
+			reduce(57), // >, reduce: Element2
+			reduce(57), // >=, reduce: Element2
+			reduce(57), // ;, reduce: Element2
+			reduce(57), // @, reduce: Element2
+			reduce(57), // {, reduce: Element2
+			reduce(57), // }, reduce: Element2
+			reduce(57), // ~, reduce: Element2
+			reduce(57), // ?, reduce: Element2
+			reduce(57), // else, reduce: Element2
+			reduce(57), // if, reduce: Element2
+			reduce(57), // for, reduce: Element2
+			reduce(57), // endfor, reduce: Element2
+			reduce(57), // elif, reduce: Element2
+			reduce(57), // endif, reduce: Element2
+			reduce(57), // set, reduce: Element2
+			reduce(57), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(57), // template_block_start, reduce: Element2
+			reduce(57), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(57), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S58
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(79),shift(80),shift(81),shift(82),shift(83),shift(84),shift(85),shift(86),shift(87),shift(88),shift(89),shift(90),shift(91),shift(92),shift(93),shift(94),shift(95),shift(96),shift(97),shift(98),shift(99),shift(100),shift(101),shift(102),shift(103),shift(104),shift(105),shift(106),shift(107),shift(108),shift(109),shift(110),shift(111),shift(112),shift(113),shift(114),shift(115),shift(116),shift(117),shift(118),shift(119),shift(120),shift(121),shift(122),shift(193),shift(55),shift(127),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(58), // ␚, reduce: Element2
+			reduce(58), // identifier, reduce: Element2
+			reduce(58), // bytes_literal, reduce: Element2
+			reduce(58), // string_literal, reduce: Element2
+			reduce(58), // integer_literal, reduce: Element2
+			reduce(58), // floating_point_literal, reduce: Element2
+			reduce(58), // newline, reduce: Element2
+			reduce(58), // dollar, reduce: Element2
+			reduce(58), // *, reduce: Element2
+			reduce(58), // [, reduce: Element2
+			reduce(58), // ], reduce: Element2
+			reduce(58), // (, reduce: Element2
+			reduce(58), // ), reduce: Element2
+			reduce(58), // ,, reduce: Element2
+			reduce(58), // ., reduce: Element2
+			reduce(58), // :, reduce: Element2
+			reduce(58), // %, reduce: Element2
+			reduce(58), // !, reduce: Element2
+			reduce(58), // |, reduce: Element2
+			reduce(58), // |>, reduce: Element2
+			reduce(58), // ^, reduce: Element2
+			reduce(58), // &, reduce: Element2
+			reduce(58), // <<, reduce: Element2
+			reduce(58), // >>, reduce: Element2
+			reduce(58), // =>, reduce: Element2
+			reduce(58), // ->, reduce: Element2
+			reduce(58), // /, reduce: Element2
+			reduce(58), // +, reduce: Element2
+			reduce(58), // -, reduce: Element2
+			reduce(58), // ||, reduce: Element2
+			reduce(58), // <>, reduce: Element2
+			reduce(58), // !=, reduce: Element2
+			reduce(58), // =, reduce: Element2
+			reduce(58), // <, reduce: Element2
+			reduce(58), // <=, reduce: Element2
+			reduce(58), // >, reduce: Element2
+			reduce(58), // >=, reduce: Element2
+			reduce(58), // ;, reduce: Element2
+			reduce(58), // @, reduce: Element2
+			reduce(58), // {, reduce: Element2
+			reduce(58), // }, reduce: Element2
+			reduce(58), // ~, reduce: Element2
+			reduce(58), // ?, reduce: Element2
+			reduce(58), // else, reduce: Element2
+			reduce(58), // if, reduce: Element2
+			reduce(58), // for, reduce: Element2
+			reduce(58), // endfor, reduce: Element2
+			reduce(58), // elif, reduce: Element2
+			reduce(58), // endif, reduce: Element2
+			reduce(58), // set, reduce: Element2
+			reduce(58), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(58), // template_block_start, reduce: Element2
+			reduce(58), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(58), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S59
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(195),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(59), // ␚, reduce: Comment
+			reduce(59), // identifier, reduce: Comment
+			reduce(59), // bytes_literal, reduce: Comment
+			reduce(59), // string_literal, reduce: Comment
+			reduce(59), // integer_literal, reduce: Comment
+			reduce(59), // floating_point_literal, reduce: Comment
+			reduce(59), // newline, reduce: Comment
+			reduce(59), // dollar, reduce: Comment
+			reduce(59), // *, reduce: Comment
+			reduce(59), // [, reduce: Comment
+			reduce(59), // ], reduce: Comment
+			reduce(59), // (, reduce: Comment
+			reduce(59), // ), reduce: Comment
+			reduce(59), // ,, reduce: Comment
+			reduce(59), // ., reduce: Comment
+			reduce(59), // :, reduce: Comment
+			reduce(59), // %, reduce: Comment
+			reduce(59), // !, reduce: Comment
+			reduce(59), // |, reduce: Comment
+			reduce(59), // |>, reduce: Comment
+			reduce(59), // ^, reduce: Comment
+			reduce(59), // &, reduce: Comment
+			reduce(59), // <<, reduce: Comment
+			reduce(59), // >>, reduce: Comment
+			reduce(59), // =>, reduce: Comment
+			reduce(59), // ->, reduce: Comment
+			reduce(59), // /, reduce: Comment
+			reduce(59), // +, reduce: Comment
+			reduce(59), // -, reduce: Comment
+			reduce(59), // ||, reduce: Comment
+			reduce(59), // <>, reduce: Comment
+			reduce(59), // !=, reduce: Comment
+			reduce(59), // =, reduce: Comment
+			reduce(59), // <, reduce: Comment
+			reduce(59), // <=, reduce: Comment
+			reduce(59), // >, reduce: Comment
+			reduce(59), // >=, reduce: Comment
+			reduce(59), // ;, reduce: Comment
+			reduce(59), // @, reduce: Comment
+			reduce(59), // {, reduce: Comment
+			reduce(59), // }, reduce: Comment
+			reduce(59), // ~, reduce: Comment
+			reduce(59), // ?, reduce: Comment
+			reduce(59), // else, reduce: Comment
+			reduce(59), // if, reduce: Comment
+			reduce(59), // for, reduce: Comment
+			reduce(59), // endfor, reduce: Comment
+			reduce(59), // elif, reduce: Comment
+			reduce(59), // endif, reduce: Comment
+			reduce(59), // set, reduce: Comment
+			reduce(59), // comment, reduce: Comment
+			nil,        // template_block_end
+			reduce(59), // template_block_start, reduce: Comment
+			reduce(59), // template_comment, reduce: Comment
+			nil,        // template_variable_end
+			reduce(59), // template_variable_start, reduce: Comment
 		},
 	},
 	actionRow{ // S60
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(55),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(81),  // identifier
+			shift(82),  // bytes_literal
+			shift(83),  // string_literal
+			shift(84),  // integer_literal
+			shift(85),  // floating_point_literal
+			shift(86),  // newline
+			shift(87),  // dollar
+			shift(88),  // *
+			shift(89),  // [
+			shift(90),  // ]
+			shift(91),  // (
+			shift(92),  // )
+			shift(93),  // ,
+			shift(94),  // .
+			shift(95),  // :
+			shift(96),  // %
+			shift(97),  // !
+			shift(98),  // |
+			shift(99),  // |>
+			shift(100), // ^
+			shift(101), // &
+			shift(102), // <<
+			shift(103), // >>
+			shift(104), // =>
+			shift(105), // ->
+			shift(106), // /
+			shift(107), // +
+			shift(108), // -
+			shift(109), // ||
+			shift(110), // <>
+			shift(111), // !=
+			shift(112), // =
+			shift(113), // <
+			shift(114), // <=
+			shift(115), // >
+			shift(116), // >=
+			shift(117), // ;
+			shift(118), // @
+			shift(119), // {
+			shift(120), // }
+			shift(121), // ~
+			shift(122), // ?
+			shift(123), // else
+			shift(124), // if
+			shift(125), // for
+			shift(126), // endfor
+			shift(127), // elif
+			shift(128), // endif
+			shift(129), // set
+			shift(130), // comment
+			shift(132), // template_block_end
+			shift(61),  // template_block_start
+			shift(136), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S61
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(79),shift(80),shift(81),shift(82),shift(83),shift(84),shift(85),shift(86),shift(87),shift(88),shift(89),shift(90),shift(91),shift(92),shift(93),shift(94),shift(95),shift(96),shift(97),shift(98),shift(99),shift(100),shift(101),shift(102),shift(103),shift(104),shift(105),shift(106),shift(107),shift(108),shift(109),shift(110),shift(111),shift(112),shift(113),shift(114),shift(115),shift(116),shift(117),shift(118),shift(119),shift(120),shift(121),shift(122),shift(199),shift(55),shift(127),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S62
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),nil,reduce(82),reduce(82),nil,reduce(82),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(200), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S63
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(208),shift(209),shift(210),shift(211),shift(212),shift(213),shift(214),shift(215),shift(216),shift(217),shift(218),shift(219),shift(220),shift(221),shift(222),shift(223),shift(224),shift(225),shift(226),shift(227),shift(228),shift(229),shift(230),shift(231),shift(232),shift(233),shift(234),shift(235),shift(236),shift(237),shift(238),shift(239),shift(240),shift(241),shift(242),shift(243),shift(244),shift(245),shift(246),shift(247),shift(248),shift(249),shift(250),shift(251),nil,shift(55),shift(255),shift(257),shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(211), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S64
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),reduce(84),nil,reduce(84),reduce(84),reduce(84),reduce(84),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(65), // identifier, reduce: TemplateIfBranches
+			reduce(65), // bytes_literal, reduce: TemplateIfBranches
+			reduce(65), // string_literal, reduce: TemplateIfBranches
+			reduce(65), // integer_literal, reduce: TemplateIfBranches
+			reduce(65), // floating_point_literal, reduce: TemplateIfBranches
+			reduce(65), // newline, reduce: TemplateIfBranches
+			reduce(65), // dollar, reduce: TemplateIfBranches
+			reduce(65), // *, reduce: TemplateIfBranches
+			reduce(65), // [, reduce: TemplateIfBranches
+			reduce(65), // ], reduce: TemplateIfBranches
+			reduce(65), // (, reduce: TemplateIfBranches
+			reduce(65), // ), reduce: TemplateIfBranches
+			reduce(65), // ,, reduce: TemplateIfBranches
+			reduce(65), // ., reduce: TemplateIfBranches
+			reduce(65), // :, reduce: TemplateIfBranches
+			reduce(65), // %, reduce: TemplateIfBranches
+			reduce(65), // !, reduce: TemplateIfBranches
+			reduce(65), // |, reduce: TemplateIfBranches
+			reduce(65), // |>, reduce: TemplateIfBranches
+			reduce(65), // ^, reduce: TemplateIfBranches
+			reduce(65), // &, reduce: TemplateIfBranches
+			reduce(65), // <<, reduce: TemplateIfBranches
+			reduce(65), // >>, reduce: TemplateIfBranches
+			reduce(65), // =>, reduce: TemplateIfBranches
+			reduce(65), // ->, reduce: TemplateIfBranches
+			reduce(65), // /, reduce: TemplateIfBranches
+			reduce(65), // +, reduce: TemplateIfBranches
+			reduce(65), // -, reduce: TemplateIfBranches
+			reduce(65), // ||, reduce: TemplateIfBranches
+			reduce(65), // <>, reduce: TemplateIfBranches
+			reduce(65), // !=, reduce: TemplateIfBranches
+			reduce(65), // =, reduce: TemplateIfBranches
+			reduce(65), // <, reduce: TemplateIfBranches
+			reduce(65), // <=, reduce: TemplateIfBranches
+			reduce(65), // >, reduce: TemplateIfBranches
+			reduce(65), // >=, reduce: TemplateIfBranches
+			reduce(65), // ;, reduce: TemplateIfBranches
+			reduce(65), // @, reduce: TemplateIfBranches
+			reduce(65), // {, reduce: TemplateIfBranches
+			reduce(65), // }, reduce: TemplateIfBranches
+			reduce(65), // ~, reduce: TemplateIfBranches
+			reduce(65), // ?, reduce: TemplateIfBranches
+			reduce(65), // else, reduce: TemplateIfBranches
+			reduce(65), // if, reduce: TemplateIfBranches
+			reduce(65), // for, reduce: TemplateIfBranches
+			reduce(65), // endfor, reduce: TemplateIfBranches
+			reduce(65), // elif, reduce: TemplateIfBranches
+			reduce(65), // endif, reduce: TemplateIfBranches
+			reduce(65), // set, reduce: TemplateIfBranches
+			reduce(65), // comment, reduce: TemplateIfBranches
+			nil,        // template_block_end
+			reduce(65), // template_block_start, reduce: TemplateIfBranches
+			reduce(65), // template_comment, reduce: TemplateIfBranches
+			nil,        // template_variable_end
+			reduce(65), // template_variable_start, reduce: TemplateIfBranches
 		},
 	},
 	actionRow{ // S65
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),reduce(2),nil,reduce(2),reduce(2),nil,reduce(2),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(81),  // identifier
+			shift(82),  // bytes_literal
+			shift(83),  // string_literal
+			shift(84),  // integer_literal
+			shift(85),  // floating_point_literal
+			shift(86),  // newline
+			shift(87),  // dollar
+			shift(88),  // *
+			shift(89),  // [
+			shift(90),  // ]
+			shift(91),  // (
+			shift(92),  // )
+			shift(93),  // ,
+			shift(94),  // .
+			shift(95),  // :
+			shift(96),  // %
+			shift(97),  // !
+			shift(98),  // |
+			shift(99),  // |>
+			shift(100), // ^
+			shift(101), // &
+			shift(102), // <<
+			shift(103), // >>
+			shift(104), // =>
+			shift(105), // ->
+			shift(106), // /
+			shift(107), // +
+			shift(108), // -
+			shift(109), // ||
+			shift(110), // <>
+			shift(111), // !=
+			shift(112), // =
+			shift(113), // <
+			shift(114), // <=
+			shift(115), // >
+			shift(116), // >=
+			shift(117), // ;
+			shift(118), // @
+			shift(119), // {
+			shift(120), // }
+			shift(121), // ~
+			shift(122), // ?
+			shift(123), // else
+			shift(124), // if
+			shift(125), // for
+			shift(126), // endfor
+			shift(127), // elif
+			shift(128), // endif
+			shift(129), // set
+			shift(130), // comment
+			shift(214), // template_block_end
+			shift(61),  // template_block_start
+			shift(136), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S66
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),reduce(3),nil,reduce(3),reduce(3),nil,reduce(3),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(216), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S67
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),reduce(4),nil,reduce(4),reduce(4),nil,reduce(4),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(79), // identifier, reduce: TemplateForBlockPrefix
+			reduce(79), // bytes_literal, reduce: TemplateForBlockPrefix
+			reduce(79), // string_literal, reduce: TemplateForBlockPrefix
+			reduce(79), // integer_literal, reduce: TemplateForBlockPrefix
+			reduce(79), // floating_point_literal, reduce: TemplateForBlockPrefix
+			reduce(79), // newline, reduce: TemplateForBlockPrefix
+			reduce(79), // dollar, reduce: TemplateForBlockPrefix
+			reduce(79), // *, reduce: TemplateForBlockPrefix
+			reduce(79), // [, reduce: TemplateForBlockPrefix
+			reduce(79), // ], reduce: TemplateForBlockPrefix
+			reduce(79), // (, reduce: TemplateForBlockPrefix
+			reduce(79), // ), reduce: TemplateForBlockPrefix
+			reduce(79), // ,, reduce: TemplateForBlockPrefix
+			reduce(79), // ., reduce: TemplateForBlockPrefix
+			reduce(79), // :, reduce: TemplateForBlockPrefix
+			reduce(79), // %, reduce: TemplateForBlockPrefix
+			reduce(79), // !, reduce: TemplateForBlockPrefix
+			reduce(79), // |, reduce: TemplateForBlockPrefix
+			reduce(79), // |>, reduce: TemplateForBlockPrefix
+			reduce(79), // ^, reduce: TemplateForBlockPrefix
+			reduce(79), // &, reduce: TemplateForBlockPrefix
+			reduce(79), // <<, reduce: TemplateForBlockPrefix
+			reduce(79), // >>, reduce: TemplateForBlockPrefix
+			reduce(79), // =>, reduce: TemplateForBlockPrefix
+			reduce(79), // ->, reduce: TemplateForBlockPrefix
+			reduce(79), // /, reduce: TemplateForBlockPrefix
+			reduce(79), // +, reduce: TemplateForBlockPrefix
+			reduce(79), // -, reduce: TemplateForBlockPrefix
+			reduce(79), // ||, reduce: TemplateForBlockPrefix
+			reduce(79), // <>, reduce: TemplateForBlockPrefix
+			reduce(79), // !=, reduce: TemplateForBlockPrefix
+			reduce(79), // =, reduce: TemplateForBlockPrefix
+			reduce(79), // <, reduce: TemplateForBlockPrefix
+			reduce(79), // <=, reduce: TemplateForBlockPrefix
+			reduce(79), // >, reduce: TemplateForBlockPrefix
+			reduce(79), // >=, reduce: TemplateForBlockPrefix
+			reduce(79), // ;, reduce: TemplateForBlockPrefix
+			reduce(79), // @, reduce: TemplateForBlockPrefix
+			reduce(79), // {, reduce: TemplateForBlockPrefix
+			reduce(79), // }, reduce: TemplateForBlockPrefix
+			reduce(79), // ~, reduce: TemplateForBlockPrefix
+			reduce(79), // ?, reduce: TemplateForBlockPrefix
+			reduce(79), // else, reduce: TemplateForBlockPrefix
+			reduce(79), // if, reduce: TemplateForBlockPrefix
+			reduce(79), // for, reduce: TemplateForBlockPrefix
+			reduce(79), // endfor, reduce: TemplateForBlockPrefix
+			reduce(79), // elif, reduce: TemplateForBlockPrefix
+			reduce(79), // endif, reduce: TemplateForBlockPrefix
+			reduce(79), // set, reduce: TemplateForBlockPrefix
+			reduce(79), // comment, reduce: TemplateForBlockPrefix
+			nil,        // template_block_end
+			reduce(79), // template_block_start, reduce: TemplateForBlockPrefix
+			reduce(79), // template_comment, reduce: TemplateForBlockPrefix
+			nil,        // template_variable_end
+			reduce(79), // template_variable_start, reduce: TemplateForBlockPrefix
 		},
 	},
 	actionRow{ // S68
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),reduce(5),nil,reduce(5),reduce(5),nil,reduce(5),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(81),  // identifier
+			shift(82),  // bytes_literal
+			shift(83),  // string_literal
+			shift(84),  // integer_literal
+			shift(85),  // floating_point_literal
+			shift(86),  // newline
+			shift(87),  // dollar
+			shift(88),  // *
+			shift(89),  // [
+			shift(90),  // ]
+			shift(91),  // (
+			shift(92),  // )
+			shift(93),  // ,
+			shift(94),  // .
+			shift(95),  // :
+			shift(96),  // %
+			shift(97),  // !
+			shift(98),  // |
+			shift(99),  // |>
+			shift(100), // ^
+			shift(101), // &
+			shift(102), // <<
+			shift(103), // >>
+			shift(104), // =>
+			shift(105), // ->
+			shift(106), // /
+			shift(107), // +
+			shift(108), // -
+			shift(109), // ||
+			shift(110), // <>
+			shift(111), // !=
+			shift(112), // =
+			shift(113), // <
+			shift(114), // <=
+			shift(115), // >
+			shift(116), // >=
+			shift(117), // ;
+			shift(118), // @
+			shift(119), // {
+			shift(120), // }
+			shift(121), // ~
+			shift(122), // ?
+			shift(123), // else
+			shift(124), // if
+			shift(125), // for
+			shift(126), // endfor
+			shift(127), // elif
+			shift(128), // endif
+			shift(129), // set
+			shift(130), // comment
+			shift(219), // template_block_end
+			shift(61),  // template_block_start
+			shift(136), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S69
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),reduce(6),nil,reduce(6),reduce(6),nil,reduce(6),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(85), // ␚, reduce: TemplateComment
+			reduce(85), // identifier, reduce: TemplateComment
+			reduce(85), // bytes_literal, reduce: TemplateComment
+			reduce(85), // string_literal, reduce: TemplateComment
+			reduce(85), // integer_literal, reduce: TemplateComment
+			reduce(85), // floating_point_literal, reduce: TemplateComment
+			reduce(85), // newline, reduce: TemplateComment
+			reduce(85), // dollar, reduce: TemplateComment
+			reduce(85), // *, reduce: TemplateComment
+			reduce(85), // [, reduce: TemplateComment
+			reduce(85), // ], reduce: TemplateComment
+			reduce(85), // (, reduce: TemplateComment
+			reduce(85), // ), reduce: TemplateComment
+			reduce(85), // ,, reduce: TemplateComment
+			reduce(85), // ., reduce: TemplateComment
+			reduce(85), // :, reduce: TemplateComment
+			reduce(85), // %, reduce: TemplateComment
+			reduce(85), // !, reduce: TemplateComment
+			reduce(85), // |, reduce: TemplateComment
+			reduce(85), // |>, reduce: TemplateComment
+			reduce(85), // ^, reduce: TemplateComment
+			reduce(85), // &, reduce: TemplateComment
+			reduce(85), // <<, reduce: TemplateComment
+			reduce(85), // >>, reduce: TemplateComment
+			reduce(85), // =>, reduce: TemplateComment
+			reduce(85), // ->, reduce: TemplateComment
+			reduce(85), // /, reduce: TemplateComment
+			reduce(85), // +, reduce: TemplateComment
+			reduce(85), // -, reduce: TemplateComment
+			reduce(85), // ||, reduce: TemplateComment
+			reduce(85), // <>, reduce: TemplateComment
+			reduce(85), // !=, reduce: TemplateComment
+			reduce(85), // =, reduce: TemplateComment
+			reduce(85), // <, reduce: TemplateComment
+			reduce(85), // <=, reduce: TemplateComment
+			reduce(85), // >, reduce: TemplateComment
+			reduce(85), // >=, reduce: TemplateComment
+			reduce(85), // ;, reduce: TemplateComment
+			reduce(85), // @, reduce: TemplateComment
+			reduce(85), // {, reduce: TemplateComment
+			reduce(85), // }, reduce: TemplateComment
+			reduce(85), // ~, reduce: TemplateComment
+			reduce(85), // ?, reduce: TemplateComment
+			reduce(85), // else, reduce: TemplateComment
+			reduce(85), // if, reduce: TemplateComment
+			reduce(85), // for, reduce: TemplateComment
+			reduce(85), // endfor, reduce: TemplateComment
+			reduce(85), // elif, reduce: TemplateComment
+			reduce(85), // endif, reduce: TemplateComment
+			reduce(85), // set, reduce: TemplateComment
+			reduce(85), // comment, reduce: TemplateComment
+			nil,        // template_block_end
+			reduce(85), // template_block_start, reduce: TemplateComment
+			reduce(85), // template_comment, reduce: TemplateComment
+			nil,        // template_variable_end
+			reduce(85), // template_variable_start, reduce: TemplateComment
 		},
 	},
 	actionRow{ // S70
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),reduce(7),nil,reduce(7),reduce(7),nil,reduce(7),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(228), // identifier
+			shift(229), // bytes_literal
+			shift(230), // string_literal
+			shift(231), // integer_literal
+			shift(232), // floating_point_literal
+			shift(233), // newline
+			shift(234), // dollar
+			shift(235), // *
+			shift(236), // [
+			shift(237), // ]
+			shift(238), // (
+			shift(239), // )
+			shift(240), // ,
+			shift(241), // .
+			shift(242), // :
+			shift(243), // %
+			shift(244), // !
+			shift(245), // |
+			shift(246), // |>
+			shift(247), // ^
+			shift(248), // &
+			shift(249), // <<
+			shift(250), // >>
+			shift(251), // =>
+			shift(252), // ->
+			shift(253), // /
+			shift(254), // +
+			shift(255), // -
+			shift(256), // ||
+			shift(257), // <>
+			shift(258), // !=
+			shift(259), // =
+			shift(260), // <
+			shift(261), // <=
+			shift(262), // >
+			shift(263), // >=
+			shift(264), // ;
+			shift(265), // @
+			shift(266), // {
+			shift(267), // }
+			shift(268), // ~
+			shift(269), // ?
+			shift(270), // else
+			shift(271), // if
+			shift(272), // for
+			shift(273), // endfor
+			shift(274), // elif
+			shift(275), // endif
+			shift(276), // set
+			shift(277), // comment
+			nil,        // template_block_end
+			shift(61),  // template_block_start
+			shift(282), // template_comment
+			shift(284), // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S71
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),reduce(64),nil,reduce(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(87), // identifier, reduce: TemplateVariablePrefix
+			reduce(87), // bytes_literal, reduce: TemplateVariablePrefix
+			reduce(87), // string_literal, reduce: TemplateVariablePrefix
+			reduce(87), // integer_literal, reduce: TemplateVariablePrefix
+			reduce(87), // floating_point_literal, reduce: TemplateVariablePrefix
+			reduce(87), // newline, reduce: TemplateVariablePrefix
+			reduce(87), // dollar, reduce: TemplateVariablePrefix
+			reduce(87), // *, reduce: TemplateVariablePrefix
+			reduce(87), // [, reduce: TemplateVariablePrefix
+			reduce(87), // ], reduce: TemplateVariablePrefix
+			reduce(87), // (, reduce: TemplateVariablePrefix
+			reduce(87), // ), reduce: TemplateVariablePrefix
+			reduce(87), // ,, reduce: TemplateVariablePrefix
+			reduce(87), // ., reduce: TemplateVariablePrefix
+			reduce(87), // :, reduce: TemplateVariablePrefix
+			reduce(87), // %, reduce: TemplateVariablePrefix
+			reduce(87), // !, reduce: TemplateVariablePrefix
+			reduce(87), // |, reduce: TemplateVariablePrefix
+			reduce(87), // |>, reduce: TemplateVariablePrefix
+			reduce(87), // ^, reduce: TemplateVariablePrefix
+			reduce(87), // &, reduce: TemplateVariablePrefix
+			reduce(87), // <<, reduce: TemplateVariablePrefix
+			reduce(87), // >>, reduce: TemplateVariablePrefix
+			reduce(87), // =>, reduce: TemplateVariablePrefix
+			reduce(87), // ->, reduce: TemplateVariablePrefix
+			reduce(87), // /, reduce: TemplateVariablePrefix
+			reduce(87), // +, reduce: TemplateVariablePrefix
+			reduce(87), // -, reduce: TemplateVariablePrefix
+			reduce(87), // ||, reduce: TemplateVariablePrefix
+			reduce(87), // <>, reduce: TemplateVariablePrefix
+			reduce(87), // !=, reduce: TemplateVariablePrefix
+			reduce(87), // =, reduce: TemplateVariablePrefix
+			reduce(87), // <, reduce: TemplateVariablePrefix
+			reduce(87), // <=, reduce: TemplateVariablePrefix
+			reduce(87), // >, reduce: TemplateVariablePrefix
+			reduce(87), // >=, reduce: TemplateVariablePrefix
+			reduce(87), // ;, reduce: TemplateVariablePrefix
+			reduce(87), // @, reduce: TemplateVariablePrefix
+			reduce(87), // {, reduce: TemplateVariablePrefix
+			reduce(87), // }, reduce: TemplateVariablePrefix
+			reduce(87), // ~, reduce: TemplateVariablePrefix
+			reduce(87), // ?, reduce: TemplateVariablePrefix
+			reduce(87), // else, reduce: TemplateVariablePrefix
+			reduce(87), // if, reduce: TemplateVariablePrefix
+			reduce(87), // for, reduce: TemplateVariablePrefix
+			reduce(87), // endfor, reduce: TemplateVariablePrefix
+			reduce(87), // elif, reduce: TemplateVariablePrefix
+			reduce(87), // endif, reduce: TemplateVariablePrefix
+			reduce(87), // set, reduce: TemplateVariablePrefix
+			reduce(87), // comment, reduce: TemplateVariablePrefix
+			nil,        // template_block_end
+			reduce(87), // template_block_start, reduce: TemplateVariablePrefix
+			reduce(87), // template_comment, reduce: TemplateVariablePrefix
+			reduce(87), // template_variable_end, reduce: TemplateVariablePrefix
+			reduce(87), // template_variable_start, reduce: TemplateVariablePrefix
 		},
 	},
 	actionRow{ // S72
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),nil,reduce(11),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			reduce(2), // ␚, reduce: Script
+			reduce(2), // identifier, reduce: Script
+			reduce(2), // bytes_literal, reduce: Script
+			reduce(2), // string_literal, reduce: Script
+			reduce(2), // integer_literal, reduce: Script
+			reduce(2), // floating_point_literal, reduce: Script
+			reduce(2), // newline, reduce: Script
+			reduce(2), // dollar, reduce: Script
+			reduce(2), // *, reduce: Script
+			reduce(2), // [, reduce: Script
+			reduce(2), // ], reduce: Script
+			reduce(2), // (, reduce: Script
+			reduce(2), // ), reduce: Script
+			reduce(2), // ,, reduce: Script
+			reduce(2), // ., reduce: Script
+			reduce(2), // :, reduce: Script
+			reduce(2), // %, reduce: Script
+			reduce(2), // !, reduce: Script
+			reduce(2), // |, reduce: Script
+			reduce(2), // |>, reduce: Script
+			reduce(2), // ^, reduce: Script
+			reduce(2), // &, reduce: Script
+			reduce(2), // <<, reduce: Script
+			reduce(2), // >>, reduce: Script
+			reduce(2), // =>, reduce: Script
+			reduce(2), // ->, reduce: Script
+			reduce(2), // /, reduce: Script
+			reduce(2), // +, reduce: Script
+			reduce(2), // -, reduce: Script
+			reduce(2), // ||, reduce: Script
+			reduce(2), // <>, reduce: Script
+			reduce(2), // !=, reduce: Script
+			reduce(2), // =, reduce: Script
+			reduce(2), // <, reduce: Script
+			reduce(2), // <=, reduce: Script
+			reduce(2), // >, reduce: Script
+			reduce(2), // >=, reduce: Script
+			reduce(2), // ;, reduce: Script
+			reduce(2), // @, reduce: Script
+			reduce(2), // {, reduce: Script
+			reduce(2), // }, reduce: Script
+			reduce(2), // ~, reduce: Script
+			reduce(2), // ?, reduce: Script
+			reduce(2), // else, reduce: Script
+			reduce(2), // if, reduce: Script
+			reduce(2), // for, reduce: Script
+			reduce(2), // endfor, reduce: Script
+			reduce(2), // elif, reduce: Script
+			reduce(2), // endif, reduce: Script
+			reduce(2), // set, reduce: Script
+			reduce(2), // comment, reduce: Script
+			nil,       // template_block_end
+			reduce(2), // template_block_start, reduce: Script
+			reduce(2), // template_comment, reduce: Script
+			nil,       // template_variable_end
+			reduce(2), // template_variable_start, reduce: Script
 		},
 	},
 	actionRow{ // S73
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),nil,reduce(8),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(62), // identifier, reduce: TemplateSetBlockPrefix
+			reduce(62), // bytes_literal, reduce: TemplateSetBlockPrefix
+			reduce(62), // string_literal, reduce: TemplateSetBlockPrefix
+			reduce(62), // integer_literal, reduce: TemplateSetBlockPrefix
+			reduce(62), // floating_point_literal, reduce: TemplateSetBlockPrefix
+			reduce(62), // newline, reduce: TemplateSetBlockPrefix
+			reduce(62), // dollar, reduce: TemplateSetBlockPrefix
+			reduce(62), // *, reduce: TemplateSetBlockPrefix
+			reduce(62), // [, reduce: TemplateSetBlockPrefix
+			reduce(62), // ], reduce: TemplateSetBlockPrefix
+			reduce(62), // (, reduce: TemplateSetBlockPrefix
+			reduce(62), // ), reduce: TemplateSetBlockPrefix
+			reduce(62), // ,, reduce: TemplateSetBlockPrefix
+			reduce(62), // ., reduce: TemplateSetBlockPrefix
+			reduce(62), // :, reduce: TemplateSetBlockPrefix
+			reduce(62), // %, reduce: TemplateSetBlockPrefix
+			reduce(62), // !, reduce: TemplateSetBlockPrefix
+			reduce(62), // |, reduce: TemplateSetBlockPrefix
+			reduce(62), // |>, reduce: TemplateSetBlockPrefix
+			reduce(62), // ^, reduce: TemplateSetBlockPrefix
+			reduce(62), // &, reduce: TemplateSetBlockPrefix
+			reduce(62), // <<, reduce: TemplateSetBlockPrefix
+			reduce(62), // >>, reduce: TemplateSetBlockPrefix
+			reduce(62), // =>, reduce: TemplateSetBlockPrefix
+			reduce(62), // ->, reduce: TemplateSetBlockPrefix
+			reduce(62), // /, reduce: TemplateSetBlockPrefix
+			reduce(62), // +, reduce: TemplateSetBlockPrefix
+			reduce(62), // -, reduce: TemplateSetBlockPrefix
+			reduce(62), // ||, reduce: TemplateSetBlockPrefix
+			reduce(62), // <>, reduce: TemplateSetBlockPrefix
+			reduce(62), // !=, reduce: TemplateSetBlockPrefix
+			reduce(62), // =, reduce: TemplateSetBlockPrefix
+			reduce(62), // <, reduce: TemplateSetBlockPrefix
+			reduce(62), // <=, reduce: TemplateSetBlockPrefix
+			reduce(62), // >, reduce: TemplateSetBlockPrefix
+			reduce(62), // >=, reduce: TemplateSetBlockPrefix
+			reduce(62), // ;, reduce: TemplateSetBlockPrefix
+			reduce(62), // @, reduce: TemplateSetBlockPrefix
+			reduce(62), // {, reduce: TemplateSetBlockPrefix
+			reduce(62), // }, reduce: TemplateSetBlockPrefix
+			reduce(62), // ~, reduce: TemplateSetBlockPrefix
+			reduce(62), // ?, reduce: TemplateSetBlockPrefix
+			reduce(62), // else, reduce: TemplateSetBlockPrefix
+			reduce(62), // if, reduce: TemplateSetBlockPrefix
+			reduce(62), // for, reduce: TemplateSetBlockPrefix
+			reduce(62), // endfor, reduce: TemplateSetBlockPrefix
+			reduce(62), // elif, reduce: TemplateSetBlockPrefix
+			reduce(62), // endif, reduce: TemplateSetBlockPrefix
+			reduce(62), // set, reduce: TemplateSetBlockPrefix
+			reduce(62), // comment, reduce: TemplateSetBlockPrefix
+			reduce(62), // template_block_end, reduce: TemplateSetBlockPrefix
+			reduce(62), // template_block_start, reduce: TemplateSetBlockPrefix
+			reduce(62), // template_comment, reduce: TemplateSetBlockPrefix
+			nil,        // template_variable_end
+			reduce(62), // template_variable_start, reduce: TemplateSetBlockPrefix
 		},
 	},
 	actionRow{ // S74
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),nil,reduce(9),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(3), // identifier, reduce: Element
+			reduce(3), // bytes_literal, reduce: Element
+			reduce(3), // string_literal, reduce: Element
+			reduce(3), // integer_literal, reduce: Element
+			reduce(3), // floating_point_literal, reduce: Element
+			reduce(3), // newline, reduce: Element
+			reduce(3), // dollar, reduce: Element
+			reduce(3), // *, reduce: Element
+			reduce(3), // [, reduce: Element
+			reduce(3), // ], reduce: Element
+			reduce(3), // (, reduce: Element
+			reduce(3), // ), reduce: Element
+			reduce(3), // ,, reduce: Element
+			reduce(3), // ., reduce: Element
+			reduce(3), // :, reduce: Element
+			reduce(3), // %, reduce: Element
+			reduce(3), // !, reduce: Element
+			reduce(3), // |, reduce: Element
+			reduce(3), // |>, reduce: Element
+			reduce(3), // ^, reduce: Element
+			reduce(3), // &, reduce: Element
+			reduce(3), // <<, reduce: Element
+			reduce(3), // >>, reduce: Element
+			reduce(3), // =>, reduce: Element
+			reduce(3), // ->, reduce: Element
+			reduce(3), // /, reduce: Element
+			reduce(3), // +, reduce: Element
+			reduce(3), // -, reduce: Element
+			reduce(3), // ||, reduce: Element
+			reduce(3), // <>, reduce: Element
+			reduce(3), // !=, reduce: Element
+			reduce(3), // =, reduce: Element
+			reduce(3), // <, reduce: Element
+			reduce(3), // <=, reduce: Element
+			reduce(3), // >, reduce: Element
+			reduce(3), // >=, reduce: Element
+			reduce(3), // ;, reduce: Element
+			reduce(3), // @, reduce: Element
+			reduce(3), // {, reduce: Element
+			reduce(3), // }, reduce: Element
+			reduce(3), // ~, reduce: Element
+			reduce(3), // ?, reduce: Element
+			reduce(3), // else, reduce: Element
+			reduce(3), // if, reduce: Element
+			reduce(3), // for, reduce: Element
+			reduce(3), // endfor, reduce: Element
+			reduce(3), // elif, reduce: Element
+			reduce(3), // endif, reduce: Element
+			reduce(3), // set, reduce: Element
+			reduce(3), // comment, reduce: Element
+			reduce(3), // template_block_end, reduce: Element
+			reduce(3), // template_block_start, reduce: Element
+			reduce(3), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(3), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S75
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),nil,reduce(10),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(4), // identifier, reduce: Element
+			reduce(4), // bytes_literal, reduce: Element
+			reduce(4), // string_literal, reduce: Element
+			reduce(4), // integer_literal, reduce: Element
+			reduce(4), // floating_point_literal, reduce: Element
+			reduce(4), // newline, reduce: Element
+			reduce(4), // dollar, reduce: Element
+			reduce(4), // *, reduce: Element
+			reduce(4), // [, reduce: Element
+			reduce(4), // ], reduce: Element
+			reduce(4), // (, reduce: Element
+			reduce(4), // ), reduce: Element
+			reduce(4), // ,, reduce: Element
+			reduce(4), // ., reduce: Element
+			reduce(4), // :, reduce: Element
+			reduce(4), // %, reduce: Element
+			reduce(4), // !, reduce: Element
+			reduce(4), // |, reduce: Element
+			reduce(4), // |>, reduce: Element
+			reduce(4), // ^, reduce: Element
+			reduce(4), // &, reduce: Element
+			reduce(4), // <<, reduce: Element
+			reduce(4), // >>, reduce: Element
+			reduce(4), // =>, reduce: Element
+			reduce(4), // ->, reduce: Element
+			reduce(4), // /, reduce: Element
+			reduce(4), // +, reduce: Element
+			reduce(4), // -, reduce: Element
+			reduce(4), // ||, reduce: Element
+			reduce(4), // <>, reduce: Element
+			reduce(4), // !=, reduce: Element
+			reduce(4), // =, reduce: Element
+			reduce(4), // <, reduce: Element
+			reduce(4), // <=, reduce: Element
+			reduce(4), // >, reduce: Element
+			reduce(4), // >=, reduce: Element
+			reduce(4), // ;, reduce: Element
+			reduce(4), // @, reduce: Element
+			reduce(4), // {, reduce: Element
+			reduce(4), // }, reduce: Element
+			reduce(4), // ~, reduce: Element
+			reduce(4), // ?, reduce: Element
+			reduce(4), // else, reduce: Element
+			reduce(4), // if, reduce: Element
+			reduce(4), // for, reduce: Element
+			reduce(4), // endfor, reduce: Element
+			reduce(4), // elif, reduce: Element
+			reduce(4), // endif, reduce: Element
+			reduce(4), // set, reduce: Element
+			reduce(4), // comment, reduce: Element
+			reduce(4), // template_block_end, reduce: Element
+			reduce(4), // template_block_start, reduce: Element
+			reduce(4), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(4), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S76
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),nil,reduce(12),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(5), // identifier, reduce: Element
+			reduce(5), // bytes_literal, reduce: Element
+			reduce(5), // string_literal, reduce: Element
+			reduce(5), // integer_literal, reduce: Element
+			reduce(5), // floating_point_literal, reduce: Element
+			reduce(5), // newline, reduce: Element
+			reduce(5), // dollar, reduce: Element
+			reduce(5), // *, reduce: Element
+			reduce(5), // [, reduce: Element
+			reduce(5), // ], reduce: Element
+			reduce(5), // (, reduce: Element
+			reduce(5), // ), reduce: Element
+			reduce(5), // ,, reduce: Element
+			reduce(5), // ., reduce: Element
+			reduce(5), // :, reduce: Element
+			reduce(5), // %, reduce: Element
+			reduce(5), // !, reduce: Element
+			reduce(5), // |, reduce: Element
+			reduce(5), // |>, reduce: Element
+			reduce(5), // ^, reduce: Element
+			reduce(5), // &, reduce: Element
+			reduce(5), // <<, reduce: Element
+			reduce(5), // >>, reduce: Element
+			reduce(5), // =>, reduce: Element
+			reduce(5), // ->, reduce: Element
+			reduce(5), // /, reduce: Element
+			reduce(5), // +, reduce: Element
+			reduce(5), // -, reduce: Element
+			reduce(5), // ||, reduce: Element
+			reduce(5), // <>, reduce: Element
+			reduce(5), // !=, reduce: Element
+			reduce(5), // =, reduce: Element
+			reduce(5), // <, reduce: Element
+			reduce(5), // <=, reduce: Element
+			reduce(5), // >, reduce: Element
+			reduce(5), // >=, reduce: Element
+			reduce(5), // ;, reduce: Element
+			reduce(5), // @, reduce: Element
+			reduce(5), // {, reduce: Element
+			reduce(5), // }, reduce: Element
+			reduce(5), // ~, reduce: Element
+			reduce(5), // ?, reduce: Element
+			reduce(5), // else, reduce: Element
+			reduce(5), // if, reduce: Element
+			reduce(5), // for, reduce: Element
+			reduce(5), // endfor, reduce: Element
+			reduce(5), // elif, reduce: Element
+			reduce(5), // endif, reduce: Element
+			reduce(5), // set, reduce: Element
+			reduce(5), // comment, reduce: Element
+			reduce(5), // template_block_end, reduce: Element
+			reduce(5), // template_block_start, reduce: Element
+			reduce(5), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(5), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S77
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),nil,reduce(13),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(6), // identifier, reduce: Element
+			reduce(6), // bytes_literal, reduce: Element
+			reduce(6), // string_literal, reduce: Element
+			reduce(6), // integer_literal, reduce: Element
+			reduce(6), // floating_point_literal, reduce: Element
+			reduce(6), // newline, reduce: Element
+			reduce(6), // dollar, reduce: Element
+			reduce(6), // *, reduce: Element
+			reduce(6), // [, reduce: Element
+			reduce(6), // ], reduce: Element
+			reduce(6), // (, reduce: Element
+			reduce(6), // ), reduce: Element
+			reduce(6), // ,, reduce: Element
+			reduce(6), // ., reduce: Element
+			reduce(6), // :, reduce: Element
+			reduce(6), // %, reduce: Element
+			reduce(6), // !, reduce: Element
+			reduce(6), // |, reduce: Element
+			reduce(6), // |>, reduce: Element
+			reduce(6), // ^, reduce: Element
+			reduce(6), // &, reduce: Element
+			reduce(6), // <<, reduce: Element
+			reduce(6), // >>, reduce: Element
+			reduce(6), // =>, reduce: Element
+			reduce(6), // ->, reduce: Element
+			reduce(6), // /, reduce: Element
+			reduce(6), // +, reduce: Element
+			reduce(6), // -, reduce: Element
+			reduce(6), // ||, reduce: Element
+			reduce(6), // <>, reduce: Element
+			reduce(6), // !=, reduce: Element
+			reduce(6), // =, reduce: Element
+			reduce(6), // <, reduce: Element
+			reduce(6), // <=, reduce: Element
+			reduce(6), // >, reduce: Element
+			reduce(6), // >=, reduce: Element
+			reduce(6), // ;, reduce: Element
+			reduce(6), // @, reduce: Element
+			reduce(6), // {, reduce: Element
+			reduce(6), // }, reduce: Element
+			reduce(6), // ~, reduce: Element
+			reduce(6), // ?, reduce: Element
+			reduce(6), // else, reduce: Element
+			reduce(6), // if, reduce: Element
+			reduce(6), // for, reduce: Element
+			reduce(6), // endfor, reduce: Element
+			reduce(6), // elif, reduce: Element
+			reduce(6), // endif, reduce: Element
+			reduce(6), // set, reduce: Element
+			reduce(6), // comment, reduce: Element
+			reduce(6), // template_block_end, reduce: Element
+			reduce(6), // template_block_start, reduce: Element
+			reduce(6), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(6), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S78
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),nil,reduce(14),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(7), // identifier, reduce: Element
+			reduce(7), // bytes_literal, reduce: Element
+			reduce(7), // string_literal, reduce: Element
+			reduce(7), // integer_literal, reduce: Element
+			reduce(7), // floating_point_literal, reduce: Element
+			reduce(7), // newline, reduce: Element
+			reduce(7), // dollar, reduce: Element
+			reduce(7), // *, reduce: Element
+			reduce(7), // [, reduce: Element
+			reduce(7), // ], reduce: Element
+			reduce(7), // (, reduce: Element
+			reduce(7), // ), reduce: Element
+			reduce(7), // ,, reduce: Element
+			reduce(7), // ., reduce: Element
+			reduce(7), // :, reduce: Element
+			reduce(7), // %, reduce: Element
+			reduce(7), // !, reduce: Element
+			reduce(7), // |, reduce: Element
+			reduce(7), // |>, reduce: Element
+			reduce(7), // ^, reduce: Element
+			reduce(7), // &, reduce: Element
+			reduce(7), // <<, reduce: Element
+			reduce(7), // >>, reduce: Element
+			reduce(7), // =>, reduce: Element
+			reduce(7), // ->, reduce: Element
+			reduce(7), // /, reduce: Element
+			reduce(7), // +, reduce: Element
+			reduce(7), // -, reduce: Element
+			reduce(7), // ||, reduce: Element
+			reduce(7), // <>, reduce: Element
+			reduce(7), // !=, reduce: Element
+			reduce(7), // =, reduce: Element
+			reduce(7), // <, reduce: Element
+			reduce(7), // <=, reduce: Element
+			reduce(7), // >, reduce: Element
+			reduce(7), // >=, reduce: Element
+			reduce(7), // ;, reduce: Element
+			reduce(7), // @, reduce: Element
+			reduce(7), // {, reduce: Element
+			reduce(7), // }, reduce: Element
+			reduce(7), // ~, reduce: Element
+			reduce(7), // ?, reduce: Element
+			reduce(7), // else, reduce: Element
+			reduce(7), // if, reduce: Element
+			reduce(7), // for, reduce: Element
+			reduce(7), // endfor, reduce: Element
+			reduce(7), // elif, reduce: Element
+			reduce(7), // endif, reduce: Element
+			reduce(7), // set, reduce: Element
+			reduce(7), // comment, reduce: Element
+			reduce(7), // template_block_end, reduce: Element
+			reduce(7), // template_block_start, reduce: Element
+			reduce(7), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(7), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S79
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),nil,reduce(15),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(8), // identifier, reduce: Element
+			reduce(8), // bytes_literal, reduce: Element
+			reduce(8), // string_literal, reduce: Element
+			reduce(8), // integer_literal, reduce: Element
+			reduce(8), // floating_point_literal, reduce: Element
+			reduce(8), // newline, reduce: Element
+			reduce(8), // dollar, reduce: Element
+			reduce(8), // *, reduce: Element
+			reduce(8), // [, reduce: Element
+			reduce(8), // ], reduce: Element
+			reduce(8), // (, reduce: Element
+			reduce(8), // ), reduce: Element
+			reduce(8), // ,, reduce: Element
+			reduce(8), // ., reduce: Element
+			reduce(8), // :, reduce: Element
+			reduce(8), // %, reduce: Element
+			reduce(8), // !, reduce: Element
+			reduce(8), // |, reduce: Element
+			reduce(8), // |>, reduce: Element
+			reduce(8), // ^, reduce: Element
+			reduce(8), // &, reduce: Element
+			reduce(8), // <<, reduce: Element
+			reduce(8), // >>, reduce: Element
+			reduce(8), // =>, reduce: Element
+			reduce(8), // ->, reduce: Element
+			reduce(8), // /, reduce: Element
+			reduce(8), // +, reduce: Element
+			reduce(8), // -, reduce: Element
+			reduce(8), // ||, reduce: Element
+			reduce(8), // <>, reduce: Element
+			reduce(8), // !=, reduce: Element
+			reduce(8), // =, reduce: Element
+			reduce(8), // <, reduce: Element
+			reduce(8), // <=, reduce: Element
+			reduce(8), // >, reduce: Element
+			reduce(8), // >=, reduce: Element
+			reduce(8), // ;, reduce: Element
+			reduce(8), // @, reduce: Element
+			reduce(8), // {, reduce: Element
+			reduce(8), // }, reduce: Element
+			reduce(8), // ~, reduce: Element
+			reduce(8), // ?, reduce: Element
+			reduce(8), // else, reduce: Element
+			reduce(8), // if, reduce: Element
+			reduce(8), // for, reduce: Element
+			reduce(8), // endfor, reduce: Element
+			reduce(8), // elif, reduce: Element
+			reduce(8), // endif, reduce: Element
+			reduce(8), // set, reduce: Element
+			reduce(8), // comment, reduce: Element
+			reduce(8), // template_block_end, reduce: Element
+			reduce(8), // template_block_start, reduce: Element
+			reduce(8), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(8), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S80
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),nil,reduce(16),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(9), // identifier, reduce: Element2
+			reduce(9), // bytes_literal, reduce: Element2
+			reduce(9), // string_literal, reduce: Element2
+			reduce(9), // integer_literal, reduce: Element2
+			reduce(9), // floating_point_literal, reduce: Element2
+			reduce(9), // newline, reduce: Element2
+			reduce(9), // dollar, reduce: Element2
+			reduce(9), // *, reduce: Element2
+			reduce(9), // [, reduce: Element2
+			reduce(9), // ], reduce: Element2
+			reduce(9), // (, reduce: Element2
+			reduce(9), // ), reduce: Element2
+			reduce(9), // ,, reduce: Element2
+			reduce(9), // ., reduce: Element2
+			reduce(9), // :, reduce: Element2
+			reduce(9), // %, reduce: Element2
+			reduce(9), // !, reduce: Element2
+			reduce(9), // |, reduce: Element2
+			reduce(9), // |>, reduce: Element2
+			reduce(9), // ^, reduce: Element2
+			reduce(9), // &, reduce: Element2
+			reduce(9), // <<, reduce: Element2
+			reduce(9), // >>, reduce: Element2
+			reduce(9), // =>, reduce: Element2
+			reduce(9), // ->, reduce: Element2
+			reduce(9), // /, reduce: Element2
+			reduce(9), // +, reduce: Element2
+			reduce(9), // -, reduce: Element2
+			reduce(9), // ||, reduce: Element2
+			reduce(9), // <>, reduce: Element2
+			reduce(9), // !=, reduce: Element2
+			reduce(9), // =, reduce: Element2
+			reduce(9), // <, reduce: Element2
+			reduce(9), // <=, reduce: Element2
+			reduce(9), // >, reduce: Element2
+			reduce(9), // >=, reduce: Element2
+			reduce(9), // ;, reduce: Element2
+			reduce(9), // @, reduce: Element2
+			reduce(9), // {, reduce: Element2
+			reduce(9), // }, reduce: Element2
+			reduce(9), // ~, reduce: Element2
+			reduce(9), // ?, reduce: Element2
+			reduce(9), // else, reduce: Element2
+			reduce(9), // if, reduce: Element2
+			reduce(9), // for, reduce: Element2
+			reduce(9), // endfor, reduce: Element2
+			reduce(9), // elif, reduce: Element2
+			reduce(9), // endif, reduce: Element2
+			reduce(9), // set, reduce: Element2
+			reduce(9), // comment, reduce: Element2
+			reduce(9), // template_block_end, reduce: Element2
+			reduce(9), // template_block_start, reduce: Element2
+			reduce(9), // template_comment, reduce: Element2
+			nil,       // template_variable_end
+			reduce(9), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S81
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),nil,reduce(17),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(10), // identifier, reduce: Element2
+			reduce(10), // bytes_literal, reduce: Element2
+			reduce(10), // string_literal, reduce: Element2
+			reduce(10), // integer_literal, reduce: Element2
+			reduce(10), // floating_point_literal, reduce: Element2
+			reduce(10), // newline, reduce: Element2
+			reduce(10), // dollar, reduce: Element2
+			reduce(10), // *, reduce: Element2
+			reduce(10), // [, reduce: Element2
+			reduce(10), // ], reduce: Element2
+			reduce(10), // (, reduce: Element2
+			reduce(10), // ), reduce: Element2
+			reduce(10), // ,, reduce: Element2
+			reduce(10), // ., reduce: Element2
+			reduce(10), // :, reduce: Element2
+			reduce(10), // %, reduce: Element2
+			reduce(10), // !, reduce: Element2
+			reduce(10), // |, reduce: Element2
+			reduce(10), // |>, reduce: Element2
+			reduce(10), // ^, reduce: Element2
+			reduce(10), // &, reduce: Element2
+			reduce(10), // <<, reduce: Element2
+			reduce(10), // >>, reduce: Element2
+			reduce(10), // =>, reduce: Element2
+			reduce(10), // ->, reduce: Element2
+			reduce(10), // /, reduce: Element2
+			reduce(10), // +, reduce: Element2
+			reduce(10), // -, reduce: Element2
+			reduce(10), // ||, reduce: Element2
+			reduce(10), // <>, reduce: Element2
+			reduce(10), // !=, reduce: Element2
+			reduce(10), // =, reduce: Element2
+			reduce(10), // <, reduce: Element2
+			reduce(10), // <=, reduce: Element2
+			reduce(10), // >, reduce: Element2
+			reduce(10), // >=, reduce: Element2
+			reduce(10), // ;, reduce: Element2
+			reduce(10), // @, reduce: Element2
+			reduce(10), // {, reduce: Element2
+			reduce(10), // }, reduce: Element2
+			reduce(10), // ~, reduce: Element2
+			reduce(10), // ?, reduce: Element2
+			reduce(10), // else, reduce: Element2
+			reduce(10), // if, reduce: Element2
+			reduce(10), // for, reduce: Element2
+			reduce(10), // endfor, reduce: Element2
+			reduce(10), // elif, reduce: Element2
+			reduce(10), // endif, reduce: Element2
+			reduce(10), // set, reduce: Element2
+			reduce(10), // comment, reduce: Element2
+			reduce(10), // template_block_end, reduce: Element2
+			reduce(10), // template_block_start, reduce: Element2
+			reduce(10), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(10), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S82
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),nil,reduce(18),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(11), // identifier, reduce: Element2
+			reduce(11), // bytes_literal, reduce: Element2
+			reduce(11), // string_literal, reduce: Element2
+			reduce(11), // integer_literal, reduce: Element2
+			reduce(11), // floating_point_literal, reduce: Element2
+			reduce(11), // newline, reduce: Element2
+			reduce(11), // dollar, reduce: Element2
+			reduce(11), // *, reduce: Element2
+			reduce(11), // [, reduce: Element2
+			reduce(11), // ], reduce: Element2
+			reduce(11), // (, reduce: Element2
+			reduce(11), // ), reduce: Element2
+			reduce(11), // ,, reduce: Element2
+			reduce(11), // ., reduce: Element2
+			reduce(11), // :, reduce: Element2
+			reduce(11), // %, reduce: Element2
+			reduce(11), // !, reduce: Element2
+			reduce(11), // |, reduce: Element2
+			reduce(11), // |>, reduce: Element2
+			reduce(11), // ^, reduce: Element2
+			reduce(11), // &, reduce: Element2
+			reduce(11), // <<, reduce: Element2
+			reduce(11), // >>, reduce: Element2
+			reduce(11), // =>, reduce: Element2
+			reduce(11), // ->, reduce: Element2
+			reduce(11), // /, reduce: Element2
+			reduce(11), // +, reduce: Element2
+			reduce(11), // -, reduce: Element2
+			reduce(11), // ||, reduce: Element2
+			reduce(11), // <>, reduce: Element2
+			reduce(11), // !=, reduce: Element2
+			reduce(11), // =, reduce: Element2
+			reduce(11), // <, reduce: Element2
+			reduce(11), // <=, reduce: Element2
+			reduce(11), // >, reduce: Element2
+			reduce(11), // >=, reduce: Element2
+			reduce(11), // ;, reduce: Element2
+			reduce(11), // @, reduce: Element2
+			reduce(11), // {, reduce: Element2
+			reduce(11), // }, reduce: Element2
+			reduce(11), // ~, reduce: Element2
+			reduce(11), // ?, reduce: Element2
+			reduce(11), // else, reduce: Element2
+			reduce(11), // if, reduce: Element2
+			reduce(11), // for, reduce: Element2
+			reduce(11), // endfor, reduce: Element2
+			reduce(11), // elif, reduce: Element2
+			reduce(11), // endif, reduce: Element2
+			reduce(11), // set, reduce: Element2
+			reduce(11), // comment, reduce: Element2
+			reduce(11), // template_block_end, reduce: Element2
+			reduce(11), // template_block_start, reduce: Element2
+			reduce(11), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(11), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S83
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),nil,reduce(19),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(12), // identifier, reduce: Element2
+			reduce(12), // bytes_literal, reduce: Element2
+			reduce(12), // string_literal, reduce: Element2
+			reduce(12), // integer_literal, reduce: Element2
+			reduce(12), // floating_point_literal, reduce: Element2
+			reduce(12), // newline, reduce: Element2
+			reduce(12), // dollar, reduce: Element2
+			reduce(12), // *, reduce: Element2
+			reduce(12), // [, reduce: Element2
+			reduce(12), // ], reduce: Element2
+			reduce(12), // (, reduce: Element2
+			reduce(12), // ), reduce: Element2
+			reduce(12), // ,, reduce: Element2
+			reduce(12), // ., reduce: Element2
+			reduce(12), // :, reduce: Element2
+			reduce(12), // %, reduce: Element2
+			reduce(12), // !, reduce: Element2
+			reduce(12), // |, reduce: Element2
+			reduce(12), // |>, reduce: Element2
+			reduce(12), // ^, reduce: Element2
+			reduce(12), // &, reduce: Element2
+			reduce(12), // <<, reduce: Element2
+			reduce(12), // >>, reduce: Element2
+			reduce(12), // =>, reduce: Element2
+			reduce(12), // ->, reduce: Element2
+			reduce(12), // /, reduce: Element2
+			reduce(12), // +, reduce: Element2
+			reduce(12), // -, reduce: Element2
+			reduce(12), // ||, reduce: Element2
+			reduce(12), // <>, reduce: Element2
+			reduce(12), // !=, reduce: Element2
+			reduce(12), // =, reduce: Element2
+			reduce(12), // <, reduce: Element2
+			reduce(12), // <=, reduce: Element2
+			reduce(12), // >, reduce: Element2
+			reduce(12), // >=, reduce: Element2
+			reduce(12), // ;, reduce: Element2
+			reduce(12), // @, reduce: Element2
+			reduce(12), // {, reduce: Element2
+			reduce(12), // }, reduce: Element2
+			reduce(12), // ~, reduce: Element2
+			reduce(12), // ?, reduce: Element2
+			reduce(12), // else, reduce: Element2
+			reduce(12), // if, reduce: Element2
+			reduce(12), // for, reduce: Element2
+			reduce(12), // endfor, reduce: Element2
+			reduce(12), // elif, reduce: Element2
+			reduce(12), // endif, reduce: Element2
+			reduce(12), // set, reduce: Element2
+			reduce(12), // comment, reduce: Element2
+			reduce(12), // template_block_end, reduce: Element2
+			reduce(12), // template_block_start, reduce: Element2
+			reduce(12), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(12), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S84
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),nil,reduce(20),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(13), // identifier, reduce: Element2
+			reduce(13), // bytes_literal, reduce: Element2
+			reduce(13), // string_literal, reduce: Element2
+			reduce(13), // integer_literal, reduce: Element2
+			reduce(13), // floating_point_literal, reduce: Element2
+			reduce(13), // newline, reduce: Element2
+			reduce(13), // dollar, reduce: Element2
+			reduce(13), // *, reduce: Element2
+			reduce(13), // [, reduce: Element2
+			reduce(13), // ], reduce: Element2
+			reduce(13), // (, reduce: Element2
+			reduce(13), // ), reduce: Element2
+			reduce(13), // ,, reduce: Element2
+			reduce(13), // ., reduce: Element2
+			reduce(13), // :, reduce: Element2
+			reduce(13), // %, reduce: Element2
+			reduce(13), // !, reduce: Element2
+			reduce(13), // |, reduce: Element2
+			reduce(13), // |>, reduce: Element2
+			reduce(13), // ^, reduce: Element2
+			reduce(13), // &, reduce: Element2
+			reduce(13), // <<, reduce: Element2
+			reduce(13), // >>, reduce: Element2
+			reduce(13), // =>, reduce: Element2
+			reduce(13), // ->, reduce: Element2
+			reduce(13), // /, reduce: Element2
+			reduce(13), // +, reduce: Element2
+			reduce(13), // -, reduce: Element2
+			reduce(13), // ||, reduce: Element2
+			reduce(13), // <>, reduce: Element2
+			reduce(13), // !=, reduce: Element2
+			reduce(13), // =, reduce: Element2
+			reduce(13), // <, reduce: Element2
+			reduce(13), // <=, reduce: Element2
+			reduce(13), // >, reduce: Element2
+			reduce(13), // >=, reduce: Element2
+			reduce(13), // ;, reduce: Element2
+			reduce(13), // @, reduce: Element2
+			reduce(13), // {, reduce: Element2
+			reduce(13), // }, reduce: Element2
+			reduce(13), // ~, reduce: Element2
+			reduce(13), // ?, reduce: Element2
+			reduce(13), // else, reduce: Element2
+			reduce(13), // if, reduce: Element2
+			reduce(13), // for, reduce: Element2
+			reduce(13), // endfor, reduce: Element2
+			reduce(13), // elif, reduce: Element2
+			reduce(13), // endif, reduce: Element2
+			reduce(13), // set, reduce: Element2
+			reduce(13), // comment, reduce: Element2
+			reduce(13), // template_block_end, reduce: Element2
+			reduce(13), // template_block_start, reduce: Element2
+			reduce(13), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(13), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S85
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),nil,reduce(21),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(14), // identifier, reduce: Element2
+			reduce(14), // bytes_literal, reduce: Element2
+			reduce(14), // string_literal, reduce: Element2
+			reduce(14), // integer_literal, reduce: Element2
+			reduce(14), // floating_point_literal, reduce: Element2
+			reduce(14), // newline, reduce: Element2
+			reduce(14), // dollar, reduce: Element2
+			reduce(14), // *, reduce: Element2
+			reduce(14), // [, reduce: Element2
+			reduce(14), // ], reduce: Element2
+			reduce(14), // (, reduce: Element2
+			reduce(14), // ), reduce: Element2
+			reduce(14), // ,, reduce: Element2
+			reduce(14), // ., reduce: Element2
+			reduce(14), // :, reduce: Element2
+			reduce(14), // %, reduce: Element2
+			reduce(14), // !, reduce: Element2
+			reduce(14), // |, reduce: Element2
+			reduce(14), // |>, reduce: Element2
+			reduce(14), // ^, reduce: Element2
+			reduce(14), // &, reduce: Element2
+			reduce(14), // <<, reduce: Element2
+			reduce(14), // >>, reduce: Element2
+			reduce(14), // =>, reduce: Element2
+			reduce(14), // ->, reduce: Element2
+			reduce(14), // /, reduce: Element2
+			reduce(14), // +, reduce: Element2
+			reduce(14), // -, reduce: Element2
+			reduce(14), // ||, reduce: Element2
+			reduce(14), // <>, reduce: Element2
+			reduce(14), // !=, reduce: Element2
+			reduce(14), // =, reduce: Element2
+			reduce(14), // <, reduce: Element2
+			reduce(14), // <=, reduce: Element2
+			reduce(14), // >, reduce: Element2
+			reduce(14), // >=, reduce: Element2
+			reduce(14), // ;, reduce: Element2
+			reduce(14), // @, reduce: Element2
+			reduce(14), // {, reduce: Element2
+			reduce(14), // }, reduce: Element2
+			reduce(14), // ~, reduce: Element2
+			reduce(14), // ?, reduce: Element2
+			reduce(14), // else, reduce: Element2
+			reduce(14), // if, reduce: Element2
+			reduce(14), // for, reduce: Element2
+			reduce(14), // endfor, reduce: Element2
+			reduce(14), // elif, reduce: Element2
+			reduce(14), // endif, reduce: Element2
+			reduce(14), // set, reduce: Element2
+			reduce(14), // comment, reduce: Element2
+			reduce(14), // template_block_end, reduce: Element2
+			reduce(14), // template_block_start, reduce: Element2
+			reduce(14), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(14), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S86
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),nil,reduce(22),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(15), // identifier, reduce: Element2
+			reduce(15), // bytes_literal, reduce: Element2
+			reduce(15), // string_literal, reduce: Element2
+			reduce(15), // integer_literal, reduce: Element2
+			reduce(15), // floating_point_literal, reduce: Element2
+			reduce(15), // newline, reduce: Element2
+			reduce(15), // dollar, reduce: Element2
+			reduce(15), // *, reduce: Element2
+			reduce(15), // [, reduce: Element2
+			reduce(15), // ], reduce: Element2
+			reduce(15), // (, reduce: Element2
+			reduce(15), // ), reduce: Element2
+			reduce(15), // ,, reduce: Element2
+			reduce(15), // ., reduce: Element2
+			reduce(15), // :, reduce: Element2
+			reduce(15), // %, reduce: Element2
+			reduce(15), // !, reduce: Element2
+			reduce(15), // |, reduce: Element2
+			reduce(15), // |>, reduce: Element2
+			reduce(15), // ^, reduce: Element2
+			reduce(15), // &, reduce: Element2
+			reduce(15), // <<, reduce: Element2
+			reduce(15), // >>, reduce: Element2
+			reduce(15), // =>, reduce: Element2
+			reduce(15), // ->, reduce: Element2
+			reduce(15), // /, reduce: Element2
+			reduce(15), // +, reduce: Element2
+			reduce(15), // -, reduce: Element2
+			reduce(15), // ||, reduce: Element2
+			reduce(15), // <>, reduce: Element2
+			reduce(15), // !=, reduce: Element2
+			reduce(15), // =, reduce: Element2
+			reduce(15), // <, reduce: Element2
+			reduce(15), // <=, reduce: Element2
+			reduce(15), // >, reduce: Element2
+			reduce(15), // >=, reduce: Element2
+			reduce(15), // ;, reduce: Element2
+			reduce(15), // @, reduce: Element2
+			reduce(15), // {, reduce: Element2
+			reduce(15), // }, reduce: Element2
+			reduce(15), // ~, reduce: Element2
+			reduce(15), // ?, reduce: Element2
+			reduce(15), // else, reduce: Element2
+			reduce(15), // if, reduce: Element2
+			reduce(15), // for, reduce: Element2
+			reduce(15), // endfor, reduce: Element2
+			reduce(15), // elif, reduce: Element2
+			reduce(15), // endif, reduce: Element2
+			reduce(15), // set, reduce: Element2
+			reduce(15), // comment, reduce: Element2
+			reduce(15), // template_block_end, reduce: Element2
+			reduce(15), // template_block_start, reduce: Element2
+			reduce(15), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(15), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S87
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),nil,reduce(23),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(16), // identifier, reduce: Element2
+			reduce(16), // bytes_literal, reduce: Element2
+			reduce(16), // string_literal, reduce: Element2
+			reduce(16), // integer_literal, reduce: Element2
+			reduce(16), // floating_point_literal, reduce: Element2
+			reduce(16), // newline, reduce: Element2
+			reduce(16), // dollar, reduce: Element2
+			reduce(16), // *, reduce: Element2
+			reduce(16), // [, reduce: Element2
+			reduce(16), // ], reduce: Element2
+			reduce(16), // (, reduce: Element2
+			reduce(16), // ), reduce: Element2
+			reduce(16), // ,, reduce: Element2
+			reduce(16), // ., reduce: Element2
+			reduce(16), // :, reduce: Element2
+			reduce(16), // %, reduce: Element2
+			reduce(16), // !, reduce: Element2
+			reduce(16), // |, reduce: Element2
+			reduce(16), // |>, reduce: Element2
+			reduce(16), // ^, reduce: Element2
+			reduce(16), // &, reduce: Element2
+			reduce(16), // <<, reduce: Element2
+			reduce(16), // >>, reduce: Element2
+			reduce(16), // =>, reduce: Element2
+			reduce(16), // ->, reduce: Element2
+			reduce(16), // /, reduce: Element2
+			reduce(16), // +, reduce: Element2
+			reduce(16), // -, reduce: Element2
+			reduce(16), // ||, reduce: Element2
+			reduce(16), // <>, reduce: Element2
+			reduce(16), // !=, reduce: Element2
+			reduce(16), // =, reduce: Element2
+			reduce(16), // <, reduce: Element2
+			reduce(16), // <=, reduce: Element2
+			reduce(16), // >, reduce: Element2
+			reduce(16), // >=, reduce: Element2
+			reduce(16), // ;, reduce: Element2
+			reduce(16), // @, reduce: Element2
+			reduce(16), // {, reduce: Element2
+			reduce(16), // }, reduce: Element2
+			reduce(16), // ~, reduce: Element2
+			reduce(16), // ?, reduce: Element2
+			reduce(16), // else, reduce: Element2
+			reduce(16), // if, reduce: Element2
+			reduce(16), // for, reduce: Element2
+			reduce(16), // endfor, reduce: Element2
+			reduce(16), // elif, reduce: Element2
+			reduce(16), // endif, reduce: Element2
+			reduce(16), // set, reduce: Element2
+			reduce(16), // comment, reduce: Element2
+			reduce(16), // template_block_end, reduce: Element2
+			reduce(16), // template_block_start, reduce: Element2
+			reduce(16), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(16), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S88
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),nil,reduce(24),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(17), // identifier, reduce: Element2
+			reduce(17), // bytes_literal, reduce: Element2
+			reduce(17), // string_literal, reduce: Element2
+			reduce(17), // integer_literal, reduce: Element2
+			reduce(17), // floating_point_literal, reduce: Element2
+			reduce(17), // newline, reduce: Element2
+			reduce(17), // dollar, reduce: Element2
+			reduce(17), // *, reduce: Element2
+			reduce(17), // [, reduce: Element2
+			reduce(17), // ], reduce: Element2
+			reduce(17), // (, reduce: Element2
+			reduce(17), // ), reduce: Element2
+			reduce(17), // ,, reduce: Element2
+			reduce(17), // ., reduce: Element2
+			reduce(17), // :, reduce: Element2
+			reduce(17), // %, reduce: Element2
+			reduce(17), // !, reduce: Element2
+			reduce(17), // |, reduce: Element2
+			reduce(17), // |>, reduce: Element2
+			reduce(17), // ^, reduce: Element2
+			reduce(17), // &, reduce: Element2
+			reduce(17), // <<, reduce: Element2
+			reduce(17), // >>, reduce: Element2
+			reduce(17), // =>, reduce: Element2
+			reduce(17), // ->, reduce: Element2
+			reduce(17), // /, reduce: Element2
+			reduce(17), // +, reduce: Element2
+			reduce(17), // -, reduce: Element2
+			reduce(17), // ||, reduce: Element2
+			reduce(17), // <>, reduce: Element2
+			reduce(17), // !=, reduce: Element2
+			reduce(17), // =, reduce: Element2
+			reduce(17), // <, reduce: Element2
+			reduce(17), // <=, reduce: Element2
+			reduce(17), // >, reduce: Element2
+			reduce(17), // >=, reduce: Element2
+			reduce(17), // ;, reduce: Element2
+			reduce(17), // @, reduce: Element2
+			reduce(17), // {, reduce: Element2
+			reduce(17), // }, reduce: Element2
+			reduce(17), // ~, reduce: Element2
+			reduce(17), // ?, reduce: Element2
+			reduce(17), // else, reduce: Element2
+			reduce(17), // if, reduce: Element2
+			reduce(17), // for, reduce: Element2
+			reduce(17), // endfor, reduce: Element2
+			reduce(17), // elif, reduce: Element2
+			reduce(17), // endif, reduce: Element2
+			reduce(17), // set, reduce: Element2
+			reduce(17), // comment, reduce: Element2
+			reduce(17), // template_block_end, reduce: Element2
+			reduce(17), // template_block_start, reduce: Element2
+			reduce(17), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(17), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S89
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),nil,reduce(25),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(18), // identifier, reduce: Element2
+			reduce(18), // bytes_literal, reduce: Element2
+			reduce(18), // string_literal, reduce: Element2
+			reduce(18), // integer_literal, reduce: Element2
+			reduce(18), // floating_point_literal, reduce: Element2
+			reduce(18), // newline, reduce: Element2
+			reduce(18), // dollar, reduce: Element2
+			reduce(18), // *, reduce: Element2
+			reduce(18), // [, reduce: Element2
+			reduce(18), // ], reduce: Element2
+			reduce(18), // (, reduce: Element2
+			reduce(18), // ), reduce: Element2
+			reduce(18), // ,, reduce: Element2
+			reduce(18), // ., reduce: Element2
+			reduce(18), // :, reduce: Element2
+			reduce(18), // %, reduce: Element2
+			reduce(18), // !, reduce: Element2
+			reduce(18), // |, reduce: Element2
+			reduce(18), // |>, reduce: Element2
+			reduce(18), // ^, reduce: Element2
+			reduce(18), // &, reduce: Element2
+			reduce(18), // <<, reduce: Element2
+			reduce(18), // >>, reduce: Element2
+			reduce(18), // =>, reduce: Element2
+			reduce(18), // ->, reduce: Element2
+			reduce(18), // /, reduce: Element2
+			reduce(18), // +, reduce: Element2
+			reduce(18), // -, reduce: Element2
+			reduce(18), // ||, reduce: Element2
+			reduce(18), // <>, reduce: Element2
+			reduce(18), // !=, reduce: Element2
+			reduce(18), // =, reduce: Element2
+			reduce(18), // <, reduce: Element2
+			reduce(18), // <=, reduce: Element2
+			reduce(18), // >, reduce: Element2
+			reduce(18), // >=, reduce: Element2
+			reduce(18), // ;, reduce: Element2
+			reduce(18), // @, reduce: Element2
+			reduce(18), // {, reduce: Element2
+			reduce(18), // }, reduce: Element2
+			reduce(18), // ~, reduce: Element2
+			reduce(18), // ?, reduce: Element2
+			reduce(18), // else, reduce: Element2
+			reduce(18), // if, reduce: Element2
+			reduce(18), // for, reduce: Element2
+			reduce(18), // endfor, reduce: Element2
+			reduce(18), // elif, reduce: Element2
+			reduce(18), // endif, reduce: Element2
+			reduce(18), // set, reduce: Element2
+			reduce(18), // comment, reduce: Element2
+			reduce(18), // template_block_end, reduce: Element2
+			reduce(18), // template_block_start, reduce: Element2
+			reduce(18), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(18), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S90
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),nil,reduce(26),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(19), // identifier, reduce: Element2
+			reduce(19), // bytes_literal, reduce: Element2
+			reduce(19), // string_literal, reduce: Element2
+			reduce(19), // integer_literal, reduce: Element2
+			reduce(19), // floating_point_literal, reduce: Element2
+			reduce(19), // newline, reduce: Element2
+			reduce(19), // dollar, reduce: Element2
+			reduce(19), // *, reduce: Element2
+			reduce(19), // [, reduce: Element2
+			reduce(19), // ], reduce: Element2
+			reduce(19), // (, reduce: Element2
+			reduce(19), // ), reduce: Element2
+			reduce(19), // ,, reduce: Element2
+			reduce(19), // ., reduce: Element2
+			reduce(19), // :, reduce: Element2
+			reduce(19), // %, reduce: Element2
+			reduce(19), // !, reduce: Element2
+			reduce(19), // |, reduce: Element2
+			reduce(19), // |>, reduce: Element2
+			reduce(19), // ^, reduce: Element2
+			reduce(19), // &, reduce: Element2
+			reduce(19), // <<, reduce: Element2
+			reduce(19), // >>, reduce: Element2
+			reduce(19), // =>, reduce: Element2
+			reduce(19), // ->, reduce: Element2
+			reduce(19), // /, reduce: Element2
+			reduce(19), // +, reduce: Element2
+			reduce(19), // -, reduce: Element2
+			reduce(19), // ||, reduce: Element2
+			reduce(19), // <>, reduce: Element2
+			reduce(19), // !=, reduce: Element2
+			reduce(19), // =, reduce: Element2
+			reduce(19), // <, reduce: Element2
+			reduce(19), // <=, reduce: Element2
+			reduce(19), // >, reduce: Element2
+			reduce(19), // >=, reduce: Element2
+			reduce(19), // ;, reduce: Element2
+			reduce(19), // @, reduce: Element2
+			reduce(19), // {, reduce: Element2
+			reduce(19), // }, reduce: Element2
+			reduce(19), // ~, reduce: Element2
+			reduce(19), // ?, reduce: Element2
+			reduce(19), // else, reduce: Element2
+			reduce(19), // if, reduce: Element2
+			reduce(19), // for, reduce: Element2
+			reduce(19), // endfor, reduce: Element2
+			reduce(19), // elif, reduce: Element2
+			reduce(19), // endif, reduce: Element2
+			reduce(19), // set, reduce: Element2
+			reduce(19), // comment, reduce: Element2
+			reduce(19), // template_block_end, reduce: Element2
+			reduce(19), // template_block_start, reduce: Element2
+			reduce(19), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(19), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S91
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),nil,reduce(27),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(20), // identifier, reduce: Element2
+			reduce(20), // bytes_literal, reduce: Element2
+			reduce(20), // string_literal, reduce: Element2
+			reduce(20), // integer_literal, reduce: Element2
+			reduce(20), // floating_point_literal, reduce: Element2
+			reduce(20), // newline, reduce: Element2
+			reduce(20), // dollar, reduce: Element2
+			reduce(20), // *, reduce: Element2
+			reduce(20), // [, reduce: Element2
+			reduce(20), // ], reduce: Element2
+			reduce(20), // (, reduce: Element2
+			reduce(20), // ), reduce: Element2
+			reduce(20), // ,, reduce: Element2
+			reduce(20), // ., reduce: Element2
+			reduce(20), // :, reduce: Element2
+			reduce(20), // %, reduce: Element2
+			reduce(20), // !, reduce: Element2
+			reduce(20), // |, reduce: Element2
+			reduce(20), // |>, reduce: Element2
+			reduce(20), // ^, reduce: Element2
+			reduce(20), // &, reduce: Element2
+			reduce(20), // <<, reduce: Element2
+			reduce(20), // >>, reduce: Element2
+			reduce(20), // =>, reduce: Element2
+			reduce(20), // ->, reduce: Element2
+			reduce(20), // /, reduce: Element2
+			reduce(20), // +, reduce: Element2
+			reduce(20), // -, reduce: Element2
+			reduce(20), // ||, reduce: Element2
+			reduce(20), // <>, reduce: Element2
+			reduce(20), // !=, reduce: Element2
+			reduce(20), // =, reduce: Element2
+			reduce(20), // <, reduce: Element2
+			reduce(20), // <=, reduce: Element2
+			reduce(20), // >, reduce: Element2
+			reduce(20), // >=, reduce: Element2
+			reduce(20), // ;, reduce: Element2
+			reduce(20), // @, reduce: Element2
+			reduce(20), // {, reduce: Element2
+			reduce(20), // }, reduce: Element2
+			reduce(20), // ~, reduce: Element2
+			reduce(20), // ?, reduce: Element2
+			reduce(20), // else, reduce: Element2
+			reduce(20), // if, reduce: Element2
+			reduce(20), // for, reduce: Element2
+			reduce(20), // endfor, reduce: Element2
+			reduce(20), // elif, reduce: Element2
+			reduce(20), // endif, reduce: Element2
+			reduce(20), // set, reduce: Element2
+			reduce(20), // comment, reduce: Element2
+			reduce(20), // template_block_end, reduce: Element2
+			reduce(20), // template_block_start, reduce: Element2
+			reduce(20), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(20), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S92
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),nil,reduce(28),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(21), // identifier, reduce: Element2
+			reduce(21), // bytes_literal, reduce: Element2
+			reduce(21), // string_literal, reduce: Element2
+			reduce(21), // integer_literal, reduce: Element2
+			reduce(21), // floating_point_literal, reduce: Element2
+			reduce(21), // newline, reduce: Element2
+			reduce(21), // dollar, reduce: Element2
+			reduce(21), // *, reduce: Element2
+			reduce(21), // [, reduce: Element2
+			reduce(21), // ], reduce: Element2
+			reduce(21), // (, reduce: Element2
+			reduce(21), // ), reduce: Element2
+			reduce(21), // ,, reduce: Element2
+			reduce(21), // ., reduce: Element2
+			reduce(21), // :, reduce: Element2
+			reduce(21), // %, reduce: Element2
+			reduce(21), // !, reduce: Element2
+			reduce(21), // |, reduce: Element2
+			reduce(21), // |>, reduce: Element2
+			reduce(21), // ^, reduce: Element2
+			reduce(21), // &, reduce: Element2
+			reduce(21), // <<, reduce: Element2
+			reduce(21), // >>, reduce: Element2
+			reduce(21), // =>, reduce: Element2
+			reduce(21), // ->, reduce: Element2
+			reduce(21), // /, reduce: Element2
+			reduce(21), // +, reduce: Element2
+			reduce(21), // -, reduce: Element2
+			reduce(21), // ||, reduce: Element2
+			reduce(21), // <>, reduce: Element2
+			reduce(21), // !=, reduce: Element2
+			reduce(21), // =, reduce: Element2
+			reduce(21), // <, reduce: Element2
+			reduce(21), // <=, reduce: Element2
+			reduce(21), // >, reduce: Element2
+			reduce(21), // >=, reduce: Element2
+			reduce(21), // ;, reduce: Element2
+			reduce(21), // @, reduce: Element2
+			reduce(21), // {, reduce: Element2
+			reduce(21), // }, reduce: Element2
+			reduce(21), // ~, reduce: Element2
+			reduce(21), // ?, reduce: Element2
+			reduce(21), // else, reduce: Element2
+			reduce(21), // if, reduce: Element2
+			reduce(21), // for, reduce: Element2
+			reduce(21), // endfor, reduce: Element2
+			reduce(21), // elif, reduce: Element2
+			reduce(21), // endif, reduce: Element2
+			reduce(21), // set, reduce: Element2
+			reduce(21), // comment, reduce: Element2
+			reduce(21), // template_block_end, reduce: Element2
+			reduce(21), // template_block_start, reduce: Element2
+			reduce(21), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(21), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S93
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),nil,reduce(29),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(22), // identifier, reduce: Element2
+			reduce(22), // bytes_literal, reduce: Element2
+			reduce(22), // string_literal, reduce: Element2
+			reduce(22), // integer_literal, reduce: Element2
+			reduce(22), // floating_point_literal, reduce: Element2
+			reduce(22), // newline, reduce: Element2
+			reduce(22), // dollar, reduce: Element2
+			reduce(22), // *, reduce: Element2
+			reduce(22), // [, reduce: Element2
+			reduce(22), // ], reduce: Element2
+			reduce(22), // (, reduce: Element2
+			reduce(22), // ), reduce: Element2
+			reduce(22), // ,, reduce: Element2
+			reduce(22), // ., reduce: Element2
+			reduce(22), // :, reduce: Element2
+			reduce(22), // %, reduce: Element2
+			reduce(22), // !, reduce: Element2
+			reduce(22), // |, reduce: Element2
+			reduce(22), // |>, reduce: Element2
+			reduce(22), // ^, reduce: Element2
+			reduce(22), // &, reduce: Element2
+			reduce(22), // <<, reduce: Element2
+			reduce(22), // >>, reduce: Element2
+			reduce(22), // =>, reduce: Element2
+			reduce(22), // ->, reduce: Element2
+			reduce(22), // /, reduce: Element2
+			reduce(22), // +, reduce: Element2
+			reduce(22), // -, reduce: Element2
+			reduce(22), // ||, reduce: Element2
+			reduce(22), // <>, reduce: Element2
+			reduce(22), // !=, reduce: Element2
+			reduce(22), // =, reduce: Element2
+			reduce(22), // <, reduce: Element2
+			reduce(22), // <=, reduce: Element2
+			reduce(22), // >, reduce: Element2
+			reduce(22), // >=, reduce: Element2
+			reduce(22), // ;, reduce: Element2
+			reduce(22), // @, reduce: Element2
+			reduce(22), // {, reduce: Element2
+			reduce(22), // }, reduce: Element2
+			reduce(22), // ~, reduce: Element2
+			reduce(22), // ?, reduce: Element2
+			reduce(22), // else, reduce: Element2
+			reduce(22), // if, reduce: Element2
+			reduce(22), // for, reduce: Element2
+			reduce(22), // endfor, reduce: Element2
+			reduce(22), // elif, reduce: Element2
+			reduce(22), // endif, reduce: Element2
+			reduce(22), // set, reduce: Element2
+			reduce(22), // comment, reduce: Element2
+			reduce(22), // template_block_end, reduce: Element2
+			reduce(22), // template_block_start, reduce: Element2
+			reduce(22), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(22), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S94
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),nil,reduce(30),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(23), // identifier, reduce: Element2
+			reduce(23), // bytes_literal, reduce: Element2
+			reduce(23), // string_literal, reduce: Element2
+			reduce(23), // integer_literal, reduce: Element2
+			reduce(23), // floating_point_literal, reduce: Element2
+			reduce(23), // newline, reduce: Element2
+			reduce(23), // dollar, reduce: Element2
+			reduce(23), // *, reduce: Element2
+			reduce(23), // [, reduce: Element2
+			reduce(23), // ], reduce: Element2
+			reduce(23), // (, reduce: Element2
+			reduce(23), // ), reduce: Element2
+			reduce(23), // ,, reduce: Element2
+			reduce(23), // ., reduce: Element2
+			reduce(23), // :, reduce: Element2
+			reduce(23), // %, reduce: Element2
+			reduce(23), // !, reduce: Element2
+			reduce(23), // |, reduce: Element2
+			reduce(23), // |>, reduce: Element2
+			reduce(23), // ^, reduce: Element2
+			reduce(23), // &, reduce: Element2
+			reduce(23), // <<, reduce: Element2
+			reduce(23), // >>, reduce: Element2
+			reduce(23), // =>, reduce: Element2
+			reduce(23), // ->, reduce: Element2
+			reduce(23), // /, reduce: Element2
+			reduce(23), // +, reduce: Element2
+			reduce(23), // -, reduce: Element2
+			reduce(23), // ||, reduce: Element2
+			reduce(23), // <>, reduce: Element2
+			reduce(23), // !=, reduce: Element2
+			reduce(23), // =, reduce: Element2
+			reduce(23), // <, reduce: Element2
+			reduce(23), // <=, reduce: Element2
+			reduce(23), // >, reduce: Element2
+			reduce(23), // >=, reduce: Element2
+			reduce(23), // ;, reduce: Element2
+			reduce(23), // @, reduce: Element2
+			reduce(23), // {, reduce: Element2
+			reduce(23), // }, reduce: Element2
+			reduce(23), // ~, reduce: Element2
+			reduce(23), // ?, reduce: Element2
+			reduce(23), // else, reduce: Element2
+			reduce(23), // if, reduce: Element2
+			reduce(23), // for, reduce: Element2
+			reduce(23), // endfor, reduce: Element2
+			reduce(23), // elif, reduce: Element2
+			reduce(23), // endif, reduce: Element2
+			reduce(23), // set, reduce: Element2
+			reduce(23), // comment, reduce: Element2
+			reduce(23), // template_block_end, reduce: Element2
+			reduce(23), // template_block_start, reduce: Element2
+			reduce(23), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(23), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S95
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),nil,reduce(31),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(24), // identifier, reduce: Element2
+			reduce(24), // bytes_literal, reduce: Element2
+			reduce(24), // string_literal, reduce: Element2
+			reduce(24), // integer_literal, reduce: Element2
+			reduce(24), // floating_point_literal, reduce: Element2
+			reduce(24), // newline, reduce: Element2
+			reduce(24), // dollar, reduce: Element2
+			reduce(24), // *, reduce: Element2
+			reduce(24), // [, reduce: Element2
+			reduce(24), // ], reduce: Element2
+			reduce(24), // (, reduce: Element2
+			reduce(24), // ), reduce: Element2
+			reduce(24), // ,, reduce: Element2
+			reduce(24), // ., reduce: Element2
+			reduce(24), // :, reduce: Element2
+			reduce(24), // %, reduce: Element2
+			reduce(24), // !, reduce: Element2
+			reduce(24), // |, reduce: Element2
+			reduce(24), // |>, reduce: Element2
+			reduce(24), // ^, reduce: Element2
+			reduce(24), // &, reduce: Element2
+			reduce(24), // <<, reduce: Element2
+			reduce(24), // >>, reduce: Element2
+			reduce(24), // =>, reduce: Element2
+			reduce(24), // ->, reduce: Element2
+			reduce(24), // /, reduce: Element2
+			reduce(24), // +, reduce: Element2
+			reduce(24), // -, reduce: Element2
+			reduce(24), // ||, reduce: Element2
+			reduce(24), // <>, reduce: Element2
+			reduce(24), // !=, reduce: Element2
+			reduce(24), // =, reduce: Element2
+			reduce(24), // <, reduce: Element2
+			reduce(24), // <=, reduce: Element2
+			reduce(24), // >, reduce: Element2
+			reduce(24), // >=, reduce: Element2
+			reduce(24), // ;, reduce: Element2
+			reduce(24), // @, reduce: Element2
+			reduce(24), // {, reduce: Element2
+			reduce(24), // }, reduce: Element2
+			reduce(24), // ~, reduce: Element2
+			reduce(24), // ?, reduce: Element2
+			reduce(24), // else, reduce: Element2
+			reduce(24), // if, reduce: Element2
+			reduce(24), // for, reduce: Element2
+			reduce(24), // endfor, reduce: Element2
+			reduce(24), // elif, reduce: Element2
+			reduce(24), // endif, reduce: Element2
+			reduce(24), // set, reduce: Element2
+			reduce(24), // comment, reduce: Element2
+			reduce(24), // template_block_end, reduce: Element2
+			reduce(24), // template_block_start, reduce: Element2
+			reduce(24), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(24), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S96
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),nil,reduce(32),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(25), // identifier, reduce: Element2
+			reduce(25), // bytes_literal, reduce: Element2
+			reduce(25), // string_literal, reduce: Element2
+			reduce(25), // integer_literal, reduce: Element2
+			reduce(25), // floating_point_literal, reduce: Element2
+			reduce(25), // newline, reduce: Element2
+			reduce(25), // dollar, reduce: Element2
+			reduce(25), // *, reduce: Element2
+			reduce(25), // [, reduce: Element2
+			reduce(25), // ], reduce: Element2
+			reduce(25), // (, reduce: Element2
+			reduce(25), // ), reduce: Element2
+			reduce(25), // ,, reduce: Element2
+			reduce(25), // ., reduce: Element2
+			reduce(25), // :, reduce: Element2
+			reduce(25), // %, reduce: Element2
+			reduce(25), // !, reduce: Element2
+			reduce(25), // |, reduce: Element2
+			reduce(25), // |>, reduce: Element2
+			reduce(25), // ^, reduce: Element2
+			reduce(25), // &, reduce: Element2
+			reduce(25), // <<, reduce: Element2
+			reduce(25), // >>, reduce: Element2
+			reduce(25), // =>, reduce: Element2
+			reduce(25), // ->, reduce: Element2
+			reduce(25), // /, reduce: Element2
+			reduce(25), // +, reduce: Element2
+			reduce(25), // -, reduce: Element2
+			reduce(25), // ||, reduce: Element2
+			reduce(25), // <>, reduce: Element2
+			reduce(25), // !=, reduce: Element2
+			reduce(25), // =, reduce: Element2
+			reduce(25), // <, reduce: Element2
+			reduce(25), // <=, reduce: Element2
+			reduce(25), // >, reduce: Element2
+			reduce(25), // >=, reduce: Element2
+			reduce(25), // ;, reduce: Element2
+			reduce(25), // @, reduce: Element2
+			reduce(25), // {, reduce: Element2
+			reduce(25), // }, reduce: Element2
+			reduce(25), // ~, reduce: Element2
+			reduce(25), // ?, reduce: Element2
+			reduce(25), // else, reduce: Element2
+			reduce(25), // if, reduce: Element2
+			reduce(25), // for, reduce: Element2
+			reduce(25), // endfor, reduce: Element2
+			reduce(25), // elif, reduce: Element2
+			reduce(25), // endif, reduce: Element2
+			reduce(25), // set, reduce: Element2
+			reduce(25), // comment, reduce: Element2
+			reduce(25), // template_block_end, reduce: Element2
+			reduce(25), // template_block_start, reduce: Element2
+			reduce(25), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(25), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S97
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),nil,reduce(33),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(26), // identifier, reduce: Element2
+			reduce(26), // bytes_literal, reduce: Element2
+			reduce(26), // string_literal, reduce: Element2
+			reduce(26), // integer_literal, reduce: Element2
+			reduce(26), // floating_point_literal, reduce: Element2
+			reduce(26), // newline, reduce: Element2
+			reduce(26), // dollar, reduce: Element2
+			reduce(26), // *, reduce: Element2
+			reduce(26), // [, reduce: Element2
+			reduce(26), // ], reduce: Element2
+			reduce(26), // (, reduce: Element2
+			reduce(26), // ), reduce: Element2
+			reduce(26), // ,, reduce: Element2
+			reduce(26), // ., reduce: Element2
+			reduce(26), // :, reduce: Element2
+			reduce(26), // %, reduce: Element2
+			reduce(26), // !, reduce: Element2
+			reduce(26), // |, reduce: Element2
+			reduce(26), // |>, reduce: Element2
+			reduce(26), // ^, reduce: Element2
+			reduce(26), // &, reduce: Element2
+			reduce(26), // <<, reduce: Element2
+			reduce(26), // >>, reduce: Element2
+			reduce(26), // =>, reduce: Element2
+			reduce(26), // ->, reduce: Element2
+			reduce(26), // /, reduce: Element2
+			reduce(26), // +, reduce: Element2
+			reduce(26), // -, reduce: Element2
+			reduce(26), // ||, reduce: Element2
+			reduce(26), // <>, reduce: Element2
+			reduce(26), // !=, reduce: Element2
+			reduce(26), // =, reduce: Element2
+			reduce(26), // <, reduce: Element2
+			reduce(26), // <=, reduce: Element2
+			reduce(26), // >, reduce: Element2
+			reduce(26), // >=, reduce: Element2
+			reduce(26), // ;, reduce: Element2
+			reduce(26), // @, reduce: Element2
+			reduce(26), // {, reduce: Element2
+			reduce(26), // }, reduce: Element2
+			reduce(26), // ~, reduce: Element2
+			reduce(26), // ?, reduce: Element2
+			reduce(26), // else, reduce: Element2
+			reduce(26), // if, reduce: Element2
+			reduce(26), // for, reduce: Element2
+			reduce(26), // endfor, reduce: Element2
+			reduce(26), // elif, reduce: Element2
+			reduce(26), // endif, reduce: Element2
+			reduce(26), // set, reduce: Element2
+			reduce(26), // comment, reduce: Element2
+			reduce(26), // template_block_end, reduce: Element2
+			reduce(26), // template_block_start, reduce: Element2
+			reduce(26), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(26), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S98
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),nil,reduce(34),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(27), // identifier, reduce: Element2
+			reduce(27), // bytes_literal, reduce: Element2
+			reduce(27), // string_literal, reduce: Element2
+			reduce(27), // integer_literal, reduce: Element2
+			reduce(27), // floating_point_literal, reduce: Element2
+			reduce(27), // newline, reduce: Element2
+			reduce(27), // dollar, reduce: Element2
+			reduce(27), // *, reduce: Element2
+			reduce(27), // [, reduce: Element2
+			reduce(27), // ], reduce: Element2
+			reduce(27), // (, reduce: Element2
+			reduce(27), // ), reduce: Element2
+			reduce(27), // ,, reduce: Element2
+			reduce(27), // ., reduce: Element2
+			reduce(27), // :, reduce: Element2
+			reduce(27), // %, reduce: Element2
+			reduce(27), // !, reduce: Element2
+			reduce(27), // |, reduce: Element2
+			reduce(27), // |>, reduce: Element2
+			reduce(27), // ^, reduce: Element2
+			reduce(27), // &, reduce: Element2
+			reduce(27), // <<, reduce: Element2
+			reduce(27), // >>, reduce: Element2
+			reduce(27), // =>, reduce: Element2
+			reduce(27), // ->, reduce: Element2
+			reduce(27), // /, reduce: Element2
+			reduce(27), // +, reduce: Element2
+			reduce(27), // -, reduce: Element2
+			reduce(27), // ||, reduce: Element2
+			reduce(27), // <>, reduce: Element2
+			reduce(27), // !=, reduce: Element2
+			reduce(27), // =, reduce: Element2
+			reduce(27), // <, reduce: Element2
+			reduce(27), // <=, reduce: Element2
+			reduce(27), // >, reduce: Element2
+			reduce(27), // >=, reduce: Element2
+			reduce(27), // ;, reduce: Element2
+			reduce(27), // @, reduce: Element2
+			reduce(27), // {, reduce: Element2
+			reduce(27), // }, reduce: Element2
+			reduce(27), // ~, reduce: Element2
+			reduce(27), // ?, reduce: Element2
+			reduce(27), // else, reduce: Element2
+			reduce(27), // if, reduce: Element2
+			reduce(27), // for, reduce: Element2
+			reduce(27), // endfor, reduce: Element2
+			reduce(27), // elif, reduce: Element2
+			reduce(27), // endif, reduce: Element2
+			reduce(27), // set, reduce: Element2
+			reduce(27), // comment, reduce: Element2
+			reduce(27), // template_block_end, reduce: Element2
+			reduce(27), // template_block_start, reduce: Element2
+			reduce(27), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(27), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S99
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),nil,reduce(35),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(28), // identifier, reduce: Element2
+			reduce(28), // bytes_literal, reduce: Element2
+			reduce(28), // string_literal, reduce: Element2
+			reduce(28), // integer_literal, reduce: Element2
+			reduce(28), // floating_point_literal, reduce: Element2
+			reduce(28), // newline, reduce: Element2
+			reduce(28), // dollar, reduce: Element2
+			reduce(28), // *, reduce: Element2
+			reduce(28), // [, reduce: Element2
+			reduce(28), // ], reduce: Element2
+			reduce(28), // (, reduce: Element2
+			reduce(28), // ), reduce: Element2
+			reduce(28), // ,, reduce: Element2
+			reduce(28), // ., reduce: Element2
+			reduce(28), // :, reduce: Element2
+			reduce(28), // %, reduce: Element2
+			reduce(28), // !, reduce: Element2
+			reduce(28), // |, reduce: Element2
+			reduce(28), // |>, reduce: Element2
+			reduce(28), // ^, reduce: Element2
+			reduce(28), // &, reduce: Element2
+			reduce(28), // <<, reduce: Element2
+			reduce(28), // >>, reduce: Element2
+			reduce(28), // =>, reduce: Element2
+			reduce(28), // ->, reduce: Element2
+			reduce(28), // /, reduce: Element2
+			reduce(28), // +, reduce: Element2
+			reduce(28), // -, reduce: Element2
+			reduce(28), // ||, reduce: Element2
+			reduce(28), // <>, reduce: Element2
+			reduce(28), // !=, reduce: Element2
+			reduce(28), // =, reduce: Element2
+			reduce(28), // <, reduce: Element2
+			reduce(28), // <=, reduce: Element2
+			reduce(28), // >, reduce: Element2
+			reduce(28), // >=, reduce: Element2
+			reduce(28), // ;, reduce: Element2
+			reduce(28), // @, reduce: Element2
+			reduce(28), // {, reduce: Element2
+			reduce(28), // }, reduce: Element2
+			reduce(28), // ~, reduce: Element2
+			reduce(28), // ?, reduce: Element2
+			reduce(28), // else, reduce: Element2
+			reduce(28), // if, reduce: Element2
+			reduce(28), // for, reduce: Element2
+			reduce(28), // endfor, reduce: Element2
+			reduce(28), // elif, reduce: Element2
+			reduce(28), // endif, reduce: Element2
+			reduce(28), // set, reduce: Element2
+			reduce(28), // comment, reduce: Element2
+			reduce(28), // template_block_end, reduce: Element2
+			reduce(28), // template_block_start, reduce: Element2
+			reduce(28), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(28), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S100
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),nil,reduce(36),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(29), // identifier, reduce: Element2
+			reduce(29), // bytes_literal, reduce: Element2
+			reduce(29), // string_literal, reduce: Element2
+			reduce(29), // integer_literal, reduce: Element2
+			reduce(29), // floating_point_literal, reduce: Element2
+			reduce(29), // newline, reduce: Element2
+			reduce(29), // dollar, reduce: Element2
+			reduce(29), // *, reduce: Element2
+			reduce(29), // [, reduce: Element2
+			reduce(29), // ], reduce: Element2
+			reduce(29), // (, reduce: Element2
+			reduce(29), // ), reduce: Element2
+			reduce(29), // ,, reduce: Element2
+			reduce(29), // ., reduce: Element2
+			reduce(29), // :, reduce: Element2
+			reduce(29), // %, reduce: Element2
+			reduce(29), // !, reduce: Element2
+			reduce(29), // |, reduce: Element2
+			reduce(29), // |>, reduce: Element2
+			reduce(29), // ^, reduce: Element2
+			reduce(29), // &, reduce: Element2
+			reduce(29), // <<, reduce: Element2
+			reduce(29), // >>, reduce: Element2
+			reduce(29), // =>, reduce: Element2
+			reduce(29), // ->, reduce: Element2
+			reduce(29), // /, reduce: Element2
+			reduce(29), // +, reduce: Element2
+			reduce(29), // -, reduce: Element2
+			reduce(29), // ||, reduce: Element2
+			reduce(29), // <>, reduce: Element2
+			reduce(29), // !=, reduce: Element2
+			reduce(29), // =, reduce: Element2
+			reduce(29), // <, reduce: Element2
+			reduce(29), // <=, reduce: Element2
+			reduce(29), // >, reduce: Element2
+			reduce(29), // >=, reduce: Element2
+			reduce(29), // ;, reduce: Element2
+			reduce(29), // @, reduce: Element2
+			reduce(29), // {, reduce: Element2
+			reduce(29), // }, reduce: Element2
+			reduce(29), // ~, reduce: Element2
+			reduce(29), // ?, reduce: Element2
+			reduce(29), // else, reduce: Element2
+			reduce(29), // if, reduce: Element2
+			reduce(29), // for, reduce: Element2
+			reduce(29), // endfor, reduce: Element2
+			reduce(29), // elif, reduce: Element2
+			reduce(29), // endif, reduce: Element2
+			reduce(29), // set, reduce: Element2
+			reduce(29), // comment, reduce: Element2
+			reduce(29), // template_block_end, reduce: Element2
+			reduce(29), // template_block_start, reduce: Element2
+			reduce(29), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(29), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S101
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),nil,reduce(37),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(30), // identifier, reduce: Element2
+			reduce(30), // bytes_literal, reduce: Element2
+			reduce(30), // string_literal, reduce: Element2
+			reduce(30), // integer_literal, reduce: Element2
+			reduce(30), // floating_point_literal, reduce: Element2
+			reduce(30), // newline, reduce: Element2
+			reduce(30), // dollar, reduce: Element2
+			reduce(30), // *, reduce: Element2
+			reduce(30), // [, reduce: Element2
+			reduce(30), // ], reduce: Element2
+			reduce(30), // (, reduce: Element2
+			reduce(30), // ), reduce: Element2
+			reduce(30), // ,, reduce: Element2
+			reduce(30), // ., reduce: Element2
+			reduce(30), // :, reduce: Element2
+			reduce(30), // %, reduce: Element2
+			reduce(30), // !, reduce: Element2
+			reduce(30), // |, reduce: Element2
+			reduce(30), // |>, reduce: Element2
+			reduce(30), // ^, reduce: Element2
+			reduce(30), // &, reduce: Element2
+			reduce(30), // <<, reduce: Element2
+			reduce(30), // >>, reduce: Element2
+			reduce(30), // =>, reduce: Element2
+			reduce(30), // ->, reduce: Element2
+			reduce(30), // /, reduce: Element2
+			reduce(30), // +, reduce: Element2
+			reduce(30), // -, reduce: Element2
+			reduce(30), // ||, reduce: Element2
+			reduce(30), // <>, reduce: Element2
+			reduce(30), // !=, reduce: Element2
+			reduce(30), // =, reduce: Element2
+			reduce(30), // <, reduce: Element2
+			reduce(30), // <=, reduce: Element2
+			reduce(30), // >, reduce: Element2
+			reduce(30), // >=, reduce: Element2
+			reduce(30), // ;, reduce: Element2
+			reduce(30), // @, reduce: Element2
+			reduce(30), // {, reduce: Element2
+			reduce(30), // }, reduce: Element2
+			reduce(30), // ~, reduce: Element2
+			reduce(30), // ?, reduce: Element2
+			reduce(30), // else, reduce: Element2
+			reduce(30), // if, reduce: Element2
+			reduce(30), // for, reduce: Element2
+			reduce(30), // endfor, reduce: Element2
+			reduce(30), // elif, reduce: Element2
+			reduce(30), // endif, reduce: Element2
+			reduce(30), // set, reduce: Element2
+			reduce(30), // comment, reduce: Element2
+			reduce(30), // template_block_end, reduce: Element2
+			reduce(30), // template_block_start, reduce: Element2
+			reduce(30), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(30), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S102
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),nil,reduce(38),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(31), // identifier, reduce: Element2
+			reduce(31), // bytes_literal, reduce: Element2
+			reduce(31), // string_literal, reduce: Element2
+			reduce(31), // integer_literal, reduce: Element2
+			reduce(31), // floating_point_literal, reduce: Element2
+			reduce(31), // newline, reduce: Element2
+			reduce(31), // dollar, reduce: Element2
+			reduce(31), // *, reduce: Element2
+			reduce(31), // [, reduce: Element2
+			reduce(31), // ], reduce: Element2
+			reduce(31), // (, reduce: Element2
+			reduce(31), // ), reduce: Element2
+			reduce(31), // ,, reduce: Element2
+			reduce(31), // ., reduce: Element2
+			reduce(31), // :, reduce: Element2
+			reduce(31), // %, reduce: Element2
+			reduce(31), // !, reduce: Element2
+			reduce(31), // |, reduce: Element2
+			reduce(31), // |>, reduce: Element2
+			reduce(31), // ^, reduce: Element2
+			reduce(31), // &, reduce: Element2
+			reduce(31), // <<, reduce: Element2
+			reduce(31), // >>, reduce: Element2
+			reduce(31), // =>, reduce: Element2
+			reduce(31), // ->, reduce: Element2
+			reduce(31), // /, reduce: Element2
+			reduce(31), // +, reduce: Element2
+			reduce(31), // -, reduce: Element2
+			reduce(31), // ||, reduce: Element2
+			reduce(31), // <>, reduce: Element2
+			reduce(31), // !=, reduce: Element2
+			reduce(31), // =, reduce: Element2
+			reduce(31), // <, reduce: Element2
+			reduce(31), // <=, reduce: Element2
+			reduce(31), // >, reduce: Element2
+			reduce(31), // >=, reduce: Element2
+			reduce(31), // ;, reduce: Element2
+			reduce(31), // @, reduce: Element2
+			reduce(31), // {, reduce: Element2
+			reduce(31), // }, reduce: Element2
+			reduce(31), // ~, reduce: Element2
+			reduce(31), // ?, reduce: Element2
+			reduce(31), // else, reduce: Element2
+			reduce(31), // if, reduce: Element2
+			reduce(31), // for, reduce: Element2
+			reduce(31), // endfor, reduce: Element2
+			reduce(31), // elif, reduce: Element2
+			reduce(31), // endif, reduce: Element2
+			reduce(31), // set, reduce: Element2
+			reduce(31), // comment, reduce: Element2
+			reduce(31), // template_block_end, reduce: Element2
+			reduce(31), // template_block_start, reduce: Element2
+			reduce(31), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(31), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S103
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),nil,reduce(39),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(32), // identifier, reduce: Element2
+			reduce(32), // bytes_literal, reduce: Element2
+			reduce(32), // string_literal, reduce: Element2
+			reduce(32), // integer_literal, reduce: Element2
+			reduce(32), // floating_point_literal, reduce: Element2
+			reduce(32), // newline, reduce: Element2
+			reduce(32), // dollar, reduce: Element2
+			reduce(32), // *, reduce: Element2
+			reduce(32), // [, reduce: Element2
+			reduce(32), // ], reduce: Element2
+			reduce(32), // (, reduce: Element2
+			reduce(32), // ), reduce: Element2
+			reduce(32), // ,, reduce: Element2
+			reduce(32), // ., reduce: Element2
+			reduce(32), // :, reduce: Element2
+			reduce(32), // %, reduce: Element2
+			reduce(32), // !, reduce: Element2
+			reduce(32), // |, reduce: Element2
+			reduce(32), // |>, reduce: Element2
+			reduce(32), // ^, reduce: Element2
+			reduce(32), // &, reduce: Element2
+			reduce(32), // <<, reduce: Element2
+			reduce(32), // >>, reduce: Element2
+			reduce(32), // =>, reduce: Element2
+			reduce(32), // ->, reduce: Element2
+			reduce(32), // /, reduce: Element2
+			reduce(32), // +, reduce: Element2
+			reduce(32), // -, reduce: Element2
+			reduce(32), // ||, reduce: Element2
+			reduce(32), // <>, reduce: Element2
+			reduce(32), // !=, reduce: Element2
+			reduce(32), // =, reduce: Element2
+			reduce(32), // <, reduce: Element2
+			reduce(32), // <=, reduce: Element2
+			reduce(32), // >, reduce: Element2
+			reduce(32), // >=, reduce: Element2
+			reduce(32), // ;, reduce: Element2
+			reduce(32), // @, reduce: Element2
+			reduce(32), // {, reduce: Element2
+			reduce(32), // }, reduce: Element2
+			reduce(32), // ~, reduce: Element2
+			reduce(32), // ?, reduce: Element2
+			reduce(32), // else, reduce: Element2
+			reduce(32), // if, reduce: Element2
+			reduce(32), // for, reduce: Element2
+			reduce(32), // endfor, reduce: Element2
+			reduce(32), // elif, reduce: Element2
+			reduce(32), // endif, reduce: Element2
+			reduce(32), // set, reduce: Element2
+			reduce(32), // comment, reduce: Element2
+			reduce(32), // template_block_end, reduce: Element2
+			reduce(32), // template_block_start, reduce: Element2
+			reduce(32), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(32), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S104
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),nil,reduce(40),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(33), // identifier, reduce: Element2
+			reduce(33), // bytes_literal, reduce: Element2
+			reduce(33), // string_literal, reduce: Element2
+			reduce(33), // integer_literal, reduce: Element2
+			reduce(33), // floating_point_literal, reduce: Element2
+			reduce(33), // newline, reduce: Element2
+			reduce(33), // dollar, reduce: Element2
+			reduce(33), // *, reduce: Element2
+			reduce(33), // [, reduce: Element2
+			reduce(33), // ], reduce: Element2
+			reduce(33), // (, reduce: Element2
+			reduce(33), // ), reduce: Element2
+			reduce(33), // ,, reduce: Element2
+			reduce(33), // ., reduce: Element2
+			reduce(33), // :, reduce: Element2
+			reduce(33), // %, reduce: Element2
+			reduce(33), // !, reduce: Element2
+			reduce(33), // |, reduce: Element2
+			reduce(33), // |>, reduce: Element2
+			reduce(33), // ^, reduce: Element2
+			reduce(33), // &, reduce: Element2
+			reduce(33), // <<, reduce: Element2
+			reduce(33), // >>, reduce: Element2
+			reduce(33), // =>, reduce: Element2
+			reduce(33), // ->, reduce: Element2
+			reduce(33), // /, reduce: Element2
+			reduce(33), // +, reduce: Element2
+			reduce(33), // -, reduce: Element2
+			reduce(33), // ||, reduce: Element2
+			reduce(33), // <>, reduce: Element2
+			reduce(33), // !=, reduce: Element2
+			reduce(33), // =, reduce: Element2
+			reduce(33), // <, reduce: Element2
+			reduce(33), // <=, reduce: Element2
+			reduce(33), // >, reduce: Element2
+			reduce(33), // >=, reduce: Element2
+			reduce(33), // ;, reduce: Element2
+			reduce(33), // @, reduce: Element2
+			reduce(33), // {, reduce: Element2
+			reduce(33), // }, reduce: Element2
+			reduce(33), // ~, reduce: Element2
+			reduce(33), // ?, reduce: Element2
+			reduce(33), // else, reduce: Element2
+			reduce(33), // if, reduce: Element2
+			reduce(33), // for, reduce: Element2
+			reduce(33), // endfor, reduce: Element2
+			reduce(33), // elif, reduce: Element2
+			reduce(33), // endif, reduce: Element2
+			reduce(33), // set, reduce: Element2
+			reduce(33), // comment, reduce: Element2
+			reduce(33), // template_block_end, reduce: Element2
+			reduce(33), // template_block_start, reduce: Element2
+			reduce(33), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(33), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S105
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),nil,reduce(41),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(34), // identifier, reduce: Element2
+			reduce(34), // bytes_literal, reduce: Element2
+			reduce(34), // string_literal, reduce: Element2
+			reduce(34), // integer_literal, reduce: Element2
+			reduce(34), // floating_point_literal, reduce: Element2
+			reduce(34), // newline, reduce: Element2
+			reduce(34), // dollar, reduce: Element2
+			reduce(34), // *, reduce: Element2
+			reduce(34), // [, reduce: Element2
+			reduce(34), // ], reduce: Element2
+			reduce(34), // (, reduce: Element2
+			reduce(34), // ), reduce: Element2
+			reduce(34), // ,, reduce: Element2
+			reduce(34), // ., reduce: Element2
+			reduce(34), // :, reduce: Element2
+			reduce(34), // %, reduce: Element2
+			reduce(34), // !, reduce: Element2
+			reduce(34), // |, reduce: Element2
+			reduce(34), // |>, reduce: Element2
+			reduce(34), // ^, reduce: Element2
+			reduce(34), // &, reduce: Element2
+			reduce(34), // <<, reduce: Element2
+			reduce(34), // >>, reduce: Element2
+			reduce(34), // =>, reduce: Element2
+			reduce(34), // ->, reduce: Element2
+			reduce(34), // /, reduce: Element2
+			reduce(34), // +, reduce: Element2
+			reduce(34), // -, reduce: Element2
+			reduce(34), // ||, reduce: Element2
+			reduce(34), // <>, reduce: Element2
+			reduce(34), // !=, reduce: Element2
+			reduce(34), // =, reduce: Element2
+			reduce(34), // <, reduce: Element2
+			reduce(34), // <=, reduce: Element2
+			reduce(34), // >, reduce: Element2
+			reduce(34), // >=, reduce: Element2
+			reduce(34), // ;, reduce: Element2
+			reduce(34), // @, reduce: Element2
+			reduce(34), // {, reduce: Element2
+			reduce(34), // }, reduce: Element2
+			reduce(34), // ~, reduce: Element2
+			reduce(34), // ?, reduce: Element2
+			reduce(34), // else, reduce: Element2
+			reduce(34), // if, reduce: Element2
+			reduce(34), // for, reduce: Element2
+			reduce(34), // endfor, reduce: Element2
+			reduce(34), // elif, reduce: Element2
+			reduce(34), // endif, reduce: Element2
+			reduce(34), // set, reduce: Element2
+			reduce(34), // comment, reduce: Element2
+			reduce(34), // template_block_end, reduce: Element2
+			reduce(34), // template_block_start, reduce: Element2
+			reduce(34), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(34), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S106
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),nil,reduce(42),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(35), // identifier, reduce: Element2
+			reduce(35), // bytes_literal, reduce: Element2
+			reduce(35), // string_literal, reduce: Element2
+			reduce(35), // integer_literal, reduce: Element2
+			reduce(35), // floating_point_literal, reduce: Element2
+			reduce(35), // newline, reduce: Element2
+			reduce(35), // dollar, reduce: Element2
+			reduce(35), // *, reduce: Element2
+			reduce(35), // [, reduce: Element2
+			reduce(35), // ], reduce: Element2
+			reduce(35), // (, reduce: Element2
+			reduce(35), // ), reduce: Element2
+			reduce(35), // ,, reduce: Element2
+			reduce(35), // ., reduce: Element2
+			reduce(35), // :, reduce: Element2
+			reduce(35), // %, reduce: Element2
+			reduce(35), // !, reduce: Element2
+			reduce(35), // |, reduce: Element2
+			reduce(35), // |>, reduce: Element2
+			reduce(35), // ^, reduce: Element2
+			reduce(35), // &, reduce: Element2
+			reduce(35), // <<, reduce: Element2
+			reduce(35), // >>, reduce: Element2
+			reduce(35), // =>, reduce: Element2
+			reduce(35), // ->, reduce: Element2
+			reduce(35), // /, reduce: Element2
+			reduce(35), // +, reduce: Element2
+			reduce(35), // -, reduce: Element2
+			reduce(35), // ||, reduce: Element2
+			reduce(35), // <>, reduce: Element2
+			reduce(35), // !=, reduce: Element2
+			reduce(35), // =, reduce: Element2
+			reduce(35), // <, reduce: Element2
+			reduce(35), // <=, reduce: Element2
+			reduce(35), // >, reduce: Element2
+			reduce(35), // >=, reduce: Element2
+			reduce(35), // ;, reduce: Element2
+			reduce(35), // @, reduce: Element2
+			reduce(35), // {, reduce: Element2
+			reduce(35), // }, reduce: Element2
+			reduce(35), // ~, reduce: Element2
+			reduce(35), // ?, reduce: Element2
+			reduce(35), // else, reduce: Element2
+			reduce(35), // if, reduce: Element2
+			reduce(35), // for, reduce: Element2
+			reduce(35), // endfor, reduce: Element2
+			reduce(35), // elif, reduce: Element2
+			reduce(35), // endif, reduce: Element2
+			reduce(35), // set, reduce: Element2
+			reduce(35), // comment, reduce: Element2
+			reduce(35), // template_block_end, reduce: Element2
+			reduce(35), // template_block_start, reduce: Element2
+			reduce(35), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(35), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S107
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),nil,reduce(44),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(36), // identifier, reduce: Element2
+			reduce(36), // bytes_literal, reduce: Element2
+			reduce(36), // string_literal, reduce: Element2
+			reduce(36), // integer_literal, reduce: Element2
+			reduce(36), // floating_point_literal, reduce: Element2
+			reduce(36), // newline, reduce: Element2
+			reduce(36), // dollar, reduce: Element2
+			reduce(36), // *, reduce: Element2
+			reduce(36), // [, reduce: Element2
+			reduce(36), // ], reduce: Element2
+			reduce(36), // (, reduce: Element2
+			reduce(36), // ), reduce: Element2
+			reduce(36), // ,, reduce: Element2
+			reduce(36), // ., reduce: Element2
+			reduce(36), // :, reduce: Element2
+			reduce(36), // %, reduce: Element2
+			reduce(36), // !, reduce: Element2
+			reduce(36), // |, reduce: Element2
+			reduce(36), // |>, reduce: Element2
+			reduce(36), // ^, reduce: Element2
+			reduce(36), // &, reduce: Element2
+			reduce(36), // <<, reduce: Element2
+			reduce(36), // >>, reduce: Element2
+			reduce(36), // =>, reduce: Element2
+			reduce(36), // ->, reduce: Element2
+			reduce(36), // /, reduce: Element2
+			reduce(36), // +, reduce: Element2
+			reduce(36), // -, reduce: Element2
+			reduce(36), // ||, reduce: Element2
+			reduce(36), // <>, reduce: Element2
+			reduce(36), // !=, reduce: Element2
+			reduce(36), // =, reduce: Element2
+			reduce(36), // <, reduce: Element2
+			reduce(36), // <=, reduce: Element2
+			reduce(36), // >, reduce: Element2
+			reduce(36), // >=, reduce: Element2
+			reduce(36), // ;, reduce: Element2
+			reduce(36), // @, reduce: Element2
+			reduce(36), // {, reduce: Element2
+			reduce(36), // }, reduce: Element2
+			reduce(36), // ~, reduce: Element2
+			reduce(36), // ?, reduce: Element2
+			reduce(36), // else, reduce: Element2
+			reduce(36), // if, reduce: Element2
+			reduce(36), // for, reduce: Element2
+			reduce(36), // endfor, reduce: Element2
+			reduce(36), // elif, reduce: Element2
+			reduce(36), // endif, reduce: Element2
+			reduce(36), // set, reduce: Element2
+			reduce(36), // comment, reduce: Element2
+			reduce(36), // template_block_end, reduce: Element2
+			reduce(36), // template_block_start, reduce: Element2
+			reduce(36), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(36), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S108
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),nil,reduce(46),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(37), // identifier, reduce: Element2
+			reduce(37), // bytes_literal, reduce: Element2
+			reduce(37), // string_literal, reduce: Element2
+			reduce(37), // integer_literal, reduce: Element2
+			reduce(37), // floating_point_literal, reduce: Element2
+			reduce(37), // newline, reduce: Element2
+			reduce(37), // dollar, reduce: Element2
+			reduce(37), // *, reduce: Element2
+			reduce(37), // [, reduce: Element2
+			reduce(37), // ], reduce: Element2
+			reduce(37), // (, reduce: Element2
+			reduce(37), // ), reduce: Element2
+			reduce(37), // ,, reduce: Element2
+			reduce(37), // ., reduce: Element2
+			reduce(37), // :, reduce: Element2
+			reduce(37), // %, reduce: Element2
+			reduce(37), // !, reduce: Element2
+			reduce(37), // |, reduce: Element2
+			reduce(37), // |>, reduce: Element2
+			reduce(37), // ^, reduce: Element2
+			reduce(37), // &, reduce: Element2
+			reduce(37), // <<, reduce: Element2
+			reduce(37), // >>, reduce: Element2
+			reduce(37), // =>, reduce: Element2
+			reduce(37), // ->, reduce: Element2
+			reduce(37), // /, reduce: Element2
+			reduce(37), // +, reduce: Element2
+			reduce(37), // -, reduce: Element2
+			reduce(37), // ||, reduce: Element2
+			reduce(37), // <>, reduce: Element2
+			reduce(37), // !=, reduce: Element2
+			reduce(37), // =, reduce: Element2
+			reduce(37), // <, reduce: Element2
+			reduce(37), // <=, reduce: Element2
+			reduce(37), // >, reduce: Element2
+			reduce(37), // >=, reduce: Element2
+			reduce(37), // ;, reduce: Element2
+			reduce(37), // @, reduce: Element2
+			reduce(37), // {, reduce: Element2
+			reduce(37), // }, reduce: Element2
+			reduce(37), // ~, reduce: Element2
+			reduce(37), // ?, reduce: Element2
+			reduce(37), // else, reduce: Element2
+			reduce(37), // if, reduce: Element2
+			reduce(37), // for, reduce: Element2
+			reduce(37), // endfor, reduce: Element2
+			reduce(37), // elif, reduce: Element2
+			reduce(37), // endif, reduce: Element2
+			reduce(37), // set, reduce: Element2
+			reduce(37), // comment, reduce: Element2
+			reduce(37), // template_block_end, reduce: Element2
+			reduce(37), // template_block_start, reduce: Element2
+			reduce(37), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(37), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S109
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),nil,reduce(47),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(38), // identifier, reduce: Element2
+			reduce(38), // bytes_literal, reduce: Element2
+			reduce(38), // string_literal, reduce: Element2
+			reduce(38), // integer_literal, reduce: Element2
+			reduce(38), // floating_point_literal, reduce: Element2
+			reduce(38), // newline, reduce: Element2
+			reduce(38), // dollar, reduce: Element2
+			reduce(38), // *, reduce: Element2
+			reduce(38), // [, reduce: Element2
+			reduce(38), // ], reduce: Element2
+			reduce(38), // (, reduce: Element2
+			reduce(38), // ), reduce: Element2
+			reduce(38), // ,, reduce: Element2
+			reduce(38), // ., reduce: Element2
+			reduce(38), // :, reduce: Element2
+			reduce(38), // %, reduce: Element2
+			reduce(38), // !, reduce: Element2
+			reduce(38), // |, reduce: Element2
+			reduce(38), // |>, reduce: Element2
+			reduce(38), // ^, reduce: Element2
+			reduce(38), // &, reduce: Element2
+			reduce(38), // <<, reduce: Element2
+			reduce(38), // >>, reduce: Element2
+			reduce(38), // =>, reduce: Element2
+			reduce(38), // ->, reduce: Element2
+			reduce(38), // /, reduce: Element2
+			reduce(38), // +, reduce: Element2
+			reduce(38), // -, reduce: Element2
+			reduce(38), // ||, reduce: Element2
+			reduce(38), // <>, reduce: Element2
+			reduce(38), // !=, reduce: Element2
+			reduce(38), // =, reduce: Element2
+			reduce(38), // <, reduce: Element2
+			reduce(38), // <=, reduce: Element2
+			reduce(38), // >, reduce: Element2
+			reduce(38), // >=, reduce: Element2
+			reduce(38), // ;, reduce: Element2
+			reduce(38), // @, reduce: Element2
+			reduce(38), // {, reduce: Element2
+			reduce(38), // }, reduce: Element2
+			reduce(38), // ~, reduce: Element2
+			reduce(38), // ?, reduce: Element2
+			reduce(38), // else, reduce: Element2
+			reduce(38), // if, reduce: Element2
+			reduce(38), // for, reduce: Element2
+			reduce(38), // endfor, reduce: Element2
+			reduce(38), // elif, reduce: Element2
+			reduce(38), // endif, reduce: Element2
+			reduce(38), // set, reduce: Element2
+			reduce(38), // comment, reduce: Element2
+			reduce(38), // template_block_end, reduce: Element2
+			reduce(38), // template_block_start, reduce: Element2
+			reduce(38), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(38), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S110
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),nil,reduce(49),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(39), // identifier, reduce: Element2
+			reduce(39), // bytes_literal, reduce: Element2
+			reduce(39), // string_literal, reduce: Element2
+			reduce(39), // integer_literal, reduce: Element2
+			reduce(39), // floating_point_literal, reduce: Element2
+			reduce(39), // newline, reduce: Element2
+			reduce(39), // dollar, reduce: Element2
+			reduce(39), // *, reduce: Element2
+			reduce(39), // [, reduce: Element2
+			reduce(39), // ], reduce: Element2
+			reduce(39), // (, reduce: Element2
+			reduce(39), // ), reduce: Element2
+			reduce(39), // ,, reduce: Element2
+			reduce(39), // ., reduce: Element2
+			reduce(39), // :, reduce: Element2
+			reduce(39), // %, reduce: Element2
+			reduce(39), // !, reduce: Element2
+			reduce(39), // |, reduce: Element2
+			reduce(39), // |>, reduce: Element2
+			reduce(39), // ^, reduce: Element2
+			reduce(39), // &, reduce: Element2
+			reduce(39), // <<, reduce: Element2
+			reduce(39), // >>, reduce: Element2
+			reduce(39), // =>, reduce: Element2
+			reduce(39), // ->, reduce: Element2
+			reduce(39), // /, reduce: Element2
+			reduce(39), // +, reduce: Element2
+			reduce(39), // -, reduce: Element2
+			reduce(39), // ||, reduce: Element2
+			reduce(39), // <>, reduce: Element2
+			reduce(39), // !=, reduce: Element2
+			reduce(39), // =, reduce: Element2
+			reduce(39), // <, reduce: Element2
+			reduce(39), // <=, reduce: Element2
+			reduce(39), // >, reduce: Element2
+			reduce(39), // >=, reduce: Element2
+			reduce(39), // ;, reduce: Element2
+			reduce(39), // @, reduce: Element2
+			reduce(39), // {, reduce: Element2
+			reduce(39), // }, reduce: Element2
+			reduce(39), // ~, reduce: Element2
+			reduce(39), // ?, reduce: Element2
+			reduce(39), // else, reduce: Element2
+			reduce(39), // if, reduce: Element2
+			reduce(39), // for, reduce: Element2
+			reduce(39), // endfor, reduce: Element2
+			reduce(39), // elif, reduce: Element2
+			reduce(39), // endif, reduce: Element2
+			reduce(39), // set, reduce: Element2
+			reduce(39), // comment, reduce: Element2
+			reduce(39), // template_block_end, reduce: Element2
+			reduce(39), // template_block_start, reduce: Element2
+			reduce(39), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(39), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S111
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),nil,reduce(50),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(40), // identifier, reduce: Element2
+			reduce(40), // bytes_literal, reduce: Element2
+			reduce(40), // string_literal, reduce: Element2
+			reduce(40), // integer_literal, reduce: Element2
+			reduce(40), // floating_point_literal, reduce: Element2
+			reduce(40), // newline, reduce: Element2
+			reduce(40), // dollar, reduce: Element2
+			reduce(40), // *, reduce: Element2
+			reduce(40), // [, reduce: Element2
+			reduce(40), // ], reduce: Element2
+			reduce(40), // (, reduce: Element2
+			reduce(40), // ), reduce: Element2
+			reduce(40), // ,, reduce: Element2
+			reduce(40), // ., reduce: Element2
+			reduce(40), // :, reduce: Element2
+			reduce(40), // %, reduce: Element2
+			reduce(40), // !, reduce: Element2
+			reduce(40), // |, reduce: Element2
+			reduce(40), // |>, reduce: Element2
+			reduce(40), // ^, reduce: Element2
+			reduce(40), // &, reduce: Element2
+			reduce(40), // <<, reduce: Element2
+			reduce(40), // >>, reduce: Element2
+			reduce(40), // =>, reduce: Element2
+			reduce(40), // ->, reduce: Element2
+			reduce(40), // /, reduce: Element2
+			reduce(40), // +, reduce: Element2
+			reduce(40), // -, reduce: Element2
+			reduce(40), // ||, reduce: Element2
+			reduce(40), // <>, reduce: Element2
+			reduce(40), // !=, reduce: Element2
+			reduce(40), // =, reduce: Element2
+			reduce(40), // <, reduce: Element2
+			reduce(40), // <=, reduce: Element2
+			reduce(40), // >, reduce: Element2
+			reduce(40), // >=, reduce: Element2
+			reduce(40), // ;, reduce: Element2
+			reduce(40), // @, reduce: Element2
+			reduce(40), // {, reduce: Element2
+			reduce(40), // }, reduce: Element2
+			reduce(40), // ~, reduce: Element2
+			reduce(40), // ?, reduce: Element2
+			reduce(40), // else, reduce: Element2
+			reduce(40), // if, reduce: Element2
+			reduce(40), // for, reduce: Element2
+			reduce(40), // endfor, reduce: Element2
+			reduce(40), // elif, reduce: Element2
+			reduce(40), // endif, reduce: Element2
+			reduce(40), // set, reduce: Element2
+			reduce(40), // comment, reduce: Element2
+			reduce(40), // template_block_end, reduce: Element2
+			reduce(40), // template_block_start, reduce: Element2
+			reduce(40), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(40), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S112
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),nil,reduce(51),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(41), // identifier, reduce: Element2
+			reduce(41), // bytes_literal, reduce: Element2
+			reduce(41), // string_literal, reduce: Element2
+			reduce(41), // integer_literal, reduce: Element2
+			reduce(41), // floating_point_literal, reduce: Element2
+			reduce(41), // newline, reduce: Element2
+			reduce(41), // dollar, reduce: Element2
+			reduce(41), // *, reduce: Element2
+			reduce(41), // [, reduce: Element2
+			reduce(41), // ], reduce: Element2
+			reduce(41), // (, reduce: Element2
+			reduce(41), // ), reduce: Element2
+			reduce(41), // ,, reduce: Element2
+			reduce(41), // ., reduce: Element2
+			reduce(41), // :, reduce: Element2
+			reduce(41), // %, reduce: Element2
+			reduce(41), // !, reduce: Element2
+			reduce(41), // |, reduce: Element2
+			reduce(41), // |>, reduce: Element2
+			reduce(41), // ^, reduce: Element2
+			reduce(41), // &, reduce: Element2
+			reduce(41), // <<, reduce: Element2
+			reduce(41), // >>, reduce: Element2
+			reduce(41), // =>, reduce: Element2
+			reduce(41), // ->, reduce: Element2
+			reduce(41), // /, reduce: Element2
+			reduce(41), // +, reduce: Element2
+			reduce(41), // -, reduce: Element2
+			reduce(41), // ||, reduce: Element2
+			reduce(41), // <>, reduce: Element2
+			reduce(41), // !=, reduce: Element2
+			reduce(41), // =, reduce: Element2
+			reduce(41), // <, reduce: Element2
+			reduce(41), // <=, reduce: Element2
+			reduce(41), // >, reduce: Element2
+			reduce(41), // >=, reduce: Element2
+			reduce(41), // ;, reduce: Element2
+			reduce(41), // @, reduce: Element2
+			reduce(41), // {, reduce: Element2
+			reduce(41), // }, reduce: Element2
+			reduce(41), // ~, reduce: Element2
+			reduce(41), // ?, reduce: Element2
+			reduce(41), // else, reduce: Element2
+			reduce(41), // if, reduce: Element2
+			reduce(41), // for, reduce: Element2
+			reduce(41), // endfor, reduce: Element2
+			reduce(41), // elif, reduce: Element2
+			reduce(41), // endif, reduce: Element2
+			reduce(41), // set, reduce: Element2
+			reduce(41), // comment, reduce: Element2
+			reduce(41), // template_block_end, reduce: Element2
+			reduce(41), // template_block_start, reduce: Element2
+			reduce(41), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(41), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S113
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),nil,reduce(52),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(42), // identifier, reduce: Element2
+			reduce(42), // bytes_literal, reduce: Element2
+			reduce(42), // string_literal, reduce: Element2
+			reduce(42), // integer_literal, reduce: Element2
+			reduce(42), // floating_point_literal, reduce: Element2
+			reduce(42), // newline, reduce: Element2
+			reduce(42), // dollar, reduce: Element2
+			reduce(42), // *, reduce: Element2
+			reduce(42), // [, reduce: Element2
+			reduce(42), // ], reduce: Element2
+			reduce(42), // (, reduce: Element2
+			reduce(42), // ), reduce: Element2
+			reduce(42), // ,, reduce: Element2
+			reduce(42), // ., reduce: Element2
+			reduce(42), // :, reduce: Element2
+			reduce(42), // %, reduce: Element2
+			reduce(42), // !, reduce: Element2
+			reduce(42), // |, reduce: Element2
+			reduce(42), // |>, reduce: Element2
+			reduce(42), // ^, reduce: Element2
+			reduce(42), // &, reduce: Element2
+			reduce(42), // <<, reduce: Element2
+			reduce(42), // >>, reduce: Element2
+			reduce(42), // =>, reduce: Element2
+			reduce(42), // ->, reduce: Element2
+			reduce(42), // /, reduce: Element2
+			reduce(42), // +, reduce: Element2
+			reduce(42), // -, reduce: Element2
+			reduce(42), // ||, reduce: Element2
+			reduce(42), // <>, reduce: Element2
+			reduce(42), // !=, reduce: Element2
+			reduce(42), // =, reduce: Element2
+			reduce(42), // <, reduce: Element2
+			reduce(42), // <=, reduce: Element2
+			reduce(42), // >, reduce: Element2
+			reduce(42), // >=, reduce: Element2
+			reduce(42), // ;, reduce: Element2
+			reduce(42), // @, reduce: Element2
+			reduce(42), // {, reduce: Element2
+			reduce(42), // }, reduce: Element2
+			reduce(42), // ~, reduce: Element2
+			reduce(42), // ?, reduce: Element2
+			reduce(42), // else, reduce: Element2
+			reduce(42), // if, reduce: Element2
+			reduce(42), // for, reduce: Element2
+			reduce(42), // endfor, reduce: Element2
+			reduce(42), // elif, reduce: Element2
+			reduce(42), // endif, reduce: Element2
+			reduce(42), // set, reduce: Element2
+			reduce(42), // comment, reduce: Element2
+			reduce(42), // template_block_end, reduce: Element2
+			reduce(42), // template_block_start, reduce: Element2
+			reduce(42), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(42), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S114
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),nil,reduce(53),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(43), // identifier, reduce: Element2
+			reduce(43), // bytes_literal, reduce: Element2
+			reduce(43), // string_literal, reduce: Element2
+			reduce(43), // integer_literal, reduce: Element2
+			reduce(43), // floating_point_literal, reduce: Element2
+			reduce(43), // newline, reduce: Element2
+			reduce(43), // dollar, reduce: Element2
+			reduce(43), // *, reduce: Element2
+			reduce(43), // [, reduce: Element2
+			reduce(43), // ], reduce: Element2
+			reduce(43), // (, reduce: Element2
+			reduce(43), // ), reduce: Element2
+			reduce(43), // ,, reduce: Element2
+			reduce(43), // ., reduce: Element2
+			reduce(43), // :, reduce: Element2
+			reduce(43), // %, reduce: Element2
+			reduce(43), // !, reduce: Element2
+			reduce(43), // |, reduce: Element2
+			reduce(43), // |>, reduce: Element2
+			reduce(43), // ^, reduce: Element2
+			reduce(43), // &, reduce: Element2
+			reduce(43), // <<, reduce: Element2
+			reduce(43), // >>, reduce: Element2
+			reduce(43), // =>, reduce: Element2
+			reduce(43), // ->, reduce: Element2
+			reduce(43), // /, reduce: Element2
+			reduce(43), // +, reduce: Element2
+			reduce(43), // -, reduce: Element2
+			reduce(43), // ||, reduce: Element2
+			reduce(43), // <>, reduce: Element2
+			reduce(43), // !=, reduce: Element2
+			reduce(43), // =, reduce: Element2
+			reduce(43), // <, reduce: Element2
+			reduce(43), // <=, reduce: Element2
+			reduce(43), // >, reduce: Element2
+			reduce(43), // >=, reduce: Element2
+			reduce(43), // ;, reduce: Element2
+			reduce(43), // @, reduce: Element2
+			reduce(43), // {, reduce: Element2
+			reduce(43), // }, reduce: Element2
+			reduce(43), // ~, reduce: Element2
+			reduce(43), // ?, reduce: Element2
+			reduce(43), // else, reduce: Element2
+			reduce(43), // if, reduce: Element2
+			reduce(43), // for, reduce: Element2
+			reduce(43), // endfor, reduce: Element2
+			reduce(43), // elif, reduce: Element2
+			reduce(43), // endif, reduce: Element2
+			reduce(43), // set, reduce: Element2
+			reduce(43), // comment, reduce: Element2
+			reduce(43), // template_block_end, reduce: Element2
+			reduce(43), // template_block_start, reduce: Element2
+			reduce(43), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(43), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S115
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),nil,reduce(54),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(44), // identifier, reduce: Element2
+			reduce(44), // bytes_literal, reduce: Element2
+			reduce(44), // string_literal, reduce: Element2
+			reduce(44), // integer_literal, reduce: Element2
+			reduce(44), // floating_point_literal, reduce: Element2
+			reduce(44), // newline, reduce: Element2
+			reduce(44), // dollar, reduce: Element2
+			reduce(44), // *, reduce: Element2
+			reduce(44), // [, reduce: Element2
+			reduce(44), // ], reduce: Element2
+			reduce(44), // (, reduce: Element2
+			reduce(44), // ), reduce: Element2
+			reduce(44), // ,, reduce: Element2
+			reduce(44), // ., reduce: Element2
+			reduce(44), // :, reduce: Element2
+			reduce(44), // %, reduce: Element2
+			reduce(44), // !, reduce: Element2
+			reduce(44), // |, reduce: Element2
+			reduce(44), // |>, reduce: Element2
+			reduce(44), // ^, reduce: Element2
+			reduce(44), // &, reduce: Element2
+			reduce(44), // <<, reduce: Element2
+			reduce(44), // >>, reduce: Element2
+			reduce(44), // =>, reduce: Element2
+			reduce(44), // ->, reduce: Element2
+			reduce(44), // /, reduce: Element2
+			reduce(44), // +, reduce: Element2
+			reduce(44), // -, reduce: Element2
+			reduce(44), // ||, reduce: Element2
+			reduce(44), // <>, reduce: Element2
+			reduce(44), // !=, reduce: Element2
+			reduce(44), // =, reduce: Element2
+			reduce(44), // <, reduce: Element2
+			reduce(44), // <=, reduce: Element2
+			reduce(44), // >, reduce: Element2
+			reduce(44), // >=, reduce: Element2
+			reduce(44), // ;, reduce: Element2
+			reduce(44), // @, reduce: Element2
+			reduce(44), // {, reduce: Element2
+			reduce(44), // }, reduce: Element2
+			reduce(44), // ~, reduce: Element2
+			reduce(44), // ?, reduce: Element2
+			reduce(44), // else, reduce: Element2
+			reduce(44), // if, reduce: Element2
+			reduce(44), // for, reduce: Element2
+			reduce(44), // endfor, reduce: Element2
+			reduce(44), // elif, reduce: Element2
+			reduce(44), // endif, reduce: Element2
+			reduce(44), // set, reduce: Element2
+			reduce(44), // comment, reduce: Element2
+			reduce(44), // template_block_end, reduce: Element2
+			reduce(44), // template_block_start, reduce: Element2
+			reduce(44), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(44), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S116
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),nil,reduce(55),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(45), // identifier, reduce: Element2
+			reduce(45), // bytes_literal, reduce: Element2
+			reduce(45), // string_literal, reduce: Element2
+			reduce(45), // integer_literal, reduce: Element2
+			reduce(45), // floating_point_literal, reduce: Element2
+			reduce(45), // newline, reduce: Element2
+			reduce(45), // dollar, reduce: Element2
+			reduce(45), // *, reduce: Element2
+			reduce(45), // [, reduce: Element2
+			reduce(45), // ], reduce: Element2
+			reduce(45), // (, reduce: Element2
+			reduce(45), // ), reduce: Element2
+			reduce(45), // ,, reduce: Element2
+			reduce(45), // ., reduce: Element2
+			reduce(45), // :, reduce: Element2
+			reduce(45), // %, reduce: Element2
+			reduce(45), // !, reduce: Element2
+			reduce(45), // |, reduce: Element2
+			reduce(45), // |>, reduce: Element2
+			reduce(45), // ^, reduce: Element2
+			reduce(45), // &, reduce: Element2
+			reduce(45), // <<, reduce: Element2
+			reduce(45), // >>, reduce: Element2
+			reduce(45), // =>, reduce: Element2
+			reduce(45), // ->, reduce: Element2
+			reduce(45), // /, reduce: Element2
+			reduce(45), // +, reduce: Element2
+			reduce(45), // -, reduce: Element2
+			reduce(45), // ||, reduce: Element2
+			reduce(45), // <>, reduce: Element2
+			reduce(45), // !=, reduce: Element2
+			reduce(45), // =, reduce: Element2
+			reduce(45), // <, reduce: Element2
+			reduce(45), // <=, reduce: Element2
+			reduce(45), // >, reduce: Element2
+			reduce(45), // >=, reduce: Element2
+			reduce(45), // ;, reduce: Element2
+			reduce(45), // @, reduce: Element2
+			reduce(45), // {, reduce: Element2
+			reduce(45), // }, reduce: Element2
+			reduce(45), // ~, reduce: Element2
+			reduce(45), // ?, reduce: Element2
+			reduce(45), // else, reduce: Element2
+			reduce(45), // if, reduce: Element2
+			reduce(45), // for, reduce: Element2
+			reduce(45), // endfor, reduce: Element2
+			reduce(45), // elif, reduce: Element2
+			reduce(45), // endif, reduce: Element2
+			reduce(45), // set, reduce: Element2
+			reduce(45), // comment, reduce: Element2
+			reduce(45), // template_block_end, reduce: Element2
+			reduce(45), // template_block_start, reduce: Element2
+			reduce(45), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(45), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S117
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),nil,reduce(56),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(46), // identifier, reduce: Element2
+			reduce(46), // bytes_literal, reduce: Element2
+			reduce(46), // string_literal, reduce: Element2
+			reduce(46), // integer_literal, reduce: Element2
+			reduce(46), // floating_point_literal, reduce: Element2
+			reduce(46), // newline, reduce: Element2
+			reduce(46), // dollar, reduce: Element2
+			reduce(46), // *, reduce: Element2
+			reduce(46), // [, reduce: Element2
+			reduce(46), // ], reduce: Element2
+			reduce(46), // (, reduce: Element2
+			reduce(46), // ), reduce: Element2
+			reduce(46), // ,, reduce: Element2
+			reduce(46), // ., reduce: Element2
+			reduce(46), // :, reduce: Element2
+			reduce(46), // %, reduce: Element2
+			reduce(46), // !, reduce: Element2
+			reduce(46), // |, reduce: Element2
+			reduce(46), // |>, reduce: Element2
+			reduce(46), // ^, reduce: Element2
+			reduce(46), // &, reduce: Element2
+			reduce(46), // <<, reduce: Element2
+			reduce(46), // >>, reduce: Element2
+			reduce(46), // =>, reduce: Element2
+			reduce(46), // ->, reduce: Element2
+			reduce(46), // /, reduce: Element2
+			reduce(46), // +, reduce: Element2
+			reduce(46), // -, reduce: Element2
+			reduce(46), // ||, reduce: Element2
+			reduce(46), // <>, reduce: Element2
+			reduce(46), // !=, reduce: Element2
+			reduce(46), // =, reduce: Element2
+			reduce(46), // <, reduce: Element2
+			reduce(46), // <=, reduce: Element2
+			reduce(46), // >, reduce: Element2
+			reduce(46), // >=, reduce: Element2
+			reduce(46), // ;, reduce: Element2
+			reduce(46), // @, reduce: Element2
+			reduce(46), // {, reduce: Element2
+			reduce(46), // }, reduce: Element2
+			reduce(46), // ~, reduce: Element2
+			reduce(46), // ?, reduce: Element2
+			reduce(46), // else, reduce: Element2
+			reduce(46), // if, reduce: Element2
+			reduce(46), // for, reduce: Element2
+			reduce(46), // endfor, reduce: Element2
+			reduce(46), // elif, reduce: Element2
+			reduce(46), // endif, reduce: Element2
+			reduce(46), // set, reduce: Element2
+			reduce(46), // comment, reduce: Element2
+			reduce(46), // template_block_end, reduce: Element2
+			reduce(46), // template_block_start, reduce: Element2
+			reduce(46), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(46), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S118
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),nil,reduce(57),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(47), // identifier, reduce: Element2
+			reduce(47), // bytes_literal, reduce: Element2
+			reduce(47), // string_literal, reduce: Element2
+			reduce(47), // integer_literal, reduce: Element2
+			reduce(47), // floating_point_literal, reduce: Element2
+			reduce(47), // newline, reduce: Element2
+			reduce(47), // dollar, reduce: Element2
+			reduce(47), // *, reduce: Element2
+			reduce(47), // [, reduce: Element2
+			reduce(47), // ], reduce: Element2
+			reduce(47), // (, reduce: Element2
+			reduce(47), // ), reduce: Element2
+			reduce(47), // ,, reduce: Element2
+			reduce(47), // ., reduce: Element2
+			reduce(47), // :, reduce: Element2
+			reduce(47), // %, reduce: Element2
+			reduce(47), // !, reduce: Element2
+			reduce(47), // |, reduce: Element2
+			reduce(47), // |>, reduce: Element2
+			reduce(47), // ^, reduce: Element2
+			reduce(47), // &, reduce: Element2
+			reduce(47), // <<, reduce: Element2
+			reduce(47), // >>, reduce: Element2
+			reduce(47), // =>, reduce: Element2
+			reduce(47), // ->, reduce: Element2
+			reduce(47), // /, reduce: Element2
+			reduce(47), // +, reduce: Element2
+			reduce(47), // -, reduce: Element2
+			reduce(47), // ||, reduce: Element2
+			reduce(47), // <>, reduce: Element2
+			reduce(47), // !=, reduce: Element2
+			reduce(47), // =, reduce: Element2
+			reduce(47), // <, reduce: Element2
+			reduce(47), // <=, reduce: Element2
+			reduce(47), // >, reduce: Element2
+			reduce(47), // >=, reduce: Element2
+			reduce(47), // ;, reduce: Element2
+			reduce(47), // @, reduce: Element2
+			reduce(47), // {, reduce: Element2
+			reduce(47), // }, reduce: Element2
+			reduce(47), // ~, reduce: Element2
+			reduce(47), // ?, reduce: Element2
+			reduce(47), // else, reduce: Element2
+			reduce(47), // if, reduce: Element2
+			reduce(47), // for, reduce: Element2
+			reduce(47), // endfor, reduce: Element2
+			reduce(47), // elif, reduce: Element2
+			reduce(47), // endif, reduce: Element2
+			reduce(47), // set, reduce: Element2
+			reduce(47), // comment, reduce: Element2
+			reduce(47), // template_block_end, reduce: Element2
+			reduce(47), // template_block_start, reduce: Element2
+			reduce(47), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(47), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S119
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),nil,reduce(58),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(48), // identifier, reduce: Element2
+			reduce(48), // bytes_literal, reduce: Element2
+			reduce(48), // string_literal, reduce: Element2
+			reduce(48), // integer_literal, reduce: Element2
+			reduce(48), // floating_point_literal, reduce: Element2
+			reduce(48), // newline, reduce: Element2
+			reduce(48), // dollar, reduce: Element2
+			reduce(48), // *, reduce: Element2
+			reduce(48), // [, reduce: Element2
+			reduce(48), // ], reduce: Element2
+			reduce(48), // (, reduce: Element2
+			reduce(48), // ), reduce: Element2
+			reduce(48), // ,, reduce: Element2
+			reduce(48), // ., reduce: Element2
+			reduce(48), // :, reduce: Element2
+			reduce(48), // %, reduce: Element2
+			reduce(48), // !, reduce: Element2
+			reduce(48), // |, reduce: Element2
+			reduce(48), // |>, reduce: Element2
+			reduce(48), // ^, reduce: Element2
+			reduce(48), // &, reduce: Element2
+			reduce(48), // <<, reduce: Element2
+			reduce(48), // >>, reduce: Element2
+			reduce(48), // =>, reduce: Element2
+			reduce(48), // ->, reduce: Element2
+			reduce(48), // /, reduce: Element2
+			reduce(48), // +, reduce: Element2
+			reduce(48), // -, reduce: Element2
+			reduce(48), // ||, reduce: Element2
+			reduce(48), // <>, reduce: Element2
+			reduce(48), // !=, reduce: Element2
+			reduce(48), // =, reduce: Element2
+			reduce(48), // <, reduce: Element2
+			reduce(48), // <=, reduce: Element2
+			reduce(48), // >, reduce: Element2
+			reduce(48), // >=, reduce: Element2
+			reduce(48), // ;, reduce: Element2
+			reduce(48), // @, reduce: Element2
+			reduce(48), // {, reduce: Element2
+			reduce(48), // }, reduce: Element2
+			reduce(48), // ~, reduce: Element2
+			reduce(48), // ?, reduce: Element2
+			reduce(48), // else, reduce: Element2
+			reduce(48), // if, reduce: Element2
+			reduce(48), // for, reduce: Element2
+			reduce(48), // endfor, reduce: Element2
+			reduce(48), // elif, reduce: Element2
+			reduce(48), // endif, reduce: Element2
+			reduce(48), // set, reduce: Element2
+			reduce(48), // comment, reduce: Element2
+			reduce(48), // template_block_end, reduce: Element2
+			reduce(48), // template_block_start, reduce: Element2
+			reduce(48), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(48), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S120
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),nil,reduce(59),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(49), // identifier, reduce: Element2
+			reduce(49), // bytes_literal, reduce: Element2
+			reduce(49), // string_literal, reduce: Element2
+			reduce(49), // integer_literal, reduce: Element2
+			reduce(49), // floating_point_literal, reduce: Element2
+			reduce(49), // newline, reduce: Element2
+			reduce(49), // dollar, reduce: Element2
+			reduce(49), // *, reduce: Element2
+			reduce(49), // [, reduce: Element2
+			reduce(49), // ], reduce: Element2
+			reduce(49), // (, reduce: Element2
+			reduce(49), // ), reduce: Element2
+			reduce(49), // ,, reduce: Element2
+			reduce(49), // ., reduce: Element2
+			reduce(49), // :, reduce: Element2
+			reduce(49), // %, reduce: Element2
+			reduce(49), // !, reduce: Element2
+			reduce(49), // |, reduce: Element2
+			reduce(49), // |>, reduce: Element2
+			reduce(49), // ^, reduce: Element2
+			reduce(49), // &, reduce: Element2
+			reduce(49), // <<, reduce: Element2
+			reduce(49), // >>, reduce: Element2
+			reduce(49), // =>, reduce: Element2
+			reduce(49), // ->, reduce: Element2
+			reduce(49), // /, reduce: Element2
+			reduce(49), // +, reduce: Element2
+			reduce(49), // -, reduce: Element2
+			reduce(49), // ||, reduce: Element2
+			reduce(49), // <>, reduce: Element2
+			reduce(49), // !=, reduce: Element2
+			reduce(49), // =, reduce: Element2
+			reduce(49), // <, reduce: Element2
+			reduce(49), // <=, reduce: Element2
+			reduce(49), // >, reduce: Element2
+			reduce(49), // >=, reduce: Element2
+			reduce(49), // ;, reduce: Element2
+			reduce(49), // @, reduce: Element2
+			reduce(49), // {, reduce: Element2
+			reduce(49), // }, reduce: Element2
+			reduce(49), // ~, reduce: Element2
+			reduce(49), // ?, reduce: Element2
+			reduce(49), // else, reduce: Element2
+			reduce(49), // if, reduce: Element2
+			reduce(49), // for, reduce: Element2
+			reduce(49), // endfor, reduce: Element2
+			reduce(49), // elif, reduce: Element2
+			reduce(49), // endif, reduce: Element2
+			reduce(49), // set, reduce: Element2
+			reduce(49), // comment, reduce: Element2
+			reduce(49), // template_block_end, reduce: Element2
+			reduce(49), // template_block_start, reduce: Element2
+			reduce(49), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(49), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S121
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),nil,reduce(60),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(50), // identifier, reduce: Element2
+			reduce(50), // bytes_literal, reduce: Element2
+			reduce(50), // string_literal, reduce: Element2
+			reduce(50), // integer_literal, reduce: Element2
+			reduce(50), // floating_point_literal, reduce: Element2
+			reduce(50), // newline, reduce: Element2
+			reduce(50), // dollar, reduce: Element2
+			reduce(50), // *, reduce: Element2
+			reduce(50), // [, reduce: Element2
+			reduce(50), // ], reduce: Element2
+			reduce(50), // (, reduce: Element2
+			reduce(50), // ), reduce: Element2
+			reduce(50), // ,, reduce: Element2
+			reduce(50), // ., reduce: Element2
+			reduce(50), // :, reduce: Element2
+			reduce(50), // %, reduce: Element2
+			reduce(50), // !, reduce: Element2
+			reduce(50), // |, reduce: Element2
+			reduce(50), // |>, reduce: Element2
+			reduce(50), // ^, reduce: Element2
+			reduce(50), // &, reduce: Element2
+			reduce(50), // <<, reduce: Element2
+			reduce(50), // >>, reduce: Element2
+			reduce(50), // =>, reduce: Element2
+			reduce(50), // ->, reduce: Element2
+			reduce(50), // /, reduce: Element2
+			reduce(50), // +, reduce: Element2
+			reduce(50), // -, reduce: Element2
+			reduce(50), // ||, reduce: Element2
+			reduce(50), // <>, reduce: Element2
+			reduce(50), // !=, reduce: Element2
+			reduce(50), // =, reduce: Element2
+			reduce(50), // <, reduce: Element2
+			reduce(50), // <=, reduce: Element2
+			reduce(50), // >, reduce: Element2
+			reduce(50), // >=, reduce: Element2
+			reduce(50), // ;, reduce: Element2
+			reduce(50), // @, reduce: Element2
+			reduce(50), // {, reduce: Element2
+			reduce(50), // }, reduce: Element2
+			reduce(50), // ~, reduce: Element2
+			reduce(50), // ?, reduce: Element2
+			reduce(50), // else, reduce: Element2
+			reduce(50), // if, reduce: Element2
+			reduce(50), // for, reduce: Element2
+			reduce(50), // endfor, reduce: Element2
+			reduce(50), // elif, reduce: Element2
+			reduce(50), // endif, reduce: Element2
+			reduce(50), // set, reduce: Element2
+			reduce(50), // comment, reduce: Element2
+			reduce(50), // template_block_end, reduce: Element2
+			reduce(50), // template_block_start, reduce: Element2
+			reduce(50), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(50), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S122
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),nil,reduce(61),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(51), // identifier, reduce: Element2
+			reduce(51), // bytes_literal, reduce: Element2
+			reduce(51), // string_literal, reduce: Element2
+			reduce(51), // integer_literal, reduce: Element2
+			reduce(51), // floating_point_literal, reduce: Element2
+			reduce(51), // newline, reduce: Element2
+			reduce(51), // dollar, reduce: Element2
+			reduce(51), // *, reduce: Element2
+			reduce(51), // [, reduce: Element2
+			reduce(51), // ], reduce: Element2
+			reduce(51), // (, reduce: Element2
+			reduce(51), // ), reduce: Element2
+			reduce(51), // ,, reduce: Element2
+			reduce(51), // ., reduce: Element2
+			reduce(51), // :, reduce: Element2
+			reduce(51), // %, reduce: Element2
+			reduce(51), // !, reduce: Element2
+			reduce(51), // |, reduce: Element2
+			reduce(51), // |>, reduce: Element2
+			reduce(51), // ^, reduce: Element2
+			reduce(51), // &, reduce: Element2
+			reduce(51), // <<, reduce: Element2
+			reduce(51), // >>, reduce: Element2
+			reduce(51), // =>, reduce: Element2
+			reduce(51), // ->, reduce: Element2
+			reduce(51), // /, reduce: Element2
+			reduce(51), // +, reduce: Element2
+			reduce(51), // -, reduce: Element2
+			reduce(51), // ||, reduce: Element2
+			reduce(51), // <>, reduce: Element2
+			reduce(51), // !=, reduce: Element2
+			reduce(51), // =, reduce: Element2
+			reduce(51), // <, reduce: Element2
+			reduce(51), // <=, reduce: Element2
+			reduce(51), // >, reduce: Element2
+			reduce(51), // >=, reduce: Element2
+			reduce(51), // ;, reduce: Element2
+			reduce(51), // @, reduce: Element2
+			reduce(51), // {, reduce: Element2
+			reduce(51), // }, reduce: Element2
+			reduce(51), // ~, reduce: Element2
+			reduce(51), // ?, reduce: Element2
+			reduce(51), // else, reduce: Element2
+			reduce(51), // if, reduce: Element2
+			reduce(51), // for, reduce: Element2
+			reduce(51), // endfor, reduce: Element2
+			reduce(51), // elif, reduce: Element2
+			reduce(51), // endif, reduce: Element2
+			reduce(51), // set, reduce: Element2
+			reduce(51), // comment, reduce: Element2
+			reduce(51), // template_block_end, reduce: Element2
+			reduce(51), // template_block_start, reduce: Element2
+			reduce(51), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(51), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S123
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(79),shift(80),shift(81),shift(82),shift(83),shift(84),shift(85),shift(86),shift(87),shift(88),shift(89),shift(90),shift(91),shift(92),shift(93),shift(94),shift(95),shift(96),shift(97),shift(98),shift(99),shift(100),shift(101),shift(102),shift(103),shift(104),shift(105),shift(106),shift(107),shift(108),shift(109),shift(110),shift(111),shift(112),shift(113),shift(114),shift(115),shift(116),shift(117),shift(118),shift(119),shift(120),shift(121),shift(122),shift(258),shift(55),shift(127),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(52), // identifier, reduce: Element2
+			reduce(52), // bytes_literal, reduce: Element2
+			reduce(52), // string_literal, reduce: Element2
+			reduce(52), // integer_literal, reduce: Element2
+			reduce(52), // floating_point_literal, reduce: Element2
+			reduce(52), // newline, reduce: Element2
+			reduce(52), // dollar, reduce: Element2
+			reduce(52), // *, reduce: Element2
+			reduce(52), // [, reduce: Element2
+			reduce(52), // ], reduce: Element2
+			reduce(52), // (, reduce: Element2
+			reduce(52), // ), reduce: Element2
+			reduce(52), // ,, reduce: Element2
+			reduce(52), // ., reduce: Element2
+			reduce(52), // :, reduce: Element2
+			reduce(52), // %, reduce: Element2
+			reduce(52), // !, reduce: Element2
+			reduce(52), // |, reduce: Element2
+			reduce(52), // |>, reduce: Element2
+			reduce(52), // ^, reduce: Element2
+			reduce(52), // &, reduce: Element2
+			reduce(52), // <<, reduce: Element2
+			reduce(52), // >>, reduce: Element2
+			reduce(52), // =>, reduce: Element2
+			reduce(52), // ->, reduce: Element2
+			reduce(52), // /, reduce: Element2
+			reduce(52), // +, reduce: Element2
+			reduce(52), // -, reduce: Element2
+			reduce(52), // ||, reduce: Element2
+			reduce(52), // <>, reduce: Element2
+			reduce(52), // !=, reduce: Element2
+			reduce(52), // =, reduce: Element2
+			reduce(52), // <, reduce: Element2
+			reduce(52), // <=, reduce: Element2
+			reduce(52), // >, reduce: Element2
+			reduce(52), // >=, reduce: Element2
+			reduce(52), // ;, reduce: Element2
+			reduce(52), // @, reduce: Element2
+			reduce(52), // {, reduce: Element2
+			reduce(52), // }, reduce: Element2
+			reduce(52), // ~, reduce: Element2
+			reduce(52), // ?, reduce: Element2
+			reduce(52), // else, reduce: Element2
+			reduce(52), // if, reduce: Element2
+			reduce(52), // for, reduce: Element2
+			reduce(52), // endfor, reduce: Element2
+			reduce(52), // elif, reduce: Element2
+			reduce(52), // endif, reduce: Element2
+			reduce(52), // set, reduce: Element2
+			reduce(52), // comment, reduce: Element2
+			reduce(52), // template_block_end, reduce: Element2
+			reduce(52), // template_block_start, reduce: Element2
+			reduce(52), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(52), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S124
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),nil,reduce(62),reduce(62),nil,reduce(62),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(53), // identifier, reduce: Element2
+			reduce(53), // bytes_literal, reduce: Element2
+			reduce(53), // string_literal, reduce: Element2
+			reduce(53), // integer_literal, reduce: Element2
+			reduce(53), // floating_point_literal, reduce: Element2
+			reduce(53), // newline, reduce: Element2
+			reduce(53), // dollar, reduce: Element2
+			reduce(53), // *, reduce: Element2
+			reduce(53), // [, reduce: Element2
+			reduce(53), // ], reduce: Element2
+			reduce(53), // (, reduce: Element2
+			reduce(53), // ), reduce: Element2
+			reduce(53), // ,, reduce: Element2
+			reduce(53), // ., reduce: Element2
+			reduce(53), // :, reduce: Element2
+			reduce(53), // %, reduce: Element2
+			reduce(53), // !, reduce: Element2
+			reduce(53), // |, reduce: Element2
+			reduce(53), // |>, reduce: Element2
+			reduce(53), // ^, reduce: Element2
+			reduce(53), // &, reduce: Element2
+			reduce(53), // <<, reduce: Element2
+			reduce(53), // >>, reduce: Element2
+			reduce(53), // =>, reduce: Element2
+			reduce(53), // ->, reduce: Element2
+			reduce(53), // /, reduce: Element2
+			reduce(53), // +, reduce: Element2
+			reduce(53), // -, reduce: Element2
+			reduce(53), // ||, reduce: Element2
+			reduce(53), // <>, reduce: Element2
+			reduce(53), // !=, reduce: Element2
+			reduce(53), // =, reduce: Element2
+			reduce(53), // <, reduce: Element2
+			reduce(53), // <=, reduce: Element2
+			reduce(53), // >, reduce: Element2
+			reduce(53), // >=, reduce: Element2
+			reduce(53), // ;, reduce: Element2
+			reduce(53), // @, reduce: Element2
+			reduce(53), // {, reduce: Element2
+			reduce(53), // }, reduce: Element2
+			reduce(53), // ~, reduce: Element2
+			reduce(53), // ?, reduce: Element2
+			reduce(53), // else, reduce: Element2
+			reduce(53), // if, reduce: Element2
+			reduce(53), // for, reduce: Element2
+			reduce(53), // endfor, reduce: Element2
+			reduce(53), // elif, reduce: Element2
+			reduce(53), // endif, reduce: Element2
+			reduce(53), // set, reduce: Element2
+			reduce(53), // comment, reduce: Element2
+			reduce(53), // template_block_end, reduce: Element2
+			reduce(53), // template_block_start, reduce: Element2
+			reduce(53), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(53), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S125
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(259),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(54), // identifier, reduce: Element2
+			reduce(54), // bytes_literal, reduce: Element2
+			reduce(54), // string_literal, reduce: Element2
+			reduce(54), // integer_literal, reduce: Element2
+			reduce(54), // floating_point_literal, reduce: Element2
+			reduce(54), // newline, reduce: Element2
+			reduce(54), // dollar, reduce: Element2
+			reduce(54), // *, reduce: Element2
+			reduce(54), // [, reduce: Element2
+			reduce(54), // ], reduce: Element2
+			reduce(54), // (, reduce: Element2
+			reduce(54), // ), reduce: Element2
+			reduce(54), // ,, reduce: Element2
+			reduce(54), // ., reduce: Element2
+			reduce(54), // :, reduce: Element2
+			reduce(54), // %, reduce: Element2
+			reduce(54), // !, reduce: Element2
+			reduce(54), // |, reduce: Element2
+			reduce(54), // |>, reduce: Element2
+			reduce(54), // ^, reduce: Element2
+			reduce(54), // &, reduce: Element2
+			reduce(54), // <<, reduce: Element2
+			reduce(54), // >>, reduce: Element2
+			reduce(54), // =>, reduce: Element2
+			reduce(54), // ->, reduce: Element2
+			reduce(54), // /, reduce: Element2
+			reduce(54), // +, reduce: Element2
+			reduce(54), // -, reduce: Element2
+			reduce(54), // ||, reduce: Element2
+			reduce(54), // <>, reduce: Element2
+			reduce(54), // !=, reduce: Element2
+			reduce(54), // =, reduce: Element2
+			reduce(54), // <, reduce: Element2
+			reduce(54), // <=, reduce: Element2
+			reduce(54), // >, reduce: Element2
+			reduce(54), // >=, reduce: Element2
+			reduce(54), // ;, reduce: Element2
+			reduce(54), // @, reduce: Element2
+			reduce(54), // {, reduce: Element2
+			reduce(54), // }, reduce: Element2
+			reduce(54), // ~, reduce: Element2
+			reduce(54), // ?, reduce: Element2
+			reduce(54), // else, reduce: Element2
+			reduce(54), // if, reduce: Element2
+			reduce(54), // for, reduce: Element2
+			reduce(54), // endfor, reduce: Element2
+			reduce(54), // elif, reduce: Element2
+			reduce(54), // endif, reduce: Element2
+			reduce(54), // set, reduce: Element2
+			reduce(54), // comment, reduce: Element2
+			reduce(54), // template_block_end, reduce: Element2
+			reduce(54), // template_block_start, reduce: Element2
+			reduce(54), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(54), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S126
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(262),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(55), // identifier, reduce: Element2
+			reduce(55), // bytes_literal, reduce: Element2
+			reduce(55), // string_literal, reduce: Element2
+			reduce(55), // integer_literal, reduce: Element2
+			reduce(55), // floating_point_literal, reduce: Element2
+			reduce(55), // newline, reduce: Element2
+			reduce(55), // dollar, reduce: Element2
+			reduce(55), // *, reduce: Element2
+			reduce(55), // [, reduce: Element2
+			reduce(55), // ], reduce: Element2
+			reduce(55), // (, reduce: Element2
+			reduce(55), // ), reduce: Element2
+			reduce(55), // ,, reduce: Element2
+			reduce(55), // ., reduce: Element2
+			reduce(55), // :, reduce: Element2
+			reduce(55), // %, reduce: Element2
+			reduce(55), // !, reduce: Element2
+			reduce(55), // |, reduce: Element2
+			reduce(55), // |>, reduce: Element2
+			reduce(55), // ^, reduce: Element2
+			reduce(55), // &, reduce: Element2
+			reduce(55), // <<, reduce: Element2
+			reduce(55), // >>, reduce: Element2
+			reduce(55), // =>, reduce: Element2
+			reduce(55), // ->, reduce: Element2
+			reduce(55), // /, reduce: Element2
+			reduce(55), // +, reduce: Element2
+			reduce(55), // -, reduce: Element2
+			reduce(55), // ||, reduce: Element2
+			reduce(55), // <>, reduce: Element2
+			reduce(55), // !=, reduce: Element2
+			reduce(55), // =, reduce: Element2
+			reduce(55), // <, reduce: Element2
+			reduce(55), // <=, reduce: Element2
+			reduce(55), // >, reduce: Element2
+			reduce(55), // >=, reduce: Element2
+			reduce(55), // ;, reduce: Element2
+			reduce(55), // @, reduce: Element2
+			reduce(55), // {, reduce: Element2
+			reduce(55), // }, reduce: Element2
+			reduce(55), // ~, reduce: Element2
+			reduce(55), // ?, reduce: Element2
+			reduce(55), // else, reduce: Element2
+			reduce(55), // if, reduce: Element2
+			reduce(55), // for, reduce: Element2
+			reduce(55), // endfor, reduce: Element2
+			reduce(55), // elif, reduce: Element2
+			reduce(55), // endif, reduce: Element2
+			reduce(55), // set, reduce: Element2
+			reduce(55), // comment, reduce: Element2
+			reduce(55), // template_block_end, reduce: Element2
+			reduce(55), // template_block_start, reduce: Element2
+			reduce(55), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(55), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S127
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),nil,reduce(82),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(56), // identifier, reduce: Element2
+			reduce(56), // bytes_literal, reduce: Element2
+			reduce(56), // string_literal, reduce: Element2
+			reduce(56), // integer_literal, reduce: Element2
+			reduce(56), // floating_point_literal, reduce: Element2
+			reduce(56), // newline, reduce: Element2
+			reduce(56), // dollar, reduce: Element2
+			reduce(56), // *, reduce: Element2
+			reduce(56), // [, reduce: Element2
+			reduce(56), // ], reduce: Element2
+			reduce(56), // (, reduce: Element2
+			reduce(56), // ), reduce: Element2
+			reduce(56), // ,, reduce: Element2
+			reduce(56), // ., reduce: Element2
+			reduce(56), // :, reduce: Element2
+			reduce(56), // %, reduce: Element2
+			reduce(56), // !, reduce: Element2
+			reduce(56), // |, reduce: Element2
+			reduce(56), // |>, reduce: Element2
+			reduce(56), // ^, reduce: Element2
+			reduce(56), // &, reduce: Element2
+			reduce(56), // <<, reduce: Element2
+			reduce(56), // >>, reduce: Element2
+			reduce(56), // =>, reduce: Element2
+			reduce(56), // ->, reduce: Element2
+			reduce(56), // /, reduce: Element2
+			reduce(56), // +, reduce: Element2
+			reduce(56), // -, reduce: Element2
+			reduce(56), // ||, reduce: Element2
+			reduce(56), // <>, reduce: Element2
+			reduce(56), // !=, reduce: Element2
+			reduce(56), // =, reduce: Element2
+			reduce(56), // <, reduce: Element2
+			reduce(56), // <=, reduce: Element2
+			reduce(56), // >, reduce: Element2
+			reduce(56), // >=, reduce: Element2
+			reduce(56), // ;, reduce: Element2
+			reduce(56), // @, reduce: Element2
+			reduce(56), // {, reduce: Element2
+			reduce(56), // }, reduce: Element2
+			reduce(56), // ~, reduce: Element2
+			reduce(56), // ?, reduce: Element2
+			reduce(56), // else, reduce: Element2
+			reduce(56), // if, reduce: Element2
+			reduce(56), // for, reduce: Element2
+			reduce(56), // endfor, reduce: Element2
+			reduce(56), // elif, reduce: Element2
+			reduce(56), // endif, reduce: Element2
+			reduce(56), // set, reduce: Element2
+			reduce(56), // comment, reduce: Element2
+			reduce(56), // template_block_end, reduce: Element2
+			reduce(56), // template_block_start, reduce: Element2
+			reduce(56), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(56), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S128
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(208),shift(209),shift(210),shift(211),shift(212),shift(213),shift(214),shift(215),shift(216),shift(217),shift(218),shift(219),shift(220),shift(221),shift(222),shift(223),shift(224),shift(225),shift(226),shift(227),shift(228),shift(229),shift(230),shift(231),shift(232),shift(233),shift(234),shift(235),shift(236),shift(237),shift(238),shift(239),shift(240),shift(241),shift(242),shift(243),shift(244),shift(245),shift(246),shift(247),shift(248),shift(249),shift(250),shift(251),nil,shift(55),shift(255),shift(264),shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(57), // identifier, reduce: Element2
+			reduce(57), // bytes_literal, reduce: Element2
+			reduce(57), // string_literal, reduce: Element2
+			reduce(57), // integer_literal, reduce: Element2
+			reduce(57), // floating_point_literal, reduce: Element2
+			reduce(57), // newline, reduce: Element2
+			reduce(57), // dollar, reduce: Element2
+			reduce(57), // *, reduce: Element2
+			reduce(57), // [, reduce: Element2
+			reduce(57), // ], reduce: Element2
+			reduce(57), // (, reduce: Element2
+			reduce(57), // ), reduce: Element2
+			reduce(57), // ,, reduce: Element2
+			reduce(57), // ., reduce: Element2
+			reduce(57), // :, reduce: Element2
+			reduce(57), // %, reduce: Element2
+			reduce(57), // !, reduce: Element2
+			reduce(57), // |, reduce: Element2
+			reduce(57), // |>, reduce: Element2
+			reduce(57), // ^, reduce: Element2
+			reduce(57), // &, reduce: Element2
+			reduce(57), // <<, reduce: Element2
+			reduce(57), // >>, reduce: Element2
+			reduce(57), // =>, reduce: Element2
+			reduce(57), // ->, reduce: Element2
+			reduce(57), // /, reduce: Element2
+			reduce(57), // +, reduce: Element2
+			reduce(57), // -, reduce: Element2
+			reduce(57), // ||, reduce: Element2
+			reduce(57), // <>, reduce: Element2
+			reduce(57), // !=, reduce: Element2
+			reduce(57), // =, reduce: Element2
+			reduce(57), // <, reduce: Element2
+			reduce(57), // <=, reduce: Element2
+			reduce(57), // >, reduce: Element2
+			reduce(57), // >=, reduce: Element2
+			reduce(57), // ;, reduce: Element2
+			reduce(57), // @, reduce: Element2
+			reduce(57), // {, reduce: Element2
+			reduce(57), // }, reduce: Element2
+			reduce(57), // ~, reduce: Element2
+			reduce(57), // ?, reduce: Element2
+			reduce(57), // else, reduce: Element2
+			reduce(57), // if, reduce: Element2
+			reduce(57), // for, reduce: Element2
+			reduce(57), // endfor, reduce: Element2
+			reduce(57), // elif, reduce: Element2
+			reduce(57), // endif, reduce: Element2
+			reduce(57), // set, reduce: Element2
+			reduce(57), // comment, reduce: Element2
+			reduce(57), // template_block_end, reduce: Element2
+			reduce(57), // template_block_start, reduce: Element2
+			reduce(57), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(57), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S129
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),reduce(71),nil,reduce(71),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(58), // identifier, reduce: Element2
+			reduce(58), // bytes_literal, reduce: Element2
+			reduce(58), // string_literal, reduce: Element2
+			reduce(58), // integer_literal, reduce: Element2
+			reduce(58), // floating_point_literal, reduce: Element2
+			reduce(58), // newline, reduce: Element2
+			reduce(58), // dollar, reduce: Element2
+			reduce(58), // *, reduce: Element2
+			reduce(58), // [, reduce: Element2
+			reduce(58), // ], reduce: Element2
+			reduce(58), // (, reduce: Element2
+			reduce(58), // ), reduce: Element2
+			reduce(58), // ,, reduce: Element2
+			reduce(58), // ., reduce: Element2
+			reduce(58), // :, reduce: Element2
+			reduce(58), // %, reduce: Element2
+			reduce(58), // !, reduce: Element2
+			reduce(58), // |, reduce: Element2
+			reduce(58), // |>, reduce: Element2
+			reduce(58), // ^, reduce: Element2
+			reduce(58), // &, reduce: Element2
+			reduce(58), // <<, reduce: Element2
+			reduce(58), // >>, reduce: Element2
+			reduce(58), // =>, reduce: Element2
+			reduce(58), // ->, reduce: Element2
+			reduce(58), // /, reduce: Element2
+			reduce(58), // +, reduce: Element2
+			reduce(58), // -, reduce: Element2
+			reduce(58), // ||, reduce: Element2
+			reduce(58), // <>, reduce: Element2
+			reduce(58), // !=, reduce: Element2
+			reduce(58), // =, reduce: Element2
+			reduce(58), // <, reduce: Element2
+			reduce(58), // <=, reduce: Element2
+			reduce(58), // >, reduce: Element2
+			reduce(58), // >=, reduce: Element2
+			reduce(58), // ;, reduce: Element2
+			reduce(58), // @, reduce: Element2
+			reduce(58), // {, reduce: Element2
+			reduce(58), // }, reduce: Element2
+			reduce(58), // ~, reduce: Element2
+			reduce(58), // ?, reduce: Element2
+			reduce(58), // else, reduce: Element2
+			reduce(58), // if, reduce: Element2
+			reduce(58), // for, reduce: Element2
+			reduce(58), // endfor, reduce: Element2
+			reduce(58), // elif, reduce: Element2
+			reduce(58), // endif, reduce: Element2
+			reduce(58), // set, reduce: Element2
+			reduce(58), // comment, reduce: Element2
+			reduce(58), // template_block_end, reduce: Element2
+			reduce(58), // template_block_start, reduce: Element2
+			reduce(58), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(58), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S130
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),reduce(79),nil,reduce(79),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(59), // identifier, reduce: Comment
+			reduce(59), // bytes_literal, reduce: Comment
+			reduce(59), // string_literal, reduce: Comment
+			reduce(59), // integer_literal, reduce: Comment
+			reduce(59), // floating_point_literal, reduce: Comment
+			reduce(59), // newline, reduce: Comment
+			reduce(59), // dollar, reduce: Comment
+			reduce(59), // *, reduce: Comment
+			reduce(59), // [, reduce: Comment
+			reduce(59), // ], reduce: Comment
+			reduce(59), // (, reduce: Comment
+			reduce(59), // ), reduce: Comment
+			reduce(59), // ,, reduce: Comment
+			reduce(59), // ., reduce: Comment
+			reduce(59), // :, reduce: Comment
+			reduce(59), // %, reduce: Comment
+			reduce(59), // !, reduce: Comment
+			reduce(59), // |, reduce: Comment
+			reduce(59), // |>, reduce: Comment
+			reduce(59), // ^, reduce: Comment
+			reduce(59), // &, reduce: Comment
+			reduce(59), // <<, reduce: Comment
+			reduce(59), // >>, reduce: Comment
+			reduce(59), // =>, reduce: Comment
+			reduce(59), // ->, reduce: Comment
+			reduce(59), // /, reduce: Comment
+			reduce(59), // +, reduce: Comment
+			reduce(59), // -, reduce: Comment
+			reduce(59), // ||, reduce: Comment
+			reduce(59), // <>, reduce: Comment
+			reduce(59), // !=, reduce: Comment
+			reduce(59), // =, reduce: Comment
+			reduce(59), // <, reduce: Comment
+			reduce(59), // <=, reduce: Comment
+			reduce(59), // >, reduce: Comment
+			reduce(59), // >=, reduce: Comment
+			reduce(59), // ;, reduce: Comment
+			reduce(59), // @, reduce: Comment
+			reduce(59), // {, reduce: Comment
+			reduce(59), // }, reduce: Comment
+			reduce(59), // ~, reduce: Comment
+			reduce(59), // ?, reduce: Comment
+			reduce(59), // else, reduce: Comment
+			reduce(59), // if, reduce: Comment
+			reduce(59), // for, reduce: Comment
+			reduce(59), // endfor, reduce: Comment
+			reduce(59), // elif, reduce: Comment
+			reduce(59), // endif, reduce: Comment
+			reduce(59), // set, reduce: Comment
+			reduce(59), // comment, reduce: Comment
+			reduce(59), // template_block_end, reduce: Comment
+			reduce(59), // template_block_start, reduce: Comment
+			reduce(59), // template_comment, reduce: Comment
+			nil,        // template_variable_end
+			reduce(59), // template_variable_start, reduce: Comment
 		},
 	},
 	actionRow{ // S131
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),reduce(63),nil,reduce(63),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(81),  // identifier
+			shift(82),  // bytes_literal
+			shift(83),  // string_literal
+			shift(84),  // integer_literal
+			shift(85),  // floating_point_literal
+			shift(86),  // newline
+			shift(87),  // dollar
+			shift(88),  // *
+			shift(89),  // [
+			shift(90),  // ]
+			shift(91),  // (
+			shift(92),  // )
+			shift(93),  // ,
+			shift(94),  // .
+			shift(95),  // :
+			shift(96),  // %
+			shift(97),  // !
+			shift(98),  // |
+			shift(99),  // |>
+			shift(100), // ^
+			shift(101), // &
+			shift(102), // <<
+			shift(103), // >>
+			shift(104), // =>
+			shift(105), // ->
+			shift(106), // /
+			shift(107), // +
+			shift(108), // -
+			shift(109), // ||
+			shift(110), // <>
+			shift(111), // !=
+			shift(112), // =
+			shift(113), // <
+			shift(114), // <=
+			shift(115), // >
+			shift(116), // >=
+			shift(117), // ;
+			shift(118), // @
+			shift(119), // {
+			shift(120), // }
+			shift(121), // ~
+			shift(122), // ?
+			shift(123), // else
+			shift(124), // if
+			shift(125), // for
+			shift(126), // endfor
+			shift(127), // elif
+			shift(128), // endif
+			shift(129), // set
+			shift(130), // comment
+			shift(285), // template_block_end
+			shift(61),  // template_block_start
+			shift(136), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S132
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),reduce(69),nil,reduce(69),reduce(69),nil,reduce(69),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(60), // ␚, reduce: TemplateSetBlock
+			reduce(60), // identifier, reduce: TemplateSetBlock
+			reduce(60), // bytes_literal, reduce: TemplateSetBlock
+			reduce(60), // string_literal, reduce: TemplateSetBlock
+			reduce(60), // integer_literal, reduce: TemplateSetBlock
+			reduce(60), // floating_point_literal, reduce: TemplateSetBlock
+			reduce(60), // newline, reduce: TemplateSetBlock
+			reduce(60), // dollar, reduce: TemplateSetBlock
+			reduce(60), // *, reduce: TemplateSetBlock
+			reduce(60), // [, reduce: TemplateSetBlock
+			reduce(60), // ], reduce: TemplateSetBlock
+			reduce(60), // (, reduce: TemplateSetBlock
+			reduce(60), // ), reduce: TemplateSetBlock
+			reduce(60), // ,, reduce: TemplateSetBlock
+			reduce(60), // ., reduce: TemplateSetBlock
+			reduce(60), // :, reduce: TemplateSetBlock
+			reduce(60), // %, reduce: TemplateSetBlock
+			reduce(60), // !, reduce: TemplateSetBlock
+			reduce(60), // |, reduce: TemplateSetBlock
+			reduce(60), // |>, reduce: TemplateSetBlock
+			reduce(60), // ^, reduce: TemplateSetBlock
+			reduce(60), // &, reduce: TemplateSetBlock
+			reduce(60), // <<, reduce: TemplateSetBlock
+			reduce(60), // >>, reduce: TemplateSetBlock
+			reduce(60), // =>, reduce: TemplateSetBlock
+			reduce(60), // ->, reduce: TemplateSetBlock
+			reduce(60), // /, reduce: TemplateSetBlock
+			reduce(60), // +, reduce: TemplateSetBlock
+			reduce(60), // -, reduce: TemplateSetBlock
+			reduce(60), // ||, reduce: TemplateSetBlock
+			reduce(60), // <>, reduce: TemplateSetBlock
+			reduce(60), // !=, reduce: TemplateSetBlock
+			reduce(60), // =, reduce: TemplateSetBlock
+			reduce(60), // <, reduce: TemplateSetBlock
+			reduce(60), // <=, reduce: TemplateSetBlock
+			reduce(60), // >, reduce: TemplateSetBlock
+			reduce(60), // >=, reduce: TemplateSetBlock
+			reduce(60), // ;, reduce: TemplateSetBlock
+			reduce(60), // @, reduce: TemplateSetBlock
+			reduce(60), // {, reduce: TemplateSetBlock
+			reduce(60), // }, reduce: TemplateSetBlock
+			reduce(60), // ~, reduce: TemplateSetBlock
+			reduce(60), // ?, reduce: TemplateSetBlock
+			reduce(60), // else, reduce: TemplateSetBlock
+			reduce(60), // if, reduce: TemplateSetBlock
+			reduce(60), // for, reduce: TemplateSetBlock
+			reduce(60), // endfor, reduce: TemplateSetBlock
+			reduce(60), // elif, reduce: TemplateSetBlock
+			reduce(60), // endif, reduce: TemplateSetBlock
+			reduce(60), // set, reduce: TemplateSetBlock
+			reduce(60), // comment, reduce: TemplateSetBlock
+			nil,        // template_block_end
+			reduce(60), // template_block_start, reduce: TemplateSetBlock
+			reduce(60), // template_comment, reduce: TemplateSetBlock
+			nil,        // template_variable_end
+			reduce(60), // template_variable_start, reduce: TemplateSetBlock
 		},
 	},
 	actionRow{ // S133
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),nil,reduce(11),reduce(11),nil,reduce(11),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(286), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S134
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),nil,reduce(8),reduce(8),nil,reduce(8),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(288), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S135
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),nil,reduce(9),reduce(9),nil,reduce(9),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(290), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S136
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),nil,reduce(10),reduce(10),nil,reduce(10),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(85), // identifier, reduce: TemplateComment
+			reduce(85), // bytes_literal, reduce: TemplateComment
+			reduce(85), // string_literal, reduce: TemplateComment
+			reduce(85), // integer_literal, reduce: TemplateComment
+			reduce(85), // floating_point_literal, reduce: TemplateComment
+			reduce(85), // newline, reduce: TemplateComment
+			reduce(85), // dollar, reduce: TemplateComment
+			reduce(85), // *, reduce: TemplateComment
+			reduce(85), // [, reduce: TemplateComment
+			reduce(85), // ], reduce: TemplateComment
+			reduce(85), // (, reduce: TemplateComment
+			reduce(85), // ), reduce: TemplateComment
+			reduce(85), // ,, reduce: TemplateComment
+			reduce(85), // ., reduce: TemplateComment
+			reduce(85), // :, reduce: TemplateComment
+			reduce(85), // %, reduce: TemplateComment
+			reduce(85), // !, reduce: TemplateComment
+			reduce(85), // |, reduce: TemplateComment
+			reduce(85), // |>, reduce: TemplateComment
+			reduce(85), // ^, reduce: TemplateComment
+			reduce(85), // &, reduce: TemplateComment
+			reduce(85), // <<, reduce: TemplateComment
+			reduce(85), // >>, reduce: TemplateComment
+			reduce(85), // =>, reduce: TemplateComment
+			reduce(85), // ->, reduce: TemplateComment
+			reduce(85), // /, reduce: TemplateComment
+			reduce(85), // +, reduce: TemplateComment
+			reduce(85), // -, reduce: TemplateComment
+			reduce(85), // ||, reduce: TemplateComment
+			reduce(85), // <>, reduce: TemplateComment
+			reduce(85), // !=, reduce: TemplateComment
+			reduce(85), // =, reduce: TemplateComment
+			reduce(85), // <, reduce: TemplateComment
+			reduce(85), // <=, reduce: TemplateComment
+			reduce(85), // >, reduce: TemplateComment
+			reduce(85), // >=, reduce: TemplateComment
+			reduce(85), // ;, reduce: TemplateComment
+			reduce(85), // @, reduce: TemplateComment
+			reduce(85), // {, reduce: TemplateComment
+			reduce(85), // }, reduce: TemplateComment
+			reduce(85), // ~, reduce: TemplateComment
+			reduce(85), // ?, reduce: TemplateComment
+			reduce(85), // else, reduce: TemplateComment
+			reduce(85), // if, reduce: TemplateComment
+			reduce(85), // for, reduce: TemplateComment
+			reduce(85), // endfor, reduce: TemplateComment
+			reduce(85), // elif, reduce: TemplateComment
+			reduce(85), // endif, reduce: TemplateComment
+			reduce(85), // set, reduce: TemplateComment
+			reduce(85), // comment, reduce: TemplateComment
+			reduce(85), // template_block_end, reduce: TemplateComment
+			reduce(85), // template_block_start, reduce: TemplateComment
+			reduce(85), // template_comment, reduce: TemplateComment
+			nil,        // template_variable_end
+			reduce(85), // template_variable_start, reduce: TemplateComment
 		},
 	},
 	actionRow{ // S137
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),nil,reduce(12),reduce(12),nil,reduce(12),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(228), // identifier
+			shift(229), // bytes_literal
+			shift(230), // string_literal
+			shift(231), // integer_literal
+			shift(232), // floating_point_literal
+			shift(233), // newline
+			shift(234), // dollar
+			shift(235), // *
+			shift(236), // [
+			shift(237), // ]
+			shift(238), // (
+			shift(239), // )
+			shift(240), // ,
+			shift(241), // .
+			shift(242), // :
+			shift(243), // %
+			shift(244), // !
+			shift(245), // |
+			shift(246), // |>
+			shift(247), // ^
+			shift(248), // &
+			shift(249), // <<
+			shift(250), // >>
+			shift(251), // =>
+			shift(252), // ->
+			shift(253), // /
+			shift(254), // +
+			shift(255), // -
+			shift(256), // ||
+			shift(257), // <>
+			shift(258), // !=
+			shift(259), // =
+			shift(260), // <
+			shift(261), // <=
+			shift(262), // >
+			shift(263), // >=
+			shift(264), // ;
+			shift(265), // @
+			shift(266), // {
+			shift(267), // }
+			shift(268), // ~
+			shift(269), // ?
+			shift(270), // else
+			shift(271), // if
+			shift(272), // for
+			shift(273), // endfor
+			shift(274), // elif
+			shift(275), // endif
+			shift(276), // set
+			shift(277), // comment
+			nil,        // template_block_end
+			shift(61),  // template_block_start
+			shift(282), // template_comment
+			shift(292), // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S138
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),nil,reduce(13),reduce(13),nil,reduce(13),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(71), // identifier, reduce: TemplateIfBeginPrefix
+			reduce(71), // bytes_literal, reduce: TemplateIfBeginPrefix
+			reduce(71), // string_literal, reduce: TemplateIfBeginPrefix
+			reduce(71), // integer_literal, reduce: TemplateIfBeginPrefix
+			reduce(71), // floating_point_literal, reduce: TemplateIfBeginPrefix
+			reduce(71), // newline, reduce: TemplateIfBeginPrefix
+			reduce(71), // dollar, reduce: TemplateIfBeginPrefix
+			reduce(71), // *, reduce: TemplateIfBeginPrefix
+			reduce(71), // [, reduce: TemplateIfBeginPrefix
+			reduce(71), // ], reduce: TemplateIfBeginPrefix
+			reduce(71), // (, reduce: TemplateIfBeginPrefix
+			reduce(71), // ), reduce: TemplateIfBeginPrefix
+			reduce(71), // ,, reduce: TemplateIfBeginPrefix
+			reduce(71), // ., reduce: TemplateIfBeginPrefix
+			reduce(71), // :, reduce: TemplateIfBeginPrefix
+			reduce(71), // %, reduce: TemplateIfBeginPrefix
+			reduce(71), // !, reduce: TemplateIfBeginPrefix
+			reduce(71), // |, reduce: TemplateIfBeginPrefix
+			reduce(71), // |>, reduce: TemplateIfBeginPrefix
+			reduce(71), // ^, reduce: TemplateIfBeginPrefix
+			reduce(71), // &, reduce: TemplateIfBeginPrefix
+			reduce(71), // <<, reduce: TemplateIfBeginPrefix
+			reduce(71), // >>, reduce: TemplateIfBeginPrefix
+			reduce(71), // =>, reduce: TemplateIfBeginPrefix
+			reduce(71), // ->, reduce: TemplateIfBeginPrefix
+			reduce(71), // /, reduce: TemplateIfBeginPrefix
+			reduce(71), // +, reduce: TemplateIfBeginPrefix
+			reduce(71), // -, reduce: TemplateIfBeginPrefix
+			reduce(71), // ||, reduce: TemplateIfBeginPrefix
+			reduce(71), // <>, reduce: TemplateIfBeginPrefix
+			reduce(71), // !=, reduce: TemplateIfBeginPrefix
+			reduce(71), // =, reduce: TemplateIfBeginPrefix
+			reduce(71), // <, reduce: TemplateIfBeginPrefix
+			reduce(71), // <=, reduce: TemplateIfBeginPrefix
+			reduce(71), // >, reduce: TemplateIfBeginPrefix
+			reduce(71), // >=, reduce: TemplateIfBeginPrefix
+			reduce(71), // ;, reduce: TemplateIfBeginPrefix
+			reduce(71), // @, reduce: TemplateIfBeginPrefix
+			reduce(71), // {, reduce: TemplateIfBeginPrefix
+			reduce(71), // }, reduce: TemplateIfBeginPrefix
+			reduce(71), // ~, reduce: TemplateIfBeginPrefix
+			reduce(71), // ?, reduce: TemplateIfBeginPrefix
+			reduce(71), // else, reduce: TemplateIfBeginPrefix
+			reduce(71), // if, reduce: TemplateIfBeginPrefix
+			reduce(71), // for, reduce: TemplateIfBeginPrefix
+			reduce(71), // endfor, reduce: TemplateIfBeginPrefix
+			reduce(71), // elif, reduce: TemplateIfBeginPrefix
+			reduce(71), // endif, reduce: TemplateIfBeginPrefix
+			reduce(71), // set, reduce: TemplateIfBeginPrefix
+			reduce(71), // comment, reduce: TemplateIfBeginPrefix
+			reduce(71), // template_block_end, reduce: TemplateIfBeginPrefix
+			reduce(71), // template_block_start, reduce: TemplateIfBeginPrefix
+			reduce(71), // template_comment, reduce: TemplateIfBeginPrefix
+			nil,        // template_variable_end
+			reduce(71), // template_variable_start, reduce: TemplateIfBeginPrefix
 		},
 	},
 	actionRow{ // S139
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),nil,reduce(14),reduce(14),nil,reduce(14),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(82), // identifier, reduce: TemplateForBeginPrefix
+			reduce(82), // bytes_literal, reduce: TemplateForBeginPrefix
+			reduce(82), // string_literal, reduce: TemplateForBeginPrefix
+			reduce(82), // integer_literal, reduce: TemplateForBeginPrefix
+			reduce(82), // floating_point_literal, reduce: TemplateForBeginPrefix
+			reduce(82), // newline, reduce: TemplateForBeginPrefix
+			reduce(82), // dollar, reduce: TemplateForBeginPrefix
+			reduce(82), // *, reduce: TemplateForBeginPrefix
+			reduce(82), // [, reduce: TemplateForBeginPrefix
+			reduce(82), // ], reduce: TemplateForBeginPrefix
+			reduce(82), // (, reduce: TemplateForBeginPrefix
+			reduce(82), // ), reduce: TemplateForBeginPrefix
+			reduce(82), // ,, reduce: TemplateForBeginPrefix
+			reduce(82), // ., reduce: TemplateForBeginPrefix
+			reduce(82), // :, reduce: TemplateForBeginPrefix
+			reduce(82), // %, reduce: TemplateForBeginPrefix
+			reduce(82), // !, reduce: TemplateForBeginPrefix
+			reduce(82), // |, reduce: TemplateForBeginPrefix
+			reduce(82), // |>, reduce: TemplateForBeginPrefix
+			reduce(82), // ^, reduce: TemplateForBeginPrefix
+			reduce(82), // &, reduce: TemplateForBeginPrefix
+			reduce(82), // <<, reduce: TemplateForBeginPrefix
+			reduce(82), // >>, reduce: TemplateForBeginPrefix
+			reduce(82), // =>, reduce: TemplateForBeginPrefix
+			reduce(82), // ->, reduce: TemplateForBeginPrefix
+			reduce(82), // /, reduce: TemplateForBeginPrefix
+			reduce(82), // +, reduce: TemplateForBeginPrefix
+			reduce(82), // -, reduce: TemplateForBeginPrefix
+			reduce(82), // ||, reduce: TemplateForBeginPrefix
+			reduce(82), // <>, reduce: TemplateForBeginPrefix
+			reduce(82), // !=, reduce: TemplateForBeginPrefix
+			reduce(82), // =, reduce: TemplateForBeginPrefix
+			reduce(82), // <, reduce: TemplateForBeginPrefix
+			reduce(82), // <=, reduce: TemplateForBeginPrefix
+			reduce(82), // >, reduce: TemplateForBeginPrefix
+			reduce(82), // >=, reduce: TemplateForBeginPrefix
+			reduce(82), // ;, reduce: TemplateForBeginPrefix
+			reduce(82), // @, reduce: TemplateForBeginPrefix
+			reduce(82), // {, reduce: TemplateForBeginPrefix
+			reduce(82), // }, reduce: TemplateForBeginPrefix
+			reduce(82), // ~, reduce: TemplateForBeginPrefix
+			reduce(82), // ?, reduce: TemplateForBeginPrefix
+			reduce(82), // else, reduce: TemplateForBeginPrefix
+			reduce(82), // if, reduce: TemplateForBeginPrefix
+			reduce(82), // for, reduce: TemplateForBeginPrefix
+			reduce(82), // endfor, reduce: TemplateForBeginPrefix
+			reduce(82), // elif, reduce: TemplateForBeginPrefix
+			reduce(82), // endif, reduce: TemplateForBeginPrefix
+			reduce(82), // set, reduce: TemplateForBeginPrefix
+			reduce(82), // comment, reduce: TemplateForBeginPrefix
+			reduce(82), // template_block_end, reduce: TemplateForBeginPrefix
+			reduce(82), // template_block_start, reduce: TemplateForBeginPrefix
+			reduce(82), // template_comment, reduce: TemplateForBeginPrefix
+			nil,        // template_variable_end
+			reduce(82), // template_variable_start, reduce: TemplateForBeginPrefix
 		},
 	},
 	actionRow{ // S140
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),nil,reduce(15),reduce(15),nil,reduce(15),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(61), // identifier, reduce: TemplateSetBlockPrefix
+			reduce(61), // bytes_literal, reduce: TemplateSetBlockPrefix
+			reduce(61), // string_literal, reduce: TemplateSetBlockPrefix
+			reduce(61), // integer_literal, reduce: TemplateSetBlockPrefix
+			reduce(61), // floating_point_literal, reduce: TemplateSetBlockPrefix
+			reduce(61), // newline, reduce: TemplateSetBlockPrefix
+			reduce(61), // dollar, reduce: TemplateSetBlockPrefix
+			reduce(61), // *, reduce: TemplateSetBlockPrefix
+			reduce(61), // [, reduce: TemplateSetBlockPrefix
+			reduce(61), // ], reduce: TemplateSetBlockPrefix
+			reduce(61), // (, reduce: TemplateSetBlockPrefix
+			reduce(61), // ), reduce: TemplateSetBlockPrefix
+			reduce(61), // ,, reduce: TemplateSetBlockPrefix
+			reduce(61), // ., reduce: TemplateSetBlockPrefix
+			reduce(61), // :, reduce: TemplateSetBlockPrefix
+			reduce(61), // %, reduce: TemplateSetBlockPrefix
+			reduce(61), // !, reduce: TemplateSetBlockPrefix
+			reduce(61), // |, reduce: TemplateSetBlockPrefix
+			reduce(61), // |>, reduce: TemplateSetBlockPrefix
+			reduce(61), // ^, reduce: TemplateSetBlockPrefix
+			reduce(61), // &, reduce: TemplateSetBlockPrefix
+			reduce(61), // <<, reduce: TemplateSetBlockPrefix
+			reduce(61), // >>, reduce: TemplateSetBlockPrefix
+			reduce(61), // =>, reduce: TemplateSetBlockPrefix
+			reduce(61), // ->, reduce: TemplateSetBlockPrefix
+			reduce(61), // /, reduce: TemplateSetBlockPrefix
+			reduce(61), // +, reduce: TemplateSetBlockPrefix
+			reduce(61), // -, reduce: TemplateSetBlockPrefix
+			reduce(61), // ||, reduce: TemplateSetBlockPrefix
+			reduce(61), // <>, reduce: TemplateSetBlockPrefix
+			reduce(61), // !=, reduce: TemplateSetBlockPrefix
+			reduce(61), // =, reduce: TemplateSetBlockPrefix
+			reduce(61), // <, reduce: TemplateSetBlockPrefix
+			reduce(61), // <=, reduce: TemplateSetBlockPrefix
+			reduce(61), // >, reduce: TemplateSetBlockPrefix
+			reduce(61), // >=, reduce: TemplateSetBlockPrefix
+			reduce(61), // ;, reduce: TemplateSetBlockPrefix
+			reduce(61), // @, reduce: TemplateSetBlockPrefix
+			reduce(61), // {, reduce: TemplateSetBlockPrefix
+			reduce(61), // }, reduce: TemplateSetBlockPrefix
+			reduce(61), // ~, reduce: TemplateSetBlockPrefix
+			reduce(61), // ?, reduce: TemplateSetBlockPrefix
+			reduce(61), // else, reduce: TemplateSetBlockPrefix
+			reduce(61), // if, reduce: TemplateSetBlockPrefix
+			reduce(61), // for, reduce: TemplateSetBlockPrefix
+			reduce(61), // endfor, reduce: TemplateSetBlockPrefix
+			reduce(61), // elif, reduce: TemplateSetBlockPrefix
+			reduce(61), // endif, reduce: TemplateSetBlockPrefix
+			reduce(61), // set, reduce: TemplateSetBlockPrefix
+			reduce(61), // comment, reduce: TemplateSetBlockPrefix
+			reduce(61), // template_block_end, reduce: TemplateSetBlockPrefix
+			reduce(61), // template_block_start, reduce: TemplateSetBlockPrefix
+			reduce(61), // template_comment, reduce: TemplateSetBlockPrefix
+			nil,        // template_variable_end
+			reduce(61), // template_variable_start, reduce: TemplateSetBlockPrefix
 		},
 	},
 	actionRow{ // S141
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),nil,reduce(16),reduce(16),nil,reduce(16),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(66), // identifier, reduce: TemplateIfBranches
+			reduce(66), // bytes_literal, reduce: TemplateIfBranches
+			reduce(66), // string_literal, reduce: TemplateIfBranches
+			reduce(66), // integer_literal, reduce: TemplateIfBranches
+			reduce(66), // floating_point_literal, reduce: TemplateIfBranches
+			reduce(66), // newline, reduce: TemplateIfBranches
+			reduce(66), // dollar, reduce: TemplateIfBranches
+			reduce(66), // *, reduce: TemplateIfBranches
+			reduce(66), // [, reduce: TemplateIfBranches
+			reduce(66), // ], reduce: TemplateIfBranches
+			reduce(66), // (, reduce: TemplateIfBranches
+			reduce(66), // ), reduce: TemplateIfBranches
+			reduce(66), // ,, reduce: TemplateIfBranches
+			reduce(66), // ., reduce: TemplateIfBranches
+			reduce(66), // :, reduce: TemplateIfBranches
+			reduce(66), // %, reduce: TemplateIfBranches
+			reduce(66), // !, reduce: TemplateIfBranches
+			reduce(66), // |, reduce: TemplateIfBranches
+			reduce(66), // |>, reduce: TemplateIfBranches
+			reduce(66), // ^, reduce: TemplateIfBranches
+			reduce(66), // &, reduce: TemplateIfBranches
+			reduce(66), // <<, reduce: TemplateIfBranches
+			reduce(66), // >>, reduce: TemplateIfBranches
+			reduce(66), // =>, reduce: TemplateIfBranches
+			reduce(66), // ->, reduce: TemplateIfBranches
+			reduce(66), // /, reduce: TemplateIfBranches
+			reduce(66), // +, reduce: TemplateIfBranches
+			reduce(66), // -, reduce: TemplateIfBranches
+			reduce(66), // ||, reduce: TemplateIfBranches
+			reduce(66), // <>, reduce: TemplateIfBranches
+			reduce(66), // !=, reduce: TemplateIfBranches
+			reduce(66), // =, reduce: TemplateIfBranches
+			reduce(66), // <, reduce: TemplateIfBranches
+			reduce(66), // <=, reduce: TemplateIfBranches
+			reduce(66), // >, reduce: TemplateIfBranches
+			reduce(66), // >=, reduce: TemplateIfBranches
+			reduce(66), // ;, reduce: TemplateIfBranches
+			reduce(66), // @, reduce: TemplateIfBranches
+			reduce(66), // {, reduce: TemplateIfBranches
+			reduce(66), // }, reduce: TemplateIfBranches
+			reduce(66), // ~, reduce: TemplateIfBranches
+			reduce(66), // ?, reduce: TemplateIfBranches
+			reduce(66), // else, reduce: TemplateIfBranches
+			reduce(66), // if, reduce: TemplateIfBranches
+			reduce(66), // for, reduce: TemplateIfBranches
+			reduce(66), // endfor, reduce: TemplateIfBranches
+			reduce(66), // elif, reduce: TemplateIfBranches
+			reduce(66), // endif, reduce: TemplateIfBranches
+			reduce(66), // set, reduce: TemplateIfBranches
+			reduce(66), // comment, reduce: TemplateIfBranches
+			nil,        // template_block_end
+			reduce(66), // template_block_start, reduce: TemplateIfBranches
+			reduce(66), // template_comment, reduce: TemplateIfBranches
+			nil,        // template_variable_end
+			reduce(66), // template_variable_start, reduce: TemplateIfBranches
 		},
 	},
 	actionRow{ // S142
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),nil,reduce(17),reduce(17),nil,reduce(17),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(3), // identifier, reduce: Element
+			reduce(3), // bytes_literal, reduce: Element
+			reduce(3), // string_literal, reduce: Element
+			reduce(3), // integer_literal, reduce: Element
+			reduce(3), // floating_point_literal, reduce: Element
+			reduce(3), // newline, reduce: Element
+			reduce(3), // dollar, reduce: Element
+			reduce(3), // *, reduce: Element
+			reduce(3), // [, reduce: Element
+			reduce(3), // ], reduce: Element
+			reduce(3), // (, reduce: Element
+			reduce(3), // ), reduce: Element
+			reduce(3), // ,, reduce: Element
+			reduce(3), // ., reduce: Element
+			reduce(3), // :, reduce: Element
+			reduce(3), // %, reduce: Element
+			reduce(3), // !, reduce: Element
+			reduce(3), // |, reduce: Element
+			reduce(3), // |>, reduce: Element
+			reduce(3), // ^, reduce: Element
+			reduce(3), // &, reduce: Element
+			reduce(3), // <<, reduce: Element
+			reduce(3), // >>, reduce: Element
+			reduce(3), // =>, reduce: Element
+			reduce(3), // ->, reduce: Element
+			reduce(3), // /, reduce: Element
+			reduce(3), // +, reduce: Element
+			reduce(3), // -, reduce: Element
+			reduce(3), // ||, reduce: Element
+			reduce(3), // <>, reduce: Element
+			reduce(3), // !=, reduce: Element
+			reduce(3), // =, reduce: Element
+			reduce(3), // <, reduce: Element
+			reduce(3), // <=, reduce: Element
+			reduce(3), // >, reduce: Element
+			reduce(3), // >=, reduce: Element
+			reduce(3), // ;, reduce: Element
+			reduce(3), // @, reduce: Element
+			reduce(3), // {, reduce: Element
+			reduce(3), // }, reduce: Element
+			reduce(3), // ~, reduce: Element
+			reduce(3), // ?, reduce: Element
+			reduce(3), // else, reduce: Element
+			reduce(3), // if, reduce: Element
+			reduce(3), // for, reduce: Element
+			reduce(3), // endfor, reduce: Element
+			reduce(3), // elif, reduce: Element
+			reduce(3), // endif, reduce: Element
+			reduce(3), // set, reduce: Element
+			reduce(3), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(3), // template_block_start, reduce: Element
+			reduce(3), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(3), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S143
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),nil,reduce(18),reduce(18),nil,reduce(18),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(4), // identifier, reduce: Element
+			reduce(4), // bytes_literal, reduce: Element
+			reduce(4), // string_literal, reduce: Element
+			reduce(4), // integer_literal, reduce: Element
+			reduce(4), // floating_point_literal, reduce: Element
+			reduce(4), // newline, reduce: Element
+			reduce(4), // dollar, reduce: Element
+			reduce(4), // *, reduce: Element
+			reduce(4), // [, reduce: Element
+			reduce(4), // ], reduce: Element
+			reduce(4), // (, reduce: Element
+			reduce(4), // ), reduce: Element
+			reduce(4), // ,, reduce: Element
+			reduce(4), // ., reduce: Element
+			reduce(4), // :, reduce: Element
+			reduce(4), // %, reduce: Element
+			reduce(4), // !, reduce: Element
+			reduce(4), // |, reduce: Element
+			reduce(4), // |>, reduce: Element
+			reduce(4), // ^, reduce: Element
+			reduce(4), // &, reduce: Element
+			reduce(4), // <<, reduce: Element
+			reduce(4), // >>, reduce: Element
+			reduce(4), // =>, reduce: Element
+			reduce(4), // ->, reduce: Element
+			reduce(4), // /, reduce: Element
+			reduce(4), // +, reduce: Element
+			reduce(4), // -, reduce: Element
+			reduce(4), // ||, reduce: Element
+			reduce(4), // <>, reduce: Element
+			reduce(4), // !=, reduce: Element
+			reduce(4), // =, reduce: Element
+			reduce(4), // <, reduce: Element
+			reduce(4), // <=, reduce: Element
+			reduce(4), // >, reduce: Element
+			reduce(4), // >=, reduce: Element
+			reduce(4), // ;, reduce: Element
+			reduce(4), // @, reduce: Element
+			reduce(4), // {, reduce: Element
+			reduce(4), // }, reduce: Element
+			reduce(4), // ~, reduce: Element
+			reduce(4), // ?, reduce: Element
+			reduce(4), // else, reduce: Element
+			reduce(4), // if, reduce: Element
+			reduce(4), // for, reduce: Element
+			reduce(4), // endfor, reduce: Element
+			reduce(4), // elif, reduce: Element
+			reduce(4), // endif, reduce: Element
+			reduce(4), // set, reduce: Element
+			reduce(4), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(4), // template_block_start, reduce: Element
+			reduce(4), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(4), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S144
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),nil,reduce(19),reduce(19),nil,reduce(19),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(5), // identifier, reduce: Element
+			reduce(5), // bytes_literal, reduce: Element
+			reduce(5), // string_literal, reduce: Element
+			reduce(5), // integer_literal, reduce: Element
+			reduce(5), // floating_point_literal, reduce: Element
+			reduce(5), // newline, reduce: Element
+			reduce(5), // dollar, reduce: Element
+			reduce(5), // *, reduce: Element
+			reduce(5), // [, reduce: Element
+			reduce(5), // ], reduce: Element
+			reduce(5), // (, reduce: Element
+			reduce(5), // ), reduce: Element
+			reduce(5), // ,, reduce: Element
+			reduce(5), // ., reduce: Element
+			reduce(5), // :, reduce: Element
+			reduce(5), // %, reduce: Element
+			reduce(5), // !, reduce: Element
+			reduce(5), // |, reduce: Element
+			reduce(5), // |>, reduce: Element
+			reduce(5), // ^, reduce: Element
+			reduce(5), // &, reduce: Element
+			reduce(5), // <<, reduce: Element
+			reduce(5), // >>, reduce: Element
+			reduce(5), // =>, reduce: Element
+			reduce(5), // ->, reduce: Element
+			reduce(5), // /, reduce: Element
+			reduce(5), // +, reduce: Element
+			reduce(5), // -, reduce: Element
+			reduce(5), // ||, reduce: Element
+			reduce(5), // <>, reduce: Element
+			reduce(5), // !=, reduce: Element
+			reduce(5), // =, reduce: Element
+			reduce(5), // <, reduce: Element
+			reduce(5), // <=, reduce: Element
+			reduce(5), // >, reduce: Element
+			reduce(5), // >=, reduce: Element
+			reduce(5), // ;, reduce: Element
+			reduce(5), // @, reduce: Element
+			reduce(5), // {, reduce: Element
+			reduce(5), // }, reduce: Element
+			reduce(5), // ~, reduce: Element
+			reduce(5), // ?, reduce: Element
+			reduce(5), // else, reduce: Element
+			reduce(5), // if, reduce: Element
+			reduce(5), // for, reduce: Element
+			reduce(5), // endfor, reduce: Element
+			reduce(5), // elif, reduce: Element
+			reduce(5), // endif, reduce: Element
+			reduce(5), // set, reduce: Element
+			reduce(5), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(5), // template_block_start, reduce: Element
+			reduce(5), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(5), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S145
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),nil,reduce(20),reduce(20),nil,reduce(20),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(6), // identifier, reduce: Element
+			reduce(6), // bytes_literal, reduce: Element
+			reduce(6), // string_literal, reduce: Element
+			reduce(6), // integer_literal, reduce: Element
+			reduce(6), // floating_point_literal, reduce: Element
+			reduce(6), // newline, reduce: Element
+			reduce(6), // dollar, reduce: Element
+			reduce(6), // *, reduce: Element
+			reduce(6), // [, reduce: Element
+			reduce(6), // ], reduce: Element
+			reduce(6), // (, reduce: Element
+			reduce(6), // ), reduce: Element
+			reduce(6), // ,, reduce: Element
+			reduce(6), // ., reduce: Element
+			reduce(6), // :, reduce: Element
+			reduce(6), // %, reduce: Element
+			reduce(6), // !, reduce: Element
+			reduce(6), // |, reduce: Element
+			reduce(6), // |>, reduce: Element
+			reduce(6), // ^, reduce: Element
+			reduce(6), // &, reduce: Element
+			reduce(6), // <<, reduce: Element
+			reduce(6), // >>, reduce: Element
+			reduce(6), // =>, reduce: Element
+			reduce(6), // ->, reduce: Element
+			reduce(6), // /, reduce: Element
+			reduce(6), // +, reduce: Element
+			reduce(6), // -, reduce: Element
+			reduce(6), // ||, reduce: Element
+			reduce(6), // <>, reduce: Element
+			reduce(6), // !=, reduce: Element
+			reduce(6), // =, reduce: Element
+			reduce(6), // <, reduce: Element
+			reduce(6), // <=, reduce: Element
+			reduce(6), // >, reduce: Element
+			reduce(6), // >=, reduce: Element
+			reduce(6), // ;, reduce: Element
+			reduce(6), // @, reduce: Element
+			reduce(6), // {, reduce: Element
+			reduce(6), // }, reduce: Element
+			reduce(6), // ~, reduce: Element
+			reduce(6), // ?, reduce: Element
+			reduce(6), // else, reduce: Element
+			reduce(6), // if, reduce: Element
+			reduce(6), // for, reduce: Element
+			reduce(6), // endfor, reduce: Element
+			reduce(6), // elif, reduce: Element
+			reduce(6), // endif, reduce: Element
+			reduce(6), // set, reduce: Element
+			reduce(6), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(6), // template_block_start, reduce: Element
+			reduce(6), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(6), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S146
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),nil,reduce(21),reduce(21),nil,reduce(21),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(7), // identifier, reduce: Element
+			reduce(7), // bytes_literal, reduce: Element
+			reduce(7), // string_literal, reduce: Element
+			reduce(7), // integer_literal, reduce: Element
+			reduce(7), // floating_point_literal, reduce: Element
+			reduce(7), // newline, reduce: Element
+			reduce(7), // dollar, reduce: Element
+			reduce(7), // *, reduce: Element
+			reduce(7), // [, reduce: Element
+			reduce(7), // ], reduce: Element
+			reduce(7), // (, reduce: Element
+			reduce(7), // ), reduce: Element
+			reduce(7), // ,, reduce: Element
+			reduce(7), // ., reduce: Element
+			reduce(7), // :, reduce: Element
+			reduce(7), // %, reduce: Element
+			reduce(7), // !, reduce: Element
+			reduce(7), // |, reduce: Element
+			reduce(7), // |>, reduce: Element
+			reduce(7), // ^, reduce: Element
+			reduce(7), // &, reduce: Element
+			reduce(7), // <<, reduce: Element
+			reduce(7), // >>, reduce: Element
+			reduce(7), // =>, reduce: Element
+			reduce(7), // ->, reduce: Element
+			reduce(7), // /, reduce: Element
+			reduce(7), // +, reduce: Element
+			reduce(7), // -, reduce: Element
+			reduce(7), // ||, reduce: Element
+			reduce(7), // <>, reduce: Element
+			reduce(7), // !=, reduce: Element
+			reduce(7), // =, reduce: Element
+			reduce(7), // <, reduce: Element
+			reduce(7), // <=, reduce: Element
+			reduce(7), // >, reduce: Element
+			reduce(7), // >=, reduce: Element
+			reduce(7), // ;, reduce: Element
+			reduce(7), // @, reduce: Element
+			reduce(7), // {, reduce: Element
+			reduce(7), // }, reduce: Element
+			reduce(7), // ~, reduce: Element
+			reduce(7), // ?, reduce: Element
+			reduce(7), // else, reduce: Element
+			reduce(7), // if, reduce: Element
+			reduce(7), // for, reduce: Element
+			reduce(7), // endfor, reduce: Element
+			reduce(7), // elif, reduce: Element
+			reduce(7), // endif, reduce: Element
+			reduce(7), // set, reduce: Element
+			reduce(7), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(7), // template_block_start, reduce: Element
+			reduce(7), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(7), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S147
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),nil,reduce(22),reduce(22),nil,reduce(22),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(8), // identifier, reduce: Element
+			reduce(8), // bytes_literal, reduce: Element
+			reduce(8), // string_literal, reduce: Element
+			reduce(8), // integer_literal, reduce: Element
+			reduce(8), // floating_point_literal, reduce: Element
+			reduce(8), // newline, reduce: Element
+			reduce(8), // dollar, reduce: Element
+			reduce(8), // *, reduce: Element
+			reduce(8), // [, reduce: Element
+			reduce(8), // ], reduce: Element
+			reduce(8), // (, reduce: Element
+			reduce(8), // ), reduce: Element
+			reduce(8), // ,, reduce: Element
+			reduce(8), // ., reduce: Element
+			reduce(8), // :, reduce: Element
+			reduce(8), // %, reduce: Element
+			reduce(8), // !, reduce: Element
+			reduce(8), // |, reduce: Element
+			reduce(8), // |>, reduce: Element
+			reduce(8), // ^, reduce: Element
+			reduce(8), // &, reduce: Element
+			reduce(8), // <<, reduce: Element
+			reduce(8), // >>, reduce: Element
+			reduce(8), // =>, reduce: Element
+			reduce(8), // ->, reduce: Element
+			reduce(8), // /, reduce: Element
+			reduce(8), // +, reduce: Element
+			reduce(8), // -, reduce: Element
+			reduce(8), // ||, reduce: Element
+			reduce(8), // <>, reduce: Element
+			reduce(8), // !=, reduce: Element
+			reduce(8), // =, reduce: Element
+			reduce(8), // <, reduce: Element
+			reduce(8), // <=, reduce: Element
+			reduce(8), // >, reduce: Element
+			reduce(8), // >=, reduce: Element
+			reduce(8), // ;, reduce: Element
+			reduce(8), // @, reduce: Element
+			reduce(8), // {, reduce: Element
+			reduce(8), // }, reduce: Element
+			reduce(8), // ~, reduce: Element
+			reduce(8), // ?, reduce: Element
+			reduce(8), // else, reduce: Element
+			reduce(8), // if, reduce: Element
+			reduce(8), // for, reduce: Element
+			reduce(8), // endfor, reduce: Element
+			reduce(8), // elif, reduce: Element
+			reduce(8), // endif, reduce: Element
+			reduce(8), // set, reduce: Element
+			reduce(8), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(8), // template_block_start, reduce: Element
+			reduce(8), // template_comment, reduce: Element
+			nil,       // template_variable_end
+			reduce(8), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S148
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),nil,reduce(23),reduce(23),nil,reduce(23),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(9), // identifier, reduce: Element2
+			reduce(9), // bytes_literal, reduce: Element2
+			reduce(9), // string_literal, reduce: Element2
+			reduce(9), // integer_literal, reduce: Element2
+			reduce(9), // floating_point_literal, reduce: Element2
+			reduce(9), // newline, reduce: Element2
+			reduce(9), // dollar, reduce: Element2
+			reduce(9), // *, reduce: Element2
+			reduce(9), // [, reduce: Element2
+			reduce(9), // ], reduce: Element2
+			reduce(9), // (, reduce: Element2
+			reduce(9), // ), reduce: Element2
+			reduce(9), // ,, reduce: Element2
+			reduce(9), // ., reduce: Element2
+			reduce(9), // :, reduce: Element2
+			reduce(9), // %, reduce: Element2
+			reduce(9), // !, reduce: Element2
+			reduce(9), // |, reduce: Element2
+			reduce(9), // |>, reduce: Element2
+			reduce(9), // ^, reduce: Element2
+			reduce(9), // &, reduce: Element2
+			reduce(9), // <<, reduce: Element2
+			reduce(9), // >>, reduce: Element2
+			reduce(9), // =>, reduce: Element2
+			reduce(9), // ->, reduce: Element2
+			reduce(9), // /, reduce: Element2
+			reduce(9), // +, reduce: Element2
+			reduce(9), // -, reduce: Element2
+			reduce(9), // ||, reduce: Element2
+			reduce(9), // <>, reduce: Element2
+			reduce(9), // !=, reduce: Element2
+			reduce(9), // =, reduce: Element2
+			reduce(9), // <, reduce: Element2
+			reduce(9), // <=, reduce: Element2
+			reduce(9), // >, reduce: Element2
+			reduce(9), // >=, reduce: Element2
+			reduce(9), // ;, reduce: Element2
+			reduce(9), // @, reduce: Element2
+			reduce(9), // {, reduce: Element2
+			reduce(9), // }, reduce: Element2
+			reduce(9), // ~, reduce: Element2
+			reduce(9), // ?, reduce: Element2
+			reduce(9), // else, reduce: Element2
+			reduce(9), // if, reduce: Element2
+			reduce(9), // for, reduce: Element2
+			reduce(9), // endfor, reduce: Element2
+			reduce(9), // elif, reduce: Element2
+			reduce(9), // endif, reduce: Element2
+			reduce(9), // set, reduce: Element2
+			reduce(9), // comment, reduce: Element2
+			nil,       // template_block_end
+			reduce(9), // template_block_start, reduce: Element2
+			reduce(9), // template_comment, reduce: Element2
+			nil,       // template_variable_end
+			reduce(9), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S149
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),nil,reduce(24),reduce(24),nil,reduce(24),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(10), // identifier, reduce: Element2
+			reduce(10), // bytes_literal, reduce: Element2
+			reduce(10), // string_literal, reduce: Element2
+			reduce(10), // integer_literal, reduce: Element2
+			reduce(10), // floating_point_literal, reduce: Element2
+			reduce(10), // newline, reduce: Element2
+			reduce(10), // dollar, reduce: Element2
+			reduce(10), // *, reduce: Element2
+			reduce(10), // [, reduce: Element2
+			reduce(10), // ], reduce: Element2
+			reduce(10), // (, reduce: Element2
+			reduce(10), // ), reduce: Element2
+			reduce(10), // ,, reduce: Element2
+			reduce(10), // ., reduce: Element2
+			reduce(10), // :, reduce: Element2
+			reduce(10), // %, reduce: Element2
+			reduce(10), // !, reduce: Element2
+			reduce(10), // |, reduce: Element2
+			reduce(10), // |>, reduce: Element2
+			reduce(10), // ^, reduce: Element2
+			reduce(10), // &, reduce: Element2
+			reduce(10), // <<, reduce: Element2
+			reduce(10), // >>, reduce: Element2
+			reduce(10), // =>, reduce: Element2
+			reduce(10), // ->, reduce: Element2
+			reduce(10), // /, reduce: Element2
+			reduce(10), // +, reduce: Element2
+			reduce(10), // -, reduce: Element2
+			reduce(10), // ||, reduce: Element2
+			reduce(10), // <>, reduce: Element2
+			reduce(10), // !=, reduce: Element2
+			reduce(10), // =, reduce: Element2
+			reduce(10), // <, reduce: Element2
+			reduce(10), // <=, reduce: Element2
+			reduce(10), // >, reduce: Element2
+			reduce(10), // >=, reduce: Element2
+			reduce(10), // ;, reduce: Element2
+			reduce(10), // @, reduce: Element2
+			reduce(10), // {, reduce: Element2
+			reduce(10), // }, reduce: Element2
+			reduce(10), // ~, reduce: Element2
+			reduce(10), // ?, reduce: Element2
+			reduce(10), // else, reduce: Element2
+			reduce(10), // if, reduce: Element2
+			reduce(10), // for, reduce: Element2
+			reduce(10), // endfor, reduce: Element2
+			reduce(10), // elif, reduce: Element2
+			reduce(10), // endif, reduce: Element2
+			reduce(10), // set, reduce: Element2
+			reduce(10), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(10), // template_block_start, reduce: Element2
+			reduce(10), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(10), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S150
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),nil,reduce(25),reduce(25),nil,reduce(25),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(11), // identifier, reduce: Element2
+			reduce(11), // bytes_literal, reduce: Element2
+			reduce(11), // string_literal, reduce: Element2
+			reduce(11), // integer_literal, reduce: Element2
+			reduce(11), // floating_point_literal, reduce: Element2
+			reduce(11), // newline, reduce: Element2
+			reduce(11), // dollar, reduce: Element2
+			reduce(11), // *, reduce: Element2
+			reduce(11), // [, reduce: Element2
+			reduce(11), // ], reduce: Element2
+			reduce(11), // (, reduce: Element2
+			reduce(11), // ), reduce: Element2
+			reduce(11), // ,, reduce: Element2
+			reduce(11), // ., reduce: Element2
+			reduce(11), // :, reduce: Element2
+			reduce(11), // %, reduce: Element2
+			reduce(11), // !, reduce: Element2
+			reduce(11), // |, reduce: Element2
+			reduce(11), // |>, reduce: Element2
+			reduce(11), // ^, reduce: Element2
+			reduce(11), // &, reduce: Element2
+			reduce(11), // <<, reduce: Element2
+			reduce(11), // >>, reduce: Element2
+			reduce(11), // =>, reduce: Element2
+			reduce(11), // ->, reduce: Element2
+			reduce(11), // /, reduce: Element2
+			reduce(11), // +, reduce: Element2
+			reduce(11), // -, reduce: Element2
+			reduce(11), // ||, reduce: Element2
+			reduce(11), // <>, reduce: Element2
+			reduce(11), // !=, reduce: Element2
+			reduce(11), // =, reduce: Element2
+			reduce(11), // <, reduce: Element2
+			reduce(11), // <=, reduce: Element2
+			reduce(11), // >, reduce: Element2
+			reduce(11), // >=, reduce: Element2
+			reduce(11), // ;, reduce: Element2
+			reduce(11), // @, reduce: Element2
+			reduce(11), // {, reduce: Element2
+			reduce(11), // }, reduce: Element2
+			reduce(11), // ~, reduce: Element2
+			reduce(11), // ?, reduce: Element2
+			reduce(11), // else, reduce: Element2
+			reduce(11), // if, reduce: Element2
+			reduce(11), // for, reduce: Element2
+			reduce(11), // endfor, reduce: Element2
+			reduce(11), // elif, reduce: Element2
+			reduce(11), // endif, reduce: Element2
+			reduce(11), // set, reduce: Element2
+			reduce(11), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(11), // template_block_start, reduce: Element2
+			reduce(11), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(11), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S151
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),nil,reduce(26),reduce(26),nil,reduce(26),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(12), // identifier, reduce: Element2
+			reduce(12), // bytes_literal, reduce: Element2
+			reduce(12), // string_literal, reduce: Element2
+			reduce(12), // integer_literal, reduce: Element2
+			reduce(12), // floating_point_literal, reduce: Element2
+			reduce(12), // newline, reduce: Element2
+			reduce(12), // dollar, reduce: Element2
+			reduce(12), // *, reduce: Element2
+			reduce(12), // [, reduce: Element2
+			reduce(12), // ], reduce: Element2
+			reduce(12), // (, reduce: Element2
+			reduce(12), // ), reduce: Element2
+			reduce(12), // ,, reduce: Element2
+			reduce(12), // ., reduce: Element2
+			reduce(12), // :, reduce: Element2
+			reduce(12), // %, reduce: Element2
+			reduce(12), // !, reduce: Element2
+			reduce(12), // |, reduce: Element2
+			reduce(12), // |>, reduce: Element2
+			reduce(12), // ^, reduce: Element2
+			reduce(12), // &, reduce: Element2
+			reduce(12), // <<, reduce: Element2
+			reduce(12), // >>, reduce: Element2
+			reduce(12), // =>, reduce: Element2
+			reduce(12), // ->, reduce: Element2
+			reduce(12), // /, reduce: Element2
+			reduce(12), // +, reduce: Element2
+			reduce(12), // -, reduce: Element2
+			reduce(12), // ||, reduce: Element2
+			reduce(12), // <>, reduce: Element2
+			reduce(12), // !=, reduce: Element2
+			reduce(12), // =, reduce: Element2
+			reduce(12), // <, reduce: Element2
+			reduce(12), // <=, reduce: Element2
+			reduce(12), // >, reduce: Element2
+			reduce(12), // >=, reduce: Element2
+			reduce(12), // ;, reduce: Element2
+			reduce(12), // @, reduce: Element2
+			reduce(12), // {, reduce: Element2
+			reduce(12), // }, reduce: Element2
+			reduce(12), // ~, reduce: Element2
+			reduce(12), // ?, reduce: Element2
+			reduce(12), // else, reduce: Element2
+			reduce(12), // if, reduce: Element2
+			reduce(12), // for, reduce: Element2
+			reduce(12), // endfor, reduce: Element2
+			reduce(12), // elif, reduce: Element2
+			reduce(12), // endif, reduce: Element2
+			reduce(12), // set, reduce: Element2
+			reduce(12), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(12), // template_block_start, reduce: Element2
+			reduce(12), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(12), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S152
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),nil,reduce(27),reduce(27),nil,reduce(27),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(13), // identifier, reduce: Element2
+			reduce(13), // bytes_literal, reduce: Element2
+			reduce(13), // string_literal, reduce: Element2
+			reduce(13), // integer_literal, reduce: Element2
+			reduce(13), // floating_point_literal, reduce: Element2
+			reduce(13), // newline, reduce: Element2
+			reduce(13), // dollar, reduce: Element2
+			reduce(13), // *, reduce: Element2
+			reduce(13), // [, reduce: Element2
+			reduce(13), // ], reduce: Element2
+			reduce(13), // (, reduce: Element2
+			reduce(13), // ), reduce: Element2
+			reduce(13), // ,, reduce: Element2
+			reduce(13), // ., reduce: Element2
+			reduce(13), // :, reduce: Element2
+			reduce(13), // %, reduce: Element2
+			reduce(13), // !, reduce: Element2
+			reduce(13), // |, reduce: Element2
+			reduce(13), // |>, reduce: Element2
+			reduce(13), // ^, reduce: Element2
+			reduce(13), // &, reduce: Element2
+			reduce(13), // <<, reduce: Element2
+			reduce(13), // >>, reduce: Element2
+			reduce(13), // =>, reduce: Element2
+			reduce(13), // ->, reduce: Element2
+			reduce(13), // /, reduce: Element2
+			reduce(13), // +, reduce: Element2
+			reduce(13), // -, reduce: Element2
+			reduce(13), // ||, reduce: Element2
+			reduce(13), // <>, reduce: Element2
+			reduce(13), // !=, reduce: Element2
+			reduce(13), // =, reduce: Element2
+			reduce(13), // <, reduce: Element2
+			reduce(13), // <=, reduce: Element2
+			reduce(13), // >, reduce: Element2
+			reduce(13), // >=, reduce: Element2
+			reduce(13), // ;, reduce: Element2
+			reduce(13), // @, reduce: Element2
+			reduce(13), // {, reduce: Element2
+			reduce(13), // }, reduce: Element2
+			reduce(13), // ~, reduce: Element2
+			reduce(13), // ?, reduce: Element2
+			reduce(13), // else, reduce: Element2
+			reduce(13), // if, reduce: Element2
+			reduce(13), // for, reduce: Element2
+			reduce(13), // endfor, reduce: Element2
+			reduce(13), // elif, reduce: Element2
+			reduce(13), // endif, reduce: Element2
+			reduce(13), // set, reduce: Element2
+			reduce(13), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(13), // template_block_start, reduce: Element2
+			reduce(13), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(13), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S153
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),nil,reduce(28),reduce(28),nil,reduce(28),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(14), // identifier, reduce: Element2
+			reduce(14), // bytes_literal, reduce: Element2
+			reduce(14), // string_literal, reduce: Element2
+			reduce(14), // integer_literal, reduce: Element2
+			reduce(14), // floating_point_literal, reduce: Element2
+			reduce(14), // newline, reduce: Element2
+			reduce(14), // dollar, reduce: Element2
+			reduce(14), // *, reduce: Element2
+			reduce(14), // [, reduce: Element2
+			reduce(14), // ], reduce: Element2
+			reduce(14), // (, reduce: Element2
+			reduce(14), // ), reduce: Element2
+			reduce(14), // ,, reduce: Element2
+			reduce(14), // ., reduce: Element2
+			reduce(14), // :, reduce: Element2
+			reduce(14), // %, reduce: Element2
+			reduce(14), // !, reduce: Element2
+			reduce(14), // |, reduce: Element2
+			reduce(14), // |>, reduce: Element2
+			reduce(14), // ^, reduce: Element2
+			reduce(14), // &, reduce: Element2
+			reduce(14), // <<, reduce: Element2
+			reduce(14), // >>, reduce: Element2
+			reduce(14), // =>, reduce: Element2
+			reduce(14), // ->, reduce: Element2
+			reduce(14), // /, reduce: Element2
+			reduce(14), // +, reduce: Element2
+			reduce(14), // -, reduce: Element2
+			reduce(14), // ||, reduce: Element2
+			reduce(14), // <>, reduce: Element2
+			reduce(14), // !=, reduce: Element2
+			reduce(14), // =, reduce: Element2
+			reduce(14), // <, reduce: Element2
+			reduce(14), // <=, reduce: Element2
+			reduce(14), // >, reduce: Element2
+			reduce(14), // >=, reduce: Element2
+			reduce(14), // ;, reduce: Element2
+			reduce(14), // @, reduce: Element2
+			reduce(14), // {, reduce: Element2
+			reduce(14), // }, reduce: Element2
+			reduce(14), // ~, reduce: Element2
+			reduce(14), // ?, reduce: Element2
+			reduce(14), // else, reduce: Element2
+			reduce(14), // if, reduce: Element2
+			reduce(14), // for, reduce: Element2
+			reduce(14), // endfor, reduce: Element2
+			reduce(14), // elif, reduce: Element2
+			reduce(14), // endif, reduce: Element2
+			reduce(14), // set, reduce: Element2
+			reduce(14), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(14), // template_block_start, reduce: Element2
+			reduce(14), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(14), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S154
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),nil,reduce(29),reduce(29),nil,reduce(29),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(15), // identifier, reduce: Element2
+			reduce(15), // bytes_literal, reduce: Element2
+			reduce(15), // string_literal, reduce: Element2
+			reduce(15), // integer_literal, reduce: Element2
+			reduce(15), // floating_point_literal, reduce: Element2
+			reduce(15), // newline, reduce: Element2
+			reduce(15), // dollar, reduce: Element2
+			reduce(15), // *, reduce: Element2
+			reduce(15), // [, reduce: Element2
+			reduce(15), // ], reduce: Element2
+			reduce(15), // (, reduce: Element2
+			reduce(15), // ), reduce: Element2
+			reduce(15), // ,, reduce: Element2
+			reduce(15), // ., reduce: Element2
+			reduce(15), // :, reduce: Element2
+			reduce(15), // %, reduce: Element2
+			reduce(15), // !, reduce: Element2
+			reduce(15), // |, reduce: Element2
+			reduce(15), // |>, reduce: Element2
+			reduce(15), // ^, reduce: Element2
+			reduce(15), // &, reduce: Element2
+			reduce(15), // <<, reduce: Element2
+			reduce(15), // >>, reduce: Element2
+			reduce(15), // =>, reduce: Element2
+			reduce(15), // ->, reduce: Element2
+			reduce(15), // /, reduce: Element2
+			reduce(15), // +, reduce: Element2
+			reduce(15), // -, reduce: Element2
+			reduce(15), // ||, reduce: Element2
+			reduce(15), // <>, reduce: Element2
+			reduce(15), // !=, reduce: Element2
+			reduce(15), // =, reduce: Element2
+			reduce(15), // <, reduce: Element2
+			reduce(15), // <=, reduce: Element2
+			reduce(15), // >, reduce: Element2
+			reduce(15), // >=, reduce: Element2
+			reduce(15), // ;, reduce: Element2
+			reduce(15), // @, reduce: Element2
+			reduce(15), // {, reduce: Element2
+			reduce(15), // }, reduce: Element2
+			reduce(15), // ~, reduce: Element2
+			reduce(15), // ?, reduce: Element2
+			reduce(15), // else, reduce: Element2
+			reduce(15), // if, reduce: Element2
+			reduce(15), // for, reduce: Element2
+			reduce(15), // endfor, reduce: Element2
+			reduce(15), // elif, reduce: Element2
+			reduce(15), // endif, reduce: Element2
+			reduce(15), // set, reduce: Element2
+			reduce(15), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(15), // template_block_start, reduce: Element2
+			reduce(15), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(15), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S155
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),nil,reduce(30),reduce(30),nil,reduce(30),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(16), // identifier, reduce: Element2
+			reduce(16), // bytes_literal, reduce: Element2
+			reduce(16), // string_literal, reduce: Element2
+			reduce(16), // integer_literal, reduce: Element2
+			reduce(16), // floating_point_literal, reduce: Element2
+			reduce(16), // newline, reduce: Element2
+			reduce(16), // dollar, reduce: Element2
+			reduce(16), // *, reduce: Element2
+			reduce(16), // [, reduce: Element2
+			reduce(16), // ], reduce: Element2
+			reduce(16), // (, reduce: Element2
+			reduce(16), // ), reduce: Element2
+			reduce(16), // ,, reduce: Element2
+			reduce(16), // ., reduce: Element2
+			reduce(16), // :, reduce: Element2
+			reduce(16), // %, reduce: Element2
+			reduce(16), // !, reduce: Element2
+			reduce(16), // |, reduce: Element2
+			reduce(16), // |>, reduce: Element2
+			reduce(16), // ^, reduce: Element2
+			reduce(16), // &, reduce: Element2
+			reduce(16), // <<, reduce: Element2
+			reduce(16), // >>, reduce: Element2
+			reduce(16), // =>, reduce: Element2
+			reduce(16), // ->, reduce: Element2
+			reduce(16), // /, reduce: Element2
+			reduce(16), // +, reduce: Element2
+			reduce(16), // -, reduce: Element2
+			reduce(16), // ||, reduce: Element2
+			reduce(16), // <>, reduce: Element2
+			reduce(16), // !=, reduce: Element2
+			reduce(16), // =, reduce: Element2
+			reduce(16), // <, reduce: Element2
+			reduce(16), // <=, reduce: Element2
+			reduce(16), // >, reduce: Element2
+			reduce(16), // >=, reduce: Element2
+			reduce(16), // ;, reduce: Element2
+			reduce(16), // @, reduce: Element2
+			reduce(16), // {, reduce: Element2
+			reduce(16), // }, reduce: Element2
+			reduce(16), // ~, reduce: Element2
+			reduce(16), // ?, reduce: Element2
+			reduce(16), // else, reduce: Element2
+			reduce(16), // if, reduce: Element2
+			reduce(16), // for, reduce: Element2
+			reduce(16), // endfor, reduce: Element2
+			reduce(16), // elif, reduce: Element2
+			reduce(16), // endif, reduce: Element2
+			reduce(16), // set, reduce: Element2
+			reduce(16), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(16), // template_block_start, reduce: Element2
+			reduce(16), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(16), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S156
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),nil,reduce(31),reduce(31),nil,reduce(31),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(17), // identifier, reduce: Element2
+			reduce(17), // bytes_literal, reduce: Element2
+			reduce(17), // string_literal, reduce: Element2
+			reduce(17), // integer_literal, reduce: Element2
+			reduce(17), // floating_point_literal, reduce: Element2
+			reduce(17), // newline, reduce: Element2
+			reduce(17), // dollar, reduce: Element2
+			reduce(17), // *, reduce: Element2
+			reduce(17), // [, reduce: Element2
+			reduce(17), // ], reduce: Element2
+			reduce(17), // (, reduce: Element2
+			reduce(17), // ), reduce: Element2
+			reduce(17), // ,, reduce: Element2
+			reduce(17), // ., reduce: Element2
+			reduce(17), // :, reduce: Element2
+			reduce(17), // %, reduce: Element2
+			reduce(17), // !, reduce: Element2
+			reduce(17), // |, reduce: Element2
+			reduce(17), // |>, reduce: Element2
+			reduce(17), // ^, reduce: Element2
+			reduce(17), // &, reduce: Element2
+			reduce(17), // <<, reduce: Element2
+			reduce(17), // >>, reduce: Element2
+			reduce(17), // =>, reduce: Element2
+			reduce(17), // ->, reduce: Element2
+			reduce(17), // /, reduce: Element2
+			reduce(17), // +, reduce: Element2
+			reduce(17), // -, reduce: Element2
+			reduce(17), // ||, reduce: Element2
+			reduce(17), // <>, reduce: Element2
+			reduce(17), // !=, reduce: Element2
+			reduce(17), // =, reduce: Element2
+			reduce(17), // <, reduce: Element2
+			reduce(17), // <=, reduce: Element2
+			reduce(17), // >, reduce: Element2
+			reduce(17), // >=, reduce: Element2
+			reduce(17), // ;, reduce: Element2
+			reduce(17), // @, reduce: Element2
+			reduce(17), // {, reduce: Element2
+			reduce(17), // }, reduce: Element2
+			reduce(17), // ~, reduce: Element2
+			reduce(17), // ?, reduce: Element2
+			reduce(17), // else, reduce: Element2
+			reduce(17), // if, reduce: Element2
+			reduce(17), // for, reduce: Element2
+			reduce(17), // endfor, reduce: Element2
+			reduce(17), // elif, reduce: Element2
+			reduce(17), // endif, reduce: Element2
+			reduce(17), // set, reduce: Element2
+			reduce(17), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(17), // template_block_start, reduce: Element2
+			reduce(17), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(17), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S157
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),nil,reduce(32),reduce(32),nil,reduce(32),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(18), // identifier, reduce: Element2
+			reduce(18), // bytes_literal, reduce: Element2
+			reduce(18), // string_literal, reduce: Element2
+			reduce(18), // integer_literal, reduce: Element2
+			reduce(18), // floating_point_literal, reduce: Element2
+			reduce(18), // newline, reduce: Element2
+			reduce(18), // dollar, reduce: Element2
+			reduce(18), // *, reduce: Element2
+			reduce(18), // [, reduce: Element2
+			reduce(18), // ], reduce: Element2
+			reduce(18), // (, reduce: Element2
+			reduce(18), // ), reduce: Element2
+			reduce(18), // ,, reduce: Element2
+			reduce(18), // ., reduce: Element2
+			reduce(18), // :, reduce: Element2
+			reduce(18), // %, reduce: Element2
+			reduce(18), // !, reduce: Element2
+			reduce(18), // |, reduce: Element2
+			reduce(18), // |>, reduce: Element2
+			reduce(18), // ^, reduce: Element2
+			reduce(18), // &, reduce: Element2
+			reduce(18), // <<, reduce: Element2
+			reduce(18), // >>, reduce: Element2
+			reduce(18), // =>, reduce: Element2
+			reduce(18), // ->, reduce: Element2
+			reduce(18), // /, reduce: Element2
+			reduce(18), // +, reduce: Element2
+			reduce(18), // -, reduce: Element2
+			reduce(18), // ||, reduce: Element2
+			reduce(18), // <>, reduce: Element2
+			reduce(18), // !=, reduce: Element2
+			reduce(18), // =, reduce: Element2
+			reduce(18), // <, reduce: Element2
+			reduce(18), // <=, reduce: Element2
+			reduce(18), // >, reduce: Element2
+			reduce(18), // >=, reduce: Element2
+			reduce(18), // ;, reduce: Element2
+			reduce(18), // @, reduce: Element2
+			reduce(18), // {, reduce: Element2
+			reduce(18), // }, reduce: Element2
+			reduce(18), // ~, reduce: Element2
+			reduce(18), // ?, reduce: Element2
+			reduce(18), // else, reduce: Element2
+			reduce(18), // if, reduce: Element2
+			reduce(18), // for, reduce: Element2
+			reduce(18), // endfor, reduce: Element2
+			reduce(18), // elif, reduce: Element2
+			reduce(18), // endif, reduce: Element2
+			reduce(18), // set, reduce: Element2
+			reduce(18), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(18), // template_block_start, reduce: Element2
+			reduce(18), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(18), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S158
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),nil,reduce(33),reduce(33),nil,reduce(33),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(19), // identifier, reduce: Element2
+			reduce(19), // bytes_literal, reduce: Element2
+			reduce(19), // string_literal, reduce: Element2
+			reduce(19), // integer_literal, reduce: Element2
+			reduce(19), // floating_point_literal, reduce: Element2
+			reduce(19), // newline, reduce: Element2
+			reduce(19), // dollar, reduce: Element2
+			reduce(19), // *, reduce: Element2
+			reduce(19), // [, reduce: Element2
+			reduce(19), // ], reduce: Element2
+			reduce(19), // (, reduce: Element2
+			reduce(19), // ), reduce: Element2
+			reduce(19), // ,, reduce: Element2
+			reduce(19), // ., reduce: Element2
+			reduce(19), // :, reduce: Element2
+			reduce(19), // %, reduce: Element2
+			reduce(19), // !, reduce: Element2
+			reduce(19), // |, reduce: Element2
+			reduce(19), // |>, reduce: Element2
+			reduce(19), // ^, reduce: Element2
+			reduce(19), // &, reduce: Element2
+			reduce(19), // <<, reduce: Element2
+			reduce(19), // >>, reduce: Element2
+			reduce(19), // =>, reduce: Element2
+			reduce(19), // ->, reduce: Element2
+			reduce(19), // /, reduce: Element2
+			reduce(19), // +, reduce: Element2
+			reduce(19), // -, reduce: Element2
+			reduce(19), // ||, reduce: Element2
+			reduce(19), // <>, reduce: Element2
+			reduce(19), // !=, reduce: Element2
+			reduce(19), // =, reduce: Element2
+			reduce(19), // <, reduce: Element2
+			reduce(19), // <=, reduce: Element2
+			reduce(19), // >, reduce: Element2
+			reduce(19), // >=, reduce: Element2
+			reduce(19), // ;, reduce: Element2
+			reduce(19), // @, reduce: Element2
+			reduce(19), // {, reduce: Element2
+			reduce(19), // }, reduce: Element2
+			reduce(19), // ~, reduce: Element2
+			reduce(19), // ?, reduce: Element2
+			reduce(19), // else, reduce: Element2
+			reduce(19), // if, reduce: Element2
+			reduce(19), // for, reduce: Element2
+			reduce(19), // endfor, reduce: Element2
+			reduce(19), // elif, reduce: Element2
+			reduce(19), // endif, reduce: Element2
+			reduce(19), // set, reduce: Element2
+			reduce(19), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(19), // template_block_start, reduce: Element2
+			reduce(19), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(19), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S159
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),nil,reduce(34),reduce(34),nil,reduce(34),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(20), // identifier, reduce: Element2
+			reduce(20), // bytes_literal, reduce: Element2
+			reduce(20), // string_literal, reduce: Element2
+			reduce(20), // integer_literal, reduce: Element2
+			reduce(20), // floating_point_literal, reduce: Element2
+			reduce(20), // newline, reduce: Element2
+			reduce(20), // dollar, reduce: Element2
+			reduce(20), // *, reduce: Element2
+			reduce(20), // [, reduce: Element2
+			reduce(20), // ], reduce: Element2
+			reduce(20), // (, reduce: Element2
+			reduce(20), // ), reduce: Element2
+			reduce(20), // ,, reduce: Element2
+			reduce(20), // ., reduce: Element2
+			reduce(20), // :, reduce: Element2
+			reduce(20), // %, reduce: Element2
+			reduce(20), // !, reduce: Element2
+			reduce(20), // |, reduce: Element2
+			reduce(20), // |>, reduce: Element2
+			reduce(20), // ^, reduce: Element2
+			reduce(20), // &, reduce: Element2
+			reduce(20), // <<, reduce: Element2
+			reduce(20), // >>, reduce: Element2
+			reduce(20), // =>, reduce: Element2
+			reduce(20), // ->, reduce: Element2
+			reduce(20), // /, reduce: Element2
+			reduce(20), // +, reduce: Element2
+			reduce(20), // -, reduce: Element2
+			reduce(20), // ||, reduce: Element2
+			reduce(20), // <>, reduce: Element2
+			reduce(20), // !=, reduce: Element2
+			reduce(20), // =, reduce: Element2
+			reduce(20), // <, reduce: Element2
+			reduce(20), // <=, reduce: Element2
+			reduce(20), // >, reduce: Element2
+			reduce(20), // >=, reduce: Element2
+			reduce(20), // ;, reduce: Element2
+			reduce(20), // @, reduce: Element2
+			reduce(20), // {, reduce: Element2
+			reduce(20), // }, reduce: Element2
+			reduce(20), // ~, reduce: Element2
+			reduce(20), // ?, reduce: Element2
+			reduce(20), // else, reduce: Element2
+			reduce(20), // if, reduce: Element2
+			reduce(20), // for, reduce: Element2
+			reduce(20), // endfor, reduce: Element2
+			reduce(20), // elif, reduce: Element2
+			reduce(20), // endif, reduce: Element2
+			reduce(20), // set, reduce: Element2
+			reduce(20), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(20), // template_block_start, reduce: Element2
+			reduce(20), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(20), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S160
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),nil,reduce(35),reduce(35),nil,reduce(35),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(21), // identifier, reduce: Element2
+			reduce(21), // bytes_literal, reduce: Element2
+			reduce(21), // string_literal, reduce: Element2
+			reduce(21), // integer_literal, reduce: Element2
+			reduce(21), // floating_point_literal, reduce: Element2
+			reduce(21), // newline, reduce: Element2
+			reduce(21), // dollar, reduce: Element2
+			reduce(21), // *, reduce: Element2
+			reduce(21), // [, reduce: Element2
+			reduce(21), // ], reduce: Element2
+			reduce(21), // (, reduce: Element2
+			reduce(21), // ), reduce: Element2
+			reduce(21), // ,, reduce: Element2
+			reduce(21), // ., reduce: Element2
+			reduce(21), // :, reduce: Element2
+			reduce(21), // %, reduce: Element2
+			reduce(21), // !, reduce: Element2
+			reduce(21), // |, reduce: Element2
+			reduce(21), // |>, reduce: Element2
+			reduce(21), // ^, reduce: Element2
+			reduce(21), // &, reduce: Element2
+			reduce(21), // <<, reduce: Element2
+			reduce(21), // >>, reduce: Element2
+			reduce(21), // =>, reduce: Element2
+			reduce(21), // ->, reduce: Element2
+			reduce(21), // /, reduce: Element2
+			reduce(21), // +, reduce: Element2
+			reduce(21), // -, reduce: Element2
+			reduce(21), // ||, reduce: Element2
+			reduce(21), // <>, reduce: Element2
+			reduce(21), // !=, reduce: Element2
+			reduce(21), // =, reduce: Element2
+			reduce(21), // <, reduce: Element2
+			reduce(21), // <=, reduce: Element2
+			reduce(21), // >, reduce: Element2
+			reduce(21), // >=, reduce: Element2
+			reduce(21), // ;, reduce: Element2
+			reduce(21), // @, reduce: Element2
+			reduce(21), // {, reduce: Element2
+			reduce(21), // }, reduce: Element2
+			reduce(21), // ~, reduce: Element2
+			reduce(21), // ?, reduce: Element2
+			reduce(21), // else, reduce: Element2
+			reduce(21), // if, reduce: Element2
+			reduce(21), // for, reduce: Element2
+			reduce(21), // endfor, reduce: Element2
+			reduce(21), // elif, reduce: Element2
+			reduce(21), // endif, reduce: Element2
+			reduce(21), // set, reduce: Element2
+			reduce(21), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(21), // template_block_start, reduce: Element2
+			reduce(21), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(21), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S161
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),nil,reduce(36),reduce(36),nil,reduce(36),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(22), // identifier, reduce: Element2
+			reduce(22), // bytes_literal, reduce: Element2
+			reduce(22), // string_literal, reduce: Element2
+			reduce(22), // integer_literal, reduce: Element2
+			reduce(22), // floating_point_literal, reduce: Element2
+			reduce(22), // newline, reduce: Element2
+			reduce(22), // dollar, reduce: Element2
+			reduce(22), // *, reduce: Element2
+			reduce(22), // [, reduce: Element2
+			reduce(22), // ], reduce: Element2
+			reduce(22), // (, reduce: Element2
+			reduce(22), // ), reduce: Element2
+			reduce(22), // ,, reduce: Element2
+			reduce(22), // ., reduce: Element2
+			reduce(22), // :, reduce: Element2
+			reduce(22), // %, reduce: Element2
+			reduce(22), // !, reduce: Element2
+			reduce(22), // |, reduce: Element2
+			reduce(22), // |>, reduce: Element2
+			reduce(22), // ^, reduce: Element2
+			reduce(22), // &, reduce: Element2
+			reduce(22), // <<, reduce: Element2
+			reduce(22), // >>, reduce: Element2
+			reduce(22), // =>, reduce: Element2
+			reduce(22), // ->, reduce: Element2
+			reduce(22), // /, reduce: Element2
+			reduce(22), // +, reduce: Element2
+			reduce(22), // -, reduce: Element2
+			reduce(22), // ||, reduce: Element2
+			reduce(22), // <>, reduce: Element2
+			reduce(22), // !=, reduce: Element2
+			reduce(22), // =, reduce: Element2
+			reduce(22), // <, reduce: Element2
+			reduce(22), // <=, reduce: Element2
+			reduce(22), // >, reduce: Element2
+			reduce(22), // >=, reduce: Element2
+			reduce(22), // ;, reduce: Element2
+			reduce(22), // @, reduce: Element2
+			reduce(22), // {, reduce: Element2
+			reduce(22), // }, reduce: Element2
+			reduce(22), // ~, reduce: Element2
+			reduce(22), // ?, reduce: Element2
+			reduce(22), // else, reduce: Element2
+			reduce(22), // if, reduce: Element2
+			reduce(22), // for, reduce: Element2
+			reduce(22), // endfor, reduce: Element2
+			reduce(22), // elif, reduce: Element2
+			reduce(22), // endif, reduce: Element2
+			reduce(22), // set, reduce: Element2
+			reduce(22), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(22), // template_block_start, reduce: Element2
+			reduce(22), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(22), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S162
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),nil,reduce(37),reduce(37),nil,reduce(37),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(23), // identifier, reduce: Element2
+			reduce(23), // bytes_literal, reduce: Element2
+			reduce(23), // string_literal, reduce: Element2
+			reduce(23), // integer_literal, reduce: Element2
+			reduce(23), // floating_point_literal, reduce: Element2
+			reduce(23), // newline, reduce: Element2
+			reduce(23), // dollar, reduce: Element2
+			reduce(23), // *, reduce: Element2
+			reduce(23), // [, reduce: Element2
+			reduce(23), // ], reduce: Element2
+			reduce(23), // (, reduce: Element2
+			reduce(23), // ), reduce: Element2
+			reduce(23), // ,, reduce: Element2
+			reduce(23), // ., reduce: Element2
+			reduce(23), // :, reduce: Element2
+			reduce(23), // %, reduce: Element2
+			reduce(23), // !, reduce: Element2
+			reduce(23), // |, reduce: Element2
+			reduce(23), // |>, reduce: Element2
+			reduce(23), // ^, reduce: Element2
+			reduce(23), // &, reduce: Element2
+			reduce(23), // <<, reduce: Element2
+			reduce(23), // >>, reduce: Element2
+			reduce(23), // =>, reduce: Element2
+			reduce(23), // ->, reduce: Element2
+			reduce(23), // /, reduce: Element2
+			reduce(23), // +, reduce: Element2
+			reduce(23), // -, reduce: Element2
+			reduce(23), // ||, reduce: Element2
+			reduce(23), // <>, reduce: Element2
+			reduce(23), // !=, reduce: Element2
+			reduce(23), // =, reduce: Element2
+			reduce(23), // <, reduce: Element2
+			reduce(23), // <=, reduce: Element2
+			reduce(23), // >, reduce: Element2
+			reduce(23), // >=, reduce: Element2
+			reduce(23), // ;, reduce: Element2
+			reduce(23), // @, reduce: Element2
+			reduce(23), // {, reduce: Element2
+			reduce(23), // }, reduce: Element2
+			reduce(23), // ~, reduce: Element2
+			reduce(23), // ?, reduce: Element2
+			reduce(23), // else, reduce: Element2
+			reduce(23), // if, reduce: Element2
+			reduce(23), // for, reduce: Element2
+			reduce(23), // endfor, reduce: Element2
+			reduce(23), // elif, reduce: Element2
+			reduce(23), // endif, reduce: Element2
+			reduce(23), // set, reduce: Element2
+			reduce(23), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(23), // template_block_start, reduce: Element2
+			reduce(23), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(23), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S163
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),nil,reduce(38),reduce(38),nil,reduce(38),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(24), // identifier, reduce: Element2
+			reduce(24), // bytes_literal, reduce: Element2
+			reduce(24), // string_literal, reduce: Element2
+			reduce(24), // integer_literal, reduce: Element2
+			reduce(24), // floating_point_literal, reduce: Element2
+			reduce(24), // newline, reduce: Element2
+			reduce(24), // dollar, reduce: Element2
+			reduce(24), // *, reduce: Element2
+			reduce(24), // [, reduce: Element2
+			reduce(24), // ], reduce: Element2
+			reduce(24), // (, reduce: Element2
+			reduce(24), // ), reduce: Element2
+			reduce(24), // ,, reduce: Element2
+			reduce(24), // ., reduce: Element2
+			reduce(24), // :, reduce: Element2
+			reduce(24), // %, reduce: Element2
+			reduce(24), // !, reduce: Element2
+			reduce(24), // |, reduce: Element2
+			reduce(24), // |>, reduce: Element2
+			reduce(24), // ^, reduce: Element2
+			reduce(24), // &, reduce: Element2
+			reduce(24), // <<, reduce: Element2
+			reduce(24), // >>, reduce: Element2
+			reduce(24), // =>, reduce: Element2
+			reduce(24), // ->, reduce: Element2
+			reduce(24), // /, reduce: Element2
+			reduce(24), // +, reduce: Element2
+			reduce(24), // -, reduce: Element2
+			reduce(24), // ||, reduce: Element2
+			reduce(24), // <>, reduce: Element2
+			reduce(24), // !=, reduce: Element2
+			reduce(24), // =, reduce: Element2
+			reduce(24), // <, reduce: Element2
+			reduce(24), // <=, reduce: Element2
+			reduce(24), // >, reduce: Element2
+			reduce(24), // >=, reduce: Element2
+			reduce(24), // ;, reduce: Element2
+			reduce(24), // @, reduce: Element2
+			reduce(24), // {, reduce: Element2
+			reduce(24), // }, reduce: Element2
+			reduce(24), // ~, reduce: Element2
+			reduce(24), // ?, reduce: Element2
+			reduce(24), // else, reduce: Element2
+			reduce(24), // if, reduce: Element2
+			reduce(24), // for, reduce: Element2
+			reduce(24), // endfor, reduce: Element2
+			reduce(24), // elif, reduce: Element2
+			reduce(24), // endif, reduce: Element2
+			reduce(24), // set, reduce: Element2
+			reduce(24), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(24), // template_block_start, reduce: Element2
+			reduce(24), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(24), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S164
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),nil,reduce(39),reduce(39),nil,reduce(39),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(25), // identifier, reduce: Element2
+			reduce(25), // bytes_literal, reduce: Element2
+			reduce(25), // string_literal, reduce: Element2
+			reduce(25), // integer_literal, reduce: Element2
+			reduce(25), // floating_point_literal, reduce: Element2
+			reduce(25), // newline, reduce: Element2
+			reduce(25), // dollar, reduce: Element2
+			reduce(25), // *, reduce: Element2
+			reduce(25), // [, reduce: Element2
+			reduce(25), // ], reduce: Element2
+			reduce(25), // (, reduce: Element2
+			reduce(25), // ), reduce: Element2
+			reduce(25), // ,, reduce: Element2
+			reduce(25), // ., reduce: Element2
+			reduce(25), // :, reduce: Element2
+			reduce(25), // %, reduce: Element2
+			reduce(25), // !, reduce: Element2
+			reduce(25), // |, reduce: Element2
+			reduce(25), // |>, reduce: Element2
+			reduce(25), // ^, reduce: Element2
+			reduce(25), // &, reduce: Element2
+			reduce(25), // <<, reduce: Element2
+			reduce(25), // >>, reduce: Element2
+			reduce(25), // =>, reduce: Element2
+			reduce(25), // ->, reduce: Element2
+			reduce(25), // /, reduce: Element2
+			reduce(25), // +, reduce: Element2
+			reduce(25), // -, reduce: Element2
+			reduce(25), // ||, reduce: Element2
+			reduce(25), // <>, reduce: Element2
+			reduce(25), // !=, reduce: Element2
+			reduce(25), // =, reduce: Element2
+			reduce(25), // <, reduce: Element2
+			reduce(25), // <=, reduce: Element2
+			reduce(25), // >, reduce: Element2
+			reduce(25), // >=, reduce: Element2
+			reduce(25), // ;, reduce: Element2
+			reduce(25), // @, reduce: Element2
+			reduce(25), // {, reduce: Element2
+			reduce(25), // }, reduce: Element2
+			reduce(25), // ~, reduce: Element2
+			reduce(25), // ?, reduce: Element2
+			reduce(25), // else, reduce: Element2
+			reduce(25), // if, reduce: Element2
+			reduce(25), // for, reduce: Element2
+			reduce(25), // endfor, reduce: Element2
+			reduce(25), // elif, reduce: Element2
+			reduce(25), // endif, reduce: Element2
+			reduce(25), // set, reduce: Element2
+			reduce(25), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(25), // template_block_start, reduce: Element2
+			reduce(25), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(25), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S165
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),nil,reduce(40),reduce(40),nil,reduce(40),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(26), // identifier, reduce: Element2
+			reduce(26), // bytes_literal, reduce: Element2
+			reduce(26), // string_literal, reduce: Element2
+			reduce(26), // integer_literal, reduce: Element2
+			reduce(26), // floating_point_literal, reduce: Element2
+			reduce(26), // newline, reduce: Element2
+			reduce(26), // dollar, reduce: Element2
+			reduce(26), // *, reduce: Element2
+			reduce(26), // [, reduce: Element2
+			reduce(26), // ], reduce: Element2
+			reduce(26), // (, reduce: Element2
+			reduce(26), // ), reduce: Element2
+			reduce(26), // ,, reduce: Element2
+			reduce(26), // ., reduce: Element2
+			reduce(26), // :, reduce: Element2
+			reduce(26), // %, reduce: Element2
+			reduce(26), // !, reduce: Element2
+			reduce(26), // |, reduce: Element2
+			reduce(26), // |>, reduce: Element2
+			reduce(26), // ^, reduce: Element2
+			reduce(26), // &, reduce: Element2
+			reduce(26), // <<, reduce: Element2
+			reduce(26), // >>, reduce: Element2
+			reduce(26), // =>, reduce: Element2
+			reduce(26), // ->, reduce: Element2
+			reduce(26), // /, reduce: Element2
+			reduce(26), // +, reduce: Element2
+			reduce(26), // -, reduce: Element2
+			reduce(26), // ||, reduce: Element2
+			reduce(26), // <>, reduce: Element2
+			reduce(26), // !=, reduce: Element2
+			reduce(26), // =, reduce: Element2
+			reduce(26), // <, reduce: Element2
+			reduce(26), // <=, reduce: Element2
+			reduce(26), // >, reduce: Element2
+			reduce(26), // >=, reduce: Element2
+			reduce(26), // ;, reduce: Element2
+			reduce(26), // @, reduce: Element2
+			reduce(26), // {, reduce: Element2
+			reduce(26), // }, reduce: Element2
+			reduce(26), // ~, reduce: Element2
+			reduce(26), // ?, reduce: Element2
+			reduce(26), // else, reduce: Element2
+			reduce(26), // if, reduce: Element2
+			reduce(26), // for, reduce: Element2
+			reduce(26), // endfor, reduce: Element2
+			reduce(26), // elif, reduce: Element2
+			reduce(26), // endif, reduce: Element2
+			reduce(26), // set, reduce: Element2
+			reduce(26), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(26), // template_block_start, reduce: Element2
+			reduce(26), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(26), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S166
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),nil,reduce(41),reduce(41),nil,reduce(41),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(27), // identifier, reduce: Element2
+			reduce(27), // bytes_literal, reduce: Element2
+			reduce(27), // string_literal, reduce: Element2
+			reduce(27), // integer_literal, reduce: Element2
+			reduce(27), // floating_point_literal, reduce: Element2
+			reduce(27), // newline, reduce: Element2
+			reduce(27), // dollar, reduce: Element2
+			reduce(27), // *, reduce: Element2
+			reduce(27), // [, reduce: Element2
+			reduce(27), // ], reduce: Element2
+			reduce(27), // (, reduce: Element2
+			reduce(27), // ), reduce: Element2
+			reduce(27), // ,, reduce: Element2
+			reduce(27), // ., reduce: Element2
+			reduce(27), // :, reduce: Element2
+			reduce(27), // %, reduce: Element2
+			reduce(27), // !, reduce: Element2
+			reduce(27), // |, reduce: Element2
+			reduce(27), // |>, reduce: Element2
+			reduce(27), // ^, reduce: Element2
+			reduce(27), // &, reduce: Element2
+			reduce(27), // <<, reduce: Element2
+			reduce(27), // >>, reduce: Element2
+			reduce(27), // =>, reduce: Element2
+			reduce(27), // ->, reduce: Element2
+			reduce(27), // /, reduce: Element2
+			reduce(27), // +, reduce: Element2
+			reduce(27), // -, reduce: Element2
+			reduce(27), // ||, reduce: Element2
+			reduce(27), // <>, reduce: Element2
+			reduce(27), // !=, reduce: Element2
+			reduce(27), // =, reduce: Element2
+			reduce(27), // <, reduce: Element2
+			reduce(27), // <=, reduce: Element2
+			reduce(27), // >, reduce: Element2
+			reduce(27), // >=, reduce: Element2
+			reduce(27), // ;, reduce: Element2
+			reduce(27), // @, reduce: Element2
+			reduce(27), // {, reduce: Element2
+			reduce(27), // }, reduce: Element2
+			reduce(27), // ~, reduce: Element2
+			reduce(27), // ?, reduce: Element2
+			reduce(27), // else, reduce: Element2
+			reduce(27), // if, reduce: Element2
+			reduce(27), // for, reduce: Element2
+			reduce(27), // endfor, reduce: Element2
+			reduce(27), // elif, reduce: Element2
+			reduce(27), // endif, reduce: Element2
+			reduce(27), // set, reduce: Element2
+			reduce(27), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(27), // template_block_start, reduce: Element2
+			reduce(27), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(27), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S167
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),nil,reduce(42),reduce(42),nil,reduce(42),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(28), // identifier, reduce: Element2
+			reduce(28), // bytes_literal, reduce: Element2
+			reduce(28), // string_literal, reduce: Element2
+			reduce(28), // integer_literal, reduce: Element2
+			reduce(28), // floating_point_literal, reduce: Element2
+			reduce(28), // newline, reduce: Element2
+			reduce(28), // dollar, reduce: Element2
+			reduce(28), // *, reduce: Element2
+			reduce(28), // [, reduce: Element2
+			reduce(28), // ], reduce: Element2
+			reduce(28), // (, reduce: Element2
+			reduce(28), // ), reduce: Element2
+			reduce(28), // ,, reduce: Element2
+			reduce(28), // ., reduce: Element2
+			reduce(28), // :, reduce: Element2
+			reduce(28), // %, reduce: Element2
+			reduce(28), // !, reduce: Element2
+			reduce(28), // |, reduce: Element2
+			reduce(28), // |>, reduce: Element2
+			reduce(28), // ^, reduce: Element2
+			reduce(28), // &, reduce: Element2
+			reduce(28), // <<, reduce: Element2
+			reduce(28), // >>, reduce: Element2
+			reduce(28), // =>, reduce: Element2
+			reduce(28), // ->, reduce: Element2
+			reduce(28), // /, reduce: Element2
+			reduce(28), // +, reduce: Element2
+			reduce(28), // -, reduce: Element2
+			reduce(28), // ||, reduce: Element2
+			reduce(28), // <>, reduce: Element2
+			reduce(28), // !=, reduce: Element2
+			reduce(28), // =, reduce: Element2
+			reduce(28), // <, reduce: Element2
+			reduce(28), // <=, reduce: Element2
+			reduce(28), // >, reduce: Element2
+			reduce(28), // >=, reduce: Element2
+			reduce(28), // ;, reduce: Element2
+			reduce(28), // @, reduce: Element2
+			reduce(28), // {, reduce: Element2
+			reduce(28), // }, reduce: Element2
+			reduce(28), // ~, reduce: Element2
+			reduce(28), // ?, reduce: Element2
+			reduce(28), // else, reduce: Element2
+			reduce(28), // if, reduce: Element2
+			reduce(28), // for, reduce: Element2
+			reduce(28), // endfor, reduce: Element2
+			reduce(28), // elif, reduce: Element2
+			reduce(28), // endif, reduce: Element2
+			reduce(28), // set, reduce: Element2
+			reduce(28), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(28), // template_block_start, reduce: Element2
+			reduce(28), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(28), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S168
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),nil,reduce(44),reduce(44),nil,reduce(44),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(29), // identifier, reduce: Element2
+			reduce(29), // bytes_literal, reduce: Element2
+			reduce(29), // string_literal, reduce: Element2
+			reduce(29), // integer_literal, reduce: Element2
+			reduce(29), // floating_point_literal, reduce: Element2
+			reduce(29), // newline, reduce: Element2
+			reduce(29), // dollar, reduce: Element2
+			reduce(29), // *, reduce: Element2
+			reduce(29), // [, reduce: Element2
+			reduce(29), // ], reduce: Element2
+			reduce(29), // (, reduce: Element2
+			reduce(29), // ), reduce: Element2
+			reduce(29), // ,, reduce: Element2
+			reduce(29), // ., reduce: Element2
+			reduce(29), // :, reduce: Element2
+			reduce(29), // %, reduce: Element2
+			reduce(29), // !, reduce: Element2
+			reduce(29), // |, reduce: Element2
+			reduce(29), // |>, reduce: Element2
+			reduce(29), // ^, reduce: Element2
+			reduce(29), // &, reduce: Element2
+			reduce(29), // <<, reduce: Element2
+			reduce(29), // >>, reduce: Element2
+			reduce(29), // =>, reduce: Element2
+			reduce(29), // ->, reduce: Element2
+			reduce(29), // /, reduce: Element2
+			reduce(29), // +, reduce: Element2
+			reduce(29), // -, reduce: Element2
+			reduce(29), // ||, reduce: Element2
+			reduce(29), // <>, reduce: Element2
+			reduce(29), // !=, reduce: Element2
+			reduce(29), // =, reduce: Element2
+			reduce(29), // <, reduce: Element2
+			reduce(29), // <=, reduce: Element2
+			reduce(29), // >, reduce: Element2
+			reduce(29), // >=, reduce: Element2
+			reduce(29), // ;, reduce: Element2
+			reduce(29), // @, reduce: Element2
+			reduce(29), // {, reduce: Element2
+			reduce(29), // }, reduce: Element2
+			reduce(29), // ~, reduce: Element2
+			reduce(29), // ?, reduce: Element2
+			reduce(29), // else, reduce: Element2
+			reduce(29), // if, reduce: Element2
+			reduce(29), // for, reduce: Element2
+			reduce(29), // endfor, reduce: Element2
+			reduce(29), // elif, reduce: Element2
+			reduce(29), // endif, reduce: Element2
+			reduce(29), // set, reduce: Element2
+			reduce(29), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(29), // template_block_start, reduce: Element2
+			reduce(29), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(29), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S169
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),nil,reduce(46),reduce(46),nil,reduce(46),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(30), // identifier, reduce: Element2
+			reduce(30), // bytes_literal, reduce: Element2
+			reduce(30), // string_literal, reduce: Element2
+			reduce(30), // integer_literal, reduce: Element2
+			reduce(30), // floating_point_literal, reduce: Element2
+			reduce(30), // newline, reduce: Element2
+			reduce(30), // dollar, reduce: Element2
+			reduce(30), // *, reduce: Element2
+			reduce(30), // [, reduce: Element2
+			reduce(30), // ], reduce: Element2
+			reduce(30), // (, reduce: Element2
+			reduce(30), // ), reduce: Element2
+			reduce(30), // ,, reduce: Element2
+			reduce(30), // ., reduce: Element2
+			reduce(30), // :, reduce: Element2
+			reduce(30), // %, reduce: Element2
+			reduce(30), // !, reduce: Element2
+			reduce(30), // |, reduce: Element2
+			reduce(30), // |>, reduce: Element2
+			reduce(30), // ^, reduce: Element2
+			reduce(30), // &, reduce: Element2
+			reduce(30), // <<, reduce: Element2
+			reduce(30), // >>, reduce: Element2
+			reduce(30), // =>, reduce: Element2
+			reduce(30), // ->, reduce: Element2
+			reduce(30), // /, reduce: Element2
+			reduce(30), // +, reduce: Element2
+			reduce(30), // -, reduce: Element2
+			reduce(30), // ||, reduce: Element2
+			reduce(30), // <>, reduce: Element2
+			reduce(30), // !=, reduce: Element2
+			reduce(30), // =, reduce: Element2
+			reduce(30), // <, reduce: Element2
+			reduce(30), // <=, reduce: Element2
+			reduce(30), // >, reduce: Element2
+			reduce(30), // >=, reduce: Element2
+			reduce(30), // ;, reduce: Element2
+			reduce(30), // @, reduce: Element2
+			reduce(30), // {, reduce: Element2
+			reduce(30), // }, reduce: Element2
+			reduce(30), // ~, reduce: Element2
+			reduce(30), // ?, reduce: Element2
+			reduce(30), // else, reduce: Element2
+			reduce(30), // if, reduce: Element2
+			reduce(30), // for, reduce: Element2
+			reduce(30), // endfor, reduce: Element2
+			reduce(30), // elif, reduce: Element2
+			reduce(30), // endif, reduce: Element2
+			reduce(30), // set, reduce: Element2
+			reduce(30), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(30), // template_block_start, reduce: Element2
+			reduce(30), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(30), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S170
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),nil,reduce(47),reduce(47),nil,reduce(47),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(31), // identifier, reduce: Element2
+			reduce(31), // bytes_literal, reduce: Element2
+			reduce(31), // string_literal, reduce: Element2
+			reduce(31), // integer_literal, reduce: Element2
+			reduce(31), // floating_point_literal, reduce: Element2
+			reduce(31), // newline, reduce: Element2
+			reduce(31), // dollar, reduce: Element2
+			reduce(31), // *, reduce: Element2
+			reduce(31), // [, reduce: Element2
+			reduce(31), // ], reduce: Element2
+			reduce(31), // (, reduce: Element2
+			reduce(31), // ), reduce: Element2
+			reduce(31), // ,, reduce: Element2
+			reduce(31), // ., reduce: Element2
+			reduce(31), // :, reduce: Element2
+			reduce(31), // %, reduce: Element2
+			reduce(31), // !, reduce: Element2
+			reduce(31), // |, reduce: Element2
+			reduce(31), // |>, reduce: Element2
+			reduce(31), // ^, reduce: Element2
+			reduce(31), // &, reduce: Element2
+			reduce(31), // <<, reduce: Element2
+			reduce(31), // >>, reduce: Element2
+			reduce(31), // =>, reduce: Element2
+			reduce(31), // ->, reduce: Element2
+			reduce(31), // /, reduce: Element2
+			reduce(31), // +, reduce: Element2
+			reduce(31), // -, reduce: Element2
+			reduce(31), // ||, reduce: Element2
+			reduce(31), // <>, reduce: Element2
+			reduce(31), // !=, reduce: Element2
+			reduce(31), // =, reduce: Element2
+			reduce(31), // <, reduce: Element2
+			reduce(31), // <=, reduce: Element2
+			reduce(31), // >, reduce: Element2
+			reduce(31), // >=, reduce: Element2
+			reduce(31), // ;, reduce: Element2
+			reduce(31), // @, reduce: Element2
+			reduce(31), // {, reduce: Element2
+			reduce(31), // }, reduce: Element2
+			reduce(31), // ~, reduce: Element2
+			reduce(31), // ?, reduce: Element2
+			reduce(31), // else, reduce: Element2
+			reduce(31), // if, reduce: Element2
+			reduce(31), // for, reduce: Element2
+			reduce(31), // endfor, reduce: Element2
+			reduce(31), // elif, reduce: Element2
+			reduce(31), // endif, reduce: Element2
+			reduce(31), // set, reduce: Element2
+			reduce(31), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(31), // template_block_start, reduce: Element2
+			reduce(31), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(31), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S171
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),nil,reduce(49),reduce(49),nil,reduce(49),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(32), // identifier, reduce: Element2
+			reduce(32), // bytes_literal, reduce: Element2
+			reduce(32), // string_literal, reduce: Element2
+			reduce(32), // integer_literal, reduce: Element2
+			reduce(32), // floating_point_literal, reduce: Element2
+			reduce(32), // newline, reduce: Element2
+			reduce(32), // dollar, reduce: Element2
+			reduce(32), // *, reduce: Element2
+			reduce(32), // [, reduce: Element2
+			reduce(32), // ], reduce: Element2
+			reduce(32), // (, reduce: Element2
+			reduce(32), // ), reduce: Element2
+			reduce(32), // ,, reduce: Element2
+			reduce(32), // ., reduce: Element2
+			reduce(32), // :, reduce: Element2
+			reduce(32), // %, reduce: Element2
+			reduce(32), // !, reduce: Element2
+			reduce(32), // |, reduce: Element2
+			reduce(32), // |>, reduce: Element2
+			reduce(32), // ^, reduce: Element2
+			reduce(32), // &, reduce: Element2
+			reduce(32), // <<, reduce: Element2
+			reduce(32), // >>, reduce: Element2
+			reduce(32), // =>, reduce: Element2
+			reduce(32), // ->, reduce: Element2
+			reduce(32), // /, reduce: Element2
+			reduce(32), // +, reduce: Element2
+			reduce(32), // -, reduce: Element2
+			reduce(32), // ||, reduce: Element2
+			reduce(32), // <>, reduce: Element2
+			reduce(32), // !=, reduce: Element2
+			reduce(32), // =, reduce: Element2
+			reduce(32), // <, reduce: Element2
+			reduce(32), // <=, reduce: Element2
+			reduce(32), // >, reduce: Element2
+			reduce(32), // >=, reduce: Element2
+			reduce(32), // ;, reduce: Element2
+			reduce(32), // @, reduce: Element2
+			reduce(32), // {, reduce: Element2
+			reduce(32), // }, reduce: Element2
+			reduce(32), // ~, reduce: Element2
+			reduce(32), // ?, reduce: Element2
+			reduce(32), // else, reduce: Element2
+			reduce(32), // if, reduce: Element2
+			reduce(32), // for, reduce: Element2
+			reduce(32), // endfor, reduce: Element2
+			reduce(32), // elif, reduce: Element2
+			reduce(32), // endif, reduce: Element2
+			reduce(32), // set, reduce: Element2
+			reduce(32), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(32), // template_block_start, reduce: Element2
+			reduce(32), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(32), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S172
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),nil,reduce(50),reduce(50),nil,reduce(50),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(33), // identifier, reduce: Element2
+			reduce(33), // bytes_literal, reduce: Element2
+			reduce(33), // string_literal, reduce: Element2
+			reduce(33), // integer_literal, reduce: Element2
+			reduce(33), // floating_point_literal, reduce: Element2
+			reduce(33), // newline, reduce: Element2
+			reduce(33), // dollar, reduce: Element2
+			reduce(33), // *, reduce: Element2
+			reduce(33), // [, reduce: Element2
+			reduce(33), // ], reduce: Element2
+			reduce(33), // (, reduce: Element2
+			reduce(33), // ), reduce: Element2
+			reduce(33), // ,, reduce: Element2
+			reduce(33), // ., reduce: Element2
+			reduce(33), // :, reduce: Element2
+			reduce(33), // %, reduce: Element2
+			reduce(33), // !, reduce: Element2
+			reduce(33), // |, reduce: Element2
+			reduce(33), // |>, reduce: Element2
+			reduce(33), // ^, reduce: Element2
+			reduce(33), // &, reduce: Element2
+			reduce(33), // <<, reduce: Element2
+			reduce(33), // >>, reduce: Element2
+			reduce(33), // =>, reduce: Element2
+			reduce(33), // ->, reduce: Element2
+			reduce(33), // /, reduce: Element2
+			reduce(33), // +, reduce: Element2
+			reduce(33), // -, reduce: Element2
+			reduce(33), // ||, reduce: Element2
+			reduce(33), // <>, reduce: Element2
+			reduce(33), // !=, reduce: Element2
+			reduce(33), // =, reduce: Element2
+			reduce(33), // <, reduce: Element2
+			reduce(33), // <=, reduce: Element2
+			reduce(33), // >, reduce: Element2
+			reduce(33), // >=, reduce: Element2
+			reduce(33), // ;, reduce: Element2
+			reduce(33), // @, reduce: Element2
+			reduce(33), // {, reduce: Element2
+			reduce(33), // }, reduce: Element2
+			reduce(33), // ~, reduce: Element2
+			reduce(33), // ?, reduce: Element2
+			reduce(33), // else, reduce: Element2
+			reduce(33), // if, reduce: Element2
+			reduce(33), // for, reduce: Element2
+			reduce(33), // endfor, reduce: Element2
+			reduce(33), // elif, reduce: Element2
+			reduce(33), // endif, reduce: Element2
+			reduce(33), // set, reduce: Element2
+			reduce(33), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(33), // template_block_start, reduce: Element2
+			reduce(33), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(33), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S173
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),nil,reduce(51),reduce(51),nil,reduce(51),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(34), // identifier, reduce: Element2
+			reduce(34), // bytes_literal, reduce: Element2
+			reduce(34), // string_literal, reduce: Element2
+			reduce(34), // integer_literal, reduce: Element2
+			reduce(34), // floating_point_literal, reduce: Element2
+			reduce(34), // newline, reduce: Element2
+			reduce(34), // dollar, reduce: Element2
+			reduce(34), // *, reduce: Element2
+			reduce(34), // [, reduce: Element2
+			reduce(34), // ], reduce: Element2
+			reduce(34), // (, reduce: Element2
+			reduce(34), // ), reduce: Element2
+			reduce(34), // ,, reduce: Element2
+			reduce(34), // ., reduce: Element2
+			reduce(34), // :, reduce: Element2
+			reduce(34), // %, reduce: Element2
+			reduce(34), // !, reduce: Element2
+			reduce(34), // |, reduce: Element2
+			reduce(34), // |>, reduce: Element2
+			reduce(34), // ^, reduce: Element2
+			reduce(34), // &, reduce: Element2
+			reduce(34), // <<, reduce: Element2
+			reduce(34), // >>, reduce: Element2
+			reduce(34), // =>, reduce: Element2
+			reduce(34), // ->, reduce: Element2
+			reduce(34), // /, reduce: Element2
+			reduce(34), // +, reduce: Element2
+			reduce(34), // -, reduce: Element2
+			reduce(34), // ||, reduce: Element2
+			reduce(34), // <>, reduce: Element2
+			reduce(34), // !=, reduce: Element2
+			reduce(34), // =, reduce: Element2
+			reduce(34), // <, reduce: Element2
+			reduce(34), // <=, reduce: Element2
+			reduce(34), // >, reduce: Element2
+			reduce(34), // >=, reduce: Element2
+			reduce(34), // ;, reduce: Element2
+			reduce(34), // @, reduce: Element2
+			reduce(34), // {, reduce: Element2
+			reduce(34), // }, reduce: Element2
+			reduce(34), // ~, reduce: Element2
+			reduce(34), // ?, reduce: Element2
+			reduce(34), // else, reduce: Element2
+			reduce(34), // if, reduce: Element2
+			reduce(34), // for, reduce: Element2
+			reduce(34), // endfor, reduce: Element2
+			reduce(34), // elif, reduce: Element2
+			reduce(34), // endif, reduce: Element2
+			reduce(34), // set, reduce: Element2
+			reduce(34), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(34), // template_block_start, reduce: Element2
+			reduce(34), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(34), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S174
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),nil,reduce(52),reduce(52),nil,reduce(52),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(35), // identifier, reduce: Element2
+			reduce(35), // bytes_literal, reduce: Element2
+			reduce(35), // string_literal, reduce: Element2
+			reduce(35), // integer_literal, reduce: Element2
+			reduce(35), // floating_point_literal, reduce: Element2
+			reduce(35), // newline, reduce: Element2
+			reduce(35), // dollar, reduce: Element2
+			reduce(35), // *, reduce: Element2
+			reduce(35), // [, reduce: Element2
+			reduce(35), // ], reduce: Element2
+			reduce(35), // (, reduce: Element2
+			reduce(35), // ), reduce: Element2
+			reduce(35), // ,, reduce: Element2
+			reduce(35), // ., reduce: Element2
+			reduce(35), // :, reduce: Element2
+			reduce(35), // %, reduce: Element2
+			reduce(35), // !, reduce: Element2
+			reduce(35), // |, reduce: Element2
+			reduce(35), // |>, reduce: Element2
+			reduce(35), // ^, reduce: Element2
+			reduce(35), // &, reduce: Element2
+			reduce(35), // <<, reduce: Element2
+			reduce(35), // >>, reduce: Element2
+			reduce(35), // =>, reduce: Element2
+			reduce(35), // ->, reduce: Element2
+			reduce(35), // /, reduce: Element2
+			reduce(35), // +, reduce: Element2
+			reduce(35), // -, reduce: Element2
+			reduce(35), // ||, reduce: Element2
+			reduce(35), // <>, reduce: Element2
+			reduce(35), // !=, reduce: Element2
+			reduce(35), // =, reduce: Element2
+			reduce(35), // <, reduce: Element2
+			reduce(35), // <=, reduce: Element2
+			reduce(35), // >, reduce: Element2
+			reduce(35), // >=, reduce: Element2
+			reduce(35), // ;, reduce: Element2
+			reduce(35), // @, reduce: Element2
+			reduce(35), // {, reduce: Element2
+			reduce(35), // }, reduce: Element2
+			reduce(35), // ~, reduce: Element2
+			reduce(35), // ?, reduce: Element2
+			reduce(35), // else, reduce: Element2
+			reduce(35), // if, reduce: Element2
+			reduce(35), // for, reduce: Element2
+			reduce(35), // endfor, reduce: Element2
+			reduce(35), // elif, reduce: Element2
+			reduce(35), // endif, reduce: Element2
+			reduce(35), // set, reduce: Element2
+			reduce(35), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(35), // template_block_start, reduce: Element2
+			reduce(35), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(35), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S175
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),nil,reduce(53),reduce(53),nil,reduce(53),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(36), // identifier, reduce: Element2
+			reduce(36), // bytes_literal, reduce: Element2
+			reduce(36), // string_literal, reduce: Element2
+			reduce(36), // integer_literal, reduce: Element2
+			reduce(36), // floating_point_literal, reduce: Element2
+			reduce(36), // newline, reduce: Element2
+			reduce(36), // dollar, reduce: Element2
+			reduce(36), // *, reduce: Element2
+			reduce(36), // [, reduce: Element2
+			reduce(36), // ], reduce: Element2
+			reduce(36), // (, reduce: Element2
+			reduce(36), // ), reduce: Element2
+			reduce(36), // ,, reduce: Element2
+			reduce(36), // ., reduce: Element2
+			reduce(36), // :, reduce: Element2
+			reduce(36), // %, reduce: Element2
+			reduce(36), // !, reduce: Element2
+			reduce(36), // |, reduce: Element2
+			reduce(36), // |>, reduce: Element2
+			reduce(36), // ^, reduce: Element2
+			reduce(36), // &, reduce: Element2
+			reduce(36), // <<, reduce: Element2
+			reduce(36), // >>, reduce: Element2
+			reduce(36), // =>, reduce: Element2
+			reduce(36), // ->, reduce: Element2
+			reduce(36), // /, reduce: Element2
+			reduce(36), // +, reduce: Element2
+			reduce(36), // -, reduce: Element2
+			reduce(36), // ||, reduce: Element2
+			reduce(36), // <>, reduce: Element2
+			reduce(36), // !=, reduce: Element2
+			reduce(36), // =, reduce: Element2
+			reduce(36), // <, reduce: Element2
+			reduce(36), // <=, reduce: Element2
+			reduce(36), // >, reduce: Element2
+			reduce(36), // >=, reduce: Element2
+			reduce(36), // ;, reduce: Element2
+			reduce(36), // @, reduce: Element2
+			reduce(36), // {, reduce: Element2
+			reduce(36), // }, reduce: Element2
+			reduce(36), // ~, reduce: Element2
+			reduce(36), // ?, reduce: Element2
+			reduce(36), // else, reduce: Element2
+			reduce(36), // if, reduce: Element2
+			reduce(36), // for, reduce: Element2
+			reduce(36), // endfor, reduce: Element2
+			reduce(36), // elif, reduce: Element2
+			reduce(36), // endif, reduce: Element2
+			reduce(36), // set, reduce: Element2
+			reduce(36), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(36), // template_block_start, reduce: Element2
+			reduce(36), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(36), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S176
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),nil,reduce(54),reduce(54),nil,reduce(54),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(37), // identifier, reduce: Element2
+			reduce(37), // bytes_literal, reduce: Element2
+			reduce(37), // string_literal, reduce: Element2
+			reduce(37), // integer_literal, reduce: Element2
+			reduce(37), // floating_point_literal, reduce: Element2
+			reduce(37), // newline, reduce: Element2
+			reduce(37), // dollar, reduce: Element2
+			reduce(37), // *, reduce: Element2
+			reduce(37), // [, reduce: Element2
+			reduce(37), // ], reduce: Element2
+			reduce(37), // (, reduce: Element2
+			reduce(37), // ), reduce: Element2
+			reduce(37), // ,, reduce: Element2
+			reduce(37), // ., reduce: Element2
+			reduce(37), // :, reduce: Element2
+			reduce(37), // %, reduce: Element2
+			reduce(37), // !, reduce: Element2
+			reduce(37), // |, reduce: Element2
+			reduce(37), // |>, reduce: Element2
+			reduce(37), // ^, reduce: Element2
+			reduce(37), // &, reduce: Element2
+			reduce(37), // <<, reduce: Element2
+			reduce(37), // >>, reduce: Element2
+			reduce(37), // =>, reduce: Element2
+			reduce(37), // ->, reduce: Element2
+			reduce(37), // /, reduce: Element2
+			reduce(37), // +, reduce: Element2
+			reduce(37), // -, reduce: Element2
+			reduce(37), // ||, reduce: Element2
+			reduce(37), // <>, reduce: Element2
+			reduce(37), // !=, reduce: Element2
+			reduce(37), // =, reduce: Element2
+			reduce(37), // <, reduce: Element2
+			reduce(37), // <=, reduce: Element2
+			reduce(37), // >, reduce: Element2
+			reduce(37), // >=, reduce: Element2
+			reduce(37), // ;, reduce: Element2
+			reduce(37), // @, reduce: Element2
+			reduce(37), // {, reduce: Element2
+			reduce(37), // }, reduce: Element2
+			reduce(37), // ~, reduce: Element2
+			reduce(37), // ?, reduce: Element2
+			reduce(37), // else, reduce: Element2
+			reduce(37), // if, reduce: Element2
+			reduce(37), // for, reduce: Element2
+			reduce(37), // endfor, reduce: Element2
+			reduce(37), // elif, reduce: Element2
+			reduce(37), // endif, reduce: Element2
+			reduce(37), // set, reduce: Element2
+			reduce(37), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(37), // template_block_start, reduce: Element2
+			reduce(37), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(37), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S177
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),nil,reduce(55),reduce(55),nil,reduce(55),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(38), // identifier, reduce: Element2
+			reduce(38), // bytes_literal, reduce: Element2
+			reduce(38), // string_literal, reduce: Element2
+			reduce(38), // integer_literal, reduce: Element2
+			reduce(38), // floating_point_literal, reduce: Element2
+			reduce(38), // newline, reduce: Element2
+			reduce(38), // dollar, reduce: Element2
+			reduce(38), // *, reduce: Element2
+			reduce(38), // [, reduce: Element2
+			reduce(38), // ], reduce: Element2
+			reduce(38), // (, reduce: Element2
+			reduce(38), // ), reduce: Element2
+			reduce(38), // ,, reduce: Element2
+			reduce(38), // ., reduce: Element2
+			reduce(38), // :, reduce: Element2
+			reduce(38), // %, reduce: Element2
+			reduce(38), // !, reduce: Element2
+			reduce(38), // |, reduce: Element2
+			reduce(38), // |>, reduce: Element2
+			reduce(38), // ^, reduce: Element2
+			reduce(38), // &, reduce: Element2
+			reduce(38), // <<, reduce: Element2
+			reduce(38), // >>, reduce: Element2
+			reduce(38), // =>, reduce: Element2
+			reduce(38), // ->, reduce: Element2
+			reduce(38), // /, reduce: Element2
+			reduce(38), // +, reduce: Element2
+			reduce(38), // -, reduce: Element2
+			reduce(38), // ||, reduce: Element2
+			reduce(38), // <>, reduce: Element2
+			reduce(38), // !=, reduce: Element2
+			reduce(38), // =, reduce: Element2
+			reduce(38), // <, reduce: Element2
+			reduce(38), // <=, reduce: Element2
+			reduce(38), // >, reduce: Element2
+			reduce(38), // >=, reduce: Element2
+			reduce(38), // ;, reduce: Element2
+			reduce(38), // @, reduce: Element2
+			reduce(38), // {, reduce: Element2
+			reduce(38), // }, reduce: Element2
+			reduce(38), // ~, reduce: Element2
+			reduce(38), // ?, reduce: Element2
+			reduce(38), // else, reduce: Element2
+			reduce(38), // if, reduce: Element2
+			reduce(38), // for, reduce: Element2
+			reduce(38), // endfor, reduce: Element2
+			reduce(38), // elif, reduce: Element2
+			reduce(38), // endif, reduce: Element2
+			reduce(38), // set, reduce: Element2
+			reduce(38), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(38), // template_block_start, reduce: Element2
+			reduce(38), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(38), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S178
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),nil,reduce(56),reduce(56),nil,reduce(56),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(39), // identifier, reduce: Element2
+			reduce(39), // bytes_literal, reduce: Element2
+			reduce(39), // string_literal, reduce: Element2
+			reduce(39), // integer_literal, reduce: Element2
+			reduce(39), // floating_point_literal, reduce: Element2
+			reduce(39), // newline, reduce: Element2
+			reduce(39), // dollar, reduce: Element2
+			reduce(39), // *, reduce: Element2
+			reduce(39), // [, reduce: Element2
+			reduce(39), // ], reduce: Element2
+			reduce(39), // (, reduce: Element2
+			reduce(39), // ), reduce: Element2
+			reduce(39), // ,, reduce: Element2
+			reduce(39), // ., reduce: Element2
+			reduce(39), // :, reduce: Element2
+			reduce(39), // %, reduce: Element2
+			reduce(39), // !, reduce: Element2
+			reduce(39), // |, reduce: Element2
+			reduce(39), // |>, reduce: Element2
+			reduce(39), // ^, reduce: Element2
+			reduce(39), // &, reduce: Element2
+			reduce(39), // <<, reduce: Element2
+			reduce(39), // >>, reduce: Element2
+			reduce(39), // =>, reduce: Element2
+			reduce(39), // ->, reduce: Element2
+			reduce(39), // /, reduce: Element2
+			reduce(39), // +, reduce: Element2
+			reduce(39), // -, reduce: Element2
+			reduce(39), // ||, reduce: Element2
+			reduce(39), // <>, reduce: Element2
+			reduce(39), // !=, reduce: Element2
+			reduce(39), // =, reduce: Element2
+			reduce(39), // <, reduce: Element2
+			reduce(39), // <=, reduce: Element2
+			reduce(39), // >, reduce: Element2
+			reduce(39), // >=, reduce: Element2
+			reduce(39), // ;, reduce: Element2
+			reduce(39), // @, reduce: Element2
+			reduce(39), // {, reduce: Element2
+			reduce(39), // }, reduce: Element2
+			reduce(39), // ~, reduce: Element2
+			reduce(39), // ?, reduce: Element2
+			reduce(39), // else, reduce: Element2
+			reduce(39), // if, reduce: Element2
+			reduce(39), // for, reduce: Element2
+			reduce(39), // endfor, reduce: Element2
+			reduce(39), // elif, reduce: Element2
+			reduce(39), // endif, reduce: Element2
+			reduce(39), // set, reduce: Element2
+			reduce(39), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(39), // template_block_start, reduce: Element2
+			reduce(39), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(39), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S179
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),nil,reduce(57),reduce(57),nil,reduce(57),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(40), // identifier, reduce: Element2
+			reduce(40), // bytes_literal, reduce: Element2
+			reduce(40), // string_literal, reduce: Element2
+			reduce(40), // integer_literal, reduce: Element2
+			reduce(40), // floating_point_literal, reduce: Element2
+			reduce(40), // newline, reduce: Element2
+			reduce(40), // dollar, reduce: Element2
+			reduce(40), // *, reduce: Element2
+			reduce(40), // [, reduce: Element2
+			reduce(40), // ], reduce: Element2
+			reduce(40), // (, reduce: Element2
+			reduce(40), // ), reduce: Element2
+			reduce(40), // ,, reduce: Element2
+			reduce(40), // ., reduce: Element2
+			reduce(40), // :, reduce: Element2
+			reduce(40), // %, reduce: Element2
+			reduce(40), // !, reduce: Element2
+			reduce(40), // |, reduce: Element2
+			reduce(40), // |>, reduce: Element2
+			reduce(40), // ^, reduce: Element2
+			reduce(40), // &, reduce: Element2
+			reduce(40), // <<, reduce: Element2
+			reduce(40), // >>, reduce: Element2
+			reduce(40), // =>, reduce: Element2
+			reduce(40), // ->, reduce: Element2
+			reduce(40), // /, reduce: Element2
+			reduce(40), // +, reduce: Element2
+			reduce(40), // -, reduce: Element2
+			reduce(40), // ||, reduce: Element2
+			reduce(40), // <>, reduce: Element2
+			reduce(40), // !=, reduce: Element2
+			reduce(40), // =, reduce: Element2
+			reduce(40), // <, reduce: Element2
+			reduce(40), // <=, reduce: Element2
+			reduce(40), // >, reduce: Element2
+			reduce(40), // >=, reduce: Element2
+			reduce(40), // ;, reduce: Element2
+			reduce(40), // @, reduce: Element2
+			reduce(40), // {, reduce: Element2
+			reduce(40), // }, reduce: Element2
+			reduce(40), // ~, reduce: Element2
+			reduce(40), // ?, reduce: Element2
+			reduce(40), // else, reduce: Element2
+			reduce(40), // if, reduce: Element2
+			reduce(40), // for, reduce: Element2
+			reduce(40), // endfor, reduce: Element2
+			reduce(40), // elif, reduce: Element2
+			reduce(40), // endif, reduce: Element2
+			reduce(40), // set, reduce: Element2
+			reduce(40), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(40), // template_block_start, reduce: Element2
+			reduce(40), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(40), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S180
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),nil,reduce(58),reduce(58),nil,reduce(58),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(41), // identifier, reduce: Element2
+			reduce(41), // bytes_literal, reduce: Element2
+			reduce(41), // string_literal, reduce: Element2
+			reduce(41), // integer_literal, reduce: Element2
+			reduce(41), // floating_point_literal, reduce: Element2
+			reduce(41), // newline, reduce: Element2
+			reduce(41), // dollar, reduce: Element2
+			reduce(41), // *, reduce: Element2
+			reduce(41), // [, reduce: Element2
+			reduce(41), // ], reduce: Element2
+			reduce(41), // (, reduce: Element2
+			reduce(41), // ), reduce: Element2
+			reduce(41), // ,, reduce: Element2
+			reduce(41), // ., reduce: Element2
+			reduce(41), // :, reduce: Element2
+			reduce(41), // %, reduce: Element2
+			reduce(41), // !, reduce: Element2
+			reduce(41), // |, reduce: Element2
+			reduce(41), // |>, reduce: Element2
+			reduce(41), // ^, reduce: Element2
+			reduce(41), // &, reduce: Element2
+			reduce(41), // <<, reduce: Element2
+			reduce(41), // >>, reduce: Element2
+			reduce(41), // =>, reduce: Element2
+			reduce(41), // ->, reduce: Element2
+			reduce(41), // /, reduce: Element2
+			reduce(41), // +, reduce: Element2
+			reduce(41), // -, reduce: Element2
+			reduce(41), // ||, reduce: Element2
+			reduce(41), // <>, reduce: Element2
+			reduce(41), // !=, reduce: Element2
+			reduce(41), // =, reduce: Element2
+			reduce(41), // <, reduce: Element2
+			reduce(41), // <=, reduce: Element2
+			reduce(41), // >, reduce: Element2
+			reduce(41), // >=, reduce: Element2
+			reduce(41), // ;, reduce: Element2
+			reduce(41), // @, reduce: Element2
+			reduce(41), // {, reduce: Element2
+			reduce(41), // }, reduce: Element2
+			reduce(41), // ~, reduce: Element2
+			reduce(41), // ?, reduce: Element2
+			reduce(41), // else, reduce: Element2
+			reduce(41), // if, reduce: Element2
+			reduce(41), // for, reduce: Element2
+			reduce(41), // endfor, reduce: Element2
+			reduce(41), // elif, reduce: Element2
+			reduce(41), // endif, reduce: Element2
+			reduce(41), // set, reduce: Element2
+			reduce(41), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(41), // template_block_start, reduce: Element2
+			reduce(41), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(41), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S181
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),nil,reduce(59),reduce(59),nil,reduce(59),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(42), // identifier, reduce: Element2
+			reduce(42), // bytes_literal, reduce: Element2
+			reduce(42), // string_literal, reduce: Element2
+			reduce(42), // integer_literal, reduce: Element2
+			reduce(42), // floating_point_literal, reduce: Element2
+			reduce(42), // newline, reduce: Element2
+			reduce(42), // dollar, reduce: Element2
+			reduce(42), // *, reduce: Element2
+			reduce(42), // [, reduce: Element2
+			reduce(42), // ], reduce: Element2
+			reduce(42), // (, reduce: Element2
+			reduce(42), // ), reduce: Element2
+			reduce(42), // ,, reduce: Element2
+			reduce(42), // ., reduce: Element2
+			reduce(42), // :, reduce: Element2
+			reduce(42), // %, reduce: Element2
+			reduce(42), // !, reduce: Element2
+			reduce(42), // |, reduce: Element2
+			reduce(42), // |>, reduce: Element2
+			reduce(42), // ^, reduce: Element2
+			reduce(42), // &, reduce: Element2
+			reduce(42), // <<, reduce: Element2
+			reduce(42), // >>, reduce: Element2
+			reduce(42), // =>, reduce: Element2
+			reduce(42), // ->, reduce: Element2
+			reduce(42), // /, reduce: Element2
+			reduce(42), // +, reduce: Element2
+			reduce(42), // -, reduce: Element2
+			reduce(42), // ||, reduce: Element2
+			reduce(42), // <>, reduce: Element2
+			reduce(42), // !=, reduce: Element2
+			reduce(42), // =, reduce: Element2
+			reduce(42), // <, reduce: Element2
+			reduce(42), // <=, reduce: Element2
+			reduce(42), // >, reduce: Element2
+			reduce(42), // >=, reduce: Element2
+			reduce(42), // ;, reduce: Element2
+			reduce(42), // @, reduce: Element2
+			reduce(42), // {, reduce: Element2
+			reduce(42), // }, reduce: Element2
+			reduce(42), // ~, reduce: Element2
+			reduce(42), // ?, reduce: Element2
+			reduce(42), // else, reduce: Element2
+			reduce(42), // if, reduce: Element2
+			reduce(42), // for, reduce: Element2
+			reduce(42), // endfor, reduce: Element2
+			reduce(42), // elif, reduce: Element2
+			reduce(42), // endif, reduce: Element2
+			reduce(42), // set, reduce: Element2
+			reduce(42), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(42), // template_block_start, reduce: Element2
+			reduce(42), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(42), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S182
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),nil,reduce(60),reduce(60),nil,reduce(60),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(43), // identifier, reduce: Element2
+			reduce(43), // bytes_literal, reduce: Element2
+			reduce(43), // string_literal, reduce: Element2
+			reduce(43), // integer_literal, reduce: Element2
+			reduce(43), // floating_point_literal, reduce: Element2
+			reduce(43), // newline, reduce: Element2
+			reduce(43), // dollar, reduce: Element2
+			reduce(43), // *, reduce: Element2
+			reduce(43), // [, reduce: Element2
+			reduce(43), // ], reduce: Element2
+			reduce(43), // (, reduce: Element2
+			reduce(43), // ), reduce: Element2
+			reduce(43), // ,, reduce: Element2
+			reduce(43), // ., reduce: Element2
+			reduce(43), // :, reduce: Element2
+			reduce(43), // %, reduce: Element2
+			reduce(43), // !, reduce: Element2
+			reduce(43), // |, reduce: Element2
+			reduce(43), // |>, reduce: Element2
+			reduce(43), // ^, reduce: Element2
+			reduce(43), // &, reduce: Element2
+			reduce(43), // <<, reduce: Element2
+			reduce(43), // >>, reduce: Element2
+			reduce(43), // =>, reduce: Element2
+			reduce(43), // ->, reduce: Element2
+			reduce(43), // /, reduce: Element2
+			reduce(43), // +, reduce: Element2
+			reduce(43), // -, reduce: Element2
+			reduce(43), // ||, reduce: Element2
+			reduce(43), // <>, reduce: Element2
+			reduce(43), // !=, reduce: Element2
+			reduce(43), // =, reduce: Element2
+			reduce(43), // <, reduce: Element2
+			reduce(43), // <=, reduce: Element2
+			reduce(43), // >, reduce: Element2
+			reduce(43), // >=, reduce: Element2
+			reduce(43), // ;, reduce: Element2
+			reduce(43), // @, reduce: Element2
+			reduce(43), // {, reduce: Element2
+			reduce(43), // }, reduce: Element2
+			reduce(43), // ~, reduce: Element2
+			reduce(43), // ?, reduce: Element2
+			reduce(43), // else, reduce: Element2
+			reduce(43), // if, reduce: Element2
+			reduce(43), // for, reduce: Element2
+			reduce(43), // endfor, reduce: Element2
+			reduce(43), // elif, reduce: Element2
+			reduce(43), // endif, reduce: Element2
+			reduce(43), // set, reduce: Element2
+			reduce(43), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(43), // template_block_start, reduce: Element2
+			reduce(43), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(43), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S183
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),nil,reduce(61),reduce(61),nil,reduce(61),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(44), // identifier, reduce: Element2
+			reduce(44), // bytes_literal, reduce: Element2
+			reduce(44), // string_literal, reduce: Element2
+			reduce(44), // integer_literal, reduce: Element2
+			reduce(44), // floating_point_literal, reduce: Element2
+			reduce(44), // newline, reduce: Element2
+			reduce(44), // dollar, reduce: Element2
+			reduce(44), // *, reduce: Element2
+			reduce(44), // [, reduce: Element2
+			reduce(44), // ], reduce: Element2
+			reduce(44), // (, reduce: Element2
+			reduce(44), // ), reduce: Element2
+			reduce(44), // ,, reduce: Element2
+			reduce(44), // ., reduce: Element2
+			reduce(44), // :, reduce: Element2
+			reduce(44), // %, reduce: Element2
+			reduce(44), // !, reduce: Element2
+			reduce(44), // |, reduce: Element2
+			reduce(44), // |>, reduce: Element2
+			reduce(44), // ^, reduce: Element2
+			reduce(44), // &, reduce: Element2
+			reduce(44), // <<, reduce: Element2
+			reduce(44), // >>, reduce: Element2
+			reduce(44), // =>, reduce: Element2
+			reduce(44), // ->, reduce: Element2
+			reduce(44), // /, reduce: Element2
+			reduce(44), // +, reduce: Element2
+			reduce(44), // -, reduce: Element2
+			reduce(44), // ||, reduce: Element2
+			reduce(44), // <>, reduce: Element2
+			reduce(44), // !=, reduce: Element2
+			reduce(44), // =, reduce: Element2
+			reduce(44), // <, reduce: Element2
+			reduce(44), // <=, reduce: Element2
+			reduce(44), // >, reduce: Element2
+			reduce(44), // >=, reduce: Element2
+			reduce(44), // ;, reduce: Element2
+			reduce(44), // @, reduce: Element2
+			reduce(44), // {, reduce: Element2
+			reduce(44), // }, reduce: Element2
+			reduce(44), // ~, reduce: Element2
+			reduce(44), // ?, reduce: Element2
+			reduce(44), // else, reduce: Element2
+			reduce(44), // if, reduce: Element2
+			reduce(44), // for, reduce: Element2
+			reduce(44), // endfor, reduce: Element2
+			reduce(44), // elif, reduce: Element2
+			reduce(44), // endif, reduce: Element2
+			reduce(44), // set, reduce: Element2
+			reduce(44), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(44), // template_block_start, reduce: Element2
+			reduce(44), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(44), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S184
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(79),shift(80),shift(81),shift(82),shift(83),shift(84),shift(85),shift(86),shift(87),shift(88),shift(89),shift(90),shift(91),shift(92),shift(93),shift(94),shift(95),shift(96),shift(97),shift(98),shift(99),shift(100),shift(101),shift(102),shift(103),shift(104),shift(105),shift(106),shift(107),shift(108),shift(109),shift(110),shift(111),shift(112),shift(113),shift(114),shift(115),shift(116),shift(117),shift(118),shift(119),shift(120),shift(121),shift(122),shift(265),shift(55),shift(127),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(45), // identifier, reduce: Element2
+			reduce(45), // bytes_literal, reduce: Element2
+			reduce(45), // string_literal, reduce: Element2
+			reduce(45), // integer_literal, reduce: Element2
+			reduce(45), // floating_point_literal, reduce: Element2
+			reduce(45), // newline, reduce: Element2
+			reduce(45), // dollar, reduce: Element2
+			reduce(45), // *, reduce: Element2
+			reduce(45), // [, reduce: Element2
+			reduce(45), // ], reduce: Element2
+			reduce(45), // (, reduce: Element2
+			reduce(45), // ), reduce: Element2
+			reduce(45), // ,, reduce: Element2
+			reduce(45), // ., reduce: Element2
+			reduce(45), // :, reduce: Element2
+			reduce(45), // %, reduce: Element2
+			reduce(45), // !, reduce: Element2
+			reduce(45), // |, reduce: Element2
+			reduce(45), // |>, reduce: Element2
+			reduce(45), // ^, reduce: Element2
+			reduce(45), // &, reduce: Element2
+			reduce(45), // <<, reduce: Element2
+			reduce(45), // >>, reduce: Element2
+			reduce(45), // =>, reduce: Element2
+			reduce(45), // ->, reduce: Element2
+			reduce(45), // /, reduce: Element2
+			reduce(45), // +, reduce: Element2
+			reduce(45), // -, reduce: Element2
+			reduce(45), // ||, reduce: Element2
+			reduce(45), // <>, reduce: Element2
+			reduce(45), // !=, reduce: Element2
+			reduce(45), // =, reduce: Element2
+			reduce(45), // <, reduce: Element2
+			reduce(45), // <=, reduce: Element2
+			reduce(45), // >, reduce: Element2
+			reduce(45), // >=, reduce: Element2
+			reduce(45), // ;, reduce: Element2
+			reduce(45), // @, reduce: Element2
+			reduce(45), // {, reduce: Element2
+			reduce(45), // }, reduce: Element2
+			reduce(45), // ~, reduce: Element2
+			reduce(45), // ?, reduce: Element2
+			reduce(45), // else, reduce: Element2
+			reduce(45), // if, reduce: Element2
+			reduce(45), // for, reduce: Element2
+			reduce(45), // endfor, reduce: Element2
+			reduce(45), // elif, reduce: Element2
+			reduce(45), // endif, reduce: Element2
+			reduce(45), // set, reduce: Element2
+			reduce(45), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(45), // template_block_start, reduce: Element2
+			reduce(45), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(45), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S185
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(266),shift(129),shift(130),nil,nil,shift(267),shift(131),nil,nil,nil,nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(46), // identifier, reduce: Element2
+			reduce(46), // bytes_literal, reduce: Element2
+			reduce(46), // string_literal, reduce: Element2
+			reduce(46), // integer_literal, reduce: Element2
+			reduce(46), // floating_point_literal, reduce: Element2
+			reduce(46), // newline, reduce: Element2
+			reduce(46), // dollar, reduce: Element2
+			reduce(46), // *, reduce: Element2
+			reduce(46), // [, reduce: Element2
+			reduce(46), // ], reduce: Element2
+			reduce(46), // (, reduce: Element2
+			reduce(46), // ), reduce: Element2
+			reduce(46), // ,, reduce: Element2
+			reduce(46), // ., reduce: Element2
+			reduce(46), // :, reduce: Element2
+			reduce(46), // %, reduce: Element2
+			reduce(46), // !, reduce: Element2
+			reduce(46), // |, reduce: Element2
+			reduce(46), // |>, reduce: Element2
+			reduce(46), // ^, reduce: Element2
+			reduce(46), // &, reduce: Element2
+			reduce(46), // <<, reduce: Element2
+			reduce(46), // >>, reduce: Element2
+			reduce(46), // =>, reduce: Element2
+			reduce(46), // ->, reduce: Element2
+			reduce(46), // /, reduce: Element2
+			reduce(46), // +, reduce: Element2
+			reduce(46), // -, reduce: Element2
+			reduce(46), // ||, reduce: Element2
+			reduce(46), // <>, reduce: Element2
+			reduce(46), // !=, reduce: Element2
+			reduce(46), // =, reduce: Element2
+			reduce(46), // <, reduce: Element2
+			reduce(46), // <=, reduce: Element2
+			reduce(46), // >, reduce: Element2
+			reduce(46), // >=, reduce: Element2
+			reduce(46), // ;, reduce: Element2
+			reduce(46), // @, reduce: Element2
+			reduce(46), // {, reduce: Element2
+			reduce(46), // }, reduce: Element2
+			reduce(46), // ~, reduce: Element2
+			reduce(46), // ?, reduce: Element2
+			reduce(46), // else, reduce: Element2
+			reduce(46), // if, reduce: Element2
+			reduce(46), // for, reduce: Element2
+			reduce(46), // endfor, reduce: Element2
+			reduce(46), // elif, reduce: Element2
+			reduce(46), // endif, reduce: Element2
+			reduce(46), // set, reduce: Element2
+			reduce(46), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(46), // template_block_start, reduce: Element2
+			reduce(46), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(46), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S186
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(268),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(47), // identifier, reduce: Element2
+			reduce(47), // bytes_literal, reduce: Element2
+			reduce(47), // string_literal, reduce: Element2
+			reduce(47), // integer_literal, reduce: Element2
+			reduce(47), // floating_point_literal, reduce: Element2
+			reduce(47), // newline, reduce: Element2
+			reduce(47), // dollar, reduce: Element2
+			reduce(47), // *, reduce: Element2
+			reduce(47), // [, reduce: Element2
+			reduce(47), // ], reduce: Element2
+			reduce(47), // (, reduce: Element2
+			reduce(47), // ), reduce: Element2
+			reduce(47), // ,, reduce: Element2
+			reduce(47), // ., reduce: Element2
+			reduce(47), // :, reduce: Element2
+			reduce(47), // %, reduce: Element2
+			reduce(47), // !, reduce: Element2
+			reduce(47), // |, reduce: Element2
+			reduce(47), // |>, reduce: Element2
+			reduce(47), // ^, reduce: Element2
+			reduce(47), // &, reduce: Element2
+			reduce(47), // <<, reduce: Element2
+			reduce(47), // >>, reduce: Element2
+			reduce(47), // =>, reduce: Element2
+			reduce(47), // ->, reduce: Element2
+			reduce(47), // /, reduce: Element2
+			reduce(47), // +, reduce: Element2
+			reduce(47), // -, reduce: Element2
+			reduce(47), // ||, reduce: Element2
+			reduce(47), // <>, reduce: Element2
+			reduce(47), // !=, reduce: Element2
+			reduce(47), // =, reduce: Element2
+			reduce(47), // <, reduce: Element2
+			reduce(47), // <=, reduce: Element2
+			reduce(47), // >, reduce: Element2
+			reduce(47), // >=, reduce: Element2
+			reduce(47), // ;, reduce: Element2
+			reduce(47), // @, reduce: Element2
+			reduce(47), // {, reduce: Element2
+			reduce(47), // }, reduce: Element2
+			reduce(47), // ~, reduce: Element2
+			reduce(47), // ?, reduce: Element2
+			reduce(47), // else, reduce: Element2
+			reduce(47), // if, reduce: Element2
+			reduce(47), // for, reduce: Element2
+			reduce(47), // endfor, reduce: Element2
+			reduce(47), // elif, reduce: Element2
+			reduce(47), // endif, reduce: Element2
+			reduce(47), // set, reduce: Element2
+			reduce(47), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(47), // template_block_start, reduce: Element2
+			reduce(47), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(47), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S187
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),nil,reduce(65),reduce(65),nil,reduce(65),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(48), // identifier, reduce: Element2
+			reduce(48), // bytes_literal, reduce: Element2
+			reduce(48), // string_literal, reduce: Element2
+			reduce(48), // integer_literal, reduce: Element2
+			reduce(48), // floating_point_literal, reduce: Element2
+			reduce(48), // newline, reduce: Element2
+			reduce(48), // dollar, reduce: Element2
+			reduce(48), // *, reduce: Element2
+			reduce(48), // [, reduce: Element2
+			reduce(48), // ], reduce: Element2
+			reduce(48), // (, reduce: Element2
+			reduce(48), // ), reduce: Element2
+			reduce(48), // ,, reduce: Element2
+			reduce(48), // ., reduce: Element2
+			reduce(48), // :, reduce: Element2
+			reduce(48), // %, reduce: Element2
+			reduce(48), // !, reduce: Element2
+			reduce(48), // |, reduce: Element2
+			reduce(48), // |>, reduce: Element2
+			reduce(48), // ^, reduce: Element2
+			reduce(48), // &, reduce: Element2
+			reduce(48), // <<, reduce: Element2
+			reduce(48), // >>, reduce: Element2
+			reduce(48), // =>, reduce: Element2
+			reduce(48), // ->, reduce: Element2
+			reduce(48), // /, reduce: Element2
+			reduce(48), // +, reduce: Element2
+			reduce(48), // -, reduce: Element2
+			reduce(48), // ||, reduce: Element2
+			reduce(48), // <>, reduce: Element2
+			reduce(48), // !=, reduce: Element2
+			reduce(48), // =, reduce: Element2
+			reduce(48), // <, reduce: Element2
+			reduce(48), // <=, reduce: Element2
+			reduce(48), // >, reduce: Element2
+			reduce(48), // >=, reduce: Element2
+			reduce(48), // ;, reduce: Element2
+			reduce(48), // @, reduce: Element2
+			reduce(48), // {, reduce: Element2
+			reduce(48), // }, reduce: Element2
+			reduce(48), // ~, reduce: Element2
+			reduce(48), // ?, reduce: Element2
+			reduce(48), // else, reduce: Element2
+			reduce(48), // if, reduce: Element2
+			reduce(48), // for, reduce: Element2
+			reduce(48), // endfor, reduce: Element2
+			reduce(48), // elif, reduce: Element2
+			reduce(48), // endif, reduce: Element2
+			reduce(48), // set, reduce: Element2
+			reduce(48), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(48), // template_block_start, reduce: Element2
+			reduce(48), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(48), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S188
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(279),shift(280),shift(281),shift(282),shift(283),shift(284),shift(285),shift(286),shift(287),shift(288),shift(289),shift(290),shift(291),shift(292),shift(293),shift(294),shift(295),shift(296),shift(297),shift(298),shift(299),shift(300),shift(301),shift(302),shift(303),shift(304),shift(305),shift(306),shift(307),shift(308),shift(309),shift(310),shift(311),shift(312),shift(313),shift(314),shift(315),shift(316),shift(317),shift(318),shift(319),shift(320),shift(321),shift(322),nil,shift(324),shift(328),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(49), // identifier, reduce: Element2
+			reduce(49), // bytes_literal, reduce: Element2
+			reduce(49), // string_literal, reduce: Element2
+			reduce(49), // integer_literal, reduce: Element2
+			reduce(49), // floating_point_literal, reduce: Element2
+			reduce(49), // newline, reduce: Element2
+			reduce(49), // dollar, reduce: Element2
+			reduce(49), // *, reduce: Element2
+			reduce(49), // [, reduce: Element2
+			reduce(49), // ], reduce: Element2
+			reduce(49), // (, reduce: Element2
+			reduce(49), // ), reduce: Element2
+			reduce(49), // ,, reduce: Element2
+			reduce(49), // ., reduce: Element2
+			reduce(49), // :, reduce: Element2
+			reduce(49), // %, reduce: Element2
+			reduce(49), // !, reduce: Element2
+			reduce(49), // |, reduce: Element2
+			reduce(49), // |>, reduce: Element2
+			reduce(49), // ^, reduce: Element2
+			reduce(49), // &, reduce: Element2
+			reduce(49), // <<, reduce: Element2
+			reduce(49), // >>, reduce: Element2
+			reduce(49), // =>, reduce: Element2
+			reduce(49), // ->, reduce: Element2
+			reduce(49), // /, reduce: Element2
+			reduce(49), // +, reduce: Element2
+			reduce(49), // -, reduce: Element2
+			reduce(49), // ||, reduce: Element2
+			reduce(49), // <>, reduce: Element2
+			reduce(49), // !=, reduce: Element2
+			reduce(49), // =, reduce: Element2
+			reduce(49), // <, reduce: Element2
+			reduce(49), // <=, reduce: Element2
+			reduce(49), // >, reduce: Element2
+			reduce(49), // >=, reduce: Element2
+			reduce(49), // ;, reduce: Element2
+			reduce(49), // @, reduce: Element2
+			reduce(49), // {, reduce: Element2
+			reduce(49), // }, reduce: Element2
+			reduce(49), // ~, reduce: Element2
+			reduce(49), // ?, reduce: Element2
+			reduce(49), // else, reduce: Element2
+			reduce(49), // if, reduce: Element2
+			reduce(49), // for, reduce: Element2
+			reduce(49), // endfor, reduce: Element2
+			reduce(49), // elif, reduce: Element2
+			reduce(49), // endif, reduce: Element2
+			reduce(49), // set, reduce: Element2
+			reduce(49), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(49), // template_block_start, reduce: Element2
+			reduce(49), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(49), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S189
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(330),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(50), // identifier, reduce: Element2
+			reduce(50), // bytes_literal, reduce: Element2
+			reduce(50), // string_literal, reduce: Element2
+			reduce(50), // integer_literal, reduce: Element2
+			reduce(50), // floating_point_literal, reduce: Element2
+			reduce(50), // newline, reduce: Element2
+			reduce(50), // dollar, reduce: Element2
+			reduce(50), // *, reduce: Element2
+			reduce(50), // [, reduce: Element2
+			reduce(50), // ], reduce: Element2
+			reduce(50), // (, reduce: Element2
+			reduce(50), // ), reduce: Element2
+			reduce(50), // ,, reduce: Element2
+			reduce(50), // ., reduce: Element2
+			reduce(50), // :, reduce: Element2
+			reduce(50), // %, reduce: Element2
+			reduce(50), // !, reduce: Element2
+			reduce(50), // |, reduce: Element2
+			reduce(50), // |>, reduce: Element2
+			reduce(50), // ^, reduce: Element2
+			reduce(50), // &, reduce: Element2
+			reduce(50), // <<, reduce: Element2
+			reduce(50), // >>, reduce: Element2
+			reduce(50), // =>, reduce: Element2
+			reduce(50), // ->, reduce: Element2
+			reduce(50), // /, reduce: Element2
+			reduce(50), // +, reduce: Element2
+			reduce(50), // -, reduce: Element2
+			reduce(50), // ||, reduce: Element2
+			reduce(50), // <>, reduce: Element2
+			reduce(50), // !=, reduce: Element2
+			reduce(50), // =, reduce: Element2
+			reduce(50), // <, reduce: Element2
+			reduce(50), // <=, reduce: Element2
+			reduce(50), // >, reduce: Element2
+			reduce(50), // >=, reduce: Element2
+			reduce(50), // ;, reduce: Element2
+			reduce(50), // @, reduce: Element2
+			reduce(50), // {, reduce: Element2
+			reduce(50), // }, reduce: Element2
+			reduce(50), // ~, reduce: Element2
+			reduce(50), // ?, reduce: Element2
+			reduce(50), // else, reduce: Element2
+			reduce(50), // if, reduce: Element2
+			reduce(50), // for, reduce: Element2
+			reduce(50), // endfor, reduce: Element2
+			reduce(50), // elif, reduce: Element2
+			reduce(50), // endif, reduce: Element2
+			reduce(50), // set, reduce: Element2
+			reduce(50), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(50), // template_block_start, reduce: Element2
+			reduce(50), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(50), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S190
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),nil,reduce(82),reduce(82),nil,reduce(82),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(51), // identifier, reduce: Element2
+			reduce(51), // bytes_literal, reduce: Element2
+			reduce(51), // string_literal, reduce: Element2
+			reduce(51), // integer_literal, reduce: Element2
+			reduce(51), // floating_point_literal, reduce: Element2
+			reduce(51), // newline, reduce: Element2
+			reduce(51), // dollar, reduce: Element2
+			reduce(51), // *, reduce: Element2
+			reduce(51), // [, reduce: Element2
+			reduce(51), // ], reduce: Element2
+			reduce(51), // (, reduce: Element2
+			reduce(51), // ), reduce: Element2
+			reduce(51), // ,, reduce: Element2
+			reduce(51), // ., reduce: Element2
+			reduce(51), // :, reduce: Element2
+			reduce(51), // %, reduce: Element2
+			reduce(51), // !, reduce: Element2
+			reduce(51), // |, reduce: Element2
+			reduce(51), // |>, reduce: Element2
+			reduce(51), // ^, reduce: Element2
+			reduce(51), // &, reduce: Element2
+			reduce(51), // <<, reduce: Element2
+			reduce(51), // >>, reduce: Element2
+			reduce(51), // =>, reduce: Element2
+			reduce(51), // ->, reduce: Element2
+			reduce(51), // /, reduce: Element2
+			reduce(51), // +, reduce: Element2
+			reduce(51), // -, reduce: Element2
+			reduce(51), // ||, reduce: Element2
+			reduce(51), // <>, reduce: Element2
+			reduce(51), // !=, reduce: Element2
+			reduce(51), // =, reduce: Element2
+			reduce(51), // <, reduce: Element2
+			reduce(51), // <=, reduce: Element2
+			reduce(51), // >, reduce: Element2
+			reduce(51), // >=, reduce: Element2
+			reduce(51), // ;, reduce: Element2
+			reduce(51), // @, reduce: Element2
+			reduce(51), // {, reduce: Element2
+			reduce(51), // }, reduce: Element2
+			reduce(51), // ~, reduce: Element2
+			reduce(51), // ?, reduce: Element2
+			reduce(51), // else, reduce: Element2
+			reduce(51), // if, reduce: Element2
+			reduce(51), // for, reduce: Element2
+			reduce(51), // endfor, reduce: Element2
+			reduce(51), // elif, reduce: Element2
+			reduce(51), // endif, reduce: Element2
+			reduce(51), // set, reduce: Element2
+			reduce(51), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(51), // template_block_start, reduce: Element2
+			reduce(51), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(51), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S191
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(208),shift(209),shift(210),shift(211),shift(212),shift(213),shift(214),shift(215),shift(216),shift(217),shift(218),shift(219),shift(220),shift(221),shift(222),shift(223),shift(224),shift(225),shift(226),shift(227),shift(228),shift(229),shift(230),shift(231),shift(232),shift(233),shift(234),shift(235),shift(236),shift(237),shift(238),shift(239),shift(240),shift(241),shift(242),shift(243),shift(244),shift(245),shift(246),shift(247),shift(248),shift(249),shift(250),shift(251),nil,shift(55),shift(255),shift(332),shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(52), // identifier, reduce: Element2
+			reduce(52), // bytes_literal, reduce: Element2
+			reduce(52), // string_literal, reduce: Element2
+			reduce(52), // integer_literal, reduce: Element2
+			reduce(52), // floating_point_literal, reduce: Element2
+			reduce(52), // newline, reduce: Element2
+			reduce(52), // dollar, reduce: Element2
+			reduce(52), // *, reduce: Element2
+			reduce(52), // [, reduce: Element2
+			reduce(52), // ], reduce: Element2
+			reduce(52), // (, reduce: Element2
+			reduce(52), // ), reduce: Element2
+			reduce(52), // ,, reduce: Element2
+			reduce(52), // ., reduce: Element2
+			reduce(52), // :, reduce: Element2
+			reduce(52), // %, reduce: Element2
+			reduce(52), // !, reduce: Element2
+			reduce(52), // |, reduce: Element2
+			reduce(52), // |>, reduce: Element2
+			reduce(52), // ^, reduce: Element2
+			reduce(52), // &, reduce: Element2
+			reduce(52), // <<, reduce: Element2
+			reduce(52), // >>, reduce: Element2
+			reduce(52), // =>, reduce: Element2
+			reduce(52), // ->, reduce: Element2
+			reduce(52), // /, reduce: Element2
+			reduce(52), // +, reduce: Element2
+			reduce(52), // -, reduce: Element2
+			reduce(52), // ||, reduce: Element2
+			reduce(52), // <>, reduce: Element2
+			reduce(52), // !=, reduce: Element2
+			reduce(52), // =, reduce: Element2
+			reduce(52), // <, reduce: Element2
+			reduce(52), // <=, reduce: Element2
+			reduce(52), // >, reduce: Element2
+			reduce(52), // >=, reduce: Element2
+			reduce(52), // ;, reduce: Element2
+			reduce(52), // @, reduce: Element2
+			reduce(52), // {, reduce: Element2
+			reduce(52), // }, reduce: Element2
+			reduce(52), // ~, reduce: Element2
+			reduce(52), // ?, reduce: Element2
+			reduce(52), // else, reduce: Element2
+			reduce(52), // if, reduce: Element2
+			reduce(52), // for, reduce: Element2
+			reduce(52), // endfor, reduce: Element2
+			reduce(52), // elif, reduce: Element2
+			reduce(52), // endif, reduce: Element2
+			reduce(52), // set, reduce: Element2
+			reduce(52), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(52), // template_block_start, reduce: Element2
+			reduce(52), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(52), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S192
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),reduce(72),nil,reduce(72),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(53), // identifier, reduce: Element2
+			reduce(53), // bytes_literal, reduce: Element2
+			reduce(53), // string_literal, reduce: Element2
+			reduce(53), // integer_literal, reduce: Element2
+			reduce(53), // floating_point_literal, reduce: Element2
+			reduce(53), // newline, reduce: Element2
+			reduce(53), // dollar, reduce: Element2
+			reduce(53), // *, reduce: Element2
+			reduce(53), // [, reduce: Element2
+			reduce(53), // ], reduce: Element2
+			reduce(53), // (, reduce: Element2
+			reduce(53), // ), reduce: Element2
+			reduce(53), // ,, reduce: Element2
+			reduce(53), // ., reduce: Element2
+			reduce(53), // :, reduce: Element2
+			reduce(53), // %, reduce: Element2
+			reduce(53), // !, reduce: Element2
+			reduce(53), // |, reduce: Element2
+			reduce(53), // |>, reduce: Element2
+			reduce(53), // ^, reduce: Element2
+			reduce(53), // &, reduce: Element2
+			reduce(53), // <<, reduce: Element2
+			reduce(53), // >>, reduce: Element2
+			reduce(53), // =>, reduce: Element2
+			reduce(53), // ->, reduce: Element2
+			reduce(53), // /, reduce: Element2
+			reduce(53), // +, reduce: Element2
+			reduce(53), // -, reduce: Element2
+			reduce(53), // ||, reduce: Element2
+			reduce(53), // <>, reduce: Element2
+			reduce(53), // !=, reduce: Element2
+			reduce(53), // =, reduce: Element2
+			reduce(53), // <, reduce: Element2
+			reduce(53), // <=, reduce: Element2
+			reduce(53), // >, reduce: Element2
+			reduce(53), // >=, reduce: Element2
+			reduce(53), // ;, reduce: Element2
+			reduce(53), // @, reduce: Element2
+			reduce(53), // {, reduce: Element2
+			reduce(53), // }, reduce: Element2
+			reduce(53), // ~, reduce: Element2
+			reduce(53), // ?, reduce: Element2
+			reduce(53), // else, reduce: Element2
+			reduce(53), // if, reduce: Element2
+			reduce(53), // for, reduce: Element2
+			reduce(53), // endfor, reduce: Element2
+			reduce(53), // elif, reduce: Element2
+			reduce(53), // endif, reduce: Element2
+			reduce(53), // set, reduce: Element2
+			reduce(53), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(53), // template_block_start, reduce: Element2
+			reduce(53), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(53), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S193
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),reduce(70),nil,reduce(70),reduce(70),nil,reduce(70),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(54), // identifier, reduce: Element2
+			reduce(54), // bytes_literal, reduce: Element2
+			reduce(54), // string_literal, reduce: Element2
+			reduce(54), // integer_literal, reduce: Element2
+			reduce(54), // floating_point_literal, reduce: Element2
+			reduce(54), // newline, reduce: Element2
+			reduce(54), // dollar, reduce: Element2
+			reduce(54), // *, reduce: Element2
+			reduce(54), // [, reduce: Element2
+			reduce(54), // ], reduce: Element2
+			reduce(54), // (, reduce: Element2
+			reduce(54), // ), reduce: Element2
+			reduce(54), // ,, reduce: Element2
+			reduce(54), // ., reduce: Element2
+			reduce(54), // :, reduce: Element2
+			reduce(54), // %, reduce: Element2
+			reduce(54), // !, reduce: Element2
+			reduce(54), // |, reduce: Element2
+			reduce(54), // |>, reduce: Element2
+			reduce(54), // ^, reduce: Element2
+			reduce(54), // &, reduce: Element2
+			reduce(54), // <<, reduce: Element2
+			reduce(54), // >>, reduce: Element2
+			reduce(54), // =>, reduce: Element2
+			reduce(54), // ->, reduce: Element2
+			reduce(54), // /, reduce: Element2
+			reduce(54), // +, reduce: Element2
+			reduce(54), // -, reduce: Element2
+			reduce(54), // ||, reduce: Element2
+			reduce(54), // <>, reduce: Element2
+			reduce(54), // !=, reduce: Element2
+			reduce(54), // =, reduce: Element2
+			reduce(54), // <, reduce: Element2
+			reduce(54), // <=, reduce: Element2
+			reduce(54), // >, reduce: Element2
+			reduce(54), // >=, reduce: Element2
+			reduce(54), // ;, reduce: Element2
+			reduce(54), // @, reduce: Element2
+			reduce(54), // {, reduce: Element2
+			reduce(54), // }, reduce: Element2
+			reduce(54), // ~, reduce: Element2
+			reduce(54), // ?, reduce: Element2
+			reduce(54), // else, reduce: Element2
+			reduce(54), // if, reduce: Element2
+			reduce(54), // for, reduce: Element2
+			reduce(54), // endfor, reduce: Element2
+			reduce(54), // elif, reduce: Element2
+			reduce(54), // endif, reduce: Element2
+			reduce(54), // set, reduce: Element2
+			reduce(54), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(54), // template_block_start, reduce: Element2
+			reduce(54), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(54), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S194
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),reduce(77),nil,reduce(77),reduce(77),nil,reduce(77),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(55), // identifier, reduce: Element2
+			reduce(55), // bytes_literal, reduce: Element2
+			reduce(55), // string_literal, reduce: Element2
+			reduce(55), // integer_literal, reduce: Element2
+			reduce(55), // floating_point_literal, reduce: Element2
+			reduce(55), // newline, reduce: Element2
+			reduce(55), // dollar, reduce: Element2
+			reduce(55), // *, reduce: Element2
+			reduce(55), // [, reduce: Element2
+			reduce(55), // ], reduce: Element2
+			reduce(55), // (, reduce: Element2
+			reduce(55), // ), reduce: Element2
+			reduce(55), // ,, reduce: Element2
+			reduce(55), // ., reduce: Element2
+			reduce(55), // :, reduce: Element2
+			reduce(55), // %, reduce: Element2
+			reduce(55), // !, reduce: Element2
+			reduce(55), // |, reduce: Element2
+			reduce(55), // |>, reduce: Element2
+			reduce(55), // ^, reduce: Element2
+			reduce(55), // &, reduce: Element2
+			reduce(55), // <<, reduce: Element2
+			reduce(55), // >>, reduce: Element2
+			reduce(55), // =>, reduce: Element2
+			reduce(55), // ->, reduce: Element2
+			reduce(55), // /, reduce: Element2
+			reduce(55), // +, reduce: Element2
+			reduce(55), // -, reduce: Element2
+			reduce(55), // ||, reduce: Element2
+			reduce(55), // <>, reduce: Element2
+			reduce(55), // !=, reduce: Element2
+			reduce(55), // =, reduce: Element2
+			reduce(55), // <, reduce: Element2
+			reduce(55), // <=, reduce: Element2
+			reduce(55), // >, reduce: Element2
+			reduce(55), // >=, reduce: Element2
+			reduce(55), // ;, reduce: Element2
+			reduce(55), // @, reduce: Element2
+			reduce(55), // {, reduce: Element2
+			reduce(55), // }, reduce: Element2
+			reduce(55), // ~, reduce: Element2
+			reduce(55), // ?, reduce: Element2
+			reduce(55), // else, reduce: Element2
+			reduce(55), // if, reduce: Element2
+			reduce(55), // for, reduce: Element2
+			reduce(55), // endfor, reduce: Element2
+			reduce(55), // elif, reduce: Element2
+			reduce(55), // endif, reduce: Element2
+			reduce(55), // set, reduce: Element2
+			reduce(55), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(55), // template_block_start, reduce: Element2
+			reduce(55), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(55), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S195
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),shift(333),nil,nil,shift(131),nil,nil,nil,nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(56), // identifier, reduce: Element2
+			reduce(56), // bytes_literal, reduce: Element2
+			reduce(56), // string_literal, reduce: Element2
+			reduce(56), // integer_literal, reduce: Element2
+			reduce(56), // floating_point_literal, reduce: Element2
+			reduce(56), // newline, reduce: Element2
+			reduce(56), // dollar, reduce: Element2
+			reduce(56), // *, reduce: Element2
+			reduce(56), // [, reduce: Element2
+			reduce(56), // ], reduce: Element2
+			reduce(56), // (, reduce: Element2
+			reduce(56), // ), reduce: Element2
+			reduce(56), // ,, reduce: Element2
+			reduce(56), // ., reduce: Element2
+			reduce(56), // :, reduce: Element2
+			reduce(56), // %, reduce: Element2
+			reduce(56), // !, reduce: Element2
+			reduce(56), // |, reduce: Element2
+			reduce(56), // |>, reduce: Element2
+			reduce(56), // ^, reduce: Element2
+			reduce(56), // &, reduce: Element2
+			reduce(56), // <<, reduce: Element2
+			reduce(56), // >>, reduce: Element2
+			reduce(56), // =>, reduce: Element2
+			reduce(56), // ->, reduce: Element2
+			reduce(56), // /, reduce: Element2
+			reduce(56), // +, reduce: Element2
+			reduce(56), // -, reduce: Element2
+			reduce(56), // ||, reduce: Element2
+			reduce(56), // <>, reduce: Element2
+			reduce(56), // !=, reduce: Element2
+			reduce(56), // =, reduce: Element2
+			reduce(56), // <, reduce: Element2
+			reduce(56), // <=, reduce: Element2
+			reduce(56), // >, reduce: Element2
+			reduce(56), // >=, reduce: Element2
+			reduce(56), // ;, reduce: Element2
+			reduce(56), // @, reduce: Element2
+			reduce(56), // {, reduce: Element2
+			reduce(56), // }, reduce: Element2
+			reduce(56), // ~, reduce: Element2
+			reduce(56), // ?, reduce: Element2
+			reduce(56), // else, reduce: Element2
+			reduce(56), // if, reduce: Element2
+			reduce(56), // for, reduce: Element2
+			reduce(56), // endfor, reduce: Element2
+			reduce(56), // elif, reduce: Element2
+			reduce(56), // endif, reduce: Element2
+			reduce(56), // set, reduce: Element2
+			reduce(56), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(56), // template_block_start, reduce: Element2
+			reduce(56), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(56), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S196
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),nil,reduce(75),reduce(75),nil,reduce(75),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(57), // identifier, reduce: Element2
+			reduce(57), // bytes_literal, reduce: Element2
+			reduce(57), // string_literal, reduce: Element2
+			reduce(57), // integer_literal, reduce: Element2
+			reduce(57), // floating_point_literal, reduce: Element2
+			reduce(57), // newline, reduce: Element2
+			reduce(57), // dollar, reduce: Element2
+			reduce(57), // *, reduce: Element2
+			reduce(57), // [, reduce: Element2
+			reduce(57), // ], reduce: Element2
+			reduce(57), // (, reduce: Element2
+			reduce(57), // ), reduce: Element2
+			reduce(57), // ,, reduce: Element2
+			reduce(57), // ., reduce: Element2
+			reduce(57), // :, reduce: Element2
+			reduce(57), // %, reduce: Element2
+			reduce(57), // !, reduce: Element2
+			reduce(57), // |, reduce: Element2
+			reduce(57), // |>, reduce: Element2
+			reduce(57), // ^, reduce: Element2
+			reduce(57), // &, reduce: Element2
+			reduce(57), // <<, reduce: Element2
+			reduce(57), // >>, reduce: Element2
+			reduce(57), // =>, reduce: Element2
+			reduce(57), // ->, reduce: Element2
+			reduce(57), // /, reduce: Element2
+			reduce(57), // +, reduce: Element2
+			reduce(57), // -, reduce: Element2
+			reduce(57), // ||, reduce: Element2
+			reduce(57), // <>, reduce: Element2
+			reduce(57), // !=, reduce: Element2
+			reduce(57), // =, reduce: Element2
+			reduce(57), // <, reduce: Element2
+			reduce(57), // <=, reduce: Element2
+			reduce(57), // >, reduce: Element2
+			reduce(57), // >=, reduce: Element2
+			reduce(57), // ;, reduce: Element2
+			reduce(57), // @, reduce: Element2
+			reduce(57), // {, reduce: Element2
+			reduce(57), // }, reduce: Element2
+			reduce(57), // ~, reduce: Element2
+			reduce(57), // ?, reduce: Element2
+			reduce(57), // else, reduce: Element2
+			reduce(57), // if, reduce: Element2
+			reduce(57), // for, reduce: Element2
+			reduce(57), // endfor, reduce: Element2
+			reduce(57), // elif, reduce: Element2
+			reduce(57), // endif, reduce: Element2
+			reduce(57), // set, reduce: Element2
+			reduce(57), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(57), // template_block_start, reduce: Element2
+			reduce(57), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(57), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S197
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),reduce(76),nil,reduce(76),reduce(76),nil,reduce(76),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(58), // identifier, reduce: Element2
+			reduce(58), // bytes_literal, reduce: Element2
+			reduce(58), // string_literal, reduce: Element2
+			reduce(58), // integer_literal, reduce: Element2
+			reduce(58), // floating_point_literal, reduce: Element2
+			reduce(58), // newline, reduce: Element2
+			reduce(58), // dollar, reduce: Element2
+			reduce(58), // *, reduce: Element2
+			reduce(58), // [, reduce: Element2
+			reduce(58), // ], reduce: Element2
+			reduce(58), // (, reduce: Element2
+			reduce(58), // ), reduce: Element2
+			reduce(58), // ,, reduce: Element2
+			reduce(58), // ., reduce: Element2
+			reduce(58), // :, reduce: Element2
+			reduce(58), // %, reduce: Element2
+			reduce(58), // !, reduce: Element2
+			reduce(58), // |, reduce: Element2
+			reduce(58), // |>, reduce: Element2
+			reduce(58), // ^, reduce: Element2
+			reduce(58), // &, reduce: Element2
+			reduce(58), // <<, reduce: Element2
+			reduce(58), // >>, reduce: Element2
+			reduce(58), // =>, reduce: Element2
+			reduce(58), // ->, reduce: Element2
+			reduce(58), // /, reduce: Element2
+			reduce(58), // +, reduce: Element2
+			reduce(58), // -, reduce: Element2
+			reduce(58), // ||, reduce: Element2
+			reduce(58), // <>, reduce: Element2
+			reduce(58), // !=, reduce: Element2
+			reduce(58), // =, reduce: Element2
+			reduce(58), // <, reduce: Element2
+			reduce(58), // <=, reduce: Element2
+			reduce(58), // >, reduce: Element2
+			reduce(58), // >=, reduce: Element2
+			reduce(58), // ;, reduce: Element2
+			reduce(58), // @, reduce: Element2
+			reduce(58), // {, reduce: Element2
+			reduce(58), // }, reduce: Element2
+			reduce(58), // ~, reduce: Element2
+			reduce(58), // ?, reduce: Element2
+			reduce(58), // else, reduce: Element2
+			reduce(58), // if, reduce: Element2
+			reduce(58), // for, reduce: Element2
+			reduce(58), // endfor, reduce: Element2
+			reduce(58), // elif, reduce: Element2
+			reduce(58), // endif, reduce: Element2
+			reduce(58), // set, reduce: Element2
+			reduce(58), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(58), // template_block_start, reduce: Element2
+			reduce(58), // template_comment, reduce: Element2
+			nil,        // template_variable_end
+			reduce(58), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S198
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),reduce(80),nil,reduce(80),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(59), // identifier, reduce: Comment
+			reduce(59), // bytes_literal, reduce: Comment
+			reduce(59), // string_literal, reduce: Comment
+			reduce(59), // integer_literal, reduce: Comment
+			reduce(59), // floating_point_literal, reduce: Comment
+			reduce(59), // newline, reduce: Comment
+			reduce(59), // dollar, reduce: Comment
+			reduce(59), // *, reduce: Comment
+			reduce(59), // [, reduce: Comment
+			reduce(59), // ], reduce: Comment
+			reduce(59), // (, reduce: Comment
+			reduce(59), // ), reduce: Comment
+			reduce(59), // ,, reduce: Comment
+			reduce(59), // ., reduce: Comment
+			reduce(59), // :, reduce: Comment
+			reduce(59), // %, reduce: Comment
+			reduce(59), // !, reduce: Comment
+			reduce(59), // |, reduce: Comment
+			reduce(59), // |>, reduce: Comment
+			reduce(59), // ^, reduce: Comment
+			reduce(59), // &, reduce: Comment
+			reduce(59), // <<, reduce: Comment
+			reduce(59), // >>, reduce: Comment
+			reduce(59), // =>, reduce: Comment
+			reduce(59), // ->, reduce: Comment
+			reduce(59), // /, reduce: Comment
+			reduce(59), // +, reduce: Comment
+			reduce(59), // -, reduce: Comment
+			reduce(59), // ||, reduce: Comment
+			reduce(59), // <>, reduce: Comment
+			reduce(59), // !=, reduce: Comment
+			reduce(59), // =, reduce: Comment
+			reduce(59), // <, reduce: Comment
+			reduce(59), // <=, reduce: Comment
+			reduce(59), // >, reduce: Comment
+			reduce(59), // >=, reduce: Comment
+			reduce(59), // ;, reduce: Comment
+			reduce(59), // @, reduce: Comment
+			reduce(59), // {, reduce: Comment
+			reduce(59), // }, reduce: Comment
+			reduce(59), // ~, reduce: Comment
+			reduce(59), // ?, reduce: Comment
+			reduce(59), // else, reduce: Comment
+			reduce(59), // if, reduce: Comment
+			reduce(59), // for, reduce: Comment
+			reduce(59), // endfor, reduce: Comment
+			reduce(59), // elif, reduce: Comment
+			reduce(59), // endif, reduce: Comment
+			reduce(59), // set, reduce: Comment
+			reduce(59), // comment, reduce: Comment
+			nil,        // template_block_end
+			reduce(59), // template_block_start, reduce: Comment
+			reduce(59), // template_comment, reduce: Comment
+			nil,        // template_variable_end
+			reduce(59), // template_variable_start, reduce: Comment
 		},
 	},
 	actionRow{ // S199
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),reduce(78),nil,reduce(78),reduce(78),nil,reduce(78),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(81),  // identifier
+			shift(82),  // bytes_literal
+			shift(83),  // string_literal
+			shift(84),  // integer_literal
+			shift(85),  // floating_point_literal
+			shift(86),  // newline
+			shift(87),  // dollar
+			shift(88),  // *
+			shift(89),  // [
+			shift(90),  // ]
+			shift(91),  // (
+			shift(92),  // )
+			shift(93),  // ,
+			shift(94),  // .
+			shift(95),  // :
+			shift(96),  // %
+			shift(97),  // !
+			shift(98),  // |
+			shift(99),  // |>
+			shift(100), // ^
+			shift(101), // &
+			shift(102), // <<
+			shift(103), // >>
+			shift(104), // =>
+			shift(105), // ->
+			shift(106), // /
+			shift(107), // +
+			shift(108), // -
+			shift(109), // ||
+			shift(110), // <>
+			shift(111), // !=
+			shift(112), // =
+			shift(113), // <
+			shift(114), // <=
+			shift(115), // >
+			shift(116), // >=
+			shift(117), // ;
+			shift(118), // @
+			shift(119), // {
+			shift(120), // }
+			shift(121), // ~
+			shift(122), // ?
+			shift(123), // else
+			shift(124), // if
+			shift(125), // for
+			shift(126), // endfor
+			shift(127), // elif
+			shift(128), // endif
+			shift(129), // set
+			shift(130), // comment
+			shift(293), // template_block_end
+			shift(61),  // template_block_start
+			shift(136), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S200
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),reduce(85),nil,reduce(85),reduce(85),reduce(85),reduce(85),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			shift(294), // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			shift(295), // elif
+			shift(296), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S201
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),reduce(11),nil,reduce(11),reduce(11),reduce(11),reduce(11),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(297), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S202
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),reduce(8),nil,reduce(8),reduce(8),reduce(8),reduce(8),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(63), // ␚, reduce: TemplateIfBlock
+			reduce(63), // identifier, reduce: TemplateIfBlock
+			reduce(63), // bytes_literal, reduce: TemplateIfBlock
+			reduce(63), // string_literal, reduce: TemplateIfBlock
+			reduce(63), // integer_literal, reduce: TemplateIfBlock
+			reduce(63), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(63), // newline, reduce: TemplateIfBlock
+			reduce(63), // dollar, reduce: TemplateIfBlock
+			reduce(63), // *, reduce: TemplateIfBlock
+			reduce(63), // [, reduce: TemplateIfBlock
+			reduce(63), // ], reduce: TemplateIfBlock
+			reduce(63), // (, reduce: TemplateIfBlock
+			reduce(63), // ), reduce: TemplateIfBlock
+			reduce(63), // ,, reduce: TemplateIfBlock
+			reduce(63), // ., reduce: TemplateIfBlock
+			reduce(63), // :, reduce: TemplateIfBlock
+			reduce(63), // %, reduce: TemplateIfBlock
+			reduce(63), // !, reduce: TemplateIfBlock
+			reduce(63), // |, reduce: TemplateIfBlock
+			reduce(63), // |>, reduce: TemplateIfBlock
+			reduce(63), // ^, reduce: TemplateIfBlock
+			reduce(63), // &, reduce: TemplateIfBlock
+			reduce(63), // <<, reduce: TemplateIfBlock
+			reduce(63), // >>, reduce: TemplateIfBlock
+			reduce(63), // =>, reduce: TemplateIfBlock
+			reduce(63), // ->, reduce: TemplateIfBlock
+			reduce(63), // /, reduce: TemplateIfBlock
+			reduce(63), // +, reduce: TemplateIfBlock
+			reduce(63), // -, reduce: TemplateIfBlock
+			reduce(63), // ||, reduce: TemplateIfBlock
+			reduce(63), // <>, reduce: TemplateIfBlock
+			reduce(63), // !=, reduce: TemplateIfBlock
+			reduce(63), // =, reduce: TemplateIfBlock
+			reduce(63), // <, reduce: TemplateIfBlock
+			reduce(63), // <=, reduce: TemplateIfBlock
+			reduce(63), // >, reduce: TemplateIfBlock
+			reduce(63), // >=, reduce: TemplateIfBlock
+			reduce(63), // ;, reduce: TemplateIfBlock
+			reduce(63), // @, reduce: TemplateIfBlock
+			reduce(63), // {, reduce: TemplateIfBlock
+			reduce(63), // }, reduce: TemplateIfBlock
+			reduce(63), // ~, reduce: TemplateIfBlock
+			reduce(63), // ?, reduce: TemplateIfBlock
+			reduce(63), // else, reduce: TemplateIfBlock
+			reduce(63), // if, reduce: TemplateIfBlock
+			reduce(63), // for, reduce: TemplateIfBlock
+			reduce(63), // endfor, reduce: TemplateIfBlock
+			reduce(63), // elif, reduce: TemplateIfBlock
+			reduce(63), // endif, reduce: TemplateIfBlock
+			reduce(63), // set, reduce: TemplateIfBlock
+			reduce(63), // comment, reduce: TemplateIfBlock
+			nil,        // template_block_end
+			reduce(63), // template_block_start, reduce: TemplateIfBlock
+			reduce(63), // template_comment, reduce: TemplateIfBlock
+			nil,        // template_variable_end
+			reduce(63), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S203
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),reduce(9),nil,reduce(9),reduce(9),reduce(9),reduce(9),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(299), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S204
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),reduce(10),nil,reduce(10),reduce(10),reduce(10),reduce(10),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(67), // identifier, reduce: TemplateIfBranches
+			reduce(67), // bytes_literal, reduce: TemplateIfBranches
+			reduce(67), // string_literal, reduce: TemplateIfBranches
+			reduce(67), // integer_literal, reduce: TemplateIfBranches
+			reduce(67), // floating_point_literal, reduce: TemplateIfBranches
+			reduce(67), // newline, reduce: TemplateIfBranches
+			reduce(67), // dollar, reduce: TemplateIfBranches
+			reduce(67), // *, reduce: TemplateIfBranches
+			reduce(67), // [, reduce: TemplateIfBranches
+			reduce(67), // ], reduce: TemplateIfBranches
+			reduce(67), // (, reduce: TemplateIfBranches
+			reduce(67), // ), reduce: TemplateIfBranches
+			reduce(67), // ,, reduce: TemplateIfBranches
+			reduce(67), // ., reduce: TemplateIfBranches
+			reduce(67), // :, reduce: TemplateIfBranches
+			reduce(67), // %, reduce: TemplateIfBranches
+			reduce(67), // !, reduce: TemplateIfBranches
+			reduce(67), // |, reduce: TemplateIfBranches
+			reduce(67), // |>, reduce: TemplateIfBranches
+			reduce(67), // ^, reduce: TemplateIfBranches
+			reduce(67), // &, reduce: TemplateIfBranches
+			reduce(67), // <<, reduce: TemplateIfBranches
+			reduce(67), // >>, reduce: TemplateIfBranches
+			reduce(67), // =>, reduce: TemplateIfBranches
+			reduce(67), // ->, reduce: TemplateIfBranches
+			reduce(67), // /, reduce: TemplateIfBranches
+			reduce(67), // +, reduce: TemplateIfBranches
+			reduce(67), // -, reduce: TemplateIfBranches
+			reduce(67), // ||, reduce: TemplateIfBranches
+			reduce(67), // <>, reduce: TemplateIfBranches
+			reduce(67), // !=, reduce: TemplateIfBranches
+			reduce(67), // =, reduce: TemplateIfBranches
+			reduce(67), // <, reduce: TemplateIfBranches
+			reduce(67), // <=, reduce: TemplateIfBranches
+			reduce(67), // >, reduce: TemplateIfBranches
+			reduce(67), // >=, reduce: TemplateIfBranches
+			reduce(67), // ;, reduce: TemplateIfBranches
+			reduce(67), // @, reduce: TemplateIfBranches
+			reduce(67), // {, reduce: TemplateIfBranches
+			reduce(67), // }, reduce: TemplateIfBranches
+			reduce(67), // ~, reduce: TemplateIfBranches
+			reduce(67), // ?, reduce: TemplateIfBranches
+			reduce(67), // else, reduce: TemplateIfBranches
+			reduce(67), // if, reduce: TemplateIfBranches
+			reduce(67), // for, reduce: TemplateIfBranches
+			reduce(67), // endfor, reduce: TemplateIfBranches
+			reduce(67), // elif, reduce: TemplateIfBranches
+			reduce(67), // endif, reduce: TemplateIfBranches
+			reduce(67), // set, reduce: TemplateIfBranches
+			reduce(67), // comment, reduce: TemplateIfBranches
+			nil,        // template_block_end
+			reduce(67), // template_block_start, reduce: TemplateIfBranches
+			reduce(67), // template_comment, reduce: TemplateIfBranches
+			nil,        // template_variable_end
+			reduce(67), // template_variable_start, reduce: TemplateIfBranches
 		},
 	},
 	actionRow{ // S205
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),reduce(12),nil,reduce(12),reduce(12),reduce(12),reduce(12),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(68), // identifier, reduce: TemplateIfElseBody
+			reduce(68), // bytes_literal, reduce: TemplateIfElseBody
+			reduce(68), // string_literal, reduce: TemplateIfElseBody
+			reduce(68), // integer_literal, reduce: TemplateIfElseBody
+			reduce(68), // floating_point_literal, reduce: TemplateIfElseBody
+			reduce(68), // newline, reduce: TemplateIfElseBody
+			reduce(68), // dollar, reduce: TemplateIfElseBody
+			reduce(68), // *, reduce: TemplateIfElseBody
+			reduce(68), // [, reduce: TemplateIfElseBody
+			reduce(68), // ], reduce: TemplateIfElseBody
+			reduce(68), // (, reduce: TemplateIfElseBody
+			reduce(68), // ), reduce: TemplateIfElseBody
+			reduce(68), // ,, reduce: TemplateIfElseBody
+			reduce(68), // ., reduce: TemplateIfElseBody
+			reduce(68), // :, reduce: TemplateIfElseBody
+			reduce(68), // %, reduce: TemplateIfElseBody
+			reduce(68), // !, reduce: TemplateIfElseBody
+			reduce(68), // |, reduce: TemplateIfElseBody
+			reduce(68), // |>, reduce: TemplateIfElseBody
+			reduce(68), // ^, reduce: TemplateIfElseBody
+			reduce(68), // &, reduce: TemplateIfElseBody
+			reduce(68), // <<, reduce: TemplateIfElseBody
+			reduce(68), // >>, reduce: TemplateIfElseBody
+			reduce(68), // =>, reduce: TemplateIfElseBody
+			reduce(68), // ->, reduce: TemplateIfElseBody
+			reduce(68), // /, reduce: TemplateIfElseBody
+			reduce(68), // +, reduce: TemplateIfElseBody
+			reduce(68), // -, reduce: TemplateIfElseBody
+			reduce(68), // ||, reduce: TemplateIfElseBody
+			reduce(68), // <>, reduce: TemplateIfElseBody
+			reduce(68), // !=, reduce: TemplateIfElseBody
+			reduce(68), // =, reduce: TemplateIfElseBody
+			reduce(68), // <, reduce: TemplateIfElseBody
+			reduce(68), // <=, reduce: TemplateIfElseBody
+			reduce(68), // >, reduce: TemplateIfElseBody
+			reduce(68), // >=, reduce: TemplateIfElseBody
+			reduce(68), // ;, reduce: TemplateIfElseBody
+			reduce(68), // @, reduce: TemplateIfElseBody
+			reduce(68), // {, reduce: TemplateIfElseBody
+			reduce(68), // }, reduce: TemplateIfElseBody
+			reduce(68), // ~, reduce: TemplateIfElseBody
+			reduce(68), // ?, reduce: TemplateIfElseBody
+			reduce(68), // else, reduce: TemplateIfElseBody
+			reduce(68), // if, reduce: TemplateIfElseBody
+			reduce(68), // for, reduce: TemplateIfElseBody
+			reduce(68), // endfor, reduce: TemplateIfElseBody
+			reduce(68), // elif, reduce: TemplateIfElseBody
+			reduce(68), // endif, reduce: TemplateIfElseBody
+			reduce(68), // set, reduce: TemplateIfElseBody
+			reduce(68), // comment, reduce: TemplateIfElseBody
+			nil,        // template_block_end
+			reduce(68), // template_block_start, reduce: TemplateIfElseBody
+			reduce(68), // template_comment, reduce: TemplateIfElseBody
+			nil,        // template_variable_end
+			reduce(68), // template_variable_start, reduce: TemplateIfElseBody
 		},
 	},
 	actionRow{ // S206
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),reduce(13),nil,reduce(13),reduce(13),reduce(13),reduce(13),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(81),  // identifier
+			shift(82),  // bytes_literal
+			shift(83),  // string_literal
+			shift(84),  // integer_literal
+			shift(85),  // floating_point_literal
+			shift(86),  // newline
+			shift(87),  // dollar
+			shift(88),  // *
+			shift(89),  // [
+			shift(90),  // ]
+			shift(91),  // (
+			shift(92),  // )
+			shift(93),  // ,
+			shift(94),  // .
+			shift(95),  // :
+			shift(96),  // %
+			shift(97),  // !
+			shift(98),  // |
+			shift(99),  // |>
+			shift(100), // ^
+			shift(101), // &
+			shift(102), // <<
+			shift(103), // >>
+			shift(104), // =>
+			shift(105), // ->
+			shift(106), // /
+			shift(107), // +
+			shift(108), // -
+			shift(109), // ||
+			shift(110), // <>
+			shift(111), // !=
+			shift(112), // =
+			shift(113), // <
+			shift(114), // <=
+			shift(115), // >
+			shift(116), // >=
+			shift(117), // ;
+			shift(118), // @
+			shift(119), // {
+			shift(120), // }
+			shift(121), // ~
+			shift(122), // ?
+			shift(123), // else
+			shift(124), // if
+			shift(125), // for
+			shift(126), // endfor
+			shift(127), // elif
+			shift(128), // endif
+			shift(129), // set
+			shift(130), // comment
+			shift(302), // template_block_end
+			shift(61),  // template_block_start
+			shift(136), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S207
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),reduce(14),nil,reduce(14),reduce(14),reduce(14),reduce(14),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(303), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S208
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),reduce(15),nil,reduce(15),reduce(15),reduce(15),reduce(15),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(85), // identifier, reduce: TemplateComment
+			reduce(85), // bytes_literal, reduce: TemplateComment
+			reduce(85), // string_literal, reduce: TemplateComment
+			reduce(85), // integer_literal, reduce: TemplateComment
+			reduce(85), // floating_point_literal, reduce: TemplateComment
+			reduce(85), // newline, reduce: TemplateComment
+			reduce(85), // dollar, reduce: TemplateComment
+			reduce(85), // *, reduce: TemplateComment
+			reduce(85), // [, reduce: TemplateComment
+			reduce(85), // ], reduce: TemplateComment
+			reduce(85), // (, reduce: TemplateComment
+			reduce(85), // ), reduce: TemplateComment
+			reduce(85), // ,, reduce: TemplateComment
+			reduce(85), // ., reduce: TemplateComment
+			reduce(85), // :, reduce: TemplateComment
+			reduce(85), // %, reduce: TemplateComment
+			reduce(85), // !, reduce: TemplateComment
+			reduce(85), // |, reduce: TemplateComment
+			reduce(85), // |>, reduce: TemplateComment
+			reduce(85), // ^, reduce: TemplateComment
+			reduce(85), // &, reduce: TemplateComment
+			reduce(85), // <<, reduce: TemplateComment
+			reduce(85), // >>, reduce: TemplateComment
+			reduce(85), // =>, reduce: TemplateComment
+			reduce(85), // ->, reduce: TemplateComment
+			reduce(85), // /, reduce: TemplateComment
+			reduce(85), // +, reduce: TemplateComment
+			reduce(85), // -, reduce: TemplateComment
+			reduce(85), // ||, reduce: TemplateComment
+			reduce(85), // <>, reduce: TemplateComment
+			reduce(85), // !=, reduce: TemplateComment
+			reduce(85), // =, reduce: TemplateComment
+			reduce(85), // <, reduce: TemplateComment
+			reduce(85), // <=, reduce: TemplateComment
+			reduce(85), // >, reduce: TemplateComment
+			reduce(85), // >=, reduce: TemplateComment
+			reduce(85), // ;, reduce: TemplateComment
+			reduce(85), // @, reduce: TemplateComment
+			reduce(85), // {, reduce: TemplateComment
+			reduce(85), // }, reduce: TemplateComment
+			reduce(85), // ~, reduce: TemplateComment
+			reduce(85), // ?, reduce: TemplateComment
+			reduce(85), // else, reduce: TemplateComment
+			reduce(85), // if, reduce: TemplateComment
+			reduce(85), // for, reduce: TemplateComment
+			reduce(85), // endfor, reduce: TemplateComment
+			reduce(85), // elif, reduce: TemplateComment
+			reduce(85), // endif, reduce: TemplateComment
+			reduce(85), // set, reduce: TemplateComment
+			reduce(85), // comment, reduce: TemplateComment
+			nil,        // template_block_end
+			reduce(85), // template_block_start, reduce: TemplateComment
+			reduce(85), // template_comment, reduce: TemplateComment
+			nil,        // template_variable_end
+			reduce(85), // template_variable_start, reduce: TemplateComment
 		},
 	},
 	actionRow{ // S209
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),reduce(16),nil,reduce(16),reduce(16),reduce(16),reduce(16),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(228), // identifier
+			shift(229), // bytes_literal
+			shift(230), // string_literal
+			shift(231), // integer_literal
+			shift(232), // floating_point_literal
+			shift(233), // newline
+			shift(234), // dollar
+			shift(235), // *
+			shift(236), // [
+			shift(237), // ]
+			shift(238), // (
+			shift(239), // )
+			shift(240), // ,
+			shift(241), // .
+			shift(242), // :
+			shift(243), // %
+			shift(244), // !
+			shift(245), // |
+			shift(246), // |>
+			shift(247), // ^
+			shift(248), // &
+			shift(249), // <<
+			shift(250), // >>
+			shift(251), // =>
+			shift(252), // ->
+			shift(253), // /
+			shift(254), // +
+			shift(255), // -
+			shift(256), // ||
+			shift(257), // <>
+			shift(258), // !=
+			shift(259), // =
+			shift(260), // <
+			shift(261), // <=
+			shift(262), // >
+			shift(263), // >=
+			shift(264), // ;
+			shift(265), // @
+			shift(266), // {
+			shift(267), // }
+			shift(268), // ~
+			shift(269), // ?
+			shift(270), // else
+			shift(271), // if
+			shift(272), // for
+			shift(273), // endfor
+			shift(274), // elif
+			shift(275), // endif
+			shift(276), // set
+			shift(277), // comment
+			nil,        // template_block_end
+			shift(61),  // template_block_start
+			shift(282), // template_comment
+			shift(305), // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S210
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),reduce(17),nil,reduce(17),reduce(17),reduce(17),reduce(17),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(69), // identifier, reduce: TemplateIfElseBody
+			reduce(69), // bytes_literal, reduce: TemplateIfElseBody
+			reduce(69), // string_literal, reduce: TemplateIfElseBody
+			reduce(69), // integer_literal, reduce: TemplateIfElseBody
+			reduce(69), // floating_point_literal, reduce: TemplateIfElseBody
+			reduce(69), // newline, reduce: TemplateIfElseBody
+			reduce(69), // dollar, reduce: TemplateIfElseBody
+			reduce(69), // *, reduce: TemplateIfElseBody
+			reduce(69), // [, reduce: TemplateIfElseBody
+			reduce(69), // ], reduce: TemplateIfElseBody
+			reduce(69), // (, reduce: TemplateIfElseBody
+			reduce(69), // ), reduce: TemplateIfElseBody
+			reduce(69), // ,, reduce: TemplateIfElseBody
+			reduce(69), // ., reduce: TemplateIfElseBody
+			reduce(69), // :, reduce: TemplateIfElseBody
+			reduce(69), // %, reduce: TemplateIfElseBody
+			reduce(69), // !, reduce: TemplateIfElseBody
+			reduce(69), // |, reduce: TemplateIfElseBody
+			reduce(69), // |>, reduce: TemplateIfElseBody
+			reduce(69), // ^, reduce: TemplateIfElseBody
+			reduce(69), // &, reduce: TemplateIfElseBody
+			reduce(69), // <<, reduce: TemplateIfElseBody
+			reduce(69), // >>, reduce: TemplateIfElseBody
+			reduce(69), // =>, reduce: TemplateIfElseBody
+			reduce(69), // ->, reduce: TemplateIfElseBody
+			reduce(69), // /, reduce: TemplateIfElseBody
+			reduce(69), // +, reduce: TemplateIfElseBody
+			reduce(69), // -, reduce: TemplateIfElseBody
+			reduce(69), // ||, reduce: TemplateIfElseBody
+			reduce(69), // <>, reduce: TemplateIfElseBody
+			reduce(69), // !=, reduce: TemplateIfElseBody
+			reduce(69), // =, reduce: TemplateIfElseBody
+			reduce(69), // <, reduce: TemplateIfElseBody
+			reduce(69), // <=, reduce: TemplateIfElseBody
+			reduce(69), // >, reduce: TemplateIfElseBody
+			reduce(69), // >=, reduce: TemplateIfElseBody
+			reduce(69), // ;, reduce: TemplateIfElseBody
+			reduce(69), // @, reduce: TemplateIfElseBody
+			reduce(69), // {, reduce: TemplateIfElseBody
+			reduce(69), // }, reduce: TemplateIfElseBody
+			reduce(69), // ~, reduce: TemplateIfElseBody
+			reduce(69), // ?, reduce: TemplateIfElseBody
+			reduce(69), // else, reduce: TemplateIfElseBody
+			reduce(69), // if, reduce: TemplateIfElseBody
+			reduce(69), // for, reduce: TemplateIfElseBody
+			reduce(69), // endfor, reduce: TemplateIfElseBody
+			reduce(69), // elif, reduce: TemplateIfElseBody
+			reduce(69), // endif, reduce: TemplateIfElseBody
+			reduce(69), // set, reduce: TemplateIfElseBody
+			reduce(69), // comment, reduce: TemplateIfElseBody
+			nil,        // template_block_end
+			reduce(69), // template_block_start, reduce: TemplateIfElseBody
+			reduce(69), // template_comment, reduce: TemplateIfElseBody
+			nil,        // template_variable_end
+			reduce(69), // template_variable_start, reduce: TemplateIfElseBody
 		},
 	},
 	actionRow{ // S211
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),reduce(18),nil,reduce(18),reduce(18),reduce(18),reduce(18),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			nil,        // elif
+			shift(296), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S212
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),reduce(19),nil,reduce(19),reduce(19),reduce(19),reduce(19),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(64), // ␚, reduce: TemplateIfBlock
+			reduce(64), // identifier, reduce: TemplateIfBlock
+			reduce(64), // bytes_literal, reduce: TemplateIfBlock
+			reduce(64), // string_literal, reduce: TemplateIfBlock
+			reduce(64), // integer_literal, reduce: TemplateIfBlock
+			reduce(64), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(64), // newline, reduce: TemplateIfBlock
+			reduce(64), // dollar, reduce: TemplateIfBlock
+			reduce(64), // *, reduce: TemplateIfBlock
+			reduce(64), // [, reduce: TemplateIfBlock
+			reduce(64), // ], reduce: TemplateIfBlock
+			reduce(64), // (, reduce: TemplateIfBlock
+			reduce(64), // ), reduce: TemplateIfBlock
+			reduce(64), // ,, reduce: TemplateIfBlock
+			reduce(64), // ., reduce: TemplateIfBlock
+			reduce(64), // :, reduce: TemplateIfBlock
+			reduce(64), // %, reduce: TemplateIfBlock
+			reduce(64), // !, reduce: TemplateIfBlock
+			reduce(64), // |, reduce: TemplateIfBlock
+			reduce(64), // |>, reduce: TemplateIfBlock
+			reduce(64), // ^, reduce: TemplateIfBlock
+			reduce(64), // &, reduce: TemplateIfBlock
+			reduce(64), // <<, reduce: TemplateIfBlock
+			reduce(64), // >>, reduce: TemplateIfBlock
+			reduce(64), // =>, reduce: TemplateIfBlock
+			reduce(64), // ->, reduce: TemplateIfBlock
+			reduce(64), // /, reduce: TemplateIfBlock
+			reduce(64), // +, reduce: TemplateIfBlock
+			reduce(64), // -, reduce: TemplateIfBlock
+			reduce(64), // ||, reduce: TemplateIfBlock
+			reduce(64), // <>, reduce: TemplateIfBlock
+			reduce(64), // !=, reduce: TemplateIfBlock
+			reduce(64), // =, reduce: TemplateIfBlock
+			reduce(64), // <, reduce: TemplateIfBlock
+			reduce(64), // <=, reduce: TemplateIfBlock
+			reduce(64), // >, reduce: TemplateIfBlock
+			reduce(64), // >=, reduce: TemplateIfBlock
+			reduce(64), // ;, reduce: TemplateIfBlock
+			reduce(64), // @, reduce: TemplateIfBlock
+			reduce(64), // {, reduce: TemplateIfBlock
+			reduce(64), // }, reduce: TemplateIfBlock
+			reduce(64), // ~, reduce: TemplateIfBlock
+			reduce(64), // ?, reduce: TemplateIfBlock
+			reduce(64), // else, reduce: TemplateIfBlock
+			reduce(64), // if, reduce: TemplateIfBlock
+			reduce(64), // for, reduce: TemplateIfBlock
+			reduce(64), // endfor, reduce: TemplateIfBlock
+			reduce(64), // elif, reduce: TemplateIfBlock
+			reduce(64), // endif, reduce: TemplateIfBlock
+			reduce(64), // set, reduce: TemplateIfBlock
+			reduce(64), // comment, reduce: TemplateIfBlock
+			nil,        // template_block_end
+			reduce(64), // template_block_start, reduce: TemplateIfBlock
+			reduce(64), // template_comment, reduce: TemplateIfBlock
+			nil,        // template_variable_end
+			reduce(64), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S213
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),reduce(20),nil,reduce(20),reduce(20),reduce(20),reduce(20),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(72), // identifier, reduce: TemplateIfBeginPrefix
+			reduce(72), // bytes_literal, reduce: TemplateIfBeginPrefix
+			reduce(72), // string_literal, reduce: TemplateIfBeginPrefix
+			reduce(72), // integer_literal, reduce: TemplateIfBeginPrefix
+			reduce(72), // floating_point_literal, reduce: TemplateIfBeginPrefix
+			reduce(72), // newline, reduce: TemplateIfBeginPrefix
+			reduce(72), // dollar, reduce: TemplateIfBeginPrefix
+			reduce(72), // *, reduce: TemplateIfBeginPrefix
+			reduce(72), // [, reduce: TemplateIfBeginPrefix
+			reduce(72), // ], reduce: TemplateIfBeginPrefix
+			reduce(72), // (, reduce: TemplateIfBeginPrefix
+			reduce(72), // ), reduce: TemplateIfBeginPrefix
+			reduce(72), // ,, reduce: TemplateIfBeginPrefix
+			reduce(72), // ., reduce: TemplateIfBeginPrefix
+			reduce(72), // :, reduce: TemplateIfBeginPrefix
+			reduce(72), // %, reduce: TemplateIfBeginPrefix
+			reduce(72), // !, reduce: TemplateIfBeginPrefix
+			reduce(72), // |, reduce: TemplateIfBeginPrefix
+			reduce(72), // |>, reduce: TemplateIfBeginPrefix
+			reduce(72), // ^, reduce: TemplateIfBeginPrefix
+			reduce(72), // &, reduce: TemplateIfBeginPrefix
+			reduce(72), // <<, reduce: TemplateIfBeginPrefix
+			reduce(72), // >>, reduce: TemplateIfBeginPrefix
+			reduce(72), // =>, reduce: TemplateIfBeginPrefix
+			reduce(72), // ->, reduce: TemplateIfBeginPrefix
+			reduce(72), // /, reduce: TemplateIfBeginPrefix
+			reduce(72), // +, reduce: TemplateIfBeginPrefix
+			reduce(72), // -, reduce: TemplateIfBeginPrefix
+			reduce(72), // ||, reduce: TemplateIfBeginPrefix
+			reduce(72), // <>, reduce: TemplateIfBeginPrefix
+			reduce(72), // !=, reduce: TemplateIfBeginPrefix
+			reduce(72), // =, reduce: TemplateIfBeginPrefix
+			reduce(72), // <, reduce: TemplateIfBeginPrefix
+			reduce(72), // <=, reduce: TemplateIfBeginPrefix
+			reduce(72), // >, reduce: TemplateIfBeginPrefix
+			reduce(72), // >=, reduce: TemplateIfBeginPrefix
+			reduce(72), // ;, reduce: TemplateIfBeginPrefix
+			reduce(72), // @, reduce: TemplateIfBeginPrefix
+			reduce(72), // {, reduce: TemplateIfBeginPrefix
+			reduce(72), // }, reduce: TemplateIfBeginPrefix
+			reduce(72), // ~, reduce: TemplateIfBeginPrefix
+			reduce(72), // ?, reduce: TemplateIfBeginPrefix
+			reduce(72), // else, reduce: TemplateIfBeginPrefix
+			reduce(72), // if, reduce: TemplateIfBeginPrefix
+			reduce(72), // for, reduce: TemplateIfBeginPrefix
+			reduce(72), // endfor, reduce: TemplateIfBeginPrefix
+			reduce(72), // elif, reduce: TemplateIfBeginPrefix
+			reduce(72), // endif, reduce: TemplateIfBeginPrefix
+			reduce(72), // set, reduce: TemplateIfBeginPrefix
+			reduce(72), // comment, reduce: TemplateIfBeginPrefix
+			reduce(72), // template_block_end, reduce: TemplateIfBeginPrefix
+			reduce(72), // template_block_start, reduce: TemplateIfBeginPrefix
+			reduce(72), // template_comment, reduce: TemplateIfBeginPrefix
+			nil,        // template_variable_end
+			reduce(72), // template_variable_start, reduce: TemplateIfBeginPrefix
 		},
 	},
 	actionRow{ // S214
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),reduce(21),nil,reduce(21),reduce(21),reduce(21),reduce(21),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(70), // identifier, reduce: TemplateIfBegin
+			reduce(70), // bytes_literal, reduce: TemplateIfBegin
+			reduce(70), // string_literal, reduce: TemplateIfBegin
+			reduce(70), // integer_literal, reduce: TemplateIfBegin
+			reduce(70), // floating_point_literal, reduce: TemplateIfBegin
+			reduce(70), // newline, reduce: TemplateIfBegin
+			reduce(70), // dollar, reduce: TemplateIfBegin
+			reduce(70), // *, reduce: TemplateIfBegin
+			reduce(70), // [, reduce: TemplateIfBegin
+			reduce(70), // ], reduce: TemplateIfBegin
+			reduce(70), // (, reduce: TemplateIfBegin
+			reduce(70), // ), reduce: TemplateIfBegin
+			reduce(70), // ,, reduce: TemplateIfBegin
+			reduce(70), // ., reduce: TemplateIfBegin
+			reduce(70), // :, reduce: TemplateIfBegin
+			reduce(70), // %, reduce: TemplateIfBegin
+			reduce(70), // !, reduce: TemplateIfBegin
+			reduce(70), // |, reduce: TemplateIfBegin
+			reduce(70), // |>, reduce: TemplateIfBegin
+			reduce(70), // ^, reduce: TemplateIfBegin
+			reduce(70), // &, reduce: TemplateIfBegin
+			reduce(70), // <<, reduce: TemplateIfBegin
+			reduce(70), // >>, reduce: TemplateIfBegin
+			reduce(70), // =>, reduce: TemplateIfBegin
+			reduce(70), // ->, reduce: TemplateIfBegin
+			reduce(70), // /, reduce: TemplateIfBegin
+			reduce(70), // +, reduce: TemplateIfBegin
+			reduce(70), // -, reduce: TemplateIfBegin
+			reduce(70), // ||, reduce: TemplateIfBegin
+			reduce(70), // <>, reduce: TemplateIfBegin
+			reduce(70), // !=, reduce: TemplateIfBegin
+			reduce(70), // =, reduce: TemplateIfBegin
+			reduce(70), // <, reduce: TemplateIfBegin
+			reduce(70), // <=, reduce: TemplateIfBegin
+			reduce(70), // >, reduce: TemplateIfBegin
+			reduce(70), // >=, reduce: TemplateIfBegin
+			reduce(70), // ;, reduce: TemplateIfBegin
+			reduce(70), // @, reduce: TemplateIfBegin
+			reduce(70), // {, reduce: TemplateIfBegin
+			reduce(70), // }, reduce: TemplateIfBegin
+			reduce(70), // ~, reduce: TemplateIfBegin
+			reduce(70), // ?, reduce: TemplateIfBegin
+			reduce(70), // else, reduce: TemplateIfBegin
+			reduce(70), // if, reduce: TemplateIfBegin
+			reduce(70), // for, reduce: TemplateIfBegin
+			reduce(70), // endfor, reduce: TemplateIfBegin
+			reduce(70), // elif, reduce: TemplateIfBegin
+			reduce(70), // endif, reduce: TemplateIfBegin
+			reduce(70), // set, reduce: TemplateIfBegin
+			reduce(70), // comment, reduce: TemplateIfBegin
+			nil,        // template_block_end
+			reduce(70), // template_block_start, reduce: TemplateIfBegin
+			reduce(70), // template_comment, reduce: TemplateIfBegin
+			nil,        // template_variable_end
+			reduce(70), // template_variable_start, reduce: TemplateIfBegin
 		},
 	},
 	actionRow{ // S215
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),reduce(22),nil,reduce(22),reduce(22),reduce(22),reduce(22),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(80), // identifier, reduce: TemplateForBlockPrefix
+			reduce(80), // bytes_literal, reduce: TemplateForBlockPrefix
+			reduce(80), // string_literal, reduce: TemplateForBlockPrefix
+			reduce(80), // integer_literal, reduce: TemplateForBlockPrefix
+			reduce(80), // floating_point_literal, reduce: TemplateForBlockPrefix
+			reduce(80), // newline, reduce: TemplateForBlockPrefix
+			reduce(80), // dollar, reduce: TemplateForBlockPrefix
+			reduce(80), // *, reduce: TemplateForBlockPrefix
+			reduce(80), // [, reduce: TemplateForBlockPrefix
+			reduce(80), // ], reduce: TemplateForBlockPrefix
+			reduce(80), // (, reduce: TemplateForBlockPrefix
+			reduce(80), // ), reduce: TemplateForBlockPrefix
+			reduce(80), // ,, reduce: TemplateForBlockPrefix
+			reduce(80), // ., reduce: TemplateForBlockPrefix
+			reduce(80), // :, reduce: TemplateForBlockPrefix
+			reduce(80), // %, reduce: TemplateForBlockPrefix
+			reduce(80), // !, reduce: TemplateForBlockPrefix
+			reduce(80), // |, reduce: TemplateForBlockPrefix
+			reduce(80), // |>, reduce: TemplateForBlockPrefix
+			reduce(80), // ^, reduce: TemplateForBlockPrefix
+			reduce(80), // &, reduce: TemplateForBlockPrefix
+			reduce(80), // <<, reduce: TemplateForBlockPrefix
+			reduce(80), // >>, reduce: TemplateForBlockPrefix
+			reduce(80), // =>, reduce: TemplateForBlockPrefix
+			reduce(80), // ->, reduce: TemplateForBlockPrefix
+			reduce(80), // /, reduce: TemplateForBlockPrefix
+			reduce(80), // +, reduce: TemplateForBlockPrefix
+			reduce(80), // -, reduce: TemplateForBlockPrefix
+			reduce(80), // ||, reduce: TemplateForBlockPrefix
+			reduce(80), // <>, reduce: TemplateForBlockPrefix
+			reduce(80), // !=, reduce: TemplateForBlockPrefix
+			reduce(80), // =, reduce: TemplateForBlockPrefix
+			reduce(80), // <, reduce: TemplateForBlockPrefix
+			reduce(80), // <=, reduce: TemplateForBlockPrefix
+			reduce(80), // >, reduce: TemplateForBlockPrefix
+			reduce(80), // >=, reduce: TemplateForBlockPrefix
+			reduce(80), // ;, reduce: TemplateForBlockPrefix
+			reduce(80), // @, reduce: TemplateForBlockPrefix
+			reduce(80), // {, reduce: TemplateForBlockPrefix
+			reduce(80), // }, reduce: TemplateForBlockPrefix
+			reduce(80), // ~, reduce: TemplateForBlockPrefix
+			reduce(80), // ?, reduce: TemplateForBlockPrefix
+			reduce(80), // else, reduce: TemplateForBlockPrefix
+			reduce(80), // if, reduce: TemplateForBlockPrefix
+			reduce(80), // for, reduce: TemplateForBlockPrefix
+			reduce(80), // endfor, reduce: TemplateForBlockPrefix
+			reduce(80), // elif, reduce: TemplateForBlockPrefix
+			reduce(80), // endif, reduce: TemplateForBlockPrefix
+			reduce(80), // set, reduce: TemplateForBlockPrefix
+			reduce(80), // comment, reduce: TemplateForBlockPrefix
+			nil,        // template_block_end
+			reduce(80), // template_block_start, reduce: TemplateForBlockPrefix
+			reduce(80), // template_comment, reduce: TemplateForBlockPrefix
+			nil,        // template_variable_end
+			reduce(80), // template_variable_start, reduce: TemplateForBlockPrefix
 		},
 	},
 	actionRow{ // S216
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),reduce(23),nil,reduce(23),reduce(23),reduce(23),reduce(23),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			shift(306), // endfor
+			nil,        // elif
+			nil,        // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S217
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),reduce(24),nil,reduce(24),reduce(24),reduce(24),reduce(24),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(78), // ␚, reduce: TemplateForBlock
+			reduce(78), // identifier, reduce: TemplateForBlock
+			reduce(78), // bytes_literal, reduce: TemplateForBlock
+			reduce(78), // string_literal, reduce: TemplateForBlock
+			reduce(78), // integer_literal, reduce: TemplateForBlock
+			reduce(78), // floating_point_literal, reduce: TemplateForBlock
+			reduce(78), // newline, reduce: TemplateForBlock
+			reduce(78), // dollar, reduce: TemplateForBlock
+			reduce(78), // *, reduce: TemplateForBlock
+			reduce(78), // [, reduce: TemplateForBlock
+			reduce(78), // ], reduce: TemplateForBlock
+			reduce(78), // (, reduce: TemplateForBlock
+			reduce(78), // ), reduce: TemplateForBlock
+			reduce(78), // ,, reduce: TemplateForBlock
+			reduce(78), // ., reduce: TemplateForBlock
+			reduce(78), // :, reduce: TemplateForBlock
+			reduce(78), // %, reduce: TemplateForBlock
+			reduce(78), // !, reduce: TemplateForBlock
+			reduce(78), // |, reduce: TemplateForBlock
+			reduce(78), // |>, reduce: TemplateForBlock
+			reduce(78), // ^, reduce: TemplateForBlock
+			reduce(78), // &, reduce: TemplateForBlock
+			reduce(78), // <<, reduce: TemplateForBlock
+			reduce(78), // >>, reduce: TemplateForBlock
+			reduce(78), // =>, reduce: TemplateForBlock
+			reduce(78), // ->, reduce: TemplateForBlock
+			reduce(78), // /, reduce: TemplateForBlock
+			reduce(78), // +, reduce: TemplateForBlock
+			reduce(78), // -, reduce: TemplateForBlock
+			reduce(78), // ||, reduce: TemplateForBlock
+			reduce(78), // <>, reduce: TemplateForBlock
+			reduce(78), // !=, reduce: TemplateForBlock
+			reduce(78), // =, reduce: TemplateForBlock
+			reduce(78), // <, reduce: TemplateForBlock
+			reduce(78), // <=, reduce: TemplateForBlock
+			reduce(78), // >, reduce: TemplateForBlock
+			reduce(78), // >=, reduce: TemplateForBlock
+			reduce(78), // ;, reduce: TemplateForBlock
+			reduce(78), // @, reduce: TemplateForBlock
+			reduce(78), // {, reduce: TemplateForBlock
+			reduce(78), // }, reduce: TemplateForBlock
+			reduce(78), // ~, reduce: TemplateForBlock
+			reduce(78), // ?, reduce: TemplateForBlock
+			reduce(78), // else, reduce: TemplateForBlock
+			reduce(78), // if, reduce: TemplateForBlock
+			reduce(78), // for, reduce: TemplateForBlock
+			reduce(78), // endfor, reduce: TemplateForBlock
+			reduce(78), // elif, reduce: TemplateForBlock
+			reduce(78), // endif, reduce: TemplateForBlock
+			reduce(78), // set, reduce: TemplateForBlock
+			reduce(78), // comment, reduce: TemplateForBlock
+			nil,        // template_block_end
+			reduce(78), // template_block_start, reduce: TemplateForBlock
+			reduce(78), // template_comment, reduce: TemplateForBlock
+			nil,        // template_variable_end
+			reduce(78), // template_variable_start, reduce: TemplateForBlock
 		},
 	},
 	actionRow{ // S218
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),reduce(25),nil,reduce(25),reduce(25),reduce(25),reduce(25),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(83), // identifier, reduce: TemplateForBeginPrefix
+			reduce(83), // bytes_literal, reduce: TemplateForBeginPrefix
+			reduce(83), // string_literal, reduce: TemplateForBeginPrefix
+			reduce(83), // integer_literal, reduce: TemplateForBeginPrefix
+			reduce(83), // floating_point_literal, reduce: TemplateForBeginPrefix
+			reduce(83), // newline, reduce: TemplateForBeginPrefix
+			reduce(83), // dollar, reduce: TemplateForBeginPrefix
+			reduce(83), // *, reduce: TemplateForBeginPrefix
+			reduce(83), // [, reduce: TemplateForBeginPrefix
+			reduce(83), // ], reduce: TemplateForBeginPrefix
+			reduce(83), // (, reduce: TemplateForBeginPrefix
+			reduce(83), // ), reduce: TemplateForBeginPrefix
+			reduce(83), // ,, reduce: TemplateForBeginPrefix
+			reduce(83), // ., reduce: TemplateForBeginPrefix
+			reduce(83), // :, reduce: TemplateForBeginPrefix
+			reduce(83), // %, reduce: TemplateForBeginPrefix
+			reduce(83), // !, reduce: TemplateForBeginPrefix
+			reduce(83), // |, reduce: TemplateForBeginPrefix
+			reduce(83), // |>, reduce: TemplateForBeginPrefix
+			reduce(83), // ^, reduce: TemplateForBeginPrefix
+			reduce(83), // &, reduce: TemplateForBeginPrefix
+			reduce(83), // <<, reduce: TemplateForBeginPrefix
+			reduce(83), // >>, reduce: TemplateForBeginPrefix
+			reduce(83), // =>, reduce: TemplateForBeginPrefix
+			reduce(83), // ->, reduce: TemplateForBeginPrefix
+			reduce(83), // /, reduce: TemplateForBeginPrefix
+			reduce(83), // +, reduce: TemplateForBeginPrefix
+			reduce(83), // -, reduce: TemplateForBeginPrefix
+			reduce(83), // ||, reduce: TemplateForBeginPrefix
+			reduce(83), // <>, reduce: TemplateForBeginPrefix
+			reduce(83), // !=, reduce: TemplateForBeginPrefix
+			reduce(83), // =, reduce: TemplateForBeginPrefix
+			reduce(83), // <, reduce: TemplateForBeginPrefix
+			reduce(83), // <=, reduce: TemplateForBeginPrefix
+			reduce(83), // >, reduce: TemplateForBeginPrefix
+			reduce(83), // >=, reduce: TemplateForBeginPrefix
+			reduce(83), // ;, reduce: TemplateForBeginPrefix
+			reduce(83), // @, reduce: TemplateForBeginPrefix
+			reduce(83), // {, reduce: TemplateForBeginPrefix
+			reduce(83), // }, reduce: TemplateForBeginPrefix
+			reduce(83), // ~, reduce: TemplateForBeginPrefix
+			reduce(83), // ?, reduce: TemplateForBeginPrefix
+			reduce(83), // else, reduce: TemplateForBeginPrefix
+			reduce(83), // if, reduce: TemplateForBeginPrefix
+			reduce(83), // for, reduce: TemplateForBeginPrefix
+			reduce(83), // endfor, reduce: TemplateForBeginPrefix
+			reduce(83), // elif, reduce: TemplateForBeginPrefix
+			reduce(83), // endif, reduce: TemplateForBeginPrefix
+			reduce(83), // set, reduce: TemplateForBeginPrefix
+			reduce(83), // comment, reduce: TemplateForBeginPrefix
+			reduce(83), // template_block_end, reduce: TemplateForBeginPrefix
+			reduce(83), // template_block_start, reduce: TemplateForBeginPrefix
+			reduce(83), // template_comment, reduce: TemplateForBeginPrefix
+			nil,        // template_variable_end
+			reduce(83), // template_variable_start, reduce: TemplateForBeginPrefix
 		},
 	},
 	actionRow{ // S219
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),reduce(26),nil,reduce(26),reduce(26),reduce(26),reduce(26),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(81), // identifier, reduce: TemplateForBegin
+			reduce(81), // bytes_literal, reduce: TemplateForBegin
+			reduce(81), // string_literal, reduce: TemplateForBegin
+			reduce(81), // integer_literal, reduce: TemplateForBegin
+			reduce(81), // floating_point_literal, reduce: TemplateForBegin
+			reduce(81), // newline, reduce: TemplateForBegin
+			reduce(81), // dollar, reduce: TemplateForBegin
+			reduce(81), // *, reduce: TemplateForBegin
+			reduce(81), // [, reduce: TemplateForBegin
+			reduce(81), // ], reduce: TemplateForBegin
+			reduce(81), // (, reduce: TemplateForBegin
+			reduce(81), // ), reduce: TemplateForBegin
+			reduce(81), // ,, reduce: TemplateForBegin
+			reduce(81), // ., reduce: TemplateForBegin
+			reduce(81), // :, reduce: TemplateForBegin
+			reduce(81), // %, reduce: TemplateForBegin
+			reduce(81), // !, reduce: TemplateForBegin
+			reduce(81), // |, reduce: TemplateForBegin
+			reduce(81), // |>, reduce: TemplateForBegin
+			reduce(81), // ^, reduce: TemplateForBegin
+			reduce(81), // &, reduce: TemplateForBegin
+			reduce(81), // <<, reduce: TemplateForBegin
+			reduce(81), // >>, reduce: TemplateForBegin
+			reduce(81), // =>, reduce: TemplateForBegin
+			reduce(81), // ->, reduce: TemplateForBegin
+			reduce(81), // /, reduce: TemplateForBegin
+			reduce(81), // +, reduce: TemplateForBegin
+			reduce(81), // -, reduce: TemplateForBegin
+			reduce(81), // ||, reduce: TemplateForBegin
+			reduce(81), // <>, reduce: TemplateForBegin
+			reduce(81), // !=, reduce: TemplateForBegin
+			reduce(81), // =, reduce: TemplateForBegin
+			reduce(81), // <, reduce: TemplateForBegin
+			reduce(81), // <=, reduce: TemplateForBegin
+			reduce(81), // >, reduce: TemplateForBegin
+			reduce(81), // >=, reduce: TemplateForBegin
+			reduce(81), // ;, reduce: TemplateForBegin
+			reduce(81), // @, reduce: TemplateForBegin
+			reduce(81), // {, reduce: TemplateForBegin
+			reduce(81), // }, reduce: TemplateForBegin
+			reduce(81), // ~, reduce: TemplateForBegin
+			reduce(81), // ?, reduce: TemplateForBegin
+			reduce(81), // else, reduce: TemplateForBegin
+			reduce(81), // if, reduce: TemplateForBegin
+			reduce(81), // for, reduce: TemplateForBegin
+			reduce(81), // endfor, reduce: TemplateForBegin
+			reduce(81), // elif, reduce: TemplateForBegin
+			reduce(81), // endif, reduce: TemplateForBegin
+			reduce(81), // set, reduce: TemplateForBegin
+			reduce(81), // comment, reduce: TemplateForBegin
+			nil,        // template_block_end
+			reduce(81), // template_block_start, reduce: TemplateForBegin
+			reduce(81), // template_comment, reduce: TemplateForBegin
+			nil,        // template_variable_end
+			reduce(81), // template_variable_start, reduce: TemplateForBegin
 		},
 	},
 	actionRow{ // S220
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),reduce(27),nil,reduce(27),reduce(27),reduce(27),reduce(27),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(88), // identifier, reduce: TemplateVariablePrefix
+			reduce(88), // bytes_literal, reduce: TemplateVariablePrefix
+			reduce(88), // string_literal, reduce: TemplateVariablePrefix
+			reduce(88), // integer_literal, reduce: TemplateVariablePrefix
+			reduce(88), // floating_point_literal, reduce: TemplateVariablePrefix
+			reduce(88), // newline, reduce: TemplateVariablePrefix
+			reduce(88), // dollar, reduce: TemplateVariablePrefix
+			reduce(88), // *, reduce: TemplateVariablePrefix
+			reduce(88), // [, reduce: TemplateVariablePrefix
+			reduce(88), // ], reduce: TemplateVariablePrefix
+			reduce(88), // (, reduce: TemplateVariablePrefix
+			reduce(88), // ), reduce: TemplateVariablePrefix
+			reduce(88), // ,, reduce: TemplateVariablePrefix
+			reduce(88), // ., reduce: TemplateVariablePrefix
+			reduce(88), // :, reduce: TemplateVariablePrefix
+			reduce(88), // %, reduce: TemplateVariablePrefix
+			reduce(88), // !, reduce: TemplateVariablePrefix
+			reduce(88), // |, reduce: TemplateVariablePrefix
+			reduce(88), // |>, reduce: TemplateVariablePrefix
+			reduce(88), // ^, reduce: TemplateVariablePrefix
+			reduce(88), // &, reduce: TemplateVariablePrefix
+			reduce(88), // <<, reduce: TemplateVariablePrefix
+			reduce(88), // >>, reduce: TemplateVariablePrefix
+			reduce(88), // =>, reduce: TemplateVariablePrefix
+			reduce(88), // ->, reduce: TemplateVariablePrefix
+			reduce(88), // /, reduce: TemplateVariablePrefix
+			reduce(88), // +, reduce: TemplateVariablePrefix
+			reduce(88), // -, reduce: TemplateVariablePrefix
+			reduce(88), // ||, reduce: TemplateVariablePrefix
+			reduce(88), // <>, reduce: TemplateVariablePrefix
+			reduce(88), // !=, reduce: TemplateVariablePrefix
+			reduce(88), // =, reduce: TemplateVariablePrefix
+			reduce(88), // <, reduce: TemplateVariablePrefix
+			reduce(88), // <=, reduce: TemplateVariablePrefix
+			reduce(88), // >, reduce: TemplateVariablePrefix
+			reduce(88), // >=, reduce: TemplateVariablePrefix
+			reduce(88), // ;, reduce: TemplateVariablePrefix
+			reduce(88), // @, reduce: TemplateVariablePrefix
+			reduce(88), // {, reduce: TemplateVariablePrefix
+			reduce(88), // }, reduce: TemplateVariablePrefix
+			reduce(88), // ~, reduce: TemplateVariablePrefix
+			reduce(88), // ?, reduce: TemplateVariablePrefix
+			reduce(88), // else, reduce: TemplateVariablePrefix
+			reduce(88), // if, reduce: TemplateVariablePrefix
+			reduce(88), // for, reduce: TemplateVariablePrefix
+			reduce(88), // endfor, reduce: TemplateVariablePrefix
+			reduce(88), // elif, reduce: TemplateVariablePrefix
+			reduce(88), // endif, reduce: TemplateVariablePrefix
+			reduce(88), // set, reduce: TemplateVariablePrefix
+			reduce(88), // comment, reduce: TemplateVariablePrefix
+			nil,        // template_block_end
+			reduce(88), // template_block_start, reduce: TemplateVariablePrefix
+			reduce(88), // template_comment, reduce: TemplateVariablePrefix
+			reduce(88), // template_variable_end, reduce: TemplateVariablePrefix
+			reduce(88), // template_variable_start, reduce: TemplateVariablePrefix
 		},
 	},
 	actionRow{ // S221
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),reduce(28),nil,reduce(28),reduce(28),reduce(28),reduce(28),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(3), // identifier, reduce: Element
+			reduce(3), // bytes_literal, reduce: Element
+			reduce(3), // string_literal, reduce: Element
+			reduce(3), // integer_literal, reduce: Element
+			reduce(3), // floating_point_literal, reduce: Element
+			reduce(3), // newline, reduce: Element
+			reduce(3), // dollar, reduce: Element
+			reduce(3), // *, reduce: Element
+			reduce(3), // [, reduce: Element
+			reduce(3), // ], reduce: Element
+			reduce(3), // (, reduce: Element
+			reduce(3), // ), reduce: Element
+			reduce(3), // ,, reduce: Element
+			reduce(3), // ., reduce: Element
+			reduce(3), // :, reduce: Element
+			reduce(3), // %, reduce: Element
+			reduce(3), // !, reduce: Element
+			reduce(3), // |, reduce: Element
+			reduce(3), // |>, reduce: Element
+			reduce(3), // ^, reduce: Element
+			reduce(3), // &, reduce: Element
+			reduce(3), // <<, reduce: Element
+			reduce(3), // >>, reduce: Element
+			reduce(3), // =>, reduce: Element
+			reduce(3), // ->, reduce: Element
+			reduce(3), // /, reduce: Element
+			reduce(3), // +, reduce: Element
+			reduce(3), // -, reduce: Element
+			reduce(3), // ||, reduce: Element
+			reduce(3), // <>, reduce: Element
+			reduce(3), // !=, reduce: Element
+			reduce(3), // =, reduce: Element
+			reduce(3), // <, reduce: Element
+			reduce(3), // <=, reduce: Element
+			reduce(3), // >, reduce: Element
+			reduce(3), // >=, reduce: Element
+			reduce(3), // ;, reduce: Element
+			reduce(3), // @, reduce: Element
+			reduce(3), // {, reduce: Element
+			reduce(3), // }, reduce: Element
+			reduce(3), // ~, reduce: Element
+			reduce(3), // ?, reduce: Element
+			reduce(3), // else, reduce: Element
+			reduce(3), // if, reduce: Element
+			reduce(3), // for, reduce: Element
+			reduce(3), // endfor, reduce: Element
+			reduce(3), // elif, reduce: Element
+			reduce(3), // endif, reduce: Element
+			reduce(3), // set, reduce: Element
+			reduce(3), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(3), // template_block_start, reduce: Element
+			reduce(3), // template_comment, reduce: Element
+			reduce(3), // template_variable_end, reduce: Element
+			reduce(3), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S222
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),reduce(29),nil,reduce(29),reduce(29),reduce(29),reduce(29),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(4), // identifier, reduce: Element
+			reduce(4), // bytes_literal, reduce: Element
+			reduce(4), // string_literal, reduce: Element
+			reduce(4), // integer_literal, reduce: Element
+			reduce(4), // floating_point_literal, reduce: Element
+			reduce(4), // newline, reduce: Element
+			reduce(4), // dollar, reduce: Element
+			reduce(4), // *, reduce: Element
+			reduce(4), // [, reduce: Element
+			reduce(4), // ], reduce: Element
+			reduce(4), // (, reduce: Element
+			reduce(4), // ), reduce: Element
+			reduce(4), // ,, reduce: Element
+			reduce(4), // ., reduce: Element
+			reduce(4), // :, reduce: Element
+			reduce(4), // %, reduce: Element
+			reduce(4), // !, reduce: Element
+			reduce(4), // |, reduce: Element
+			reduce(4), // |>, reduce: Element
+			reduce(4), // ^, reduce: Element
+			reduce(4), // &, reduce: Element
+			reduce(4), // <<, reduce: Element
+			reduce(4), // >>, reduce: Element
+			reduce(4), // =>, reduce: Element
+			reduce(4), // ->, reduce: Element
+			reduce(4), // /, reduce: Element
+			reduce(4), // +, reduce: Element
+			reduce(4), // -, reduce: Element
+			reduce(4), // ||, reduce: Element
+			reduce(4), // <>, reduce: Element
+			reduce(4), // !=, reduce: Element
+			reduce(4), // =, reduce: Element
+			reduce(4), // <, reduce: Element
+			reduce(4), // <=, reduce: Element
+			reduce(4), // >, reduce: Element
+			reduce(4), // >=, reduce: Element
+			reduce(4), // ;, reduce: Element
+			reduce(4), // @, reduce: Element
+			reduce(4), // {, reduce: Element
+			reduce(4), // }, reduce: Element
+			reduce(4), // ~, reduce: Element
+			reduce(4), // ?, reduce: Element
+			reduce(4), // else, reduce: Element
+			reduce(4), // if, reduce: Element
+			reduce(4), // for, reduce: Element
+			reduce(4), // endfor, reduce: Element
+			reduce(4), // elif, reduce: Element
+			reduce(4), // endif, reduce: Element
+			reduce(4), // set, reduce: Element
+			reduce(4), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(4), // template_block_start, reduce: Element
+			reduce(4), // template_comment, reduce: Element
+			reduce(4), // template_variable_end, reduce: Element
+			reduce(4), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S223
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),reduce(30),nil,reduce(30),reduce(30),reduce(30),reduce(30),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(5), // identifier, reduce: Element
+			reduce(5), // bytes_literal, reduce: Element
+			reduce(5), // string_literal, reduce: Element
+			reduce(5), // integer_literal, reduce: Element
+			reduce(5), // floating_point_literal, reduce: Element
+			reduce(5), // newline, reduce: Element
+			reduce(5), // dollar, reduce: Element
+			reduce(5), // *, reduce: Element
+			reduce(5), // [, reduce: Element
+			reduce(5), // ], reduce: Element
+			reduce(5), // (, reduce: Element
+			reduce(5), // ), reduce: Element
+			reduce(5), // ,, reduce: Element
+			reduce(5), // ., reduce: Element
+			reduce(5), // :, reduce: Element
+			reduce(5), // %, reduce: Element
+			reduce(5), // !, reduce: Element
+			reduce(5), // |, reduce: Element
+			reduce(5), // |>, reduce: Element
+			reduce(5), // ^, reduce: Element
+			reduce(5), // &, reduce: Element
+			reduce(5), // <<, reduce: Element
+			reduce(5), // >>, reduce: Element
+			reduce(5), // =>, reduce: Element
+			reduce(5), // ->, reduce: Element
+			reduce(5), // /, reduce: Element
+			reduce(5), // +, reduce: Element
+			reduce(5), // -, reduce: Element
+			reduce(5), // ||, reduce: Element
+			reduce(5), // <>, reduce: Element
+			reduce(5), // !=, reduce: Element
+			reduce(5), // =, reduce: Element
+			reduce(5), // <, reduce: Element
+			reduce(5), // <=, reduce: Element
+			reduce(5), // >, reduce: Element
+			reduce(5), // >=, reduce: Element
+			reduce(5), // ;, reduce: Element
+			reduce(5), // @, reduce: Element
+			reduce(5), // {, reduce: Element
+			reduce(5), // }, reduce: Element
+			reduce(5), // ~, reduce: Element
+			reduce(5), // ?, reduce: Element
+			reduce(5), // else, reduce: Element
+			reduce(5), // if, reduce: Element
+			reduce(5), // for, reduce: Element
+			reduce(5), // endfor, reduce: Element
+			reduce(5), // elif, reduce: Element
+			reduce(5), // endif, reduce: Element
+			reduce(5), // set, reduce: Element
+			reduce(5), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(5), // template_block_start, reduce: Element
+			reduce(5), // template_comment, reduce: Element
+			reduce(5), // template_variable_end, reduce: Element
+			reduce(5), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S224
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),reduce(31),nil,reduce(31),reduce(31),reduce(31),reduce(31),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(6), // identifier, reduce: Element
+			reduce(6), // bytes_literal, reduce: Element
+			reduce(6), // string_literal, reduce: Element
+			reduce(6), // integer_literal, reduce: Element
+			reduce(6), // floating_point_literal, reduce: Element
+			reduce(6), // newline, reduce: Element
+			reduce(6), // dollar, reduce: Element
+			reduce(6), // *, reduce: Element
+			reduce(6), // [, reduce: Element
+			reduce(6), // ], reduce: Element
+			reduce(6), // (, reduce: Element
+			reduce(6), // ), reduce: Element
+			reduce(6), // ,, reduce: Element
+			reduce(6), // ., reduce: Element
+			reduce(6), // :, reduce: Element
+			reduce(6), // %, reduce: Element
+			reduce(6), // !, reduce: Element
+			reduce(6), // |, reduce: Element
+			reduce(6), // |>, reduce: Element
+			reduce(6), // ^, reduce: Element
+			reduce(6), // &, reduce: Element
+			reduce(6), // <<, reduce: Element
+			reduce(6), // >>, reduce: Element
+			reduce(6), // =>, reduce: Element
+			reduce(6), // ->, reduce: Element
+			reduce(6), // /, reduce: Element
+			reduce(6), // +, reduce: Element
+			reduce(6), // -, reduce: Element
+			reduce(6), // ||, reduce: Element
+			reduce(6), // <>, reduce: Element
+			reduce(6), // !=, reduce: Element
+			reduce(6), // =, reduce: Element
+			reduce(6), // <, reduce: Element
+			reduce(6), // <=, reduce: Element
+			reduce(6), // >, reduce: Element
+			reduce(6), // >=, reduce: Element
+			reduce(6), // ;, reduce: Element
+			reduce(6), // @, reduce: Element
+			reduce(6), // {, reduce: Element
+			reduce(6), // }, reduce: Element
+			reduce(6), // ~, reduce: Element
+			reduce(6), // ?, reduce: Element
+			reduce(6), // else, reduce: Element
+			reduce(6), // if, reduce: Element
+			reduce(6), // for, reduce: Element
+			reduce(6), // endfor, reduce: Element
+			reduce(6), // elif, reduce: Element
+			reduce(6), // endif, reduce: Element
+			reduce(6), // set, reduce: Element
+			reduce(6), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(6), // template_block_start, reduce: Element
+			reduce(6), // template_comment, reduce: Element
+			reduce(6), // template_variable_end, reduce: Element
+			reduce(6), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S225
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),reduce(32),nil,reduce(32),reduce(32),reduce(32),reduce(32),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(7), // identifier, reduce: Element
+			reduce(7), // bytes_literal, reduce: Element
+			reduce(7), // string_literal, reduce: Element
+			reduce(7), // integer_literal, reduce: Element
+			reduce(7), // floating_point_literal, reduce: Element
+			reduce(7), // newline, reduce: Element
+			reduce(7), // dollar, reduce: Element
+			reduce(7), // *, reduce: Element
+			reduce(7), // [, reduce: Element
+			reduce(7), // ], reduce: Element
+			reduce(7), // (, reduce: Element
+			reduce(7), // ), reduce: Element
+			reduce(7), // ,, reduce: Element
+			reduce(7), // ., reduce: Element
+			reduce(7), // :, reduce: Element
+			reduce(7), // %, reduce: Element
+			reduce(7), // !, reduce: Element
+			reduce(7), // |, reduce: Element
+			reduce(7), // |>, reduce: Element
+			reduce(7), // ^, reduce: Element
+			reduce(7), // &, reduce: Element
+			reduce(7), // <<, reduce: Element
+			reduce(7), // >>, reduce: Element
+			reduce(7), // =>, reduce: Element
+			reduce(7), // ->, reduce: Element
+			reduce(7), // /, reduce: Element
+			reduce(7), // +, reduce: Element
+			reduce(7), // -, reduce: Element
+			reduce(7), // ||, reduce: Element
+			reduce(7), // <>, reduce: Element
+			reduce(7), // !=, reduce: Element
+			reduce(7), // =, reduce: Element
+			reduce(7), // <, reduce: Element
+			reduce(7), // <=, reduce: Element
+			reduce(7), // >, reduce: Element
+			reduce(7), // >=, reduce: Element
+			reduce(7), // ;, reduce: Element
+			reduce(7), // @, reduce: Element
+			reduce(7), // {, reduce: Element
+			reduce(7), // }, reduce: Element
+			reduce(7), // ~, reduce: Element
+			reduce(7), // ?, reduce: Element
+			reduce(7), // else, reduce: Element
+			reduce(7), // if, reduce: Element
+			reduce(7), // for, reduce: Element
+			reduce(7), // endfor, reduce: Element
+			reduce(7), // elif, reduce: Element
+			reduce(7), // endif, reduce: Element
+			reduce(7), // set, reduce: Element
+			reduce(7), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(7), // template_block_start, reduce: Element
+			reduce(7), // template_comment, reduce: Element
+			reduce(7), // template_variable_end, reduce: Element
+			reduce(7), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S226
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),reduce(33),nil,reduce(33),reduce(33),reduce(33),reduce(33),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(8), // identifier, reduce: Element
+			reduce(8), // bytes_literal, reduce: Element
+			reduce(8), // string_literal, reduce: Element
+			reduce(8), // integer_literal, reduce: Element
+			reduce(8), // floating_point_literal, reduce: Element
+			reduce(8), // newline, reduce: Element
+			reduce(8), // dollar, reduce: Element
+			reduce(8), // *, reduce: Element
+			reduce(8), // [, reduce: Element
+			reduce(8), // ], reduce: Element
+			reduce(8), // (, reduce: Element
+			reduce(8), // ), reduce: Element
+			reduce(8), // ,, reduce: Element
+			reduce(8), // ., reduce: Element
+			reduce(8), // :, reduce: Element
+			reduce(8), // %, reduce: Element
+			reduce(8), // !, reduce: Element
+			reduce(8), // |, reduce: Element
+			reduce(8), // |>, reduce: Element
+			reduce(8), // ^, reduce: Element
+			reduce(8), // &, reduce: Element
+			reduce(8), // <<, reduce: Element
+			reduce(8), // >>, reduce: Element
+			reduce(8), // =>, reduce: Element
+			reduce(8), // ->, reduce: Element
+			reduce(8), // /, reduce: Element
+			reduce(8), // +, reduce: Element
+			reduce(8), // -, reduce: Element
+			reduce(8), // ||, reduce: Element
+			reduce(8), // <>, reduce: Element
+			reduce(8), // !=, reduce: Element
+			reduce(8), // =, reduce: Element
+			reduce(8), // <, reduce: Element
+			reduce(8), // <=, reduce: Element
+			reduce(8), // >, reduce: Element
+			reduce(8), // >=, reduce: Element
+			reduce(8), // ;, reduce: Element
+			reduce(8), // @, reduce: Element
+			reduce(8), // {, reduce: Element
+			reduce(8), // }, reduce: Element
+			reduce(8), // ~, reduce: Element
+			reduce(8), // ?, reduce: Element
+			reduce(8), // else, reduce: Element
+			reduce(8), // if, reduce: Element
+			reduce(8), // for, reduce: Element
+			reduce(8), // endfor, reduce: Element
+			reduce(8), // elif, reduce: Element
+			reduce(8), // endif, reduce: Element
+			reduce(8), // set, reduce: Element
+			reduce(8), // comment, reduce: Element
+			nil,       // template_block_end
+			reduce(8), // template_block_start, reduce: Element
+			reduce(8), // template_comment, reduce: Element
+			reduce(8), // template_variable_end, reduce: Element
+			reduce(8), // template_variable_start, reduce: Element
 		},
 	},
 	actionRow{ // S227
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),reduce(34),nil,reduce(34),reduce(34),reduce(34),reduce(34),
+		actions: [numSymbols]action{
+			nil,       // INVALID
+			nil,       // ␚
+			reduce(9), // identifier, reduce: Element2
+			reduce(9), // bytes_literal, reduce: Element2
+			reduce(9), // string_literal, reduce: Element2
+			reduce(9), // integer_literal, reduce: Element2
+			reduce(9), // floating_point_literal, reduce: Element2
+			reduce(9), // newline, reduce: Element2
+			reduce(9), // dollar, reduce: Element2
+			reduce(9), // *, reduce: Element2
+			reduce(9), // [, reduce: Element2
+			reduce(9), // ], reduce: Element2
+			reduce(9), // (, reduce: Element2
+			reduce(9), // ), reduce: Element2
+			reduce(9), // ,, reduce: Element2
+			reduce(9), // ., reduce: Element2
+			reduce(9), // :, reduce: Element2
+			reduce(9), // %, reduce: Element2
+			reduce(9), // !, reduce: Element2
+			reduce(9), // |, reduce: Element2
+			reduce(9), // |>, reduce: Element2
+			reduce(9), // ^, reduce: Element2
+			reduce(9), // &, reduce: Element2
+			reduce(9), // <<, reduce: Element2
+			reduce(9), // >>, reduce: Element2
+			reduce(9), // =>, reduce: Element2
+			reduce(9), // ->, reduce: Element2
+			reduce(9), // /, reduce: Element2
+			reduce(9), // +, reduce: Element2
+			reduce(9), // -, reduce: Element2
+			reduce(9), // ||, reduce: Element2
+			reduce(9), // <>, reduce: Element2
+			reduce(9), // !=, reduce: Element2
+			reduce(9), // =, reduce: Element2
+			reduce(9), // <, reduce: Element2
+			reduce(9), // <=, reduce: Element2
+			reduce(9), // >, reduce: Element2
+			reduce(9), // >=, reduce: Element2
+			reduce(9), // ;, reduce: Element2
+			reduce(9), // @, reduce: Element2
+			reduce(9), // {, reduce: Element2
+			reduce(9), // }, reduce: Element2
+			reduce(9), // ~, reduce: Element2
+			reduce(9), // ?, reduce: Element2
+			reduce(9), // else, reduce: Element2
+			reduce(9), // if, reduce: Element2
+			reduce(9), // for, reduce: Element2
+			reduce(9), // endfor, reduce: Element2
+			reduce(9), // elif, reduce: Element2
+			reduce(9), // endif, reduce: Element2
+			reduce(9), // set, reduce: Element2
+			reduce(9), // comment, reduce: Element2
+			nil,       // template_block_end
+			reduce(9), // template_block_start, reduce: Element2
+			reduce(9), // template_comment, reduce: Element2
+			reduce(9), // template_variable_end, reduce: Element2
+			reduce(9), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S228
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),reduce(35),nil,reduce(35),reduce(35),reduce(35),reduce(35),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(10), // identifier, reduce: Element2
+			reduce(10), // bytes_literal, reduce: Element2
+			reduce(10), // string_literal, reduce: Element2
+			reduce(10), // integer_literal, reduce: Element2
+			reduce(10), // floating_point_literal, reduce: Element2
+			reduce(10), // newline, reduce: Element2
+			reduce(10), // dollar, reduce: Element2
+			reduce(10), // *, reduce: Element2
+			reduce(10), // [, reduce: Element2
+			reduce(10), // ], reduce: Element2
+			reduce(10), // (, reduce: Element2
+			reduce(10), // ), reduce: Element2
+			reduce(10), // ,, reduce: Element2
+			reduce(10), // ., reduce: Element2
+			reduce(10), // :, reduce: Element2
+			reduce(10), // %, reduce: Element2
+			reduce(10), // !, reduce: Element2
+			reduce(10), // |, reduce: Element2
+			reduce(10), // |>, reduce: Element2
+			reduce(10), // ^, reduce: Element2
+			reduce(10), // &, reduce: Element2
+			reduce(10), // <<, reduce: Element2
+			reduce(10), // >>, reduce: Element2
+			reduce(10), // =>, reduce: Element2
+			reduce(10), // ->, reduce: Element2
+			reduce(10), // /, reduce: Element2
+			reduce(10), // +, reduce: Element2
+			reduce(10), // -, reduce: Element2
+			reduce(10), // ||, reduce: Element2
+			reduce(10), // <>, reduce: Element2
+			reduce(10), // !=, reduce: Element2
+			reduce(10), // =, reduce: Element2
+			reduce(10), // <, reduce: Element2
+			reduce(10), // <=, reduce: Element2
+			reduce(10), // >, reduce: Element2
+			reduce(10), // >=, reduce: Element2
+			reduce(10), // ;, reduce: Element2
+			reduce(10), // @, reduce: Element2
+			reduce(10), // {, reduce: Element2
+			reduce(10), // }, reduce: Element2
+			reduce(10), // ~, reduce: Element2
+			reduce(10), // ?, reduce: Element2
+			reduce(10), // else, reduce: Element2
+			reduce(10), // if, reduce: Element2
+			reduce(10), // for, reduce: Element2
+			reduce(10), // endfor, reduce: Element2
+			reduce(10), // elif, reduce: Element2
+			reduce(10), // endif, reduce: Element2
+			reduce(10), // set, reduce: Element2
+			reduce(10), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(10), // template_block_start, reduce: Element2
+			reduce(10), // template_comment, reduce: Element2
+			reduce(10), // template_variable_end, reduce: Element2
+			reduce(10), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S229
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),reduce(36),nil,reduce(36),reduce(36),reduce(36),reduce(36),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(11), // identifier, reduce: Element2
+			reduce(11), // bytes_literal, reduce: Element2
+			reduce(11), // string_literal, reduce: Element2
+			reduce(11), // integer_literal, reduce: Element2
+			reduce(11), // floating_point_literal, reduce: Element2
+			reduce(11), // newline, reduce: Element2
+			reduce(11), // dollar, reduce: Element2
+			reduce(11), // *, reduce: Element2
+			reduce(11), // [, reduce: Element2
+			reduce(11), // ], reduce: Element2
+			reduce(11), // (, reduce: Element2
+			reduce(11), // ), reduce: Element2
+			reduce(11), // ,, reduce: Element2
+			reduce(11), // ., reduce: Element2
+			reduce(11), // :, reduce: Element2
+			reduce(11), // %, reduce: Element2
+			reduce(11), // !, reduce: Element2
+			reduce(11), // |, reduce: Element2
+			reduce(11), // |>, reduce: Element2
+			reduce(11), // ^, reduce: Element2
+			reduce(11), // &, reduce: Element2
+			reduce(11), // <<, reduce: Element2
+			reduce(11), // >>, reduce: Element2
+			reduce(11), // =>, reduce: Element2
+			reduce(11), // ->, reduce: Element2
+			reduce(11), // /, reduce: Element2
+			reduce(11), // +, reduce: Element2
+			reduce(11), // -, reduce: Element2
+			reduce(11), // ||, reduce: Element2
+			reduce(11), // <>, reduce: Element2
+			reduce(11), // !=, reduce: Element2
+			reduce(11), // =, reduce: Element2
+			reduce(11), // <, reduce: Element2
+			reduce(11), // <=, reduce: Element2
+			reduce(11), // >, reduce: Element2
+			reduce(11), // >=, reduce: Element2
+			reduce(11), // ;, reduce: Element2
+			reduce(11), // @, reduce: Element2
+			reduce(11), // {, reduce: Element2
+			reduce(11), // }, reduce: Element2
+			reduce(11), // ~, reduce: Element2
+			reduce(11), // ?, reduce: Element2
+			reduce(11), // else, reduce: Element2
+			reduce(11), // if, reduce: Element2
+			reduce(11), // for, reduce: Element2
+			reduce(11), // endfor, reduce: Element2
+			reduce(11), // elif, reduce: Element2
+			reduce(11), // endif, reduce: Element2
+			reduce(11), // set, reduce: Element2
+			reduce(11), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(11), // template_block_start, reduce: Element2
+			reduce(11), // template_comment, reduce: Element2
+			reduce(11), // template_variable_end, reduce: Element2
+			reduce(11), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S230
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),reduce(37),nil,reduce(37),reduce(37),reduce(37),reduce(37),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(12), // identifier, reduce: Element2
+			reduce(12), // bytes_literal, reduce: Element2
+			reduce(12), // string_literal, reduce: Element2
+			reduce(12), // integer_literal, reduce: Element2
+			reduce(12), // floating_point_literal, reduce: Element2
+			reduce(12), // newline, reduce: Element2
+			reduce(12), // dollar, reduce: Element2
+			reduce(12), // *, reduce: Element2
+			reduce(12), // [, reduce: Element2
+			reduce(12), // ], reduce: Element2
+			reduce(12), // (, reduce: Element2
+			reduce(12), // ), reduce: Element2
+			reduce(12), // ,, reduce: Element2
+			reduce(12), // ., reduce: Element2
+			reduce(12), // :, reduce: Element2
+			reduce(12), // %, reduce: Element2
+			reduce(12), // !, reduce: Element2
+			reduce(12), // |, reduce: Element2
+			reduce(12), // |>, reduce: Element2
+			reduce(12), // ^, reduce: Element2
+			reduce(12), // &, reduce: Element2
+			reduce(12), // <<, reduce: Element2
+			reduce(12), // >>, reduce: Element2
+			reduce(12), // =>, reduce: Element2
+			reduce(12), // ->, reduce: Element2
+			reduce(12), // /, reduce: Element2
+			reduce(12), // +, reduce: Element2
+			reduce(12), // -, reduce: Element2
+			reduce(12), // ||, reduce: Element2
+			reduce(12), // <>, reduce: Element2
+			reduce(12), // !=, reduce: Element2
+			reduce(12), // =, reduce: Element2
+			reduce(12), // <, reduce: Element2
+			reduce(12), // <=, reduce: Element2
+			reduce(12), // >, reduce: Element2
+			reduce(12), // >=, reduce: Element2
+			reduce(12), // ;, reduce: Element2
+			reduce(12), // @, reduce: Element2
+			reduce(12), // {, reduce: Element2
+			reduce(12), // }, reduce: Element2
+			reduce(12), // ~, reduce: Element2
+			reduce(12), // ?, reduce: Element2
+			reduce(12), // else, reduce: Element2
+			reduce(12), // if, reduce: Element2
+			reduce(12), // for, reduce: Element2
+			reduce(12), // endfor, reduce: Element2
+			reduce(12), // elif, reduce: Element2
+			reduce(12), // endif, reduce: Element2
+			reduce(12), // set, reduce: Element2
+			reduce(12), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(12), // template_block_start, reduce: Element2
+			reduce(12), // template_comment, reduce: Element2
+			reduce(12), // template_variable_end, reduce: Element2
+			reduce(12), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S231
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),reduce(38),nil,reduce(38),reduce(38),reduce(38),reduce(38),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(13), // identifier, reduce: Element2
+			reduce(13), // bytes_literal, reduce: Element2
+			reduce(13), // string_literal, reduce: Element2
+			reduce(13), // integer_literal, reduce: Element2
+			reduce(13), // floating_point_literal, reduce: Element2
+			reduce(13), // newline, reduce: Element2
+			reduce(13), // dollar, reduce: Element2
+			reduce(13), // *, reduce: Element2
+			reduce(13), // [, reduce: Element2
+			reduce(13), // ], reduce: Element2
+			reduce(13), // (, reduce: Element2
+			reduce(13), // ), reduce: Element2
+			reduce(13), // ,, reduce: Element2
+			reduce(13), // ., reduce: Element2
+			reduce(13), // :, reduce: Element2
+			reduce(13), // %, reduce: Element2
+			reduce(13), // !, reduce: Element2
+			reduce(13), // |, reduce: Element2
+			reduce(13), // |>, reduce: Element2
+			reduce(13), // ^, reduce: Element2
+			reduce(13), // &, reduce: Element2
+			reduce(13), // <<, reduce: Element2
+			reduce(13), // >>, reduce: Element2
+			reduce(13), // =>, reduce: Element2
+			reduce(13), // ->, reduce: Element2
+			reduce(13), // /, reduce: Element2
+			reduce(13), // +, reduce: Element2
+			reduce(13), // -, reduce: Element2
+			reduce(13), // ||, reduce: Element2
+			reduce(13), // <>, reduce: Element2
+			reduce(13), // !=, reduce: Element2
+			reduce(13), // =, reduce: Element2
+			reduce(13), // <, reduce: Element2
+			reduce(13), // <=, reduce: Element2
+			reduce(13), // >, reduce: Element2
+			reduce(13), // >=, reduce: Element2
+			reduce(13), // ;, reduce: Element2
+			reduce(13), // @, reduce: Element2
+			reduce(13), // {, reduce: Element2
+			reduce(13), // }, reduce: Element2
+			reduce(13), // ~, reduce: Element2
+			reduce(13), // ?, reduce: Element2
+			reduce(13), // else, reduce: Element2
+			reduce(13), // if, reduce: Element2
+			reduce(13), // for, reduce: Element2
+			reduce(13), // endfor, reduce: Element2
+			reduce(13), // elif, reduce: Element2
+			reduce(13), // endif, reduce: Element2
+			reduce(13), // set, reduce: Element2
+			reduce(13), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(13), // template_block_start, reduce: Element2
+			reduce(13), // template_comment, reduce: Element2
+			reduce(13), // template_variable_end, reduce: Element2
+			reduce(13), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S232
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),reduce(39),nil,reduce(39),reduce(39),reduce(39),reduce(39),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(14), // identifier, reduce: Element2
+			reduce(14), // bytes_literal, reduce: Element2
+			reduce(14), // string_literal, reduce: Element2
+			reduce(14), // integer_literal, reduce: Element2
+			reduce(14), // floating_point_literal, reduce: Element2
+			reduce(14), // newline, reduce: Element2
+			reduce(14), // dollar, reduce: Element2
+			reduce(14), // *, reduce: Element2
+			reduce(14), // [, reduce: Element2
+			reduce(14), // ], reduce: Element2
+			reduce(14), // (, reduce: Element2
+			reduce(14), // ), reduce: Element2
+			reduce(14), // ,, reduce: Element2
+			reduce(14), // ., reduce: Element2
+			reduce(14), // :, reduce: Element2
+			reduce(14), // %, reduce: Element2
+			reduce(14), // !, reduce: Element2
+			reduce(14), // |, reduce: Element2
+			reduce(14), // |>, reduce: Element2
+			reduce(14), // ^, reduce: Element2
+			reduce(14), // &, reduce: Element2
+			reduce(14), // <<, reduce: Element2
+			reduce(14), // >>, reduce: Element2
+			reduce(14), // =>, reduce: Element2
+			reduce(14), // ->, reduce: Element2
+			reduce(14), // /, reduce: Element2
+			reduce(14), // +, reduce: Element2
+			reduce(14), // -, reduce: Element2
+			reduce(14), // ||, reduce: Element2
+			reduce(14), // <>, reduce: Element2
+			reduce(14), // !=, reduce: Element2
+			reduce(14), // =, reduce: Element2
+			reduce(14), // <, reduce: Element2
+			reduce(14), // <=, reduce: Element2
+			reduce(14), // >, reduce: Element2
+			reduce(14), // >=, reduce: Element2
+			reduce(14), // ;, reduce: Element2
+			reduce(14), // @, reduce: Element2
+			reduce(14), // {, reduce: Element2
+			reduce(14), // }, reduce: Element2
+			reduce(14), // ~, reduce: Element2
+			reduce(14), // ?, reduce: Element2
+			reduce(14), // else, reduce: Element2
+			reduce(14), // if, reduce: Element2
+			reduce(14), // for, reduce: Element2
+			reduce(14), // endfor, reduce: Element2
+			reduce(14), // elif, reduce: Element2
+			reduce(14), // endif, reduce: Element2
+			reduce(14), // set, reduce: Element2
+			reduce(14), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(14), // template_block_start, reduce: Element2
+			reduce(14), // template_comment, reduce: Element2
+			reduce(14), // template_variable_end, reduce: Element2
+			reduce(14), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S233
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),reduce(40),nil,reduce(40),reduce(40),reduce(40),reduce(40),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(15), // identifier, reduce: Element2
+			reduce(15), // bytes_literal, reduce: Element2
+			reduce(15), // string_literal, reduce: Element2
+			reduce(15), // integer_literal, reduce: Element2
+			reduce(15), // floating_point_literal, reduce: Element2
+			reduce(15), // newline, reduce: Element2
+			reduce(15), // dollar, reduce: Element2
+			reduce(15), // *, reduce: Element2
+			reduce(15), // [, reduce: Element2
+			reduce(15), // ], reduce: Element2
+			reduce(15), // (, reduce: Element2
+			reduce(15), // ), reduce: Element2
+			reduce(15), // ,, reduce: Element2
+			reduce(15), // ., reduce: Element2
+			reduce(15), // :, reduce: Element2
+			reduce(15), // %, reduce: Element2
+			reduce(15), // !, reduce: Element2
+			reduce(15), // |, reduce: Element2
+			reduce(15), // |>, reduce: Element2
+			reduce(15), // ^, reduce: Element2
+			reduce(15), // &, reduce: Element2
+			reduce(15), // <<, reduce: Element2
+			reduce(15), // >>, reduce: Element2
+			reduce(15), // =>, reduce: Element2
+			reduce(15), // ->, reduce: Element2
+			reduce(15), // /, reduce: Element2
+			reduce(15), // +, reduce: Element2
+			reduce(15), // -, reduce: Element2
+			reduce(15), // ||, reduce: Element2
+			reduce(15), // <>, reduce: Element2
+			reduce(15), // !=, reduce: Element2
+			reduce(15), // =, reduce: Element2
+			reduce(15), // <, reduce: Element2
+			reduce(15), // <=, reduce: Element2
+			reduce(15), // >, reduce: Element2
+			reduce(15), // >=, reduce: Element2
+			reduce(15), // ;, reduce: Element2
+			reduce(15), // @, reduce: Element2
+			reduce(15), // {, reduce: Element2
+			reduce(15), // }, reduce: Element2
+			reduce(15), // ~, reduce: Element2
+			reduce(15), // ?, reduce: Element2
+			reduce(15), // else, reduce: Element2
+			reduce(15), // if, reduce: Element2
+			reduce(15), // for, reduce: Element2
+			reduce(15), // endfor, reduce: Element2
+			reduce(15), // elif, reduce: Element2
+			reduce(15), // endif, reduce: Element2
+			reduce(15), // set, reduce: Element2
+			reduce(15), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(15), // template_block_start, reduce: Element2
+			reduce(15), // template_comment, reduce: Element2
+			reduce(15), // template_variable_end, reduce: Element2
+			reduce(15), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S234
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),reduce(41),nil,reduce(41),reduce(41),reduce(41),reduce(41),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(16), // identifier, reduce: Element2
+			reduce(16), // bytes_literal, reduce: Element2
+			reduce(16), // string_literal, reduce: Element2
+			reduce(16), // integer_literal, reduce: Element2
+			reduce(16), // floating_point_literal, reduce: Element2
+			reduce(16), // newline, reduce: Element2
+			reduce(16), // dollar, reduce: Element2
+			reduce(16), // *, reduce: Element2
+			reduce(16), // [, reduce: Element2
+			reduce(16), // ], reduce: Element2
+			reduce(16), // (, reduce: Element2
+			reduce(16), // ), reduce: Element2
+			reduce(16), // ,, reduce: Element2
+			reduce(16), // ., reduce: Element2
+			reduce(16), // :, reduce: Element2
+			reduce(16), // %, reduce: Element2
+			reduce(16), // !, reduce: Element2
+			reduce(16), // |, reduce: Element2
+			reduce(16), // |>, reduce: Element2
+			reduce(16), // ^, reduce: Element2
+			reduce(16), // &, reduce: Element2
+			reduce(16), // <<, reduce: Element2
+			reduce(16), // >>, reduce: Element2
+			reduce(16), // =>, reduce: Element2
+			reduce(16), // ->, reduce: Element2
+			reduce(16), // /, reduce: Element2
+			reduce(16), // +, reduce: Element2
+			reduce(16), // -, reduce: Element2
+			reduce(16), // ||, reduce: Element2
+			reduce(16), // <>, reduce: Element2
+			reduce(16), // !=, reduce: Element2
+			reduce(16), // =, reduce: Element2
+			reduce(16), // <, reduce: Element2
+			reduce(16), // <=, reduce: Element2
+			reduce(16), // >, reduce: Element2
+			reduce(16), // >=, reduce: Element2
+			reduce(16), // ;, reduce: Element2
+			reduce(16), // @, reduce: Element2
+			reduce(16), // {, reduce: Element2
+			reduce(16), // }, reduce: Element2
+			reduce(16), // ~, reduce: Element2
+			reduce(16), // ?, reduce: Element2
+			reduce(16), // else, reduce: Element2
+			reduce(16), // if, reduce: Element2
+			reduce(16), // for, reduce: Element2
+			reduce(16), // endfor, reduce: Element2
+			reduce(16), // elif, reduce: Element2
+			reduce(16), // endif, reduce: Element2
+			reduce(16), // set, reduce: Element2
+			reduce(16), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(16), // template_block_start, reduce: Element2
+			reduce(16), // template_comment, reduce: Element2
+			reduce(16), // template_variable_end, reduce: Element2
+			reduce(16), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S235
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),reduce(42),nil,reduce(42),reduce(42),reduce(42),reduce(42),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(17), // identifier, reduce: Element2
+			reduce(17), // bytes_literal, reduce: Element2
+			reduce(17), // string_literal, reduce: Element2
+			reduce(17), // integer_literal, reduce: Element2
+			reduce(17), // floating_point_literal, reduce: Element2
+			reduce(17), // newline, reduce: Element2
+			reduce(17), // dollar, reduce: Element2
+			reduce(17), // *, reduce: Element2
+			reduce(17), // [, reduce: Element2
+			reduce(17), // ], reduce: Element2
+			reduce(17), // (, reduce: Element2
+			reduce(17), // ), reduce: Element2
+			reduce(17), // ,, reduce: Element2
+			reduce(17), // ., reduce: Element2
+			reduce(17), // :, reduce: Element2
+			reduce(17), // %, reduce: Element2
+			reduce(17), // !, reduce: Element2
+			reduce(17), // |, reduce: Element2
+			reduce(17), // |>, reduce: Element2
+			reduce(17), // ^, reduce: Element2
+			reduce(17), // &, reduce: Element2
+			reduce(17), // <<, reduce: Element2
+			reduce(17), // >>, reduce: Element2
+			reduce(17), // =>, reduce: Element2
+			reduce(17), // ->, reduce: Element2
+			reduce(17), // /, reduce: Element2
+			reduce(17), // +, reduce: Element2
+			reduce(17), // -, reduce: Element2
+			reduce(17), // ||, reduce: Element2
+			reduce(17), // <>, reduce: Element2
+			reduce(17), // !=, reduce: Element2
+			reduce(17), // =, reduce: Element2
+			reduce(17), // <, reduce: Element2
+			reduce(17), // <=, reduce: Element2
+			reduce(17), // >, reduce: Element2
+			reduce(17), // >=, reduce: Element2
+			reduce(17), // ;, reduce: Element2
+			reduce(17), // @, reduce: Element2
+			reduce(17), // {, reduce: Element2
+			reduce(17), // }, reduce: Element2
+			reduce(17), // ~, reduce: Element2
+			reduce(17), // ?, reduce: Element2
+			reduce(17), // else, reduce: Element2
+			reduce(17), // if, reduce: Element2
+			reduce(17), // for, reduce: Element2
+			reduce(17), // endfor, reduce: Element2
+			reduce(17), // elif, reduce: Element2
+			reduce(17), // endif, reduce: Element2
+			reduce(17), // set, reduce: Element2
+			reduce(17), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(17), // template_block_start, reduce: Element2
+			reduce(17), // template_comment, reduce: Element2
+			reduce(17), // template_variable_end, reduce: Element2
+			reduce(17), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S236
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),reduce(44),nil,reduce(44),reduce(44),reduce(44),reduce(44),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(18), // identifier, reduce: Element2
+			reduce(18), // bytes_literal, reduce: Element2
+			reduce(18), // string_literal, reduce: Element2
+			reduce(18), // integer_literal, reduce: Element2
+			reduce(18), // floating_point_literal, reduce: Element2
+			reduce(18), // newline, reduce: Element2
+			reduce(18), // dollar, reduce: Element2
+			reduce(18), // *, reduce: Element2
+			reduce(18), // [, reduce: Element2
+			reduce(18), // ], reduce: Element2
+			reduce(18), // (, reduce: Element2
+			reduce(18), // ), reduce: Element2
+			reduce(18), // ,, reduce: Element2
+			reduce(18), // ., reduce: Element2
+			reduce(18), // :, reduce: Element2
+			reduce(18), // %, reduce: Element2
+			reduce(18), // !, reduce: Element2
+			reduce(18), // |, reduce: Element2
+			reduce(18), // |>, reduce: Element2
+			reduce(18), // ^, reduce: Element2
+			reduce(18), // &, reduce: Element2
+			reduce(18), // <<, reduce: Element2
+			reduce(18), // >>, reduce: Element2
+			reduce(18), // =>, reduce: Element2
+			reduce(18), // ->, reduce: Element2
+			reduce(18), // /, reduce: Element2
+			reduce(18), // +, reduce: Element2
+			reduce(18), // -, reduce: Element2
+			reduce(18), // ||, reduce: Element2
+			reduce(18), // <>, reduce: Element2
+			reduce(18), // !=, reduce: Element2
+			reduce(18), // =, reduce: Element2
+			reduce(18), // <, reduce: Element2
+			reduce(18), // <=, reduce: Element2
+			reduce(18), // >, reduce: Element2
+			reduce(18), // >=, reduce: Element2
+			reduce(18), // ;, reduce: Element2
+			reduce(18), // @, reduce: Element2
+			reduce(18), // {, reduce: Element2
+			reduce(18), // }, reduce: Element2
+			reduce(18), // ~, reduce: Element2
+			reduce(18), // ?, reduce: Element2
+			reduce(18), // else, reduce: Element2
+			reduce(18), // if, reduce: Element2
+			reduce(18), // for, reduce: Element2
+			reduce(18), // endfor, reduce: Element2
+			reduce(18), // elif, reduce: Element2
+			reduce(18), // endif, reduce: Element2
+			reduce(18), // set, reduce: Element2
+			reduce(18), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(18), // template_block_start, reduce: Element2
+			reduce(18), // template_comment, reduce: Element2
+			reduce(18), // template_variable_end, reduce: Element2
+			reduce(18), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S237
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),reduce(46),nil,reduce(46),reduce(46),reduce(46),reduce(46),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(19), // identifier, reduce: Element2
+			reduce(19), // bytes_literal, reduce: Element2
+			reduce(19), // string_literal, reduce: Element2
+			reduce(19), // integer_literal, reduce: Element2
+			reduce(19), // floating_point_literal, reduce: Element2
+			reduce(19), // newline, reduce: Element2
+			reduce(19), // dollar, reduce: Element2
+			reduce(19), // *, reduce: Element2
+			reduce(19), // [, reduce: Element2
+			reduce(19), // ], reduce: Element2
+			reduce(19), // (, reduce: Element2
+			reduce(19), // ), reduce: Element2
+			reduce(19), // ,, reduce: Element2
+			reduce(19), // ., reduce: Element2
+			reduce(19), // :, reduce: Element2
+			reduce(19), // %, reduce: Element2
+			reduce(19), // !, reduce: Element2
+			reduce(19), // |, reduce: Element2
+			reduce(19), // |>, reduce: Element2
+			reduce(19), // ^, reduce: Element2
+			reduce(19), // &, reduce: Element2
+			reduce(19), // <<, reduce: Element2
+			reduce(19), // >>, reduce: Element2
+			reduce(19), // =>, reduce: Element2
+			reduce(19), // ->, reduce: Element2
+			reduce(19), // /, reduce: Element2
+			reduce(19), // +, reduce: Element2
+			reduce(19), // -, reduce: Element2
+			reduce(19), // ||, reduce: Element2
+			reduce(19), // <>, reduce: Element2
+			reduce(19), // !=, reduce: Element2
+			reduce(19), // =, reduce: Element2
+			reduce(19), // <, reduce: Element2
+			reduce(19), // <=, reduce: Element2
+			reduce(19), // >, reduce: Element2
+			reduce(19), // >=, reduce: Element2
+			reduce(19), // ;, reduce: Element2
+			reduce(19), // @, reduce: Element2
+			reduce(19), // {, reduce: Element2
+			reduce(19), // }, reduce: Element2
+			reduce(19), // ~, reduce: Element2
+			reduce(19), // ?, reduce: Element2
+			reduce(19), // else, reduce: Element2
+			reduce(19), // if, reduce: Element2
+			reduce(19), // for, reduce: Element2
+			reduce(19), // endfor, reduce: Element2
+			reduce(19), // elif, reduce: Element2
+			reduce(19), // endif, reduce: Element2
+			reduce(19), // set, reduce: Element2
+			reduce(19), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(19), // template_block_start, reduce: Element2
+			reduce(19), // template_comment, reduce: Element2
+			reduce(19), // template_variable_end, reduce: Element2
+			reduce(19), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S238
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),reduce(47),nil,reduce(47),reduce(47),reduce(47),reduce(47),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(20), // identifier, reduce: Element2
+			reduce(20), // bytes_literal, reduce: Element2
+			reduce(20), // string_literal, reduce: Element2
+			reduce(20), // integer_literal, reduce: Element2
+			reduce(20), // floating_point_literal, reduce: Element2
+			reduce(20), // newline, reduce: Element2
+			reduce(20), // dollar, reduce: Element2
+			reduce(20), // *, reduce: Element2
+			reduce(20), // [, reduce: Element2
+			reduce(20), // ], reduce: Element2
+			reduce(20), // (, reduce: Element2
+			reduce(20), // ), reduce: Element2
+			reduce(20), // ,, reduce: Element2
+			reduce(20), // ., reduce: Element2
+			reduce(20), // :, reduce: Element2
+			reduce(20), // %, reduce: Element2
+			reduce(20), // !, reduce: Element2
+			reduce(20), // |, reduce: Element2
+			reduce(20), // |>, reduce: Element2
+			reduce(20), // ^, reduce: Element2
+			reduce(20), // &, reduce: Element2
+			reduce(20), // <<, reduce: Element2
+			reduce(20), // >>, reduce: Element2
+			reduce(20), // =>, reduce: Element2
+			reduce(20), // ->, reduce: Element2
+			reduce(20), // /, reduce: Element2
+			reduce(20), // +, reduce: Element2
+			reduce(20), // -, reduce: Element2
+			reduce(20), // ||, reduce: Element2
+			reduce(20), // <>, reduce: Element2
+			reduce(20), // !=, reduce: Element2
+			reduce(20), // =, reduce: Element2
+			reduce(20), // <, reduce: Element2
+			reduce(20), // <=, reduce: Element2
+			reduce(20), // >, reduce: Element2
+			reduce(20), // >=, reduce: Element2
+			reduce(20), // ;, reduce: Element2
+			reduce(20), // @, reduce: Element2
+			reduce(20), // {, reduce: Element2
+			reduce(20), // }, reduce: Element2
+			reduce(20), // ~, reduce: Element2
+			reduce(20), // ?, reduce: Element2
+			reduce(20), // else, reduce: Element2
+			reduce(20), // if, reduce: Element2
+			reduce(20), // for, reduce: Element2
+			reduce(20), // endfor, reduce: Element2
+			reduce(20), // elif, reduce: Element2
+			reduce(20), // endif, reduce: Element2
+			reduce(20), // set, reduce: Element2
+			reduce(20), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(20), // template_block_start, reduce: Element2
+			reduce(20), // template_comment, reduce: Element2
+			reduce(20), // template_variable_end, reduce: Element2
+			reduce(20), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S239
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),reduce(49),nil,reduce(49),reduce(49),reduce(49),reduce(49),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(21), // identifier, reduce: Element2
+			reduce(21), // bytes_literal, reduce: Element2
+			reduce(21), // string_literal, reduce: Element2
+			reduce(21), // integer_literal, reduce: Element2
+			reduce(21), // floating_point_literal, reduce: Element2
+			reduce(21), // newline, reduce: Element2
+			reduce(21), // dollar, reduce: Element2
+			reduce(21), // *, reduce: Element2
+			reduce(21), // [, reduce: Element2
+			reduce(21), // ], reduce: Element2
+			reduce(21), // (, reduce: Element2
+			reduce(21), // ), reduce: Element2
+			reduce(21), // ,, reduce: Element2
+			reduce(21), // ., reduce: Element2
+			reduce(21), // :, reduce: Element2
+			reduce(21), // %, reduce: Element2
+			reduce(21), // !, reduce: Element2
+			reduce(21), // |, reduce: Element2
+			reduce(21), // |>, reduce: Element2
+			reduce(21), // ^, reduce: Element2
+			reduce(21), // &, reduce: Element2
+			reduce(21), // <<, reduce: Element2
+			reduce(21), // >>, reduce: Element2
+			reduce(21), // =>, reduce: Element2
+			reduce(21), // ->, reduce: Element2
+			reduce(21), // /, reduce: Element2
+			reduce(21), // +, reduce: Element2
+			reduce(21), // -, reduce: Element2
+			reduce(21), // ||, reduce: Element2
+			reduce(21), // <>, reduce: Element2
+			reduce(21), // !=, reduce: Element2
+			reduce(21), // =, reduce: Element2
+			reduce(21), // <, reduce: Element2
+			reduce(21), // <=, reduce: Element2
+			reduce(21), // >, reduce: Element2
+			reduce(21), // >=, reduce: Element2
+			reduce(21), // ;, reduce: Element2
+			reduce(21), // @, reduce: Element2
+			reduce(21), // {, reduce: Element2
+			reduce(21), // }, reduce: Element2
+			reduce(21), // ~, reduce: Element2
+			reduce(21), // ?, reduce: Element2
+			reduce(21), // else, reduce: Element2
+			reduce(21), // if, reduce: Element2
+			reduce(21), // for, reduce: Element2
+			reduce(21), // endfor, reduce: Element2
+			reduce(21), // elif, reduce: Element2
+			reduce(21), // endif, reduce: Element2
+			reduce(21), // set, reduce: Element2
+			reduce(21), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(21), // template_block_start, reduce: Element2
+			reduce(21), // template_comment, reduce: Element2
+			reduce(21), // template_variable_end, reduce: Element2
+			reduce(21), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S240
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),reduce(50),nil,reduce(50),reduce(50),reduce(50),reduce(50),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(22), // identifier, reduce: Element2
+			reduce(22), // bytes_literal, reduce: Element2
+			reduce(22), // string_literal, reduce: Element2
+			reduce(22), // integer_literal, reduce: Element2
+			reduce(22), // floating_point_literal, reduce: Element2
+			reduce(22), // newline, reduce: Element2
+			reduce(22), // dollar, reduce: Element2
+			reduce(22), // *, reduce: Element2
+			reduce(22), // [, reduce: Element2
+			reduce(22), // ], reduce: Element2
+			reduce(22), // (, reduce: Element2
+			reduce(22), // ), reduce: Element2
+			reduce(22), // ,, reduce: Element2
+			reduce(22), // ., reduce: Element2
+			reduce(22), // :, reduce: Element2
+			reduce(22), // %, reduce: Element2
+			reduce(22), // !, reduce: Element2
+			reduce(22), // |, reduce: Element2
+			reduce(22), // |>, reduce: Element2
+			reduce(22), // ^, reduce: Element2
+			reduce(22), // &, reduce: Element2
+			reduce(22), // <<, reduce: Element2
+			reduce(22), // >>, reduce: Element2
+			reduce(22), // =>, reduce: Element2
+			reduce(22), // ->, reduce: Element2
+			reduce(22), // /, reduce: Element2
+			reduce(22), // +, reduce: Element2
+			reduce(22), // -, reduce: Element2
+			reduce(22), // ||, reduce: Element2
+			reduce(22), // <>, reduce: Element2
+			reduce(22), // !=, reduce: Element2
+			reduce(22), // =, reduce: Element2
+			reduce(22), // <, reduce: Element2
+			reduce(22), // <=, reduce: Element2
+			reduce(22), // >, reduce: Element2
+			reduce(22), // >=, reduce: Element2
+			reduce(22), // ;, reduce: Element2
+			reduce(22), // @, reduce: Element2
+			reduce(22), // {, reduce: Element2
+			reduce(22), // }, reduce: Element2
+			reduce(22), // ~, reduce: Element2
+			reduce(22), // ?, reduce: Element2
+			reduce(22), // else, reduce: Element2
+			reduce(22), // if, reduce: Element2
+			reduce(22), // for, reduce: Element2
+			reduce(22), // endfor, reduce: Element2
+			reduce(22), // elif, reduce: Element2
+			reduce(22), // endif, reduce: Element2
+			reduce(22), // set, reduce: Element2
+			reduce(22), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(22), // template_block_start, reduce: Element2
+			reduce(22), // template_comment, reduce: Element2
+			reduce(22), // template_variable_end, reduce: Element2
+			reduce(22), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S241
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),reduce(51),nil,reduce(51),reduce(51),reduce(51),reduce(51),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(23), // identifier, reduce: Element2
+			reduce(23), // bytes_literal, reduce: Element2
+			reduce(23), // string_literal, reduce: Element2
+			reduce(23), // integer_literal, reduce: Element2
+			reduce(23), // floating_point_literal, reduce: Element2
+			reduce(23), // newline, reduce: Element2
+			reduce(23), // dollar, reduce: Element2
+			reduce(23), // *, reduce: Element2
+			reduce(23), // [, reduce: Element2
+			reduce(23), // ], reduce: Element2
+			reduce(23), // (, reduce: Element2
+			reduce(23), // ), reduce: Element2
+			reduce(23), // ,, reduce: Element2
+			reduce(23), // ., reduce: Element2
+			reduce(23), // :, reduce: Element2
+			reduce(23), // %, reduce: Element2
+			reduce(23), // !, reduce: Element2
+			reduce(23), // |, reduce: Element2
+			reduce(23), // |>, reduce: Element2
+			reduce(23), // ^, reduce: Element2
+			reduce(23), // &, reduce: Element2
+			reduce(23), // <<, reduce: Element2
+			reduce(23), // >>, reduce: Element2
+			reduce(23), // =>, reduce: Element2
+			reduce(23), // ->, reduce: Element2
+			reduce(23), // /, reduce: Element2
+			reduce(23), // +, reduce: Element2
+			reduce(23), // -, reduce: Element2
+			reduce(23), // ||, reduce: Element2
+			reduce(23), // <>, reduce: Element2
+			reduce(23), // !=, reduce: Element2
+			reduce(23), // =, reduce: Element2
+			reduce(23), // <, reduce: Element2
+			reduce(23), // <=, reduce: Element2
+			reduce(23), // >, reduce: Element2
+			reduce(23), // >=, reduce: Element2
+			reduce(23), // ;, reduce: Element2
+			reduce(23), // @, reduce: Element2
+			reduce(23), // {, reduce: Element2
+			reduce(23), // }, reduce: Element2
+			reduce(23), // ~, reduce: Element2
+			reduce(23), // ?, reduce: Element2
+			reduce(23), // else, reduce: Element2
+			reduce(23), // if, reduce: Element2
+			reduce(23), // for, reduce: Element2
+			reduce(23), // endfor, reduce: Element2
+			reduce(23), // elif, reduce: Element2
+			reduce(23), // endif, reduce: Element2
+			reduce(23), // set, reduce: Element2
+			reduce(23), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(23), // template_block_start, reduce: Element2
+			reduce(23), // template_comment, reduce: Element2
+			reduce(23), // template_variable_end, reduce: Element2
+			reduce(23), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S242
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),reduce(52),nil,reduce(52),reduce(52),reduce(52),reduce(52),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(24), // identifier, reduce: Element2
+			reduce(24), // bytes_literal, reduce: Element2
+			reduce(24), // string_literal, reduce: Element2
+			reduce(24), // integer_literal, reduce: Element2
+			reduce(24), // floating_point_literal, reduce: Element2
+			reduce(24), // newline, reduce: Element2
+			reduce(24), // dollar, reduce: Element2
+			reduce(24), // *, reduce: Element2
+			reduce(24), // [, reduce: Element2
+			reduce(24), // ], reduce: Element2
+			reduce(24), // (, reduce: Element2
+			reduce(24), // ), reduce: Element2
+			reduce(24), // ,, reduce: Element2
+			reduce(24), // ., reduce: Element2
+			reduce(24), // :, reduce: Element2
+			reduce(24), // %, reduce: Element2
+			reduce(24), // !, reduce: Element2
+			reduce(24), // |, reduce: Element2
+			reduce(24), // |>, reduce: Element2
+			reduce(24), // ^, reduce: Element2
+			reduce(24), // &, reduce: Element2
+			reduce(24), // <<, reduce: Element2
+			reduce(24), // >>, reduce: Element2
+			reduce(24), // =>, reduce: Element2
+			reduce(24), // ->, reduce: Element2
+			reduce(24), // /, reduce: Element2
+			reduce(24), // +, reduce: Element2
+			reduce(24), // -, reduce: Element2
+			reduce(24), // ||, reduce: Element2
+			reduce(24), // <>, reduce: Element2
+			reduce(24), // !=, reduce: Element2
+			reduce(24), // =, reduce: Element2
+			reduce(24), // <, reduce: Element2
+			reduce(24), // <=, reduce: Element2
+			reduce(24), // >, reduce: Element2
+			reduce(24), // >=, reduce: Element2
+			reduce(24), // ;, reduce: Element2
+			reduce(24), // @, reduce: Element2
+			reduce(24), // {, reduce: Element2
+			reduce(24), // }, reduce: Element2
+			reduce(24), // ~, reduce: Element2
+			reduce(24), // ?, reduce: Element2
+			reduce(24), // else, reduce: Element2
+			reduce(24), // if, reduce: Element2
+			reduce(24), // for, reduce: Element2
+			reduce(24), // endfor, reduce: Element2
+			reduce(24), // elif, reduce: Element2
+			reduce(24), // endif, reduce: Element2
+			reduce(24), // set, reduce: Element2
+			reduce(24), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(24), // template_block_start, reduce: Element2
+			reduce(24), // template_comment, reduce: Element2
+			reduce(24), // template_variable_end, reduce: Element2
+			reduce(24), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S243
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),reduce(53),nil,reduce(53),reduce(53),reduce(53),reduce(53),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(25), // identifier, reduce: Element2
+			reduce(25), // bytes_literal, reduce: Element2
+			reduce(25), // string_literal, reduce: Element2
+			reduce(25), // integer_literal, reduce: Element2
+			reduce(25), // floating_point_literal, reduce: Element2
+			reduce(25), // newline, reduce: Element2
+			reduce(25), // dollar, reduce: Element2
+			reduce(25), // *, reduce: Element2
+			reduce(25), // [, reduce: Element2
+			reduce(25), // ], reduce: Element2
+			reduce(25), // (, reduce: Element2
+			reduce(25), // ), reduce: Element2
+			reduce(25), // ,, reduce: Element2
+			reduce(25), // ., reduce: Element2
+			reduce(25), // :, reduce: Element2
+			reduce(25), // %, reduce: Element2
+			reduce(25), // !, reduce: Element2
+			reduce(25), // |, reduce: Element2
+			reduce(25), // |>, reduce: Element2
+			reduce(25), // ^, reduce: Element2
+			reduce(25), // &, reduce: Element2
+			reduce(25), // <<, reduce: Element2
+			reduce(25), // >>, reduce: Element2
+			reduce(25), // =>, reduce: Element2
+			reduce(25), // ->, reduce: Element2
+			reduce(25), // /, reduce: Element2
+			reduce(25), // +, reduce: Element2
+			reduce(25), // -, reduce: Element2
+			reduce(25), // ||, reduce: Element2
+			reduce(25), // <>, reduce: Element2
+			reduce(25), // !=, reduce: Element2
+			reduce(25), // =, reduce: Element2
+			reduce(25), // <, reduce: Element2
+			reduce(25), // <=, reduce: Element2
+			reduce(25), // >, reduce: Element2
+			reduce(25), // >=, reduce: Element2
+			reduce(25), // ;, reduce: Element2
+			reduce(25), // @, reduce: Element2
+			reduce(25), // {, reduce: Element2
+			reduce(25), // }, reduce: Element2
+			reduce(25), // ~, reduce: Element2
+			reduce(25), // ?, reduce: Element2
+			reduce(25), // else, reduce: Element2
+			reduce(25), // if, reduce: Element2
+			reduce(25), // for, reduce: Element2
+			reduce(25), // endfor, reduce: Element2
+			reduce(25), // elif, reduce: Element2
+			reduce(25), // endif, reduce: Element2
+			reduce(25), // set, reduce: Element2
+			reduce(25), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(25), // template_block_start, reduce: Element2
+			reduce(25), // template_comment, reduce: Element2
+			reduce(25), // template_variable_end, reduce: Element2
+			reduce(25), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S244
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),reduce(54),nil,reduce(54),reduce(54),reduce(54),reduce(54),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(26), // identifier, reduce: Element2
+			reduce(26), // bytes_literal, reduce: Element2
+			reduce(26), // string_literal, reduce: Element2
+			reduce(26), // integer_literal, reduce: Element2
+			reduce(26), // floating_point_literal, reduce: Element2
+			reduce(26), // newline, reduce: Element2
+			reduce(26), // dollar, reduce: Element2
+			reduce(26), // *, reduce: Element2
+			reduce(26), // [, reduce: Element2
+			reduce(26), // ], reduce: Element2
+			reduce(26), // (, reduce: Element2
+			reduce(26), // ), reduce: Element2
+			reduce(26), // ,, reduce: Element2
+			reduce(26), // ., reduce: Element2
+			reduce(26), // :, reduce: Element2
+			reduce(26), // %, reduce: Element2
+			reduce(26), // !, reduce: Element2
+			reduce(26), // |, reduce: Element2
+			reduce(26), // |>, reduce: Element2
+			reduce(26), // ^, reduce: Element2
+			reduce(26), // &, reduce: Element2
+			reduce(26), // <<, reduce: Element2
+			reduce(26), // >>, reduce: Element2
+			reduce(26), // =>, reduce: Element2
+			reduce(26), // ->, reduce: Element2
+			reduce(26), // /, reduce: Element2
+			reduce(26), // +, reduce: Element2
+			reduce(26), // -, reduce: Element2
+			reduce(26), // ||, reduce: Element2
+			reduce(26), // <>, reduce: Element2
+			reduce(26), // !=, reduce: Element2
+			reduce(26), // =, reduce: Element2
+			reduce(26), // <, reduce: Element2
+			reduce(26), // <=, reduce: Element2
+			reduce(26), // >, reduce: Element2
+			reduce(26), // >=, reduce: Element2
+			reduce(26), // ;, reduce: Element2
+			reduce(26), // @, reduce: Element2
+			reduce(26), // {, reduce: Element2
+			reduce(26), // }, reduce: Element2
+			reduce(26), // ~, reduce: Element2
+			reduce(26), // ?, reduce: Element2
+			reduce(26), // else, reduce: Element2
+			reduce(26), // if, reduce: Element2
+			reduce(26), // for, reduce: Element2
+			reduce(26), // endfor, reduce: Element2
+			reduce(26), // elif, reduce: Element2
+			reduce(26), // endif, reduce: Element2
+			reduce(26), // set, reduce: Element2
+			reduce(26), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(26), // template_block_start, reduce: Element2
+			reduce(26), // template_comment, reduce: Element2
+			reduce(26), // template_variable_end, reduce: Element2
+			reduce(26), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S245
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),reduce(55),nil,reduce(55),reduce(55),reduce(55),reduce(55),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(27), // identifier, reduce: Element2
+			reduce(27), // bytes_literal, reduce: Element2
+			reduce(27), // string_literal, reduce: Element2
+			reduce(27), // integer_literal, reduce: Element2
+			reduce(27), // floating_point_literal, reduce: Element2
+			reduce(27), // newline, reduce: Element2
+			reduce(27), // dollar, reduce: Element2
+			reduce(27), // *, reduce: Element2
+			reduce(27), // [, reduce: Element2
+			reduce(27), // ], reduce: Element2
+			reduce(27), // (, reduce: Element2
+			reduce(27), // ), reduce: Element2
+			reduce(27), // ,, reduce: Element2
+			reduce(27), // ., reduce: Element2
+			reduce(27), // :, reduce: Element2
+			reduce(27), // %, reduce: Element2
+			reduce(27), // !, reduce: Element2
+			reduce(27), // |, reduce: Element2
+			reduce(27), // |>, reduce: Element2
+			reduce(27), // ^, reduce: Element2
+			reduce(27), // &, reduce: Element2
+			reduce(27), // <<, reduce: Element2
+			reduce(27), // >>, reduce: Element2
+			reduce(27), // =>, reduce: Element2
+			reduce(27), // ->, reduce: Element2
+			reduce(27), // /, reduce: Element2
+			reduce(27), // +, reduce: Element2
+			reduce(27), // -, reduce: Element2
+			reduce(27), // ||, reduce: Element2
+			reduce(27), // <>, reduce: Element2
+			reduce(27), // !=, reduce: Element2
+			reduce(27), // =, reduce: Element2
+			reduce(27), // <, reduce: Element2
+			reduce(27), // <=, reduce: Element2
+			reduce(27), // >, reduce: Element2
+			reduce(27), // >=, reduce: Element2
+			reduce(27), // ;, reduce: Element2
+			reduce(27), // @, reduce: Element2
+			reduce(27), // {, reduce: Element2
+			reduce(27), // }, reduce: Element2
+			reduce(27), // ~, reduce: Element2
+			reduce(27), // ?, reduce: Element2
+			reduce(27), // else, reduce: Element2
+			reduce(27), // if, reduce: Element2
+			reduce(27), // for, reduce: Element2
+			reduce(27), // endfor, reduce: Element2
+			reduce(27), // elif, reduce: Element2
+			reduce(27), // endif, reduce: Element2
+			reduce(27), // set, reduce: Element2
+			reduce(27), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(27), // template_block_start, reduce: Element2
+			reduce(27), // template_comment, reduce: Element2
+			reduce(27), // template_variable_end, reduce: Element2
+			reduce(27), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S246
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),reduce(56),nil,reduce(56),reduce(56),reduce(56),reduce(56),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(28), // identifier, reduce: Element2
+			reduce(28), // bytes_literal, reduce: Element2
+			reduce(28), // string_literal, reduce: Element2
+			reduce(28), // integer_literal, reduce: Element2
+			reduce(28), // floating_point_literal, reduce: Element2
+			reduce(28), // newline, reduce: Element2
+			reduce(28), // dollar, reduce: Element2
+			reduce(28), // *, reduce: Element2
+			reduce(28), // [, reduce: Element2
+			reduce(28), // ], reduce: Element2
+			reduce(28), // (, reduce: Element2
+			reduce(28), // ), reduce: Element2
+			reduce(28), // ,, reduce: Element2
+			reduce(28), // ., reduce: Element2
+			reduce(28), // :, reduce: Element2
+			reduce(28), // %, reduce: Element2
+			reduce(28), // !, reduce: Element2
+			reduce(28), // |, reduce: Element2
+			reduce(28), // |>, reduce: Element2
+			reduce(28), // ^, reduce: Element2
+			reduce(28), // &, reduce: Element2
+			reduce(28), // <<, reduce: Element2
+			reduce(28), // >>, reduce: Element2
+			reduce(28), // =>, reduce: Element2
+			reduce(28), // ->, reduce: Element2
+			reduce(28), // /, reduce: Element2
+			reduce(28), // +, reduce: Element2
+			reduce(28), // -, reduce: Element2
+			reduce(28), // ||, reduce: Element2
+			reduce(28), // <>, reduce: Element2
+			reduce(28), // !=, reduce: Element2
+			reduce(28), // =, reduce: Element2
+			reduce(28), // <, reduce: Element2
+			reduce(28), // <=, reduce: Element2
+			reduce(28), // >, reduce: Element2
+			reduce(28), // >=, reduce: Element2
+			reduce(28), // ;, reduce: Element2
+			reduce(28), // @, reduce: Element2
+			reduce(28), // {, reduce: Element2
+			reduce(28), // }, reduce: Element2
+			reduce(28), // ~, reduce: Element2
+			reduce(28), // ?, reduce: Element2
+			reduce(28), // else, reduce: Element2
+			reduce(28), // if, reduce: Element2
+			reduce(28), // for, reduce: Element2
+			reduce(28), // endfor, reduce: Element2
+			reduce(28), // elif, reduce: Element2
+			reduce(28), // endif, reduce: Element2
+			reduce(28), // set, reduce: Element2
+			reduce(28), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(28), // template_block_start, reduce: Element2
+			reduce(28), // template_comment, reduce: Element2
+			reduce(28), // template_variable_end, reduce: Element2
+			reduce(28), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S247
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),reduce(57),nil,reduce(57),reduce(57),reduce(57),reduce(57),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(29), // identifier, reduce: Element2
+			reduce(29), // bytes_literal, reduce: Element2
+			reduce(29), // string_literal, reduce: Element2
+			reduce(29), // integer_literal, reduce: Element2
+			reduce(29), // floating_point_literal, reduce: Element2
+			reduce(29), // newline, reduce: Element2
+			reduce(29), // dollar, reduce: Element2
+			reduce(29), // *, reduce: Element2
+			reduce(29), // [, reduce: Element2
+			reduce(29), // ], reduce: Element2
+			reduce(29), // (, reduce: Element2
+			reduce(29), // ), reduce: Element2
+			reduce(29), // ,, reduce: Element2
+			reduce(29), // ., reduce: Element2
+			reduce(29), // :, reduce: Element2
+			reduce(29), // %, reduce: Element2
+			reduce(29), // !, reduce: Element2
+			reduce(29), // |, reduce: Element2
+			reduce(29), // |>, reduce: Element2
+			reduce(29), // ^, reduce: Element2
+			reduce(29), // &, reduce: Element2
+			reduce(29), // <<, reduce: Element2
+			reduce(29), // >>, reduce: Element2
+			reduce(29), // =>, reduce: Element2
+			reduce(29), // ->, reduce: Element2
+			reduce(29), // /, reduce: Element2
+			reduce(29), // +, reduce: Element2
+			reduce(29), // -, reduce: Element2
+			reduce(29), // ||, reduce: Element2
+			reduce(29), // <>, reduce: Element2
+			reduce(29), // !=, reduce: Element2
+			reduce(29), // =, reduce: Element2
+			reduce(29), // <, reduce: Element2
+			reduce(29), // <=, reduce: Element2
+			reduce(29), // >, reduce: Element2
+			reduce(29), // >=, reduce: Element2
+			reduce(29), // ;, reduce: Element2
+			reduce(29), // @, reduce: Element2
+			reduce(29), // {, reduce: Element2
+			reduce(29), // }, reduce: Element2
+			reduce(29), // ~, reduce: Element2
+			reduce(29), // ?, reduce: Element2
+			reduce(29), // else, reduce: Element2
+			reduce(29), // if, reduce: Element2
+			reduce(29), // for, reduce: Element2
+			reduce(29), // endfor, reduce: Element2
+			reduce(29), // elif, reduce: Element2
+			reduce(29), // endif, reduce: Element2
+			reduce(29), // set, reduce: Element2
+			reduce(29), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(29), // template_block_start, reduce: Element2
+			reduce(29), // template_comment, reduce: Element2
+			reduce(29), // template_variable_end, reduce: Element2
+			reduce(29), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S248
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),reduce(58),nil,reduce(58),reduce(58),reduce(58),reduce(58),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(30), // identifier, reduce: Element2
+			reduce(30), // bytes_literal, reduce: Element2
+			reduce(30), // string_literal, reduce: Element2
+			reduce(30), // integer_literal, reduce: Element2
+			reduce(30), // floating_point_literal, reduce: Element2
+			reduce(30), // newline, reduce: Element2
+			reduce(30), // dollar, reduce: Element2
+			reduce(30), // *, reduce: Element2
+			reduce(30), // [, reduce: Element2
+			reduce(30), // ], reduce: Element2
+			reduce(30), // (, reduce: Element2
+			reduce(30), // ), reduce: Element2
+			reduce(30), // ,, reduce: Element2
+			reduce(30), // ., reduce: Element2
+			reduce(30), // :, reduce: Element2
+			reduce(30), // %, reduce: Element2
+			reduce(30), // !, reduce: Element2
+			reduce(30), // |, reduce: Element2
+			reduce(30), // |>, reduce: Element2
+			reduce(30), // ^, reduce: Element2
+			reduce(30), // &, reduce: Element2
+			reduce(30), // <<, reduce: Element2
+			reduce(30), // >>, reduce: Element2
+			reduce(30), // =>, reduce: Element2
+			reduce(30), // ->, reduce: Element2
+			reduce(30), // /, reduce: Element2
+			reduce(30), // +, reduce: Element2
+			reduce(30), // -, reduce: Element2
+			reduce(30), // ||, reduce: Element2
+			reduce(30), // <>, reduce: Element2
+			reduce(30), // !=, reduce: Element2
+			reduce(30), // =, reduce: Element2
+			reduce(30), // <, reduce: Element2
+			reduce(30), // <=, reduce: Element2
+			reduce(30), // >, reduce: Element2
+			reduce(30), // >=, reduce: Element2
+			reduce(30), // ;, reduce: Element2
+			reduce(30), // @, reduce: Element2
+			reduce(30), // {, reduce: Element2
+			reduce(30), // }, reduce: Element2
+			reduce(30), // ~, reduce: Element2
+			reduce(30), // ?, reduce: Element2
+			reduce(30), // else, reduce: Element2
+			reduce(30), // if, reduce: Element2
+			reduce(30), // for, reduce: Element2
+			reduce(30), // endfor, reduce: Element2
+			reduce(30), // elif, reduce: Element2
+			reduce(30), // endif, reduce: Element2
+			reduce(30), // set, reduce: Element2
+			reduce(30), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(30), // template_block_start, reduce: Element2
+			reduce(30), // template_comment, reduce: Element2
+			reduce(30), // template_variable_end, reduce: Element2
+			reduce(30), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S249
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),reduce(59),nil,reduce(59),reduce(59),reduce(59),reduce(59),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(31), // identifier, reduce: Element2
+			reduce(31), // bytes_literal, reduce: Element2
+			reduce(31), // string_literal, reduce: Element2
+			reduce(31), // integer_literal, reduce: Element2
+			reduce(31), // floating_point_literal, reduce: Element2
+			reduce(31), // newline, reduce: Element2
+			reduce(31), // dollar, reduce: Element2
+			reduce(31), // *, reduce: Element2
+			reduce(31), // [, reduce: Element2
+			reduce(31), // ], reduce: Element2
+			reduce(31), // (, reduce: Element2
+			reduce(31), // ), reduce: Element2
+			reduce(31), // ,, reduce: Element2
+			reduce(31), // ., reduce: Element2
+			reduce(31), // :, reduce: Element2
+			reduce(31), // %, reduce: Element2
+			reduce(31), // !, reduce: Element2
+			reduce(31), // |, reduce: Element2
+			reduce(31), // |>, reduce: Element2
+			reduce(31), // ^, reduce: Element2
+			reduce(31), // &, reduce: Element2
+			reduce(31), // <<, reduce: Element2
+			reduce(31), // >>, reduce: Element2
+			reduce(31), // =>, reduce: Element2
+			reduce(31), // ->, reduce: Element2
+			reduce(31), // /, reduce: Element2
+			reduce(31), // +, reduce: Element2
+			reduce(31), // -, reduce: Element2
+			reduce(31), // ||, reduce: Element2
+			reduce(31), // <>, reduce: Element2
+			reduce(31), // !=, reduce: Element2
+			reduce(31), // =, reduce: Element2
+			reduce(31), // <, reduce: Element2
+			reduce(31), // <=, reduce: Element2
+			reduce(31), // >, reduce: Element2
+			reduce(31), // >=, reduce: Element2
+			reduce(31), // ;, reduce: Element2
+			reduce(31), // @, reduce: Element2
+			reduce(31), // {, reduce: Element2
+			reduce(31), // }, reduce: Element2
+			reduce(31), // ~, reduce: Element2
+			reduce(31), // ?, reduce: Element2
+			reduce(31), // else, reduce: Element2
+			reduce(31), // if, reduce: Element2
+			reduce(31), // for, reduce: Element2
+			reduce(31), // endfor, reduce: Element2
+			reduce(31), // elif, reduce: Element2
+			reduce(31), // endif, reduce: Element2
+			reduce(31), // set, reduce: Element2
+			reduce(31), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(31), // template_block_start, reduce: Element2
+			reduce(31), // template_comment, reduce: Element2
+			reduce(31), // template_variable_end, reduce: Element2
+			reduce(31), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S250
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),reduce(60),nil,reduce(60),reduce(60),reduce(60),reduce(60),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(32), // identifier, reduce: Element2
+			reduce(32), // bytes_literal, reduce: Element2
+			reduce(32), // string_literal, reduce: Element2
+			reduce(32), // integer_literal, reduce: Element2
+			reduce(32), // floating_point_literal, reduce: Element2
+			reduce(32), // newline, reduce: Element2
+			reduce(32), // dollar, reduce: Element2
+			reduce(32), // *, reduce: Element2
+			reduce(32), // [, reduce: Element2
+			reduce(32), // ], reduce: Element2
+			reduce(32), // (, reduce: Element2
+			reduce(32), // ), reduce: Element2
+			reduce(32), // ,, reduce: Element2
+			reduce(32), // ., reduce: Element2
+			reduce(32), // :, reduce: Element2
+			reduce(32), // %, reduce: Element2
+			reduce(32), // !, reduce: Element2
+			reduce(32), // |, reduce: Element2
+			reduce(32), // |>, reduce: Element2
+			reduce(32), // ^, reduce: Element2
+			reduce(32), // &, reduce: Element2
+			reduce(32), // <<, reduce: Element2
+			reduce(32), // >>, reduce: Element2
+			reduce(32), // =>, reduce: Element2
+			reduce(32), // ->, reduce: Element2
+			reduce(32), // /, reduce: Element2
+			reduce(32), // +, reduce: Element2
+			reduce(32), // -, reduce: Element2
+			reduce(32), // ||, reduce: Element2
+			reduce(32), // <>, reduce: Element2
+			reduce(32), // !=, reduce: Element2
+			reduce(32), // =, reduce: Element2
+			reduce(32), // <, reduce: Element2
+			reduce(32), // <=, reduce: Element2
+			reduce(32), // >, reduce: Element2
+			reduce(32), // >=, reduce: Element2
+			reduce(32), // ;, reduce: Element2
+			reduce(32), // @, reduce: Element2
+			reduce(32), // {, reduce: Element2
+			reduce(32), // }, reduce: Element2
+			reduce(32), // ~, reduce: Element2
+			reduce(32), // ?, reduce: Element2
+			reduce(32), // else, reduce: Element2
+			reduce(32), // if, reduce: Element2
+			reduce(32), // for, reduce: Element2
+			reduce(32), // endfor, reduce: Element2
+			reduce(32), // elif, reduce: Element2
+			reduce(32), // endif, reduce: Element2
+			reduce(32), // set, reduce: Element2
+			reduce(32), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(32), // template_block_start, reduce: Element2
+			reduce(32), // template_comment, reduce: Element2
+			reduce(32), // template_variable_end, reduce: Element2
+			reduce(32), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S251
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),reduce(61),nil,reduce(61),reduce(61),reduce(61),reduce(61),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(33), // identifier, reduce: Element2
+			reduce(33), // bytes_literal, reduce: Element2
+			reduce(33), // string_literal, reduce: Element2
+			reduce(33), // integer_literal, reduce: Element2
+			reduce(33), // floating_point_literal, reduce: Element2
+			reduce(33), // newline, reduce: Element2
+			reduce(33), // dollar, reduce: Element2
+			reduce(33), // *, reduce: Element2
+			reduce(33), // [, reduce: Element2
+			reduce(33), // ], reduce: Element2
+			reduce(33), // (, reduce: Element2
+			reduce(33), // ), reduce: Element2
+			reduce(33), // ,, reduce: Element2
+			reduce(33), // ., reduce: Element2
+			reduce(33), // :, reduce: Element2
+			reduce(33), // %, reduce: Element2
+			reduce(33), // !, reduce: Element2
+			reduce(33), // |, reduce: Element2
+			reduce(33), // |>, reduce: Element2
+			reduce(33), // ^, reduce: Element2
+			reduce(33), // &, reduce: Element2
+			reduce(33), // <<, reduce: Element2
+			reduce(33), // >>, reduce: Element2
+			reduce(33), // =>, reduce: Element2
+			reduce(33), // ->, reduce: Element2
+			reduce(33), // /, reduce: Element2
+			reduce(33), // +, reduce: Element2
+			reduce(33), // -, reduce: Element2
+			reduce(33), // ||, reduce: Element2
+			reduce(33), // <>, reduce: Element2
+			reduce(33), // !=, reduce: Element2
+			reduce(33), // =, reduce: Element2
+			reduce(33), // <, reduce: Element2
+			reduce(33), // <=, reduce: Element2
+			reduce(33), // >, reduce: Element2
+			reduce(33), // >=, reduce: Element2
+			reduce(33), // ;, reduce: Element2
+			reduce(33), // @, reduce: Element2
+			reduce(33), // {, reduce: Element2
+			reduce(33), // }, reduce: Element2
+			reduce(33), // ~, reduce: Element2
+			reduce(33), // ?, reduce: Element2
+			reduce(33), // else, reduce: Element2
+			reduce(33), // if, reduce: Element2
+			reduce(33), // for, reduce: Element2
+			reduce(33), // endfor, reduce: Element2
+			reduce(33), // elif, reduce: Element2
+			reduce(33), // endif, reduce: Element2
+			reduce(33), // set, reduce: Element2
+			reduce(33), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(33), // template_block_start, reduce: Element2
+			reduce(33), // template_comment, reduce: Element2
+			reduce(33), // template_variable_end, reduce: Element2
+			reduce(33), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S252
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(79),shift(80),shift(81),shift(82),shift(83),shift(84),shift(85),shift(86),shift(87),shift(88),shift(89),shift(90),shift(91),shift(92),shift(93),shift(94),shift(95),shift(96),shift(97),shift(98),shift(99),shift(100),shift(101),shift(102),shift(103),shift(104),shift(105),shift(106),shift(107),shift(108),shift(109),shift(110),shift(111),shift(112),shift(113),shift(114),shift(115),shift(116),shift(117),shift(118),shift(119),shift(120),shift(121),shift(122),shift(334),shift(55),shift(127),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(34), // identifier, reduce: Element2
+			reduce(34), // bytes_literal, reduce: Element2
+			reduce(34), // string_literal, reduce: Element2
+			reduce(34), // integer_literal, reduce: Element2
+			reduce(34), // floating_point_literal, reduce: Element2
+			reduce(34), // newline, reduce: Element2
+			reduce(34), // dollar, reduce: Element2
+			reduce(34), // *, reduce: Element2
+			reduce(34), // [, reduce: Element2
+			reduce(34), // ], reduce: Element2
+			reduce(34), // (, reduce: Element2
+			reduce(34), // ), reduce: Element2
+			reduce(34), // ,, reduce: Element2
+			reduce(34), // ., reduce: Element2
+			reduce(34), // :, reduce: Element2
+			reduce(34), // %, reduce: Element2
+			reduce(34), // !, reduce: Element2
+			reduce(34), // |, reduce: Element2
+			reduce(34), // |>, reduce: Element2
+			reduce(34), // ^, reduce: Element2
+			reduce(34), // &, reduce: Element2
+			reduce(34), // <<, reduce: Element2
+			reduce(34), // >>, reduce: Element2
+			reduce(34), // =>, reduce: Element2
+			reduce(34), // ->, reduce: Element2
+			reduce(34), // /, reduce: Element2
+			reduce(34), // +, reduce: Element2
+			reduce(34), // -, reduce: Element2
+			reduce(34), // ||, reduce: Element2
+			reduce(34), // <>, reduce: Element2
+			reduce(34), // !=, reduce: Element2
+			reduce(34), // =, reduce: Element2
+			reduce(34), // <, reduce: Element2
+			reduce(34), // <=, reduce: Element2
+			reduce(34), // >, reduce: Element2
+			reduce(34), // >=, reduce: Element2
+			reduce(34), // ;, reduce: Element2
+			reduce(34), // @, reduce: Element2
+			reduce(34), // {, reduce: Element2
+			reduce(34), // }, reduce: Element2
+			reduce(34), // ~, reduce: Element2
+			reduce(34), // ?, reduce: Element2
+			reduce(34), // else, reduce: Element2
+			reduce(34), // if, reduce: Element2
+			reduce(34), // for, reduce: Element2
+			reduce(34), // endfor, reduce: Element2
+			reduce(34), // elif, reduce: Element2
+			reduce(34), // endif, reduce: Element2
+			reduce(34), // set, reduce: Element2
+			reduce(34), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(34), // template_block_start, reduce: Element2
+			reduce(34), // template_comment, reduce: Element2
+			reduce(34), // template_variable_end, reduce: Element2
+			reduce(34), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S253
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(335),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(35), // identifier, reduce: Element2
+			reduce(35), // bytes_literal, reduce: Element2
+			reduce(35), // string_literal, reduce: Element2
+			reduce(35), // integer_literal, reduce: Element2
+			reduce(35), // floating_point_literal, reduce: Element2
+			reduce(35), // newline, reduce: Element2
+			reduce(35), // dollar, reduce: Element2
+			reduce(35), // *, reduce: Element2
+			reduce(35), // [, reduce: Element2
+			reduce(35), // ], reduce: Element2
+			reduce(35), // (, reduce: Element2
+			reduce(35), // ), reduce: Element2
+			reduce(35), // ,, reduce: Element2
+			reduce(35), // ., reduce: Element2
+			reduce(35), // :, reduce: Element2
+			reduce(35), // %, reduce: Element2
+			reduce(35), // !, reduce: Element2
+			reduce(35), // |, reduce: Element2
+			reduce(35), // |>, reduce: Element2
+			reduce(35), // ^, reduce: Element2
+			reduce(35), // &, reduce: Element2
+			reduce(35), // <<, reduce: Element2
+			reduce(35), // >>, reduce: Element2
+			reduce(35), // =>, reduce: Element2
+			reduce(35), // ->, reduce: Element2
+			reduce(35), // /, reduce: Element2
+			reduce(35), // +, reduce: Element2
+			reduce(35), // -, reduce: Element2
+			reduce(35), // ||, reduce: Element2
+			reduce(35), // <>, reduce: Element2
+			reduce(35), // !=, reduce: Element2
+			reduce(35), // =, reduce: Element2
+			reduce(35), // <, reduce: Element2
+			reduce(35), // <=, reduce: Element2
+			reduce(35), // >, reduce: Element2
+			reduce(35), // >=, reduce: Element2
+			reduce(35), // ;, reduce: Element2
+			reduce(35), // @, reduce: Element2
+			reduce(35), // {, reduce: Element2
+			reduce(35), // }, reduce: Element2
+			reduce(35), // ~, reduce: Element2
+			reduce(35), // ?, reduce: Element2
+			reduce(35), // else, reduce: Element2
+			reduce(35), // if, reduce: Element2
+			reduce(35), // for, reduce: Element2
+			reduce(35), // endfor, reduce: Element2
+			reduce(35), // elif, reduce: Element2
+			reduce(35), // endif, reduce: Element2
+			reduce(35), // set, reduce: Element2
+			reduce(35), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(35), // template_block_start, reduce: Element2
+			reduce(35), // template_comment, reduce: Element2
+			reduce(35), // template_variable_end, reduce: Element2
+			reduce(35), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S254
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(338),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(36), // identifier, reduce: Element2
+			reduce(36), // bytes_literal, reduce: Element2
+			reduce(36), // string_literal, reduce: Element2
+			reduce(36), // integer_literal, reduce: Element2
+			reduce(36), // floating_point_literal, reduce: Element2
+			reduce(36), // newline, reduce: Element2
+			reduce(36), // dollar, reduce: Element2
+			reduce(36), // *, reduce: Element2
+			reduce(36), // [, reduce: Element2
+			reduce(36), // ], reduce: Element2
+			reduce(36), // (, reduce: Element2
+			reduce(36), // ), reduce: Element2
+			reduce(36), // ,, reduce: Element2
+			reduce(36), // ., reduce: Element2
+			reduce(36), // :, reduce: Element2
+			reduce(36), // %, reduce: Element2
+			reduce(36), // !, reduce: Element2
+			reduce(36), // |, reduce: Element2
+			reduce(36), // |>, reduce: Element2
+			reduce(36), // ^, reduce: Element2
+			reduce(36), // &, reduce: Element2
+			reduce(36), // <<, reduce: Element2
+			reduce(36), // >>, reduce: Element2
+			reduce(36), // =>, reduce: Element2
+			reduce(36), // ->, reduce: Element2
+			reduce(36), // /, reduce: Element2
+			reduce(36), // +, reduce: Element2
+			reduce(36), // -, reduce: Element2
+			reduce(36), // ||, reduce: Element2
+			reduce(36), // <>, reduce: Element2
+			reduce(36), // !=, reduce: Element2
+			reduce(36), // =, reduce: Element2
+			reduce(36), // <, reduce: Element2
+			reduce(36), // <=, reduce: Element2
+			reduce(36), // >, reduce: Element2
+			reduce(36), // >=, reduce: Element2
+			reduce(36), // ;, reduce: Element2
+			reduce(36), // @, reduce: Element2
+			reduce(36), // {, reduce: Element2
+			reduce(36), // }, reduce: Element2
+			reduce(36), // ~, reduce: Element2
+			reduce(36), // ?, reduce: Element2
+			reduce(36), // else, reduce: Element2
+			reduce(36), // if, reduce: Element2
+			reduce(36), // for, reduce: Element2
+			reduce(36), // endfor, reduce: Element2
+			reduce(36), // elif, reduce: Element2
+			reduce(36), // endif, reduce: Element2
+			reduce(36), // set, reduce: Element2
+			reduce(36), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(36), // template_block_start, reduce: Element2
+			reduce(36), // template_comment, reduce: Element2
+			reduce(36), // template_variable_end, reduce: Element2
+			reduce(36), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S255
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),reduce(82),nil,reduce(82),reduce(82),reduce(82),reduce(82),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(37), // identifier, reduce: Element2
+			reduce(37), // bytes_literal, reduce: Element2
+			reduce(37), // string_literal, reduce: Element2
+			reduce(37), // integer_literal, reduce: Element2
+			reduce(37), // floating_point_literal, reduce: Element2
+			reduce(37), // newline, reduce: Element2
+			reduce(37), // dollar, reduce: Element2
+			reduce(37), // *, reduce: Element2
+			reduce(37), // [, reduce: Element2
+			reduce(37), // ], reduce: Element2
+			reduce(37), // (, reduce: Element2
+			reduce(37), // ), reduce: Element2
+			reduce(37), // ,, reduce: Element2
+			reduce(37), // ., reduce: Element2
+			reduce(37), // :, reduce: Element2
+			reduce(37), // %, reduce: Element2
+			reduce(37), // !, reduce: Element2
+			reduce(37), // |, reduce: Element2
+			reduce(37), // |>, reduce: Element2
+			reduce(37), // ^, reduce: Element2
+			reduce(37), // &, reduce: Element2
+			reduce(37), // <<, reduce: Element2
+			reduce(37), // >>, reduce: Element2
+			reduce(37), // =>, reduce: Element2
+			reduce(37), // ->, reduce: Element2
+			reduce(37), // /, reduce: Element2
+			reduce(37), // +, reduce: Element2
+			reduce(37), // -, reduce: Element2
+			reduce(37), // ||, reduce: Element2
+			reduce(37), // <>, reduce: Element2
+			reduce(37), // !=, reduce: Element2
+			reduce(37), // =, reduce: Element2
+			reduce(37), // <, reduce: Element2
+			reduce(37), // <=, reduce: Element2
+			reduce(37), // >, reduce: Element2
+			reduce(37), // >=, reduce: Element2
+			reduce(37), // ;, reduce: Element2
+			reduce(37), // @, reduce: Element2
+			reduce(37), // {, reduce: Element2
+			reduce(37), // }, reduce: Element2
+			reduce(37), // ~, reduce: Element2
+			reduce(37), // ?, reduce: Element2
+			reduce(37), // else, reduce: Element2
+			reduce(37), // if, reduce: Element2
+			reduce(37), // for, reduce: Element2
+			reduce(37), // endfor, reduce: Element2
+			reduce(37), // elif, reduce: Element2
+			reduce(37), // endif, reduce: Element2
+			reduce(37), // set, reduce: Element2
+			reduce(37), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(37), // template_block_start, reduce: Element2
+			reduce(37), // template_comment, reduce: Element2
+			reduce(37), // template_variable_end, reduce: Element2
+			reduce(37), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S256
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(208),shift(209),shift(210),shift(211),shift(212),shift(213),shift(214),shift(215),shift(216),shift(217),shift(218),shift(219),shift(220),shift(221),shift(222),shift(223),shift(224),shift(225),shift(226),shift(227),shift(228),shift(229),shift(230),shift(231),shift(232),shift(233),shift(234),shift(235),shift(236),shift(237),shift(238),shift(239),shift(240),shift(241),shift(242),shift(243),shift(244),shift(245),shift(246),shift(247),shift(248),shift(249),shift(250),shift(251),nil,shift(55),shift(255),shift(340),shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(38), // identifier, reduce: Element2
+			reduce(38), // bytes_literal, reduce: Element2
+			reduce(38), // string_literal, reduce: Element2
+			reduce(38), // integer_literal, reduce: Element2
+			reduce(38), // floating_point_literal, reduce: Element2
+			reduce(38), // newline, reduce: Element2
+			reduce(38), // dollar, reduce: Element2
+			reduce(38), // *, reduce: Element2
+			reduce(38), // [, reduce: Element2
+			reduce(38), // ], reduce: Element2
+			reduce(38), // (, reduce: Element2
+			reduce(38), // ), reduce: Element2
+			reduce(38), // ,, reduce: Element2
+			reduce(38), // ., reduce: Element2
+			reduce(38), // :, reduce: Element2
+			reduce(38), // %, reduce: Element2
+			reduce(38), // !, reduce: Element2
+			reduce(38), // |, reduce: Element2
+			reduce(38), // |>, reduce: Element2
+			reduce(38), // ^, reduce: Element2
+			reduce(38), // &, reduce: Element2
+			reduce(38), // <<, reduce: Element2
+			reduce(38), // >>, reduce: Element2
+			reduce(38), // =>, reduce: Element2
+			reduce(38), // ->, reduce: Element2
+			reduce(38), // /, reduce: Element2
+			reduce(38), // +, reduce: Element2
+			reduce(38), // -, reduce: Element2
+			reduce(38), // ||, reduce: Element2
+			reduce(38), // <>, reduce: Element2
+			reduce(38), // !=, reduce: Element2
+			reduce(38), // =, reduce: Element2
+			reduce(38), // <, reduce: Element2
+			reduce(38), // <=, reduce: Element2
+			reduce(38), // >, reduce: Element2
+			reduce(38), // >=, reduce: Element2
+			reduce(38), // ;, reduce: Element2
+			reduce(38), // @, reduce: Element2
+			reduce(38), // {, reduce: Element2
+			reduce(38), // }, reduce: Element2
+			reduce(38), // ~, reduce: Element2
+			reduce(38), // ?, reduce: Element2
+			reduce(38), // else, reduce: Element2
+			reduce(38), // if, reduce: Element2
+			reduce(38), // for, reduce: Element2
+			reduce(38), // endfor, reduce: Element2
+			reduce(38), // elif, reduce: Element2
+			reduce(38), // endif, reduce: Element2
+			reduce(38), // set, reduce: Element2
+			reduce(38), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(38), // template_block_start, reduce: Element2
+			reduce(38), // template_comment, reduce: Element2
+			reduce(38), // template_variable_end, reduce: Element2
+			reduce(38), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S257
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),nil,reduce(83),reduce(83),nil,reduce(83),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(39), // identifier, reduce: Element2
+			reduce(39), // bytes_literal, reduce: Element2
+			reduce(39), // string_literal, reduce: Element2
+			reduce(39), // integer_literal, reduce: Element2
+			reduce(39), // floating_point_literal, reduce: Element2
+			reduce(39), // newline, reduce: Element2
+			reduce(39), // dollar, reduce: Element2
+			reduce(39), // *, reduce: Element2
+			reduce(39), // [, reduce: Element2
+			reduce(39), // ], reduce: Element2
+			reduce(39), // (, reduce: Element2
+			reduce(39), // ), reduce: Element2
+			reduce(39), // ,, reduce: Element2
+			reduce(39), // ., reduce: Element2
+			reduce(39), // :, reduce: Element2
+			reduce(39), // %, reduce: Element2
+			reduce(39), // !, reduce: Element2
+			reduce(39), // |, reduce: Element2
+			reduce(39), // |>, reduce: Element2
+			reduce(39), // ^, reduce: Element2
+			reduce(39), // &, reduce: Element2
+			reduce(39), // <<, reduce: Element2
+			reduce(39), // >>, reduce: Element2
+			reduce(39), // =>, reduce: Element2
+			reduce(39), // ->, reduce: Element2
+			reduce(39), // /, reduce: Element2
+			reduce(39), // +, reduce: Element2
+			reduce(39), // -, reduce: Element2
+			reduce(39), // ||, reduce: Element2
+			reduce(39), // <>, reduce: Element2
+			reduce(39), // !=, reduce: Element2
+			reduce(39), // =, reduce: Element2
+			reduce(39), // <, reduce: Element2
+			reduce(39), // <=, reduce: Element2
+			reduce(39), // >, reduce: Element2
+			reduce(39), // >=, reduce: Element2
+			reduce(39), // ;, reduce: Element2
+			reduce(39), // @, reduce: Element2
+			reduce(39), // {, reduce: Element2
+			reduce(39), // }, reduce: Element2
+			reduce(39), // ~, reduce: Element2
+			reduce(39), // ?, reduce: Element2
+			reduce(39), // else, reduce: Element2
+			reduce(39), // if, reduce: Element2
+			reduce(39), // for, reduce: Element2
+			reduce(39), // endfor, reduce: Element2
+			reduce(39), // elif, reduce: Element2
+			reduce(39), // endif, reduce: Element2
+			reduce(39), // set, reduce: Element2
+			reduce(39), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(39), // template_block_start, reduce: Element2
+			reduce(39), // template_comment, reduce: Element2
+			reduce(39), // template_variable_end, reduce: Element2
+			reduce(39), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S258
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),nil,reduce(62),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(40), // identifier, reduce: Element2
+			reduce(40), // bytes_literal, reduce: Element2
+			reduce(40), // string_literal, reduce: Element2
+			reduce(40), // integer_literal, reduce: Element2
+			reduce(40), // floating_point_literal, reduce: Element2
+			reduce(40), // newline, reduce: Element2
+			reduce(40), // dollar, reduce: Element2
+			reduce(40), // *, reduce: Element2
+			reduce(40), // [, reduce: Element2
+			reduce(40), // ], reduce: Element2
+			reduce(40), // (, reduce: Element2
+			reduce(40), // ), reduce: Element2
+			reduce(40), // ,, reduce: Element2
+			reduce(40), // ., reduce: Element2
+			reduce(40), // :, reduce: Element2
+			reduce(40), // %, reduce: Element2
+			reduce(40), // !, reduce: Element2
+			reduce(40), // |, reduce: Element2
+			reduce(40), // |>, reduce: Element2
+			reduce(40), // ^, reduce: Element2
+			reduce(40), // &, reduce: Element2
+			reduce(40), // <<, reduce: Element2
+			reduce(40), // >>, reduce: Element2
+			reduce(40), // =>, reduce: Element2
+			reduce(40), // ->, reduce: Element2
+			reduce(40), // /, reduce: Element2
+			reduce(40), // +, reduce: Element2
+			reduce(40), // -, reduce: Element2
+			reduce(40), // ||, reduce: Element2
+			reduce(40), // <>, reduce: Element2
+			reduce(40), // !=, reduce: Element2
+			reduce(40), // =, reduce: Element2
+			reduce(40), // <, reduce: Element2
+			reduce(40), // <=, reduce: Element2
+			reduce(40), // >, reduce: Element2
+			reduce(40), // >=, reduce: Element2
+			reduce(40), // ;, reduce: Element2
+			reduce(40), // @, reduce: Element2
+			reduce(40), // {, reduce: Element2
+			reduce(40), // }, reduce: Element2
+			reduce(40), // ~, reduce: Element2
+			reduce(40), // ?, reduce: Element2
+			reduce(40), // else, reduce: Element2
+			reduce(40), // if, reduce: Element2
+			reduce(40), // for, reduce: Element2
+			reduce(40), // endfor, reduce: Element2
+			reduce(40), // elif, reduce: Element2
+			reduce(40), // endif, reduce: Element2
+			reduce(40), // set, reduce: Element2
+			reduce(40), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(40), // template_block_start, reduce: Element2
+			reduce(40), // template_comment, reduce: Element2
+			reduce(40), // template_variable_end, reduce: Element2
+			reduce(40), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S259
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(266),shift(129),shift(130),nil,nil,shift(341),shift(131),nil,nil,nil,nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(41), // identifier, reduce: Element2
+			reduce(41), // bytes_literal, reduce: Element2
+			reduce(41), // string_literal, reduce: Element2
+			reduce(41), // integer_literal, reduce: Element2
+			reduce(41), // floating_point_literal, reduce: Element2
+			reduce(41), // newline, reduce: Element2
+			reduce(41), // dollar, reduce: Element2
+			reduce(41), // *, reduce: Element2
+			reduce(41), // [, reduce: Element2
+			reduce(41), // ], reduce: Element2
+			reduce(41), // (, reduce: Element2
+			reduce(41), // ), reduce: Element2
+			reduce(41), // ,, reduce: Element2
+			reduce(41), // ., reduce: Element2
+			reduce(41), // :, reduce: Element2
+			reduce(41), // %, reduce: Element2
+			reduce(41), // !, reduce: Element2
+			reduce(41), // |, reduce: Element2
+			reduce(41), // |>, reduce: Element2
+			reduce(41), // ^, reduce: Element2
+			reduce(41), // &, reduce: Element2
+			reduce(41), // <<, reduce: Element2
+			reduce(41), // >>, reduce: Element2
+			reduce(41), // =>, reduce: Element2
+			reduce(41), // ->, reduce: Element2
+			reduce(41), // /, reduce: Element2
+			reduce(41), // +, reduce: Element2
+			reduce(41), // -, reduce: Element2
+			reduce(41), // ||, reduce: Element2
+			reduce(41), // <>, reduce: Element2
+			reduce(41), // !=, reduce: Element2
+			reduce(41), // =, reduce: Element2
+			reduce(41), // <, reduce: Element2
+			reduce(41), // <=, reduce: Element2
+			reduce(41), // >, reduce: Element2
+			reduce(41), // >=, reduce: Element2
+			reduce(41), // ;, reduce: Element2
+			reduce(41), // @, reduce: Element2
+			reduce(41), // {, reduce: Element2
+			reduce(41), // }, reduce: Element2
+			reduce(41), // ~, reduce: Element2
+			reduce(41), // ?, reduce: Element2
+			reduce(41), // else, reduce: Element2
+			reduce(41), // if, reduce: Element2
+			reduce(41), // for, reduce: Element2
+			reduce(41), // endfor, reduce: Element2
+			reduce(41), // elif, reduce: Element2
+			reduce(41), // endif, reduce: Element2
+			reduce(41), // set, reduce: Element2
+			reduce(41), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(41), // template_block_start, reduce: Element2
+			reduce(41), // template_comment, reduce: Element2
+			reduce(41), // template_variable_end, reduce: Element2
+			reduce(41), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S260
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),nil,reduce(65),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(42), // identifier, reduce: Element2
+			reduce(42), // bytes_literal, reduce: Element2
+			reduce(42), // string_literal, reduce: Element2
+			reduce(42), // integer_literal, reduce: Element2
+			reduce(42), // floating_point_literal, reduce: Element2
+			reduce(42), // newline, reduce: Element2
+			reduce(42), // dollar, reduce: Element2
+			reduce(42), // *, reduce: Element2
+			reduce(42), // [, reduce: Element2
+			reduce(42), // ], reduce: Element2
+			reduce(42), // (, reduce: Element2
+			reduce(42), // ), reduce: Element2
+			reduce(42), // ,, reduce: Element2
+			reduce(42), // ., reduce: Element2
+			reduce(42), // :, reduce: Element2
+			reduce(42), // %, reduce: Element2
+			reduce(42), // !, reduce: Element2
+			reduce(42), // |, reduce: Element2
+			reduce(42), // |>, reduce: Element2
+			reduce(42), // ^, reduce: Element2
+			reduce(42), // &, reduce: Element2
+			reduce(42), // <<, reduce: Element2
+			reduce(42), // >>, reduce: Element2
+			reduce(42), // =>, reduce: Element2
+			reduce(42), // ->, reduce: Element2
+			reduce(42), // /, reduce: Element2
+			reduce(42), // +, reduce: Element2
+			reduce(42), // -, reduce: Element2
+			reduce(42), // ||, reduce: Element2
+			reduce(42), // <>, reduce: Element2
+			reduce(42), // !=, reduce: Element2
+			reduce(42), // =, reduce: Element2
+			reduce(42), // <, reduce: Element2
+			reduce(42), // <=, reduce: Element2
+			reduce(42), // >, reduce: Element2
+			reduce(42), // >=, reduce: Element2
+			reduce(42), // ;, reduce: Element2
+			reduce(42), // @, reduce: Element2
+			reduce(42), // {, reduce: Element2
+			reduce(42), // }, reduce: Element2
+			reduce(42), // ~, reduce: Element2
+			reduce(42), // ?, reduce: Element2
+			reduce(42), // else, reduce: Element2
+			reduce(42), // if, reduce: Element2
+			reduce(42), // for, reduce: Element2
+			reduce(42), // endfor, reduce: Element2
+			reduce(42), // elif, reduce: Element2
+			reduce(42), // endif, reduce: Element2
+			reduce(42), // set, reduce: Element2
+			reduce(42), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(42), // template_block_start, reduce: Element2
+			reduce(42), // template_comment, reduce: Element2
+			reduce(42), // template_variable_end, reduce: Element2
+			reduce(42), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S261
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(279),shift(280),shift(281),shift(282),shift(283),shift(284),shift(285),shift(286),shift(287),shift(288),shift(289),shift(290),shift(291),shift(292),shift(293),shift(294),shift(295),shift(296),shift(297),shift(298),shift(299),shift(300),shift(301),shift(302),shift(303),shift(304),shift(305),shift(306),shift(307),shift(308),shift(309),shift(310),shift(311),shift(312),shift(313),shift(314),shift(315),shift(316),shift(317),shift(318),shift(319),shift(320),shift(321),shift(322),nil,shift(343),shift(328),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(43), // identifier, reduce: Element2
+			reduce(43), // bytes_literal, reduce: Element2
+			reduce(43), // string_literal, reduce: Element2
+			reduce(43), // integer_literal, reduce: Element2
+			reduce(43), // floating_point_literal, reduce: Element2
+			reduce(43), // newline, reduce: Element2
+			reduce(43), // dollar, reduce: Element2
+			reduce(43), // *, reduce: Element2
+			reduce(43), // [, reduce: Element2
+			reduce(43), // ], reduce: Element2
+			reduce(43), // (, reduce: Element2
+			reduce(43), // ), reduce: Element2
+			reduce(43), // ,, reduce: Element2
+			reduce(43), // ., reduce: Element2
+			reduce(43), // :, reduce: Element2
+			reduce(43), // %, reduce: Element2
+			reduce(43), // !, reduce: Element2
+			reduce(43), // |, reduce: Element2
+			reduce(43), // |>, reduce: Element2
+			reduce(43), // ^, reduce: Element2
+			reduce(43), // &, reduce: Element2
+			reduce(43), // <<, reduce: Element2
+			reduce(43), // >>, reduce: Element2
+			reduce(43), // =>, reduce: Element2
+			reduce(43), // ->, reduce: Element2
+			reduce(43), // /, reduce: Element2
+			reduce(43), // +, reduce: Element2
+			reduce(43), // -, reduce: Element2
+			reduce(43), // ||, reduce: Element2
+			reduce(43), // <>, reduce: Element2
+			reduce(43), // !=, reduce: Element2
+			reduce(43), // =, reduce: Element2
+			reduce(43), // <, reduce: Element2
+			reduce(43), // <=, reduce: Element2
+			reduce(43), // >, reduce: Element2
+			reduce(43), // >=, reduce: Element2
+			reduce(43), // ;, reduce: Element2
+			reduce(43), // @, reduce: Element2
+			reduce(43), // {, reduce: Element2
+			reduce(43), // }, reduce: Element2
+			reduce(43), // ~, reduce: Element2
+			reduce(43), // ?, reduce: Element2
+			reduce(43), // else, reduce: Element2
+			reduce(43), // if, reduce: Element2
+			reduce(43), // for, reduce: Element2
+			reduce(43), // endfor, reduce: Element2
+			reduce(43), // elif, reduce: Element2
+			reduce(43), // endif, reduce: Element2
+			reduce(43), // set, reduce: Element2
+			reduce(43), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(43), // template_block_start, reduce: Element2
+			reduce(43), // template_comment, reduce: Element2
+			reduce(43), // template_variable_end, reduce: Element2
+			reduce(43), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S262
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),shift(345),nil,nil,shift(131),nil,nil,nil,nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(44), // identifier, reduce: Element2
+			reduce(44), // bytes_literal, reduce: Element2
+			reduce(44), // string_literal, reduce: Element2
+			reduce(44), // integer_literal, reduce: Element2
+			reduce(44), // floating_point_literal, reduce: Element2
+			reduce(44), // newline, reduce: Element2
+			reduce(44), // dollar, reduce: Element2
+			reduce(44), // *, reduce: Element2
+			reduce(44), // [, reduce: Element2
+			reduce(44), // ], reduce: Element2
+			reduce(44), // (, reduce: Element2
+			reduce(44), // ), reduce: Element2
+			reduce(44), // ,, reduce: Element2
+			reduce(44), // ., reduce: Element2
+			reduce(44), // :, reduce: Element2
+			reduce(44), // %, reduce: Element2
+			reduce(44), // !, reduce: Element2
+			reduce(44), // |, reduce: Element2
+			reduce(44), // |>, reduce: Element2
+			reduce(44), // ^, reduce: Element2
+			reduce(44), // &, reduce: Element2
+			reduce(44), // <<, reduce: Element2
+			reduce(44), // >>, reduce: Element2
+			reduce(44), // =>, reduce: Element2
+			reduce(44), // ->, reduce: Element2
+			reduce(44), // /, reduce: Element2
+			reduce(44), // +, reduce: Element2
+			reduce(44), // -, reduce: Element2
+			reduce(44), // ||, reduce: Element2
+			reduce(44), // <>, reduce: Element2
+			reduce(44), // !=, reduce: Element2
+			reduce(44), // =, reduce: Element2
+			reduce(44), // <, reduce: Element2
+			reduce(44), // <=, reduce: Element2
+			reduce(44), // >, reduce: Element2
+			reduce(44), // >=, reduce: Element2
+			reduce(44), // ;, reduce: Element2
+			reduce(44), // @, reduce: Element2
+			reduce(44), // {, reduce: Element2
+			reduce(44), // }, reduce: Element2
+			reduce(44), // ~, reduce: Element2
+			reduce(44), // ?, reduce: Element2
+			reduce(44), // else, reduce: Element2
+			reduce(44), // if, reduce: Element2
+			reduce(44), // for, reduce: Element2
+			reduce(44), // endfor, reduce: Element2
+			reduce(44), // elif, reduce: Element2
+			reduce(44), // endif, reduce: Element2
+			reduce(44), // set, reduce: Element2
+			reduce(44), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(44), // template_block_start, reduce: Element2
+			reduce(44), // template_comment, reduce: Element2
+			reduce(44), // template_variable_end, reduce: Element2
+			reduce(44), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S263
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),nil,reduce(75),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(45), // identifier, reduce: Element2
+			reduce(45), // bytes_literal, reduce: Element2
+			reduce(45), // string_literal, reduce: Element2
+			reduce(45), // integer_literal, reduce: Element2
+			reduce(45), // floating_point_literal, reduce: Element2
+			reduce(45), // newline, reduce: Element2
+			reduce(45), // dollar, reduce: Element2
+			reduce(45), // *, reduce: Element2
+			reduce(45), // [, reduce: Element2
+			reduce(45), // ], reduce: Element2
+			reduce(45), // (, reduce: Element2
+			reduce(45), // ), reduce: Element2
+			reduce(45), // ,, reduce: Element2
+			reduce(45), // ., reduce: Element2
+			reduce(45), // :, reduce: Element2
+			reduce(45), // %, reduce: Element2
+			reduce(45), // !, reduce: Element2
+			reduce(45), // |, reduce: Element2
+			reduce(45), // |>, reduce: Element2
+			reduce(45), // ^, reduce: Element2
+			reduce(45), // &, reduce: Element2
+			reduce(45), // <<, reduce: Element2
+			reduce(45), // >>, reduce: Element2
+			reduce(45), // =>, reduce: Element2
+			reduce(45), // ->, reduce: Element2
+			reduce(45), // /, reduce: Element2
+			reduce(45), // +, reduce: Element2
+			reduce(45), // -, reduce: Element2
+			reduce(45), // ||, reduce: Element2
+			reduce(45), // <>, reduce: Element2
+			reduce(45), // !=, reduce: Element2
+			reduce(45), // =, reduce: Element2
+			reduce(45), // <, reduce: Element2
+			reduce(45), // <=, reduce: Element2
+			reduce(45), // >, reduce: Element2
+			reduce(45), // >=, reduce: Element2
+			reduce(45), // ;, reduce: Element2
+			reduce(45), // @, reduce: Element2
+			reduce(45), // {, reduce: Element2
+			reduce(45), // }, reduce: Element2
+			reduce(45), // ~, reduce: Element2
+			reduce(45), // ?, reduce: Element2
+			reduce(45), // else, reduce: Element2
+			reduce(45), // if, reduce: Element2
+			reduce(45), // for, reduce: Element2
+			reduce(45), // endfor, reduce: Element2
+			reduce(45), // elif, reduce: Element2
+			reduce(45), // endif, reduce: Element2
+			reduce(45), // set, reduce: Element2
+			reduce(45), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(45), // template_block_start, reduce: Element2
+			reduce(45), // template_comment, reduce: Element2
+			reduce(45), // template_variable_end, reduce: Element2
+			reduce(45), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S264
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),nil,reduce(83),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(46), // identifier, reduce: Element2
+			reduce(46), // bytes_literal, reduce: Element2
+			reduce(46), // string_literal, reduce: Element2
+			reduce(46), // integer_literal, reduce: Element2
+			reduce(46), // floating_point_literal, reduce: Element2
+			reduce(46), // newline, reduce: Element2
+			reduce(46), // dollar, reduce: Element2
+			reduce(46), // *, reduce: Element2
+			reduce(46), // [, reduce: Element2
+			reduce(46), // ], reduce: Element2
+			reduce(46), // (, reduce: Element2
+			reduce(46), // ), reduce: Element2
+			reduce(46), // ,, reduce: Element2
+			reduce(46), // ., reduce: Element2
+			reduce(46), // :, reduce: Element2
+			reduce(46), // %, reduce: Element2
+			reduce(46), // !, reduce: Element2
+			reduce(46), // |, reduce: Element2
+			reduce(46), // |>, reduce: Element2
+			reduce(46), // ^, reduce: Element2
+			reduce(46), // &, reduce: Element2
+			reduce(46), // <<, reduce: Element2
+			reduce(46), // >>, reduce: Element2
+			reduce(46), // =>, reduce: Element2
+			reduce(46), // ->, reduce: Element2
+			reduce(46), // /, reduce: Element2
+			reduce(46), // +, reduce: Element2
+			reduce(46), // -, reduce: Element2
+			reduce(46), // ||, reduce: Element2
+			reduce(46), // <>, reduce: Element2
+			reduce(46), // !=, reduce: Element2
+			reduce(46), // =, reduce: Element2
+			reduce(46), // <, reduce: Element2
+			reduce(46), // <=, reduce: Element2
+			reduce(46), // >, reduce: Element2
+			reduce(46), // >=, reduce: Element2
+			reduce(46), // ;, reduce: Element2
+			reduce(46), // @, reduce: Element2
+			reduce(46), // {, reduce: Element2
+			reduce(46), // }, reduce: Element2
+			reduce(46), // ~, reduce: Element2
+			reduce(46), // ?, reduce: Element2
+			reduce(46), // else, reduce: Element2
+			reduce(46), // if, reduce: Element2
+			reduce(46), // for, reduce: Element2
+			reduce(46), // endfor, reduce: Element2
+			reduce(46), // elif, reduce: Element2
+			reduce(46), // endif, reduce: Element2
+			reduce(46), // set, reduce: Element2
+			reduce(46), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(46), // template_block_start, reduce: Element2
+			reduce(46), // template_comment, reduce: Element2
+			reduce(46), // template_variable_end, reduce: Element2
+			reduce(46), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S265
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),nil,reduce(62),reduce(62),nil,reduce(62),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(47), // identifier, reduce: Element2
+			reduce(47), // bytes_literal, reduce: Element2
+			reduce(47), // string_literal, reduce: Element2
+			reduce(47), // integer_literal, reduce: Element2
+			reduce(47), // floating_point_literal, reduce: Element2
+			reduce(47), // newline, reduce: Element2
+			reduce(47), // dollar, reduce: Element2
+			reduce(47), // *, reduce: Element2
+			reduce(47), // [, reduce: Element2
+			reduce(47), // ], reduce: Element2
+			reduce(47), // (, reduce: Element2
+			reduce(47), // ), reduce: Element2
+			reduce(47), // ,, reduce: Element2
+			reduce(47), // ., reduce: Element2
+			reduce(47), // :, reduce: Element2
+			reduce(47), // %, reduce: Element2
+			reduce(47), // !, reduce: Element2
+			reduce(47), // |, reduce: Element2
+			reduce(47), // |>, reduce: Element2
+			reduce(47), // ^, reduce: Element2
+			reduce(47), // &, reduce: Element2
+			reduce(47), // <<, reduce: Element2
+			reduce(47), // >>, reduce: Element2
+			reduce(47), // =>, reduce: Element2
+			reduce(47), // ->, reduce: Element2
+			reduce(47), // /, reduce: Element2
+			reduce(47), // +, reduce: Element2
+			reduce(47), // -, reduce: Element2
+			reduce(47), // ||, reduce: Element2
+			reduce(47), // <>, reduce: Element2
+			reduce(47), // !=, reduce: Element2
+			reduce(47), // =, reduce: Element2
+			reduce(47), // <, reduce: Element2
+			reduce(47), // <=, reduce: Element2
+			reduce(47), // >, reduce: Element2
+			reduce(47), // >=, reduce: Element2
+			reduce(47), // ;, reduce: Element2
+			reduce(47), // @, reduce: Element2
+			reduce(47), // {, reduce: Element2
+			reduce(47), // }, reduce: Element2
+			reduce(47), // ~, reduce: Element2
+			reduce(47), // ?, reduce: Element2
+			reduce(47), // else, reduce: Element2
+			reduce(47), // if, reduce: Element2
+			reduce(47), // for, reduce: Element2
+			reduce(47), // endfor, reduce: Element2
+			reduce(47), // elif, reduce: Element2
+			reduce(47), // endif, reduce: Element2
+			reduce(47), // set, reduce: Element2
+			reduce(47), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(47), // template_block_start, reduce: Element2
+			reduce(47), // template_comment, reduce: Element2
+			reduce(47), // template_variable_end, reduce: Element2
+			reduce(47), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S266
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(346),nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(48), // identifier, reduce: Element2
+			reduce(48), // bytes_literal, reduce: Element2
+			reduce(48), // string_literal, reduce: Element2
+			reduce(48), // integer_literal, reduce: Element2
+			reduce(48), // floating_point_literal, reduce: Element2
+			reduce(48), // newline, reduce: Element2
+			reduce(48), // dollar, reduce: Element2
+			reduce(48), // *, reduce: Element2
+			reduce(48), // [, reduce: Element2
+			reduce(48), // ], reduce: Element2
+			reduce(48), // (, reduce: Element2
+			reduce(48), // ), reduce: Element2
+			reduce(48), // ,, reduce: Element2
+			reduce(48), // ., reduce: Element2
+			reduce(48), // :, reduce: Element2
+			reduce(48), // %, reduce: Element2
+			reduce(48), // !, reduce: Element2
+			reduce(48), // |, reduce: Element2
+			reduce(48), // |>, reduce: Element2
+			reduce(48), // ^, reduce: Element2
+			reduce(48), // &, reduce: Element2
+			reduce(48), // <<, reduce: Element2
+			reduce(48), // >>, reduce: Element2
+			reduce(48), // =>, reduce: Element2
+			reduce(48), // ->, reduce: Element2
+			reduce(48), // /, reduce: Element2
+			reduce(48), // +, reduce: Element2
+			reduce(48), // -, reduce: Element2
+			reduce(48), // ||, reduce: Element2
+			reduce(48), // <>, reduce: Element2
+			reduce(48), // !=, reduce: Element2
+			reduce(48), // =, reduce: Element2
+			reduce(48), // <, reduce: Element2
+			reduce(48), // <=, reduce: Element2
+			reduce(48), // >, reduce: Element2
+			reduce(48), // >=, reduce: Element2
+			reduce(48), // ;, reduce: Element2
+			reduce(48), // @, reduce: Element2
+			reduce(48), // {, reduce: Element2
+			reduce(48), // }, reduce: Element2
+			reduce(48), // ~, reduce: Element2
+			reduce(48), // ?, reduce: Element2
+			reduce(48), // else, reduce: Element2
+			reduce(48), // if, reduce: Element2
+			reduce(48), // for, reduce: Element2
+			reduce(48), // endfor, reduce: Element2
+			reduce(48), // elif, reduce: Element2
+			reduce(48), // endif, reduce: Element2
+			reduce(48), // set, reduce: Element2
+			reduce(48), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(48), // template_block_start, reduce: Element2
+			reduce(48), // template_comment, reduce: Element2
+			reduce(48), // template_variable_end, reduce: Element2
+			reduce(48), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S267
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(347),nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(49), // identifier, reduce: Element2
+			reduce(49), // bytes_literal, reduce: Element2
+			reduce(49), // string_literal, reduce: Element2
+			reduce(49), // integer_literal, reduce: Element2
+			reduce(49), // floating_point_literal, reduce: Element2
+			reduce(49), // newline, reduce: Element2
+			reduce(49), // dollar, reduce: Element2
+			reduce(49), // *, reduce: Element2
+			reduce(49), // [, reduce: Element2
+			reduce(49), // ], reduce: Element2
+			reduce(49), // (, reduce: Element2
+			reduce(49), // ), reduce: Element2
+			reduce(49), // ,, reduce: Element2
+			reduce(49), // ., reduce: Element2
+			reduce(49), // :, reduce: Element2
+			reduce(49), // %, reduce: Element2
+			reduce(49), // !, reduce: Element2
+			reduce(49), // |, reduce: Element2
+			reduce(49), // |>, reduce: Element2
+			reduce(49), // ^, reduce: Element2
+			reduce(49), // &, reduce: Element2
+			reduce(49), // <<, reduce: Element2
+			reduce(49), // >>, reduce: Element2
+			reduce(49), // =>, reduce: Element2
+			reduce(49), // ->, reduce: Element2
+			reduce(49), // /, reduce: Element2
+			reduce(49), // +, reduce: Element2
+			reduce(49), // -, reduce: Element2
+			reduce(49), // ||, reduce: Element2
+			reduce(49), // <>, reduce: Element2
+			reduce(49), // !=, reduce: Element2
+			reduce(49), // =, reduce: Element2
+			reduce(49), // <, reduce: Element2
+			reduce(49), // <=, reduce: Element2
+			reduce(49), // >, reduce: Element2
+			reduce(49), // >=, reduce: Element2
+			reduce(49), // ;, reduce: Element2
+			reduce(49), // @, reduce: Element2
+			reduce(49), // {, reduce: Element2
+			reduce(49), // }, reduce: Element2
+			reduce(49), // ~, reduce: Element2
+			reduce(49), // ?, reduce: Element2
+			reduce(49), // else, reduce: Element2
+			reduce(49), // if, reduce: Element2
+			reduce(49), // for, reduce: Element2
+			reduce(49), // endfor, reduce: Element2
+			reduce(49), // elif, reduce: Element2
+			reduce(49), // endif, reduce: Element2
+			reduce(49), // set, reduce: Element2
+			reduce(49), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(49), // template_block_start, reduce: Element2
+			reduce(49), // template_comment, reduce: Element2
+			reduce(49), // template_variable_end, reduce: Element2
+			reduce(49), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S268
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(266),shift(129),shift(130),nil,nil,shift(348),shift(131),nil,nil,nil,nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(50), // identifier, reduce: Element2
+			reduce(50), // bytes_literal, reduce: Element2
+			reduce(50), // string_literal, reduce: Element2
+			reduce(50), // integer_literal, reduce: Element2
+			reduce(50), // floating_point_literal, reduce: Element2
+			reduce(50), // newline, reduce: Element2
+			reduce(50), // dollar, reduce: Element2
+			reduce(50), // *, reduce: Element2
+			reduce(50), // [, reduce: Element2
+			reduce(50), // ], reduce: Element2
+			reduce(50), // (, reduce: Element2
+			reduce(50), // ), reduce: Element2
+			reduce(50), // ,, reduce: Element2
+			reduce(50), // ., reduce: Element2
+			reduce(50), // :, reduce: Element2
+			reduce(50), // %, reduce: Element2
+			reduce(50), // !, reduce: Element2
+			reduce(50), // |, reduce: Element2
+			reduce(50), // |>, reduce: Element2
+			reduce(50), // ^, reduce: Element2
+			reduce(50), // &, reduce: Element2
+			reduce(50), // <<, reduce: Element2
+			reduce(50), // >>, reduce: Element2
+			reduce(50), // =>, reduce: Element2
+			reduce(50), // ->, reduce: Element2
+			reduce(50), // /, reduce: Element2
+			reduce(50), // +, reduce: Element2
+			reduce(50), // -, reduce: Element2
+			reduce(50), // ||, reduce: Element2
+			reduce(50), // <>, reduce: Element2
+			reduce(50), // !=, reduce: Element2
+			reduce(50), // =, reduce: Element2
+			reduce(50), // <, reduce: Element2
+			reduce(50), // <=, reduce: Element2
+			reduce(50), // >, reduce: Element2
+			reduce(50), // >=, reduce: Element2
+			reduce(50), // ;, reduce: Element2
+			reduce(50), // @, reduce: Element2
+			reduce(50), // {, reduce: Element2
+			reduce(50), // }, reduce: Element2
+			reduce(50), // ~, reduce: Element2
+			reduce(50), // ?, reduce: Element2
+			reduce(50), // else, reduce: Element2
+			reduce(50), // if, reduce: Element2
+			reduce(50), // for, reduce: Element2
+			reduce(50), // endfor, reduce: Element2
+			reduce(50), // elif, reduce: Element2
+			reduce(50), // endif, reduce: Element2
+			reduce(50), // set, reduce: Element2
+			reduce(50), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(50), // template_block_start, reduce: Element2
+			reduce(50), // template_comment, reduce: Element2
+			reduce(50), // template_variable_end, reduce: Element2
+			reduce(50), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S269
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),nil,reduce(65),reduce(65),nil,reduce(65),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(51), // identifier, reduce: Element2
+			reduce(51), // bytes_literal, reduce: Element2
+			reduce(51), // string_literal, reduce: Element2
+			reduce(51), // integer_literal, reduce: Element2
+			reduce(51), // floating_point_literal, reduce: Element2
+			reduce(51), // newline, reduce: Element2
+			reduce(51), // dollar, reduce: Element2
+			reduce(51), // *, reduce: Element2
+			reduce(51), // [, reduce: Element2
+			reduce(51), // ], reduce: Element2
+			reduce(51), // (, reduce: Element2
+			reduce(51), // ), reduce: Element2
+			reduce(51), // ,, reduce: Element2
+			reduce(51), // ., reduce: Element2
+			reduce(51), // :, reduce: Element2
+			reduce(51), // %, reduce: Element2
+			reduce(51), // !, reduce: Element2
+			reduce(51), // |, reduce: Element2
+			reduce(51), // |>, reduce: Element2
+			reduce(51), // ^, reduce: Element2
+			reduce(51), // &, reduce: Element2
+			reduce(51), // <<, reduce: Element2
+			reduce(51), // >>, reduce: Element2
+			reduce(51), // =>, reduce: Element2
+			reduce(51), // ->, reduce: Element2
+			reduce(51), // /, reduce: Element2
+			reduce(51), // +, reduce: Element2
+			reduce(51), // -, reduce: Element2
+			reduce(51), // ||, reduce: Element2
+			reduce(51), // <>, reduce: Element2
+			reduce(51), // !=, reduce: Element2
+			reduce(51), // =, reduce: Element2
+			reduce(51), // <, reduce: Element2
+			reduce(51), // <=, reduce: Element2
+			reduce(51), // >, reduce: Element2
+			reduce(51), // >=, reduce: Element2
+			reduce(51), // ;, reduce: Element2
+			reduce(51), // @, reduce: Element2
+			reduce(51), // {, reduce: Element2
+			reduce(51), // }, reduce: Element2
+			reduce(51), // ~, reduce: Element2
+			reduce(51), // ?, reduce: Element2
+			reduce(51), // else, reduce: Element2
+			reduce(51), // if, reduce: Element2
+			reduce(51), // for, reduce: Element2
+			reduce(51), // endfor, reduce: Element2
+			reduce(51), // elif, reduce: Element2
+			reduce(51), // endif, reduce: Element2
+			reduce(51), // set, reduce: Element2
+			reduce(51), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(51), // template_block_start, reduce: Element2
+			reduce(51), // template_comment, reduce: Element2
+			reduce(51), // template_variable_end, reduce: Element2
+			reduce(51), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S270
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(279),shift(280),shift(281),shift(282),shift(283),shift(284),shift(285),shift(286),shift(287),shift(288),shift(289),shift(290),shift(291),shift(292),shift(293),shift(294),shift(295),shift(296),shift(297),shift(298),shift(299),shift(300),shift(301),shift(302),shift(303),shift(304),shift(305),shift(306),shift(307),shift(308),shift(309),shift(310),shift(311),shift(312),shift(313),shift(314),shift(315),shift(316),shift(317),shift(318),shift(319),shift(320),shift(321),shift(322),nil,shift(350),shift(328),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(52), // identifier, reduce: Element2
+			reduce(52), // bytes_literal, reduce: Element2
+			reduce(52), // string_literal, reduce: Element2
+			reduce(52), // integer_literal, reduce: Element2
+			reduce(52), // floating_point_literal, reduce: Element2
+			reduce(52), // newline, reduce: Element2
+			reduce(52), // dollar, reduce: Element2
+			reduce(52), // *, reduce: Element2
+			reduce(52), // [, reduce: Element2
+			reduce(52), // ], reduce: Element2
+			reduce(52), // (, reduce: Element2
+			reduce(52), // ), reduce: Element2
+			reduce(52), // ,, reduce: Element2
+			reduce(52), // ., reduce: Element2
+			reduce(52), // :, reduce: Element2
+			reduce(52), // %, reduce: Element2
+			reduce(52), // !, reduce: Element2
+			reduce(52), // |, reduce: Element2
+			reduce(52), // |>, reduce: Element2
+			reduce(52), // ^, reduce: Element2
+			reduce(52), // &, reduce: Element2
+			reduce(52), // <<, reduce: Element2
+			reduce(52), // >>, reduce: Element2
+			reduce(52), // =>, reduce: Element2
+			reduce(52), // ->, reduce: Element2
+			reduce(52), // /, reduce: Element2
+			reduce(52), // +, reduce: Element2
+			reduce(52), // -, reduce: Element2
+			reduce(52), // ||, reduce: Element2
+			reduce(52), // <>, reduce: Element2
+			reduce(52), // !=, reduce: Element2
+			reduce(52), // =, reduce: Element2
+			reduce(52), // <, reduce: Element2
+			reduce(52), // <=, reduce: Element2
+			reduce(52), // >, reduce: Element2
+			reduce(52), // >=, reduce: Element2
+			reduce(52), // ;, reduce: Element2
+			reduce(52), // @, reduce: Element2
+			reduce(52), // {, reduce: Element2
+			reduce(52), // }, reduce: Element2
+			reduce(52), // ~, reduce: Element2
+			reduce(52), // ?, reduce: Element2
+			reduce(52), // else, reduce: Element2
+			reduce(52), // if, reduce: Element2
+			reduce(52), // for, reduce: Element2
+			reduce(52), // endfor, reduce: Element2
+			reduce(52), // elif, reduce: Element2
+			reduce(52), // endif, reduce: Element2
+			reduce(52), // set, reduce: Element2
+			reduce(52), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(52), // template_block_start, reduce: Element2
+			reduce(52), // template_comment, reduce: Element2
+			reduce(52), // template_variable_end, reduce: Element2
+			reduce(52), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S271
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(352),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(53), // identifier, reduce: Element2
+			reduce(53), // bytes_literal, reduce: Element2
+			reduce(53), // string_literal, reduce: Element2
+			reduce(53), // integer_literal, reduce: Element2
+			reduce(53), // floating_point_literal, reduce: Element2
+			reduce(53), // newline, reduce: Element2
+			reduce(53), // dollar, reduce: Element2
+			reduce(53), // *, reduce: Element2
+			reduce(53), // [, reduce: Element2
+			reduce(53), // ], reduce: Element2
+			reduce(53), // (, reduce: Element2
+			reduce(53), // ), reduce: Element2
+			reduce(53), // ,, reduce: Element2
+			reduce(53), // ., reduce: Element2
+			reduce(53), // :, reduce: Element2
+			reduce(53), // %, reduce: Element2
+			reduce(53), // !, reduce: Element2
+			reduce(53), // |, reduce: Element2
+			reduce(53), // |>, reduce: Element2
+			reduce(53), // ^, reduce: Element2
+			reduce(53), // &, reduce: Element2
+			reduce(53), // <<, reduce: Element2
+			reduce(53), // >>, reduce: Element2
+			reduce(53), // =>, reduce: Element2
+			reduce(53), // ->, reduce: Element2
+			reduce(53), // /, reduce: Element2
+			reduce(53), // +, reduce: Element2
+			reduce(53), // -, reduce: Element2
+			reduce(53), // ||, reduce: Element2
+			reduce(53), // <>, reduce: Element2
+			reduce(53), // !=, reduce: Element2
+			reduce(53), // =, reduce: Element2
+			reduce(53), // <, reduce: Element2
+			reduce(53), // <=, reduce: Element2
+			reduce(53), // >, reduce: Element2
+			reduce(53), // >=, reduce: Element2
+			reduce(53), // ;, reduce: Element2
+			reduce(53), // @, reduce: Element2
+			reduce(53), // {, reduce: Element2
+			reduce(53), // }, reduce: Element2
+			reduce(53), // ~, reduce: Element2
+			reduce(53), // ?, reduce: Element2
+			reduce(53), // else, reduce: Element2
+			reduce(53), // if, reduce: Element2
+			reduce(53), // for, reduce: Element2
+			reduce(53), // endfor, reduce: Element2
+			reduce(53), // elif, reduce: Element2
+			reduce(53), // endif, reduce: Element2
+			reduce(53), // set, reduce: Element2
+			reduce(53), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(53), // template_block_start, reduce: Element2
+			reduce(53), // template_comment, reduce: Element2
+			reduce(53), // template_variable_end, reduce: Element2
+			reduce(53), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S272
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(11),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(54), // identifier, reduce: Element2
+			reduce(54), // bytes_literal, reduce: Element2
+			reduce(54), // string_literal, reduce: Element2
+			reduce(54), // integer_literal, reduce: Element2
+			reduce(54), // floating_point_literal, reduce: Element2
+			reduce(54), // newline, reduce: Element2
+			reduce(54), // dollar, reduce: Element2
+			reduce(54), // *, reduce: Element2
+			reduce(54), // [, reduce: Element2
+			reduce(54), // ], reduce: Element2
+			reduce(54), // (, reduce: Element2
+			reduce(54), // ), reduce: Element2
+			reduce(54), // ,, reduce: Element2
+			reduce(54), // ., reduce: Element2
+			reduce(54), // :, reduce: Element2
+			reduce(54), // %, reduce: Element2
+			reduce(54), // !, reduce: Element2
+			reduce(54), // |, reduce: Element2
+			reduce(54), // |>, reduce: Element2
+			reduce(54), // ^, reduce: Element2
+			reduce(54), // &, reduce: Element2
+			reduce(54), // <<, reduce: Element2
+			reduce(54), // >>, reduce: Element2
+			reduce(54), // =>, reduce: Element2
+			reduce(54), // ->, reduce: Element2
+			reduce(54), // /, reduce: Element2
+			reduce(54), // +, reduce: Element2
+			reduce(54), // -, reduce: Element2
+			reduce(54), // ||, reduce: Element2
+			reduce(54), // <>, reduce: Element2
+			reduce(54), // !=, reduce: Element2
+			reduce(54), // =, reduce: Element2
+			reduce(54), // <, reduce: Element2
+			reduce(54), // <=, reduce: Element2
+			reduce(54), // >, reduce: Element2
+			reduce(54), // >=, reduce: Element2
+			reduce(54), // ;, reduce: Element2
+			reduce(54), // @, reduce: Element2
+			reduce(54), // {, reduce: Element2
+			reduce(54), // }, reduce: Element2
+			reduce(54), // ~, reduce: Element2
+			reduce(54), // ?, reduce: Element2
+			reduce(54), // else, reduce: Element2
+			reduce(54), // if, reduce: Element2
+			reduce(54), // for, reduce: Element2
+			reduce(54), // endfor, reduce: Element2
+			reduce(54), // elif, reduce: Element2
+			reduce(54), // endif, reduce: Element2
+			reduce(54), // set, reduce: Element2
+			reduce(54), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(54), // template_block_start, reduce: Element2
+			reduce(54), // template_comment, reduce: Element2
+			reduce(54), // template_variable_end, reduce: Element2
+			reduce(54), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S273
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(8),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(55), // identifier, reduce: Element2
+			reduce(55), // bytes_literal, reduce: Element2
+			reduce(55), // string_literal, reduce: Element2
+			reduce(55), // integer_literal, reduce: Element2
+			reduce(55), // floating_point_literal, reduce: Element2
+			reduce(55), // newline, reduce: Element2
+			reduce(55), // dollar, reduce: Element2
+			reduce(55), // *, reduce: Element2
+			reduce(55), // [, reduce: Element2
+			reduce(55), // ], reduce: Element2
+			reduce(55), // (, reduce: Element2
+			reduce(55), // ), reduce: Element2
+			reduce(55), // ,, reduce: Element2
+			reduce(55), // ., reduce: Element2
+			reduce(55), // :, reduce: Element2
+			reduce(55), // %, reduce: Element2
+			reduce(55), // !, reduce: Element2
+			reduce(55), // |, reduce: Element2
+			reduce(55), // |>, reduce: Element2
+			reduce(55), // ^, reduce: Element2
+			reduce(55), // &, reduce: Element2
+			reduce(55), // <<, reduce: Element2
+			reduce(55), // >>, reduce: Element2
+			reduce(55), // =>, reduce: Element2
+			reduce(55), // ->, reduce: Element2
+			reduce(55), // /, reduce: Element2
+			reduce(55), // +, reduce: Element2
+			reduce(55), // -, reduce: Element2
+			reduce(55), // ||, reduce: Element2
+			reduce(55), // <>, reduce: Element2
+			reduce(55), // !=, reduce: Element2
+			reduce(55), // =, reduce: Element2
+			reduce(55), // <, reduce: Element2
+			reduce(55), // <=, reduce: Element2
+			reduce(55), // >, reduce: Element2
+			reduce(55), // >=, reduce: Element2
+			reduce(55), // ;, reduce: Element2
+			reduce(55), // @, reduce: Element2
+			reduce(55), // {, reduce: Element2
+			reduce(55), // }, reduce: Element2
+			reduce(55), // ~, reduce: Element2
+			reduce(55), // ?, reduce: Element2
+			reduce(55), // else, reduce: Element2
+			reduce(55), // if, reduce: Element2
+			reduce(55), // for, reduce: Element2
+			reduce(55), // endfor, reduce: Element2
+			reduce(55), // elif, reduce: Element2
+			reduce(55), // endif, reduce: Element2
+			reduce(55), // set, reduce: Element2
+			reduce(55), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(55), // template_block_start, reduce: Element2
+			reduce(55), // template_comment, reduce: Element2
+			reduce(55), // template_variable_end, reduce: Element2
+			reduce(55), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S274
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(9),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(56), // identifier, reduce: Element2
+			reduce(56), // bytes_literal, reduce: Element2
+			reduce(56), // string_literal, reduce: Element2
+			reduce(56), // integer_literal, reduce: Element2
+			reduce(56), // floating_point_literal, reduce: Element2
+			reduce(56), // newline, reduce: Element2
+			reduce(56), // dollar, reduce: Element2
+			reduce(56), // *, reduce: Element2
+			reduce(56), // [, reduce: Element2
+			reduce(56), // ], reduce: Element2
+			reduce(56), // (, reduce: Element2
+			reduce(56), // ), reduce: Element2
+			reduce(56), // ,, reduce: Element2
+			reduce(56), // ., reduce: Element2
+			reduce(56), // :, reduce: Element2
+			reduce(56), // %, reduce: Element2
+			reduce(56), // !, reduce: Element2
+			reduce(56), // |, reduce: Element2
+			reduce(56), // |>, reduce: Element2
+			reduce(56), // ^, reduce: Element2
+			reduce(56), // &, reduce: Element2
+			reduce(56), // <<, reduce: Element2
+			reduce(56), // >>, reduce: Element2
+			reduce(56), // =>, reduce: Element2
+			reduce(56), // ->, reduce: Element2
+			reduce(56), // /, reduce: Element2
+			reduce(56), // +, reduce: Element2
+			reduce(56), // -, reduce: Element2
+			reduce(56), // ||, reduce: Element2
+			reduce(56), // <>, reduce: Element2
+			reduce(56), // !=, reduce: Element2
+			reduce(56), // =, reduce: Element2
+			reduce(56), // <, reduce: Element2
+			reduce(56), // <=, reduce: Element2
+			reduce(56), // >, reduce: Element2
+			reduce(56), // >=, reduce: Element2
+			reduce(56), // ;, reduce: Element2
+			reduce(56), // @, reduce: Element2
+			reduce(56), // {, reduce: Element2
+			reduce(56), // }, reduce: Element2
+			reduce(56), // ~, reduce: Element2
+			reduce(56), // ?, reduce: Element2
+			reduce(56), // else, reduce: Element2
+			reduce(56), // if, reduce: Element2
+			reduce(56), // for, reduce: Element2
+			reduce(56), // endfor, reduce: Element2
+			reduce(56), // elif, reduce: Element2
+			reduce(56), // endif, reduce: Element2
+			reduce(56), // set, reduce: Element2
+			reduce(56), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(56), // template_block_start, reduce: Element2
+			reduce(56), // template_comment, reduce: Element2
+			reduce(56), // template_variable_end, reduce: Element2
+			reduce(56), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S275
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(10),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(57), // identifier, reduce: Element2
+			reduce(57), // bytes_literal, reduce: Element2
+			reduce(57), // string_literal, reduce: Element2
+			reduce(57), // integer_literal, reduce: Element2
+			reduce(57), // floating_point_literal, reduce: Element2
+			reduce(57), // newline, reduce: Element2
+			reduce(57), // dollar, reduce: Element2
+			reduce(57), // *, reduce: Element2
+			reduce(57), // [, reduce: Element2
+			reduce(57), // ], reduce: Element2
+			reduce(57), // (, reduce: Element2
+			reduce(57), // ), reduce: Element2
+			reduce(57), // ,, reduce: Element2
+			reduce(57), // ., reduce: Element2
+			reduce(57), // :, reduce: Element2
+			reduce(57), // %, reduce: Element2
+			reduce(57), // !, reduce: Element2
+			reduce(57), // |, reduce: Element2
+			reduce(57), // |>, reduce: Element2
+			reduce(57), // ^, reduce: Element2
+			reduce(57), // &, reduce: Element2
+			reduce(57), // <<, reduce: Element2
+			reduce(57), // >>, reduce: Element2
+			reduce(57), // =>, reduce: Element2
+			reduce(57), // ->, reduce: Element2
+			reduce(57), // /, reduce: Element2
+			reduce(57), // +, reduce: Element2
+			reduce(57), // -, reduce: Element2
+			reduce(57), // ||, reduce: Element2
+			reduce(57), // <>, reduce: Element2
+			reduce(57), // !=, reduce: Element2
+			reduce(57), // =, reduce: Element2
+			reduce(57), // <, reduce: Element2
+			reduce(57), // <=, reduce: Element2
+			reduce(57), // >, reduce: Element2
+			reduce(57), // >=, reduce: Element2
+			reduce(57), // ;, reduce: Element2
+			reduce(57), // @, reduce: Element2
+			reduce(57), // {, reduce: Element2
+			reduce(57), // }, reduce: Element2
+			reduce(57), // ~, reduce: Element2
+			reduce(57), // ?, reduce: Element2
+			reduce(57), // else, reduce: Element2
+			reduce(57), // if, reduce: Element2
+			reduce(57), // for, reduce: Element2
+			reduce(57), // endfor, reduce: Element2
+			reduce(57), // elif, reduce: Element2
+			reduce(57), // endif, reduce: Element2
+			reduce(57), // set, reduce: Element2
+			reduce(57), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(57), // template_block_start, reduce: Element2
+			reduce(57), // template_comment, reduce: Element2
+			reduce(57), // template_variable_end, reduce: Element2
+			reduce(57), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S276
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(12),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(58), // identifier, reduce: Element2
+			reduce(58), // bytes_literal, reduce: Element2
+			reduce(58), // string_literal, reduce: Element2
+			reduce(58), // integer_literal, reduce: Element2
+			reduce(58), // floating_point_literal, reduce: Element2
+			reduce(58), // newline, reduce: Element2
+			reduce(58), // dollar, reduce: Element2
+			reduce(58), // *, reduce: Element2
+			reduce(58), // [, reduce: Element2
+			reduce(58), // ], reduce: Element2
+			reduce(58), // (, reduce: Element2
+			reduce(58), // ), reduce: Element2
+			reduce(58), // ,, reduce: Element2
+			reduce(58), // ., reduce: Element2
+			reduce(58), // :, reduce: Element2
+			reduce(58), // %, reduce: Element2
+			reduce(58), // !, reduce: Element2
+			reduce(58), // |, reduce: Element2
+			reduce(58), // |>, reduce: Element2
+			reduce(58), // ^, reduce: Element2
+			reduce(58), // &, reduce: Element2
+			reduce(58), // <<, reduce: Element2
+			reduce(58), // >>, reduce: Element2
+			reduce(58), // =>, reduce: Element2
+			reduce(58), // ->, reduce: Element2
+			reduce(58), // /, reduce: Element2
+			reduce(58), // +, reduce: Element2
+			reduce(58), // -, reduce: Element2
+			reduce(58), // ||, reduce: Element2
+			reduce(58), // <>, reduce: Element2
+			reduce(58), // !=, reduce: Element2
+			reduce(58), // =, reduce: Element2
+			reduce(58), // <, reduce: Element2
+			reduce(58), // <=, reduce: Element2
+			reduce(58), // >, reduce: Element2
+			reduce(58), // >=, reduce: Element2
+			reduce(58), // ;, reduce: Element2
+			reduce(58), // @, reduce: Element2
+			reduce(58), // {, reduce: Element2
+			reduce(58), // }, reduce: Element2
+			reduce(58), // ~, reduce: Element2
+			reduce(58), // ?, reduce: Element2
+			reduce(58), // else, reduce: Element2
+			reduce(58), // if, reduce: Element2
+			reduce(58), // for, reduce: Element2
+			reduce(58), // endfor, reduce: Element2
+			reduce(58), // elif, reduce: Element2
+			reduce(58), // endif, reduce: Element2
+			reduce(58), // set, reduce: Element2
+			reduce(58), // comment, reduce: Element2
+			nil,        // template_block_end
+			reduce(58), // template_block_start, reduce: Element2
+			reduce(58), // template_comment, reduce: Element2
+			reduce(58), // template_variable_end, reduce: Element2
+			reduce(58), // template_variable_start, reduce: Element2
 		},
 	},
 	actionRow{ // S277
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(13),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(59), // identifier, reduce: Comment
+			reduce(59), // bytes_literal, reduce: Comment
+			reduce(59), // string_literal, reduce: Comment
+			reduce(59), // integer_literal, reduce: Comment
+			reduce(59), // floating_point_literal, reduce: Comment
+			reduce(59), // newline, reduce: Comment
+			reduce(59), // dollar, reduce: Comment
+			reduce(59), // *, reduce: Comment
+			reduce(59), // [, reduce: Comment
+			reduce(59), // ], reduce: Comment
+			reduce(59), // (, reduce: Comment
+			reduce(59), // ), reduce: Comment
+			reduce(59), // ,, reduce: Comment
+			reduce(59), // ., reduce: Comment
+			reduce(59), // :, reduce: Comment
+			reduce(59), // %, reduce: Comment
+			reduce(59), // !, reduce: Comment
+			reduce(59), // |, reduce: Comment
+			reduce(59), // |>, reduce: Comment
+			reduce(59), // ^, reduce: Comment
+			reduce(59), // &, reduce: Comment
+			reduce(59), // <<, reduce: Comment
+			reduce(59), // >>, reduce: Comment
+			reduce(59), // =>, reduce: Comment
+			reduce(59), // ->, reduce: Comment
+			reduce(59), // /, reduce: Comment
+			reduce(59), // +, reduce: Comment
+			reduce(59), // -, reduce: Comment
+			reduce(59), // ||, reduce: Comment
+			reduce(59), // <>, reduce: Comment
+			reduce(59), // !=, reduce: Comment
+			reduce(59), // =, reduce: Comment
+			reduce(59), // <, reduce: Comment
+			reduce(59), // <=, reduce: Comment
+			reduce(59), // >, reduce: Comment
+			reduce(59), // >=, reduce: Comment
+			reduce(59), // ;, reduce: Comment
+			reduce(59), // @, reduce: Comment
+			reduce(59), // {, reduce: Comment
+			reduce(59), // }, reduce: Comment
+			reduce(59), // ~, reduce: Comment
+			reduce(59), // ?, reduce: Comment
+			reduce(59), // else, reduce: Comment
+			reduce(59), // if, reduce: Comment
+			reduce(59), // for, reduce: Comment
+			reduce(59), // endfor, reduce: Comment
+			reduce(59), // elif, reduce: Comment
+			reduce(59), // endif, reduce: Comment
+			reduce(59), // set, reduce: Comment
+			reduce(59), // comment, reduce: Comment
+			nil,        // template_block_end
+			reduce(59), // template_block_start, reduce: Comment
+			reduce(59), // template_comment, reduce: Comment
+			reduce(59), // template_variable_end, reduce: Comment
+			reduce(59), // template_variable_start, reduce: Comment
 		},
 	},
 	actionRow{ // S278
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(14),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(81),  // identifier
+			shift(82),  // bytes_literal
+			shift(83),  // string_literal
+			shift(84),  // integer_literal
+			shift(85),  // floating_point_literal
+			shift(86),  // newline
+			shift(87),  // dollar
+			shift(88),  // *
+			shift(89),  // [
+			shift(90),  // ]
+			shift(91),  // (
+			shift(92),  // )
+			shift(93),  // ,
+			shift(94),  // .
+			shift(95),  // :
+			shift(96),  // %
+			shift(97),  // !
+			shift(98),  // |
+			shift(99),  // |>
+			shift(100), // ^
+			shift(101), // &
+			shift(102), // <<
+			shift(103), // >>
+			shift(104), // =>
+			shift(105), // ->
+			shift(106), // /
+			shift(107), // +
+			shift(108), // -
+			shift(109), // ||
+			shift(110), // <>
+			shift(111), // !=
+			shift(112), // =
+			shift(113), // <
+			shift(114), // <=
+			shift(115), // >
+			shift(116), // >=
+			shift(117), // ;
+			shift(118), // @
+			shift(119), // {
+			shift(120), // }
+			shift(121), // ~
+			shift(122), // ?
+			shift(123), // else
+			shift(124), // if
+			shift(125), // for
+			shift(126), // endfor
+			shift(127), // elif
+			shift(128), // endif
+			shift(129), // set
+			shift(130), // comment
+			shift(307), // template_block_end
+			shift(61),  // template_block_start
+			shift(136), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S279
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(15),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(308), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S280
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(16),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(310), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S281
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(17),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(149), // identifier
+			shift(150), // bytes_literal
+			shift(151), // string_literal
+			shift(152), // integer_literal
+			shift(153), // floating_point_literal
+			shift(154), // newline
+			shift(155), // dollar
+			shift(156), // *
+			shift(157), // [
+			shift(158), // ]
+			shift(159), // (
+			shift(160), // )
+			shift(161), // ,
+			shift(162), // .
+			shift(163), // :
+			shift(164), // %
+			shift(165), // !
+			shift(166), // |
+			shift(167), // |>
+			shift(168), // ^
+			shift(169), // &
+			shift(170), // <<
+			shift(171), // >>
+			shift(172), // =>
+			shift(173), // ->
+			shift(174), // /
+			shift(175), // +
+			shift(176), // -
+			shift(177), // ||
+			shift(178), // <>
+			shift(179), // !=
+			shift(180), // =
+			shift(181), // <
+			shift(182), // <=
+			shift(183), // >
+			shift(184), // >=
+			shift(185), // ;
+			shift(186), // @
+			shift(187), // {
+			shift(188), // }
+			shift(189), // ~
+			shift(190), // ?
+			shift(191), // else
+			shift(192), // if
+			shift(193), // for
+			shift(194), // endfor
+			shift(195), // elif
+			shift(196), // endif
+			shift(197), // set
+			shift(198), // comment
+			nil,        // template_block_end
+			shift(312), // template_block_start
+			shift(208), // template_comment
+			nil,        // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S282
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(18),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(85), // identifier, reduce: TemplateComment
+			reduce(85), // bytes_literal, reduce: TemplateComment
+			reduce(85), // string_literal, reduce: TemplateComment
+			reduce(85), // integer_literal, reduce: TemplateComment
+			reduce(85), // floating_point_literal, reduce: TemplateComment
+			reduce(85), // newline, reduce: TemplateComment
+			reduce(85), // dollar, reduce: TemplateComment
+			reduce(85), // *, reduce: TemplateComment
+			reduce(85), // [, reduce: TemplateComment
+			reduce(85), // ], reduce: TemplateComment
+			reduce(85), // (, reduce: TemplateComment
+			reduce(85), // ), reduce: TemplateComment
+			reduce(85), // ,, reduce: TemplateComment
+			reduce(85), // ., reduce: TemplateComment
+			reduce(85), // :, reduce: TemplateComment
+			reduce(85), // %, reduce: TemplateComment
+			reduce(85), // !, reduce: TemplateComment
+			reduce(85), // |, reduce: TemplateComment
+			reduce(85), // |>, reduce: TemplateComment
+			reduce(85), // ^, reduce: TemplateComment
+			reduce(85), // &, reduce: TemplateComment
+			reduce(85), // <<, reduce: TemplateComment
+			reduce(85), // >>, reduce: TemplateComment
+			reduce(85), // =>, reduce: TemplateComment
+			reduce(85), // ->, reduce: TemplateComment
+			reduce(85), // /, reduce: TemplateComment
+			reduce(85), // +, reduce: TemplateComment
+			reduce(85), // -, reduce: TemplateComment
+			reduce(85), // ||, reduce: TemplateComment
+			reduce(85), // <>, reduce: TemplateComment
+			reduce(85), // !=, reduce: TemplateComment
+			reduce(85), // =, reduce: TemplateComment
+			reduce(85), // <, reduce: TemplateComment
+			reduce(85), // <=, reduce: TemplateComment
+			reduce(85), // >, reduce: TemplateComment
+			reduce(85), // >=, reduce: TemplateComment
+			reduce(85), // ;, reduce: TemplateComment
+			reduce(85), // @, reduce: TemplateComment
+			reduce(85), // {, reduce: TemplateComment
+			reduce(85), // }, reduce: TemplateComment
+			reduce(85), // ~, reduce: TemplateComment
+			reduce(85), // ?, reduce: TemplateComment
+			reduce(85), // else, reduce: TemplateComment
+			reduce(85), // if, reduce: TemplateComment
+			reduce(85), // for, reduce: TemplateComment
+			reduce(85), // endfor, reduce: TemplateComment
+			reduce(85), // elif, reduce: TemplateComment
+			reduce(85), // endif, reduce: TemplateComment
+			reduce(85), // set, reduce: TemplateComment
+			reduce(85), // comment, reduce: TemplateComment
+			nil,        // template_block_end
+			reduce(85), // template_block_start, reduce: TemplateComment
+			reduce(85), // template_comment, reduce: TemplateComment
+			reduce(85), // template_variable_end, reduce: TemplateComment
+			reduce(85), // template_variable_start, reduce: TemplateComment
 		},
 	},
 	actionRow{ // S283
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(19),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			shift(228), // identifier
+			shift(229), // bytes_literal
+			shift(230), // string_literal
+			shift(231), // integer_literal
+			shift(232), // floating_point_literal
+			shift(233), // newline
+			shift(234), // dollar
+			shift(235), // *
+			shift(236), // [
+			shift(237), // ]
+			shift(238), // (
+			shift(239), // )
+			shift(240), // ,
+			shift(241), // .
+			shift(242), // :
+			shift(243), // %
+			shift(244), // !
+			shift(245), // |
+			shift(246), // |>
+			shift(247), // ^
+			shift(248), // &
+			shift(249), // <<
+			shift(250), // >>
+			shift(251), // =>
+			shift(252), // ->
+			shift(253), // /
+			shift(254), // +
+			shift(255), // -
+			shift(256), // ||
+			shift(257), // <>
+			shift(258), // !=
+			shift(259), // =
+			shift(260), // <
+			shift(261), // <=
+			shift(262), // >
+			shift(263), // >=
+			shift(264), // ;
+			shift(265), // @
+			shift(266), // {
+			shift(267), // }
+			shift(268), // ~
+			shift(269), // ?
+			shift(270), // else
+			shift(271), // if
+			shift(272), // for
+			shift(273), // endfor
+			shift(274), // elif
+			shift(275), // endif
+			shift(276), // set
+			shift(277), // comment
+			nil,        // template_block_end
+			shift(61),  // template_block_start
+			shift(282), // template_comment
+			shift(314), // template_variable_end
+			shift(71),  // template_variable_start
 		},
 	},
 	actionRow{ // S284
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(20),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(86), // ␚, reduce: TemplateVariable
+			reduce(86), // identifier, reduce: TemplateVariable
+			reduce(86), // bytes_literal, reduce: TemplateVariable
+			reduce(86), // string_literal, reduce: TemplateVariable
+			reduce(86), // integer_literal, reduce: TemplateVariable
+			reduce(86), // floating_point_literal, reduce: TemplateVariable
+			reduce(86), // newline, reduce: TemplateVariable
+			reduce(86), // dollar, reduce: TemplateVariable
+			reduce(86), // *, reduce: TemplateVariable
+			reduce(86), // [, reduce: TemplateVariable
+			reduce(86), // ], reduce: TemplateVariable
+			reduce(86), // (, reduce: TemplateVariable
+			reduce(86), // ), reduce: TemplateVariable
+			reduce(86), // ,, reduce: TemplateVariable
+			reduce(86), // ., reduce: TemplateVariable
+			reduce(86), // :, reduce: TemplateVariable
+			reduce(86), // %, reduce: TemplateVariable
+			reduce(86), // !, reduce: TemplateVariable
+			reduce(86), // |, reduce: TemplateVariable
+			reduce(86), // |>, reduce: TemplateVariable
+			reduce(86), // ^, reduce: TemplateVariable
+			reduce(86), // &, reduce: TemplateVariable
+			reduce(86), // <<, reduce: TemplateVariable
+			reduce(86), // >>, reduce: TemplateVariable
+			reduce(86), // =>, reduce: TemplateVariable
+			reduce(86), // ->, reduce: TemplateVariable
+			reduce(86), // /, reduce: TemplateVariable
+			reduce(86), // +, reduce: TemplateVariable
+			reduce(86), // -, reduce: TemplateVariable
+			reduce(86), // ||, reduce: TemplateVariable
+			reduce(86), // <>, reduce: TemplateVariable
+			reduce(86), // !=, reduce: TemplateVariable
+			reduce(86), // =, reduce: TemplateVariable
+			reduce(86), // <, reduce: TemplateVariable
+			reduce(86), // <=, reduce: TemplateVariable
+			reduce(86), // >, reduce: TemplateVariable
+			reduce(86), // >=, reduce: TemplateVariable
+			reduce(86), // ;, reduce: TemplateVariable
+			reduce(86), // @, reduce: TemplateVariable
+			reduce(86), // {, reduce: TemplateVariable
+			reduce(86), // }, reduce: TemplateVariable
+			reduce(86), // ~, reduce: TemplateVariable
+			reduce(86), // ?, reduce: TemplateVariable
+			reduce(86), // else, reduce: TemplateVariable
+			reduce(86), // if, reduce: TemplateVariable
+			reduce(86), // for, reduce: TemplateVariable
+			reduce(86), // endfor, reduce: TemplateVariable
+			reduce(86), // elif, reduce: TemplateVariable
+			reduce(86), // endif, reduce: TemplateVariable
+			reduce(86), // set, reduce: TemplateVariable
+			reduce(86), // comment, reduce: TemplateVariable
+			nil,        // template_block_end
+			reduce(86), // template_block_start, reduce: TemplateVariable
+			reduce(86), // template_comment, reduce: TemplateVariable
+			nil,        // template_variable_end
+			reduce(86), // template_variable_start, reduce: TemplateVariable
 		},
 	},
 	actionRow{ // S285
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(21),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(60), // identifier, reduce: TemplateSetBlock
+			reduce(60), // bytes_literal, reduce: TemplateSetBlock
+			reduce(60), // string_literal, reduce: TemplateSetBlock
+			reduce(60), // integer_literal, reduce: TemplateSetBlock
+			reduce(60), // floating_point_literal, reduce: TemplateSetBlock
+			reduce(60), // newline, reduce: TemplateSetBlock
+			reduce(60), // dollar, reduce: TemplateSetBlock
+			reduce(60), // *, reduce: TemplateSetBlock
+			reduce(60), // [, reduce: TemplateSetBlock
+			reduce(60), // ], reduce: TemplateSetBlock
+			reduce(60), // (, reduce: TemplateSetBlock
+			reduce(60), // ), reduce: TemplateSetBlock
+			reduce(60), // ,, reduce: TemplateSetBlock
+			reduce(60), // ., reduce: TemplateSetBlock
+			reduce(60), // :, reduce: TemplateSetBlock
+			reduce(60), // %, reduce: TemplateSetBlock
+			reduce(60), // !, reduce: TemplateSetBlock
+			reduce(60), // |, reduce: TemplateSetBlock
+			reduce(60), // |>, reduce: TemplateSetBlock
+			reduce(60), // ^, reduce: TemplateSetBlock
+			reduce(60), // &, reduce: TemplateSetBlock
+			reduce(60), // <<, reduce: TemplateSetBlock
+			reduce(60), // >>, reduce: TemplateSetBlock
+			reduce(60), // =>, reduce: TemplateSetBlock
+			reduce(60), // ->, reduce: TemplateSetBlock
+			reduce(60), // /, reduce: TemplateSetBlock
+			reduce(60), // +, reduce: TemplateSetBlock
+			reduce(60), // -, reduce: TemplateSetBlock
+			reduce(60), // ||, reduce: TemplateSetBlock
+			reduce(60), // <>, reduce: TemplateSetBlock
+			reduce(60), // !=, reduce: TemplateSetBlock
+			reduce(60), // =, reduce: TemplateSetBlock
+			reduce(60), // <, reduce: TemplateSetBlock
+			reduce(60), // <=, reduce: TemplateSetBlock
+			reduce(60), // >, reduce: TemplateSetBlock
+			reduce(60), // >=, reduce: TemplateSetBlock
+			reduce(60), // ;, reduce: TemplateSetBlock
+			reduce(60), // @, reduce: TemplateSetBlock
+			reduce(60), // {, reduce: TemplateSetBlock
+			reduce(60), // }, reduce: TemplateSetBlock
+			reduce(60), // ~, reduce: TemplateSetBlock
+			reduce(60), // ?, reduce: TemplateSetBlock
+			reduce(60), // else, reduce: TemplateSetBlock
+			reduce(60), // if, reduce: TemplateSetBlock
+			reduce(60), // for, reduce: TemplateSetBlock
+			reduce(60), // endfor, reduce: TemplateSetBlock
+			reduce(60), // elif, reduce: TemplateSetBlock
+			reduce(60), // endif, reduce: TemplateSetBlock
+			reduce(60), // set, reduce: TemplateSetBlock
+			reduce(60), // comment, reduce: TemplateSetBlock
+			reduce(60), // template_block_end, reduce: TemplateSetBlock
+			reduce(60), // template_block_start, reduce: TemplateSetBlock
+			reduce(60), // template_comment, reduce: TemplateSetBlock
+			nil,        // template_variable_end
+			reduce(60), // template_variable_start, reduce: TemplateSetBlock
 		},
 	},
 	actionRow{ // S286
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(22),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			shift(294), // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			shift(295), // elif
+			shift(315), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S287
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(23),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(63), // identifier, reduce: TemplateIfBlock
+			reduce(63), // bytes_literal, reduce: TemplateIfBlock
+			reduce(63), // string_literal, reduce: TemplateIfBlock
+			reduce(63), // integer_literal, reduce: TemplateIfBlock
+			reduce(63), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(63), // newline, reduce: TemplateIfBlock
+			reduce(63), // dollar, reduce: TemplateIfBlock
+			reduce(63), // *, reduce: TemplateIfBlock
+			reduce(63), // [, reduce: TemplateIfBlock
+			reduce(63), // ], reduce: TemplateIfBlock
+			reduce(63), // (, reduce: TemplateIfBlock
+			reduce(63), // ), reduce: TemplateIfBlock
+			reduce(63), // ,, reduce: TemplateIfBlock
+			reduce(63), // ., reduce: TemplateIfBlock
+			reduce(63), // :, reduce: TemplateIfBlock
+			reduce(63), // %, reduce: TemplateIfBlock
+			reduce(63), // !, reduce: TemplateIfBlock
+			reduce(63), // |, reduce: TemplateIfBlock
+			reduce(63), // |>, reduce: TemplateIfBlock
+			reduce(63), // ^, reduce: TemplateIfBlock
+			reduce(63), // &, reduce: TemplateIfBlock
+			reduce(63), // <<, reduce: TemplateIfBlock
+			reduce(63), // >>, reduce: TemplateIfBlock
+			reduce(63), // =>, reduce: TemplateIfBlock
+			reduce(63), // ->, reduce: TemplateIfBlock
+			reduce(63), // /, reduce: TemplateIfBlock
+			reduce(63), // +, reduce: TemplateIfBlock
+			reduce(63), // -, reduce: TemplateIfBlock
+			reduce(63), // ||, reduce: TemplateIfBlock
+			reduce(63), // <>, reduce: TemplateIfBlock
+			reduce(63), // !=, reduce: TemplateIfBlock
+			reduce(63), // =, reduce: TemplateIfBlock
+			reduce(63), // <, reduce: TemplateIfBlock
+			reduce(63), // <=, reduce: TemplateIfBlock
+			reduce(63), // >, reduce: TemplateIfBlock
+			reduce(63), // >=, reduce: TemplateIfBlock
+			reduce(63), // ;, reduce: TemplateIfBlock
+			reduce(63), // @, reduce: TemplateIfBlock
+			reduce(63), // {, reduce: TemplateIfBlock
+			reduce(63), // }, reduce: TemplateIfBlock
+			reduce(63), // ~, reduce: TemplateIfBlock
+			reduce(63), // ?, reduce: TemplateIfBlock
+			reduce(63), // else, reduce: TemplateIfBlock
+			reduce(63), // if, reduce: TemplateIfBlock
+			reduce(63), // for, reduce: TemplateIfBlock
+			reduce(63), // endfor, reduce: TemplateIfBlock
+			reduce(63), // elif, reduce: TemplateIfBlock
+			reduce(63), // endif, reduce: TemplateIfBlock
+			reduce(63), // set, reduce: TemplateIfBlock
+			reduce(63), // comment, reduce: TemplateIfBlock
+			reduce(63), // template_block_end, reduce: TemplateIfBlock
+			reduce(63), // template_block_start, reduce: TemplateIfBlock
+			reduce(63), // template_comment, reduce: TemplateIfBlock
+			nil,        // template_variable_end
+			reduce(63), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S288
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(24),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			nil,        // elif
+			shift(315), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S289
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(25),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(64), // identifier, reduce: TemplateIfBlock
+			reduce(64), // bytes_literal, reduce: TemplateIfBlock
+			reduce(64), // string_literal, reduce: TemplateIfBlock
+			reduce(64), // integer_literal, reduce: TemplateIfBlock
+			reduce(64), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(64), // newline, reduce: TemplateIfBlock
+			reduce(64), // dollar, reduce: TemplateIfBlock
+			reduce(64), // *, reduce: TemplateIfBlock
+			reduce(64), // [, reduce: TemplateIfBlock
+			reduce(64), // ], reduce: TemplateIfBlock
+			reduce(64), // (, reduce: TemplateIfBlock
+			reduce(64), // ), reduce: TemplateIfBlock
+			reduce(64), // ,, reduce: TemplateIfBlock
+			reduce(64), // ., reduce: TemplateIfBlock
+			reduce(64), // :, reduce: TemplateIfBlock
+			reduce(64), // %, reduce: TemplateIfBlock
+			reduce(64), // !, reduce: TemplateIfBlock
+			reduce(64), // |, reduce: TemplateIfBlock
+			reduce(64), // |>, reduce: TemplateIfBlock
+			reduce(64), // ^, reduce: TemplateIfBlock
+			reduce(64), // &, reduce: TemplateIfBlock
+			reduce(64), // <<, reduce: TemplateIfBlock
+			reduce(64), // >>, reduce: TemplateIfBlock
+			reduce(64), // =>, reduce: TemplateIfBlock
+			reduce(64), // ->, reduce: TemplateIfBlock
+			reduce(64), // /, reduce: TemplateIfBlock
+			reduce(64), // +, reduce: TemplateIfBlock
+			reduce(64), // -, reduce: TemplateIfBlock
+			reduce(64), // ||, reduce: TemplateIfBlock
+			reduce(64), // <>, reduce: TemplateIfBlock
+			reduce(64), // !=, reduce: TemplateIfBlock
+			reduce(64), // =, reduce: TemplateIfBlock
+			reduce(64), // <, reduce: TemplateIfBlock
+			reduce(64), // <=, reduce: TemplateIfBlock
+			reduce(64), // >, reduce: TemplateIfBlock
+			reduce(64), // >=, reduce: TemplateIfBlock
+			reduce(64), // ;, reduce: TemplateIfBlock
+			reduce(64), // @, reduce: TemplateIfBlock
+			reduce(64), // {, reduce: TemplateIfBlock
+			reduce(64), // }, reduce: TemplateIfBlock
+			reduce(64), // ~, reduce: TemplateIfBlock
+			reduce(64), // ?, reduce: TemplateIfBlock
+			reduce(64), // else, reduce: TemplateIfBlock
+			reduce(64), // if, reduce: TemplateIfBlock
+			reduce(64), // for, reduce: TemplateIfBlock
+			reduce(64), // endfor, reduce: TemplateIfBlock
+			reduce(64), // elif, reduce: TemplateIfBlock
+			reduce(64), // endif, reduce: TemplateIfBlock
+			reduce(64), // set, reduce: TemplateIfBlock
+			reduce(64), // comment, reduce: TemplateIfBlock
+			reduce(64), // template_block_end, reduce: TemplateIfBlock
+			reduce(64), // template_block_start, reduce: TemplateIfBlock
+			reduce(64), // template_comment, reduce: TemplateIfBlock
+			nil,        // template_variable_end
+			reduce(64), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S290
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(26),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			shift(316), // endfor
+			nil,        // elif
+			nil,        // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S291
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(27),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(78), // identifier, reduce: TemplateForBlock
+			reduce(78), // bytes_literal, reduce: TemplateForBlock
+			reduce(78), // string_literal, reduce: TemplateForBlock
+			reduce(78), // integer_literal, reduce: TemplateForBlock
+			reduce(78), // floating_point_literal, reduce: TemplateForBlock
+			reduce(78), // newline, reduce: TemplateForBlock
+			reduce(78), // dollar, reduce: TemplateForBlock
+			reduce(78), // *, reduce: TemplateForBlock
+			reduce(78), // [, reduce: TemplateForBlock
+			reduce(78), // ], reduce: TemplateForBlock
+			reduce(78), // (, reduce: TemplateForBlock
+			reduce(78), // ), reduce: TemplateForBlock
+			reduce(78), // ,, reduce: TemplateForBlock
+			reduce(78), // ., reduce: TemplateForBlock
+			reduce(78), // :, reduce: TemplateForBlock
+			reduce(78), // %, reduce: TemplateForBlock
+			reduce(78), // !, reduce: TemplateForBlock
+			reduce(78), // |, reduce: TemplateForBlock
+			reduce(78), // |>, reduce: TemplateForBlock
+			reduce(78), // ^, reduce: TemplateForBlock
+			reduce(78), // &, reduce: TemplateForBlock
+			reduce(78), // <<, reduce: TemplateForBlock
+			reduce(78), // >>, reduce: TemplateForBlock
+			reduce(78), // =>, reduce: TemplateForBlock
+			reduce(78), // ->, reduce: TemplateForBlock
+			reduce(78), // /, reduce: TemplateForBlock
+			reduce(78), // +, reduce: TemplateForBlock
+			reduce(78), // -, reduce: TemplateForBlock
+			reduce(78), // ||, reduce: TemplateForBlock
+			reduce(78), // <>, reduce: TemplateForBlock
+			reduce(78), // !=, reduce: TemplateForBlock
+			reduce(78), // =, reduce: TemplateForBlock
+			reduce(78), // <, reduce: TemplateForBlock
+			reduce(78), // <=, reduce: TemplateForBlock
+			reduce(78), // >, reduce: TemplateForBlock
+			reduce(78), // >=, reduce: TemplateForBlock
+			reduce(78), // ;, reduce: TemplateForBlock
+			reduce(78), // @, reduce: TemplateForBlock
+			reduce(78), // {, reduce: TemplateForBlock
+			reduce(78), // }, reduce: TemplateForBlock
+			reduce(78), // ~, reduce: TemplateForBlock
+			reduce(78), // ?, reduce: TemplateForBlock
+			reduce(78), // else, reduce: TemplateForBlock
+			reduce(78), // if, reduce: TemplateForBlock
+			reduce(78), // for, reduce: TemplateForBlock
+			reduce(78), // endfor, reduce: TemplateForBlock
+			reduce(78), // elif, reduce: TemplateForBlock
+			reduce(78), // endif, reduce: TemplateForBlock
+			reduce(78), // set, reduce: TemplateForBlock
+			reduce(78), // comment, reduce: TemplateForBlock
+			reduce(78), // template_block_end, reduce: TemplateForBlock
+			reduce(78), // template_block_start, reduce: TemplateForBlock
+			reduce(78), // template_comment, reduce: TemplateForBlock
+			nil,        // template_variable_end
+			reduce(78), // template_variable_start, reduce: TemplateForBlock
 		},
 	},
 	actionRow{ // S292
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(28),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(86), // identifier, reduce: TemplateVariable
+			reduce(86), // bytes_literal, reduce: TemplateVariable
+			reduce(86), // string_literal, reduce: TemplateVariable
+			reduce(86), // integer_literal, reduce: TemplateVariable
+			reduce(86), // floating_point_literal, reduce: TemplateVariable
+			reduce(86), // newline, reduce: TemplateVariable
+			reduce(86), // dollar, reduce: TemplateVariable
+			reduce(86), // *, reduce: TemplateVariable
+			reduce(86), // [, reduce: TemplateVariable
+			reduce(86), // ], reduce: TemplateVariable
+			reduce(86), // (, reduce: TemplateVariable
+			reduce(86), // ), reduce: TemplateVariable
+			reduce(86), // ,, reduce: TemplateVariable
+			reduce(86), // ., reduce: TemplateVariable
+			reduce(86), // :, reduce: TemplateVariable
+			reduce(86), // %, reduce: TemplateVariable
+			reduce(86), // !, reduce: TemplateVariable
+			reduce(86), // |, reduce: TemplateVariable
+			reduce(86), // |>, reduce: TemplateVariable
+			reduce(86), // ^, reduce: TemplateVariable
+			reduce(86), // &, reduce: TemplateVariable
+			reduce(86), // <<, reduce: TemplateVariable
+			reduce(86), // >>, reduce: TemplateVariable
+			reduce(86), // =>, reduce: TemplateVariable
+			reduce(86), // ->, reduce: TemplateVariable
+			reduce(86), // /, reduce: TemplateVariable
+			reduce(86), // +, reduce: TemplateVariable
+			reduce(86), // -, reduce: TemplateVariable
+			reduce(86), // ||, reduce: TemplateVariable
+			reduce(86), // <>, reduce: TemplateVariable
+			reduce(86), // !=, reduce: TemplateVariable
+			reduce(86), // =, reduce: TemplateVariable
+			reduce(86), // <, reduce: TemplateVariable
+			reduce(86), // <=, reduce: TemplateVariable
+			reduce(86), // >, reduce: TemplateVariable
+			reduce(86), // >=, reduce: TemplateVariable
+			reduce(86), // ;, reduce: TemplateVariable
+			reduce(86), // @, reduce: TemplateVariable
+			reduce(86), // {, reduce: TemplateVariable
+			reduce(86), // }, reduce: TemplateVariable
+			reduce(86), // ~, reduce: TemplateVariable
+			reduce(86), // ?, reduce: TemplateVariable
+			reduce(86), // else, reduce: TemplateVariable
+			reduce(86), // if, reduce: TemplateVariable
+			reduce(86), // for, reduce: TemplateVariable
+			reduce(86), // endfor, reduce: TemplateVariable
+			reduce(86), // elif, reduce: TemplateVariable
+			reduce(86), // endif, reduce: TemplateVariable
+			reduce(86), // set, reduce: TemplateVariable
+			reduce(86), // comment, reduce: TemplateVariable
+			reduce(86), // template_block_end, reduce: TemplateVariable
+			reduce(86), // template_block_start, reduce: TemplateVariable
+			reduce(86), // template_comment, reduce: TemplateVariable
+			nil,        // template_variable_end
+			reduce(86), // template_variable_start, reduce: TemplateVariable
 		},
 	},
 	actionRow{ // S293
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(29),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(60), // identifier, reduce: TemplateSetBlock
+			reduce(60), // bytes_literal, reduce: TemplateSetBlock
+			reduce(60), // string_literal, reduce: TemplateSetBlock
+			reduce(60), // integer_literal, reduce: TemplateSetBlock
+			reduce(60), // floating_point_literal, reduce: TemplateSetBlock
+			reduce(60), // newline, reduce: TemplateSetBlock
+			reduce(60), // dollar, reduce: TemplateSetBlock
+			reduce(60), // *, reduce: TemplateSetBlock
+			reduce(60), // [, reduce: TemplateSetBlock
+			reduce(60), // ], reduce: TemplateSetBlock
+			reduce(60), // (, reduce: TemplateSetBlock
+			reduce(60), // ), reduce: TemplateSetBlock
+			reduce(60), // ,, reduce: TemplateSetBlock
+			reduce(60), // ., reduce: TemplateSetBlock
+			reduce(60), // :, reduce: TemplateSetBlock
+			reduce(60), // %, reduce: TemplateSetBlock
+			reduce(60), // !, reduce: TemplateSetBlock
+			reduce(60), // |, reduce: TemplateSetBlock
+			reduce(60), // |>, reduce: TemplateSetBlock
+			reduce(60), // ^, reduce: TemplateSetBlock
+			reduce(60), // &, reduce: TemplateSetBlock
+			reduce(60), // <<, reduce: TemplateSetBlock
+			reduce(60), // >>, reduce: TemplateSetBlock
+			reduce(60), // =>, reduce: TemplateSetBlock
+			reduce(60), // ->, reduce: TemplateSetBlock
+			reduce(60), // /, reduce: TemplateSetBlock
+			reduce(60), // +, reduce: TemplateSetBlock
+			reduce(60), // -, reduce: TemplateSetBlock
+			reduce(60), // ||, reduce: TemplateSetBlock
+			reduce(60), // <>, reduce: TemplateSetBlock
+			reduce(60), // !=, reduce: TemplateSetBlock
+			reduce(60), // =, reduce: TemplateSetBlock
+			reduce(60), // <, reduce: TemplateSetBlock
+			reduce(60), // <=, reduce: TemplateSetBlock
+			reduce(60), // >, reduce: TemplateSetBlock
+			reduce(60), // >=, reduce: TemplateSetBlock
+			reduce(60), // ;, reduce: TemplateSetBlock
+			reduce(60), // @, reduce: TemplateSetBlock
+			reduce(60), // {, reduce: TemplateSetBlock
+			reduce(60), // }, reduce: TemplateSetBlock
+			reduce(60), // ~, reduce: TemplateSetBlock
+			reduce(60), // ?, reduce: TemplateSetBlock
+			reduce(60), // else, reduce: TemplateSetBlock
+			reduce(60), // if, reduce: TemplateSetBlock
+			reduce(60), // for, reduce: TemplateSetBlock
+			reduce(60), // endfor, reduce: TemplateSetBlock
+			reduce(60), // elif, reduce: TemplateSetBlock
+			reduce(60), // endif, reduce: TemplateSetBlock
+			reduce(60), // set, reduce: TemplateSetBlock
+			reduce(60), // comment, reduce: TemplateSetBlock
+			nil,        // template_block_end
+			reduce(60), // template_block_start, reduce: TemplateSetBlock
+			reduce(60), // template_comment, reduce: TemplateSetBlock
+			nil,        // template_variable_end
+			reduce(60), // template_variable_start, reduce: TemplateSetBlock
 		},
 	},
 	actionRow{ // S294
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(30),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(317), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S295
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(31),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(74), // identifier, reduce: TemplateElifBeginPrefix
+			reduce(74), // bytes_literal, reduce: TemplateElifBeginPrefix
+			reduce(74), // string_literal, reduce: TemplateElifBeginPrefix
+			reduce(74), // integer_literal, reduce: TemplateElifBeginPrefix
+			reduce(74), // floating_point_literal, reduce: TemplateElifBeginPrefix
+			reduce(74), // newline, reduce: TemplateElifBeginPrefix
+			reduce(74), // dollar, reduce: TemplateElifBeginPrefix
+			reduce(74), // *, reduce: TemplateElifBeginPrefix
+			reduce(74), // [, reduce: TemplateElifBeginPrefix
+			reduce(74), // ], reduce: TemplateElifBeginPrefix
+			reduce(74), // (, reduce: TemplateElifBeginPrefix
+			reduce(74), // ), reduce: TemplateElifBeginPrefix
+			reduce(74), // ,, reduce: TemplateElifBeginPrefix
+			reduce(74), // ., reduce: TemplateElifBeginPrefix
+			reduce(74), // :, reduce: TemplateElifBeginPrefix
+			reduce(74), // %, reduce: TemplateElifBeginPrefix
+			reduce(74), // !, reduce: TemplateElifBeginPrefix
+			reduce(74), // |, reduce: TemplateElifBeginPrefix
+			reduce(74), // |>, reduce: TemplateElifBeginPrefix
+			reduce(74), // ^, reduce: TemplateElifBeginPrefix
+			reduce(74), // &, reduce: TemplateElifBeginPrefix
+			reduce(74), // <<, reduce: TemplateElifBeginPrefix
+			reduce(74), // >>, reduce: TemplateElifBeginPrefix
+			reduce(74), // =>, reduce: TemplateElifBeginPrefix
+			reduce(74), // ->, reduce: TemplateElifBeginPrefix
+			reduce(74), // /, reduce: TemplateElifBeginPrefix
+			reduce(74), // +, reduce: TemplateElifBeginPrefix
+			reduce(74), // -, reduce: TemplateElifBeginPrefix
+			reduce(74), // ||, reduce: TemplateElifBeginPrefix
+			reduce(74), // <>, reduce: TemplateElifBeginPrefix
+			reduce(74), // !=, reduce: TemplateElifBeginPrefix
+			reduce(74), // =, reduce: TemplateElifBeginPrefix
+			reduce(74), // <, reduce: TemplateElifBeginPrefix
+			reduce(74), // <=, reduce: TemplateElifBeginPrefix
+			reduce(74), // >, reduce: TemplateElifBeginPrefix
+			reduce(74), // >=, reduce: TemplateElifBeginPrefix
+			reduce(74), // ;, reduce: TemplateElifBeginPrefix
+			reduce(74), // @, reduce: TemplateElifBeginPrefix
+			reduce(74), // {, reduce: TemplateElifBeginPrefix
+			reduce(74), // }, reduce: TemplateElifBeginPrefix
+			reduce(74), // ~, reduce: TemplateElifBeginPrefix
+			reduce(74), // ?, reduce: TemplateElifBeginPrefix
+			reduce(74), // else, reduce: TemplateElifBeginPrefix
+			reduce(74), // if, reduce: TemplateElifBeginPrefix
+			reduce(74), // for, reduce: TemplateElifBeginPrefix
+			reduce(74), // endfor, reduce: TemplateElifBeginPrefix
+			reduce(74), // elif, reduce: TemplateElifBeginPrefix
+			reduce(74), // endif, reduce: TemplateElifBeginPrefix
+			reduce(74), // set, reduce: TemplateElifBeginPrefix
+			reduce(74), // comment, reduce: TemplateElifBeginPrefix
+			reduce(74), // template_block_end, reduce: TemplateElifBeginPrefix
+			reduce(74), // template_block_start, reduce: TemplateElifBeginPrefix
+			reduce(74), // template_comment, reduce: TemplateElifBeginPrefix
+			nil,        // template_variable_end
+			reduce(74), // template_variable_start, reduce: TemplateElifBeginPrefix
 		},
 	},
 	actionRow{ // S296
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(32),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(318), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S297
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(33),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			shift(294), // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			shift(295), // elif
+			shift(319), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S298
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(34),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(63), // identifier, reduce: TemplateIfBlock
+			reduce(63), // bytes_literal, reduce: TemplateIfBlock
+			reduce(63), // string_literal, reduce: TemplateIfBlock
+			reduce(63), // integer_literal, reduce: TemplateIfBlock
+			reduce(63), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(63), // newline, reduce: TemplateIfBlock
+			reduce(63), // dollar, reduce: TemplateIfBlock
+			reduce(63), // *, reduce: TemplateIfBlock
+			reduce(63), // [, reduce: TemplateIfBlock
+			reduce(63), // ], reduce: TemplateIfBlock
+			reduce(63), // (, reduce: TemplateIfBlock
+			reduce(63), // ), reduce: TemplateIfBlock
+			reduce(63), // ,, reduce: TemplateIfBlock
+			reduce(63), // ., reduce: TemplateIfBlock
+			reduce(63), // :, reduce: TemplateIfBlock
+			reduce(63), // %, reduce: TemplateIfBlock
+			reduce(63), // !, reduce: TemplateIfBlock
+			reduce(63), // |, reduce: TemplateIfBlock
+			reduce(63), // |>, reduce: TemplateIfBlock
+			reduce(63), // ^, reduce: TemplateIfBlock
+			reduce(63), // &, reduce: TemplateIfBlock
+			reduce(63), // <<, reduce: TemplateIfBlock
+			reduce(63), // >>, reduce: TemplateIfBlock
+			reduce(63), // =>, reduce: TemplateIfBlock
+			reduce(63), // ->, reduce: TemplateIfBlock
+			reduce(63), // /, reduce: TemplateIfBlock
+			reduce(63), // +, reduce: TemplateIfBlock
+			reduce(63), // -, reduce: TemplateIfBlock
+			reduce(63), // ||, reduce: TemplateIfBlock
+			reduce(63), // <>, reduce: TemplateIfBlock
+			reduce(63), // !=, reduce: TemplateIfBlock
+			reduce(63), // =, reduce: TemplateIfBlock
+			reduce(63), // <, reduce: TemplateIfBlock
+			reduce(63), // <=, reduce: TemplateIfBlock
+			reduce(63), // >, reduce: TemplateIfBlock
+			reduce(63), // >=, reduce: TemplateIfBlock
+			reduce(63), // ;, reduce: TemplateIfBlock
+			reduce(63), // @, reduce: TemplateIfBlock
+			reduce(63), // {, reduce: TemplateIfBlock
+			reduce(63), // }, reduce: TemplateIfBlock
+			reduce(63), // ~, reduce: TemplateIfBlock
+			reduce(63), // ?, reduce: TemplateIfBlock
+			reduce(63), // else, reduce: TemplateIfBlock
+			reduce(63), // if, reduce: TemplateIfBlock
+			reduce(63), // for, reduce: TemplateIfBlock
+			reduce(63), // endfor, reduce: TemplateIfBlock
+			reduce(63), // elif, reduce: TemplateIfBlock
+			reduce(63), // endif, reduce: TemplateIfBlock
+			reduce(63), // set, reduce: TemplateIfBlock
+			reduce(63), // comment, reduce: TemplateIfBlock
+			nil,        // template_block_end
+			reduce(63), // template_block_start, reduce: TemplateIfBlock
+			reduce(63), // template_comment, reduce: TemplateIfBlock
+			nil,        // template_variable_end
+			reduce(63), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S299
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(35),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			nil,        // elif
+			shift(319), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S300
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(36),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(64), // identifier, reduce: TemplateIfBlock
+			reduce(64), // bytes_literal, reduce: TemplateIfBlock
+			reduce(64), // string_literal, reduce: TemplateIfBlock
+			reduce(64), // integer_literal, reduce: TemplateIfBlock
+			reduce(64), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(64), // newline, reduce: TemplateIfBlock
+			reduce(64), // dollar, reduce: TemplateIfBlock
+			reduce(64), // *, reduce: TemplateIfBlock
+			reduce(64), // [, reduce: TemplateIfBlock
+			reduce(64), // ], reduce: TemplateIfBlock
+			reduce(64), // (, reduce: TemplateIfBlock
+			reduce(64), // ), reduce: TemplateIfBlock
+			reduce(64), // ,, reduce: TemplateIfBlock
+			reduce(64), // ., reduce: TemplateIfBlock
+			reduce(64), // :, reduce: TemplateIfBlock
+			reduce(64), // %, reduce: TemplateIfBlock
+			reduce(64), // !, reduce: TemplateIfBlock
+			reduce(64), // |, reduce: TemplateIfBlock
+			reduce(64), // |>, reduce: TemplateIfBlock
+			reduce(64), // ^, reduce: TemplateIfBlock
+			reduce(64), // &, reduce: TemplateIfBlock
+			reduce(64), // <<, reduce: TemplateIfBlock
+			reduce(64), // >>, reduce: TemplateIfBlock
+			reduce(64), // =>, reduce: TemplateIfBlock
+			reduce(64), // ->, reduce: TemplateIfBlock
+			reduce(64), // /, reduce: TemplateIfBlock
+			reduce(64), // +, reduce: TemplateIfBlock
+			reduce(64), // -, reduce: TemplateIfBlock
+			reduce(64), // ||, reduce: TemplateIfBlock
+			reduce(64), // <>, reduce: TemplateIfBlock
+			reduce(64), // !=, reduce: TemplateIfBlock
+			reduce(64), // =, reduce: TemplateIfBlock
+			reduce(64), // <, reduce: TemplateIfBlock
+			reduce(64), // <=, reduce: TemplateIfBlock
+			reduce(64), // >, reduce: TemplateIfBlock
+			reduce(64), // >=, reduce: TemplateIfBlock
+			reduce(64), // ;, reduce: TemplateIfBlock
+			reduce(64), // @, reduce: TemplateIfBlock
+			reduce(64), // {, reduce: TemplateIfBlock
+			reduce(64), // }, reduce: TemplateIfBlock
+			reduce(64), // ~, reduce: TemplateIfBlock
+			reduce(64), // ?, reduce: TemplateIfBlock
+			reduce(64), // else, reduce: TemplateIfBlock
+			reduce(64), // if, reduce: TemplateIfBlock
+			reduce(64), // for, reduce: TemplateIfBlock
+			reduce(64), // endfor, reduce: TemplateIfBlock
+			reduce(64), // elif, reduce: TemplateIfBlock
+			reduce(64), // endif, reduce: TemplateIfBlock
+			reduce(64), // set, reduce: TemplateIfBlock
+			reduce(64), // comment, reduce: TemplateIfBlock
+			nil,        // template_block_end
+			reduce(64), // template_block_start, reduce: TemplateIfBlock
+			reduce(64), // template_comment, reduce: TemplateIfBlock
+			nil,        // template_variable_end
+			reduce(64), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S301
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(37),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(75), // identifier, reduce: TemplateElifBeginPrefix
+			reduce(75), // bytes_literal, reduce: TemplateElifBeginPrefix
+			reduce(75), // string_literal, reduce: TemplateElifBeginPrefix
+			reduce(75), // integer_literal, reduce: TemplateElifBeginPrefix
+			reduce(75), // floating_point_literal, reduce: TemplateElifBeginPrefix
+			reduce(75), // newline, reduce: TemplateElifBeginPrefix
+			reduce(75), // dollar, reduce: TemplateElifBeginPrefix
+			reduce(75), // *, reduce: TemplateElifBeginPrefix
+			reduce(75), // [, reduce: TemplateElifBeginPrefix
+			reduce(75), // ], reduce: TemplateElifBeginPrefix
+			reduce(75), // (, reduce: TemplateElifBeginPrefix
+			reduce(75), // ), reduce: TemplateElifBeginPrefix
+			reduce(75), // ,, reduce: TemplateElifBeginPrefix
+			reduce(75), // ., reduce: TemplateElifBeginPrefix
+			reduce(75), // :, reduce: TemplateElifBeginPrefix
+			reduce(75), // %, reduce: TemplateElifBeginPrefix
+			reduce(75), // !, reduce: TemplateElifBeginPrefix
+			reduce(75), // |, reduce: TemplateElifBeginPrefix
+			reduce(75), // |>, reduce: TemplateElifBeginPrefix
+			reduce(75), // ^, reduce: TemplateElifBeginPrefix
+			reduce(75), // &, reduce: TemplateElifBeginPrefix
+			reduce(75), // <<, reduce: TemplateElifBeginPrefix
+			reduce(75), // >>, reduce: TemplateElifBeginPrefix
+			reduce(75), // =>, reduce: TemplateElifBeginPrefix
+			reduce(75), // ->, reduce: TemplateElifBeginPrefix
+			reduce(75), // /, reduce: TemplateElifBeginPrefix
+			reduce(75), // +, reduce: TemplateElifBeginPrefix
+			reduce(75), // -, reduce: TemplateElifBeginPrefix
+			reduce(75), // ||, reduce: TemplateElifBeginPrefix
+			reduce(75), // <>, reduce: TemplateElifBeginPrefix
+			reduce(75), // !=, reduce: TemplateElifBeginPrefix
+			reduce(75), // =, reduce: TemplateElifBeginPrefix
+			reduce(75), // <, reduce: TemplateElifBeginPrefix
+			reduce(75), // <=, reduce: TemplateElifBeginPrefix
+			reduce(75), // >, reduce: TemplateElifBeginPrefix
+			reduce(75), // >=, reduce: TemplateElifBeginPrefix
+			reduce(75), // ;, reduce: TemplateElifBeginPrefix
+			reduce(75), // @, reduce: TemplateElifBeginPrefix
+			reduce(75), // {, reduce: TemplateElifBeginPrefix
+			reduce(75), // }, reduce: TemplateElifBeginPrefix
+			reduce(75), // ~, reduce: TemplateElifBeginPrefix
+			reduce(75), // ?, reduce: TemplateElifBeginPrefix
+			reduce(75), // else, reduce: TemplateElifBeginPrefix
+			reduce(75), // if, reduce: TemplateElifBeginPrefix
+			reduce(75), // for, reduce: TemplateElifBeginPrefix
+			reduce(75), // endfor, reduce: TemplateElifBeginPrefix
+			reduce(75), // elif, reduce: TemplateElifBeginPrefix
+			reduce(75), // endif, reduce: TemplateElifBeginPrefix
+			reduce(75), // set, reduce: TemplateElifBeginPrefix
+			reduce(75), // comment, reduce: TemplateElifBeginPrefix
+			reduce(75), // template_block_end, reduce: TemplateElifBeginPrefix
+			reduce(75), // template_block_start, reduce: TemplateElifBeginPrefix
+			reduce(75), // template_comment, reduce: TemplateElifBeginPrefix
+			nil,        // template_variable_end
+			reduce(75), // template_variable_start, reduce: TemplateElifBeginPrefix
 		},
 	},
 	actionRow{ // S302
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(38),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(73), // identifier, reduce: TemplateElifBegin
+			reduce(73), // bytes_literal, reduce: TemplateElifBegin
+			reduce(73), // string_literal, reduce: TemplateElifBegin
+			reduce(73), // integer_literal, reduce: TemplateElifBegin
+			reduce(73), // floating_point_literal, reduce: TemplateElifBegin
+			reduce(73), // newline, reduce: TemplateElifBegin
+			reduce(73), // dollar, reduce: TemplateElifBegin
+			reduce(73), // *, reduce: TemplateElifBegin
+			reduce(73), // [, reduce: TemplateElifBegin
+			reduce(73), // ], reduce: TemplateElifBegin
+			reduce(73), // (, reduce: TemplateElifBegin
+			reduce(73), // ), reduce: TemplateElifBegin
+			reduce(73), // ,, reduce: TemplateElifBegin
+			reduce(73), // ., reduce: TemplateElifBegin
+			reduce(73), // :, reduce: TemplateElifBegin
+			reduce(73), // %, reduce: TemplateElifBegin
+			reduce(73), // !, reduce: TemplateElifBegin
+			reduce(73), // |, reduce: TemplateElifBegin
+			reduce(73), // |>, reduce: TemplateElifBegin
+			reduce(73), // ^, reduce: TemplateElifBegin
+			reduce(73), // &, reduce: TemplateElifBegin
+			reduce(73), // <<, reduce: TemplateElifBegin
+			reduce(73), // >>, reduce: TemplateElifBegin
+			reduce(73), // =>, reduce: TemplateElifBegin
+			reduce(73), // ->, reduce: TemplateElifBegin
+			reduce(73), // /, reduce: TemplateElifBegin
+			reduce(73), // +, reduce: TemplateElifBegin
+			reduce(73), // -, reduce: TemplateElifBegin
+			reduce(73), // ||, reduce: TemplateElifBegin
+			reduce(73), // <>, reduce: TemplateElifBegin
+			reduce(73), // !=, reduce: TemplateElifBegin
+			reduce(73), // =, reduce: TemplateElifBegin
+			reduce(73), // <, reduce: TemplateElifBegin
+			reduce(73), // <=, reduce: TemplateElifBegin
+			reduce(73), // >, reduce: TemplateElifBegin
+			reduce(73), // >=, reduce: TemplateElifBegin
+			reduce(73), // ;, reduce: TemplateElifBegin
+			reduce(73), // @, reduce: TemplateElifBegin
+			reduce(73), // {, reduce: TemplateElifBegin
+			reduce(73), // }, reduce: TemplateElifBegin
+			reduce(73), // ~, reduce: TemplateElifBegin
+			reduce(73), // ?, reduce: TemplateElifBegin
+			reduce(73), // else, reduce: TemplateElifBegin
+			reduce(73), // if, reduce: TemplateElifBegin
+			reduce(73), // for, reduce: TemplateElifBegin
+			reduce(73), // endfor, reduce: TemplateElifBegin
+			reduce(73), // elif, reduce: TemplateElifBegin
+			reduce(73), // endif, reduce: TemplateElifBegin
+			reduce(73), // set, reduce: TemplateElifBegin
+			reduce(73), // comment, reduce: TemplateElifBegin
+			nil,        // template_block_end
+			reduce(73), // template_block_start, reduce: TemplateElifBegin
+			reduce(73), // template_comment, reduce: TemplateElifBegin
+			nil,        // template_variable_end
+			reduce(73), // template_variable_start, reduce: TemplateElifBegin
 		},
 	},
 	actionRow{ // S303
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(39),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			shift(320), // endfor
+			nil,        // elif
+			nil,        // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S304
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(40),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(78), // identifier, reduce: TemplateForBlock
+			reduce(78), // bytes_literal, reduce: TemplateForBlock
+			reduce(78), // string_literal, reduce: TemplateForBlock
+			reduce(78), // integer_literal, reduce: TemplateForBlock
+			reduce(78), // floating_point_literal, reduce: TemplateForBlock
+			reduce(78), // newline, reduce: TemplateForBlock
+			reduce(78), // dollar, reduce: TemplateForBlock
+			reduce(78), // *, reduce: TemplateForBlock
+			reduce(78), // [, reduce: TemplateForBlock
+			reduce(78), // ], reduce: TemplateForBlock
+			reduce(78), // (, reduce: TemplateForBlock
+			reduce(78), // ), reduce: TemplateForBlock
+			reduce(78), // ,, reduce: TemplateForBlock
+			reduce(78), // ., reduce: TemplateForBlock
+			reduce(78), // :, reduce: TemplateForBlock
+			reduce(78), // %, reduce: TemplateForBlock
+			reduce(78), // !, reduce: TemplateForBlock
+			reduce(78), // |, reduce: TemplateForBlock
+			reduce(78), // |>, reduce: TemplateForBlock
+			reduce(78), // ^, reduce: TemplateForBlock
+			reduce(78), // &, reduce: TemplateForBlock
+			reduce(78), // <<, reduce: TemplateForBlock
+			reduce(78), // >>, reduce: TemplateForBlock
+			reduce(78), // =>, reduce: TemplateForBlock
+			reduce(78), // ->, reduce: TemplateForBlock
+			reduce(78), // /, reduce: TemplateForBlock
+			reduce(78), // +, reduce: TemplateForBlock
+			reduce(78), // -, reduce: TemplateForBlock
+			reduce(78), // ||, reduce: TemplateForBlock
+			reduce(78), // <>, reduce: TemplateForBlock
+			reduce(78), // !=, reduce: TemplateForBlock
+			reduce(78), // =, reduce: TemplateForBlock
+			reduce(78), // <, reduce: TemplateForBlock
+			reduce(78), // <=, reduce: TemplateForBlock
+			reduce(78), // >, reduce: TemplateForBlock
+			reduce(78), // >=, reduce: TemplateForBlock
+			reduce(78), // ;, reduce: TemplateForBlock
+			reduce(78), // @, reduce: TemplateForBlock
+			reduce(78), // {, reduce: TemplateForBlock
+			reduce(78), // }, reduce: TemplateForBlock
+			reduce(78), // ~, reduce: TemplateForBlock
+			reduce(78), // ?, reduce: TemplateForBlock
+			reduce(78), // else, reduce: TemplateForBlock
+			reduce(78), // if, reduce: TemplateForBlock
+			reduce(78), // for, reduce: TemplateForBlock
+			reduce(78), // endfor, reduce: TemplateForBlock
+			reduce(78), // elif, reduce: TemplateForBlock
+			reduce(78), // endif, reduce: TemplateForBlock
+			reduce(78), // set, reduce: TemplateForBlock
+			reduce(78), // comment, reduce: TemplateForBlock
+			nil,        // template_block_end
+			reduce(78), // template_block_start, reduce: TemplateForBlock
+			reduce(78), // template_comment, reduce: TemplateForBlock
+			nil,        // template_variable_end
+			reduce(78), // template_variable_start, reduce: TemplateForBlock
 		},
 	},
 	actionRow{ // S305
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(41),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(86), // identifier, reduce: TemplateVariable
+			reduce(86), // bytes_literal, reduce: TemplateVariable
+			reduce(86), // string_literal, reduce: TemplateVariable
+			reduce(86), // integer_literal, reduce: TemplateVariable
+			reduce(86), // floating_point_literal, reduce: TemplateVariable
+			reduce(86), // newline, reduce: TemplateVariable
+			reduce(86), // dollar, reduce: TemplateVariable
+			reduce(86), // *, reduce: TemplateVariable
+			reduce(86), // [, reduce: TemplateVariable
+			reduce(86), // ], reduce: TemplateVariable
+			reduce(86), // (, reduce: TemplateVariable
+			reduce(86), // ), reduce: TemplateVariable
+			reduce(86), // ,, reduce: TemplateVariable
+			reduce(86), // ., reduce: TemplateVariable
+			reduce(86), // :, reduce: TemplateVariable
+			reduce(86), // %, reduce: TemplateVariable
+			reduce(86), // !, reduce: TemplateVariable
+			reduce(86), // |, reduce: TemplateVariable
+			reduce(86), // |>, reduce: TemplateVariable
+			reduce(86), // ^, reduce: TemplateVariable
+			reduce(86), // &, reduce: TemplateVariable
+			reduce(86), // <<, reduce: TemplateVariable
+			reduce(86), // >>, reduce: TemplateVariable
+			reduce(86), // =>, reduce: TemplateVariable
+			reduce(86), // ->, reduce: TemplateVariable
+			reduce(86), // /, reduce: TemplateVariable
+			reduce(86), // +, reduce: TemplateVariable
+			reduce(86), // -, reduce: TemplateVariable
+			reduce(86), // ||, reduce: TemplateVariable
+			reduce(86), // <>, reduce: TemplateVariable
+			reduce(86), // !=, reduce: TemplateVariable
+			reduce(86), // =, reduce: TemplateVariable
+			reduce(86), // <, reduce: TemplateVariable
+			reduce(86), // <=, reduce: TemplateVariable
+			reduce(86), // >, reduce: TemplateVariable
+			reduce(86), // >=, reduce: TemplateVariable
+			reduce(86), // ;, reduce: TemplateVariable
+			reduce(86), // @, reduce: TemplateVariable
+			reduce(86), // {, reduce: TemplateVariable
+			reduce(86), // }, reduce: TemplateVariable
+			reduce(86), // ~, reduce: TemplateVariable
+			reduce(86), // ?, reduce: TemplateVariable
+			reduce(86), // else, reduce: TemplateVariable
+			reduce(86), // if, reduce: TemplateVariable
+			reduce(86), // for, reduce: TemplateVariable
+			reduce(86), // endfor, reduce: TemplateVariable
+			reduce(86), // elif, reduce: TemplateVariable
+			reduce(86), // endif, reduce: TemplateVariable
+			reduce(86), // set, reduce: TemplateVariable
+			reduce(86), // comment, reduce: TemplateVariable
+			nil,        // template_block_end
+			reduce(86), // template_block_start, reduce: TemplateVariable
+			reduce(86), // template_comment, reduce: TemplateVariable
+			nil,        // template_variable_end
+			reduce(86), // template_variable_start, reduce: TemplateVariable
 		},
 	},
 	actionRow{ // S306
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(42),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(321), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S307
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(44),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(60), // identifier, reduce: TemplateSetBlock
+			reduce(60), // bytes_literal, reduce: TemplateSetBlock
+			reduce(60), // string_literal, reduce: TemplateSetBlock
+			reduce(60), // integer_literal, reduce: TemplateSetBlock
+			reduce(60), // floating_point_literal, reduce: TemplateSetBlock
+			reduce(60), // newline, reduce: TemplateSetBlock
+			reduce(60), // dollar, reduce: TemplateSetBlock
+			reduce(60), // *, reduce: TemplateSetBlock
+			reduce(60), // [, reduce: TemplateSetBlock
+			reduce(60), // ], reduce: TemplateSetBlock
+			reduce(60), // (, reduce: TemplateSetBlock
+			reduce(60), // ), reduce: TemplateSetBlock
+			reduce(60), // ,, reduce: TemplateSetBlock
+			reduce(60), // ., reduce: TemplateSetBlock
+			reduce(60), // :, reduce: TemplateSetBlock
+			reduce(60), // %, reduce: TemplateSetBlock
+			reduce(60), // !, reduce: TemplateSetBlock
+			reduce(60), // |, reduce: TemplateSetBlock
+			reduce(60), // |>, reduce: TemplateSetBlock
+			reduce(60), // ^, reduce: TemplateSetBlock
+			reduce(60), // &, reduce: TemplateSetBlock
+			reduce(60), // <<, reduce: TemplateSetBlock
+			reduce(60), // >>, reduce: TemplateSetBlock
+			reduce(60), // =>, reduce: TemplateSetBlock
+			reduce(60), // ->, reduce: TemplateSetBlock
+			reduce(60), // /, reduce: TemplateSetBlock
+			reduce(60), // +, reduce: TemplateSetBlock
+			reduce(60), // -, reduce: TemplateSetBlock
+			reduce(60), // ||, reduce: TemplateSetBlock
+			reduce(60), // <>, reduce: TemplateSetBlock
+			reduce(60), // !=, reduce: TemplateSetBlock
+			reduce(60), // =, reduce: TemplateSetBlock
+			reduce(60), // <, reduce: TemplateSetBlock
+			reduce(60), // <=, reduce: TemplateSetBlock
+			reduce(60), // >, reduce: TemplateSetBlock
+			reduce(60), // >=, reduce: TemplateSetBlock
+			reduce(60), // ;, reduce: TemplateSetBlock
+			reduce(60), // @, reduce: TemplateSetBlock
+			reduce(60), // {, reduce: TemplateSetBlock
+			reduce(60), // }, reduce: TemplateSetBlock
+			reduce(60), // ~, reduce: TemplateSetBlock
+			reduce(60), // ?, reduce: TemplateSetBlock
+			reduce(60), // else, reduce: TemplateSetBlock
+			reduce(60), // if, reduce: TemplateSetBlock
+			reduce(60), // for, reduce: TemplateSetBlock
+			reduce(60), // endfor, reduce: TemplateSetBlock
+			reduce(60), // elif, reduce: TemplateSetBlock
+			reduce(60), // endif, reduce: TemplateSetBlock
+			reduce(60), // set, reduce: TemplateSetBlock
+			reduce(60), // comment, reduce: TemplateSetBlock
+			nil,        // template_block_end
+			reduce(60), // template_block_start, reduce: TemplateSetBlock
+			reduce(60), // template_comment, reduce: TemplateSetBlock
+			reduce(60), // template_variable_end, reduce: TemplateSetBlock
+			reduce(60), // template_variable_start, reduce: TemplateSetBlock
 		},
 	},
 	actionRow{ // S308
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(46),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			shift(294), // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			shift(295), // elif
+			shift(322), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S309
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(47),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(63), // identifier, reduce: TemplateIfBlock
+			reduce(63), // bytes_literal, reduce: TemplateIfBlock
+			reduce(63), // string_literal, reduce: TemplateIfBlock
+			reduce(63), // integer_literal, reduce: TemplateIfBlock
+			reduce(63), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(63), // newline, reduce: TemplateIfBlock
+			reduce(63), // dollar, reduce: TemplateIfBlock
+			reduce(63), // *, reduce: TemplateIfBlock
+			reduce(63), // [, reduce: TemplateIfBlock
+			reduce(63), // ], reduce: TemplateIfBlock
+			reduce(63), // (, reduce: TemplateIfBlock
+			reduce(63), // ), reduce: TemplateIfBlock
+			reduce(63), // ,, reduce: TemplateIfBlock
+			reduce(63), // ., reduce: TemplateIfBlock
+			reduce(63), // :, reduce: TemplateIfBlock
+			reduce(63), // %, reduce: TemplateIfBlock
+			reduce(63), // !, reduce: TemplateIfBlock
+			reduce(63), // |, reduce: TemplateIfBlock
+			reduce(63), // |>, reduce: TemplateIfBlock
+			reduce(63), // ^, reduce: TemplateIfBlock
+			reduce(63), // &, reduce: TemplateIfBlock
+			reduce(63), // <<, reduce: TemplateIfBlock
+			reduce(63), // >>, reduce: TemplateIfBlock
+			reduce(63), // =>, reduce: TemplateIfBlock
+			reduce(63), // ->, reduce: TemplateIfBlock
+			reduce(63), // /, reduce: TemplateIfBlock
+			reduce(63), // +, reduce: TemplateIfBlock
+			reduce(63), // -, reduce: TemplateIfBlock
+			reduce(63), // ||, reduce: TemplateIfBlock
+			reduce(63), // <>, reduce: TemplateIfBlock
+			reduce(63), // !=, reduce: TemplateIfBlock
+			reduce(63), // =, reduce: TemplateIfBlock
+			reduce(63), // <, reduce: TemplateIfBlock
+			reduce(63), // <=, reduce: TemplateIfBlock
+			reduce(63), // >, reduce: TemplateIfBlock
+			reduce(63), // >=, reduce: TemplateIfBlock
+			reduce(63), // ;, reduce: TemplateIfBlock
+			reduce(63), // @, reduce: TemplateIfBlock
+			reduce(63), // {, reduce: TemplateIfBlock
+			reduce(63), // }, reduce: TemplateIfBlock
+			reduce(63), // ~, reduce: TemplateIfBlock
+			reduce(63), // ?, reduce: TemplateIfBlock
+			reduce(63), // else, reduce: TemplateIfBlock
+			reduce(63), // if, reduce: TemplateIfBlock
+			reduce(63), // for, reduce: TemplateIfBlock
+			reduce(63), // endfor, reduce: TemplateIfBlock
+			reduce(63), // elif, reduce: TemplateIfBlock
+			reduce(63), // endif, reduce: TemplateIfBlock
+			reduce(63), // set, reduce: TemplateIfBlock
+			reduce(63), // comment, reduce: TemplateIfBlock
+			nil,        // template_block_end
+			reduce(63), // template_block_start, reduce: TemplateIfBlock
+			reduce(63), // template_comment, reduce: TemplateIfBlock
+			reduce(63), // template_variable_end, reduce: TemplateIfBlock
+			reduce(63), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S310
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(49),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			nil,        // endfor
+			nil,        // elif
+			shift(322), // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S311
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(50),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(64), // identifier, reduce: TemplateIfBlock
+			reduce(64), // bytes_literal, reduce: TemplateIfBlock
+			reduce(64), // string_literal, reduce: TemplateIfBlock
+			reduce(64), // integer_literal, reduce: TemplateIfBlock
+			reduce(64), // floating_point_literal, reduce: TemplateIfBlock
+			reduce(64), // newline, reduce: TemplateIfBlock
+			reduce(64), // dollar, reduce: TemplateIfBlock
+			reduce(64), // *, reduce: TemplateIfBlock
+			reduce(64), // [, reduce: TemplateIfBlock
+			reduce(64), // ], reduce: TemplateIfBlock
+			reduce(64), // (, reduce: TemplateIfBlock
+			reduce(64), // ), reduce: TemplateIfBlock
+			reduce(64), // ,, reduce: TemplateIfBlock
+			reduce(64), // ., reduce: TemplateIfBlock
+			reduce(64), // :, reduce: TemplateIfBlock
+			reduce(64), // %, reduce: TemplateIfBlock
+			reduce(64), // !, reduce: TemplateIfBlock
+			reduce(64), // |, reduce: TemplateIfBlock
+			reduce(64), // |>, reduce: TemplateIfBlock
+			reduce(64), // ^, reduce: TemplateIfBlock
+			reduce(64), // &, reduce: TemplateIfBlock
+			reduce(64), // <<, reduce: TemplateIfBlock
+			reduce(64), // >>, reduce: TemplateIfBlock
+			reduce(64), // =>, reduce: TemplateIfBlock
+			reduce(64), // ->, reduce: TemplateIfBlock
+			reduce(64), // /, reduce: TemplateIfBlock
+			reduce(64), // +, reduce: TemplateIfBlock
+			reduce(64), // -, reduce: TemplateIfBlock
+			reduce(64), // ||, reduce: TemplateIfBlock
+			reduce(64), // <>, reduce: TemplateIfBlock
+			reduce(64), // !=, reduce: TemplateIfBlock
+			reduce(64), // =, reduce: TemplateIfBlock
+			reduce(64), // <, reduce: TemplateIfBlock
+			reduce(64), // <=, reduce: TemplateIfBlock
+			reduce(64), // >, reduce: TemplateIfBlock
+			reduce(64), // >=, reduce: TemplateIfBlock
+			reduce(64), // ;, reduce: TemplateIfBlock
+			reduce(64), // @, reduce: TemplateIfBlock
+			reduce(64), // {, reduce: TemplateIfBlock
+			reduce(64), // }, reduce: TemplateIfBlock
+			reduce(64), // ~, reduce: TemplateIfBlock
+			reduce(64), // ?, reduce: TemplateIfBlock
+			reduce(64), // else, reduce: TemplateIfBlock
+			reduce(64), // if, reduce: TemplateIfBlock
+			reduce(64), // for, reduce: TemplateIfBlock
+			reduce(64), // endfor, reduce: TemplateIfBlock
+			reduce(64), // elif, reduce: TemplateIfBlock
+			reduce(64), // endif, reduce: TemplateIfBlock
+			reduce(64), // set, reduce: TemplateIfBlock
+			reduce(64), // comment, reduce: TemplateIfBlock
+			nil,        // template_block_end
+			reduce(64), // template_block_start, reduce: TemplateIfBlock
+			reduce(64), // template_comment, reduce: TemplateIfBlock
+			reduce(64), // template_variable_end, reduce: TemplateIfBlock
+			reduce(64), // template_variable_start, reduce: TemplateIfBlock
 		},
 	},
 	actionRow{ // S312
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(51),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			shift(138), // if
+			shift(139), // for
+			shift(323), // endfor
+			nil,        // elif
+			nil,        // endif
+			shift(140), // set
+			nil,        // comment
+			nil,        // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S313
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(52),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(78), // identifier, reduce: TemplateForBlock
+			reduce(78), // bytes_literal, reduce: TemplateForBlock
+			reduce(78), // string_literal, reduce: TemplateForBlock
+			reduce(78), // integer_literal, reduce: TemplateForBlock
+			reduce(78), // floating_point_literal, reduce: TemplateForBlock
+			reduce(78), // newline, reduce: TemplateForBlock
+			reduce(78), // dollar, reduce: TemplateForBlock
+			reduce(78), // *, reduce: TemplateForBlock
+			reduce(78), // [, reduce: TemplateForBlock
+			reduce(78), // ], reduce: TemplateForBlock
+			reduce(78), // (, reduce: TemplateForBlock
+			reduce(78), // ), reduce: TemplateForBlock
+			reduce(78), // ,, reduce: TemplateForBlock
+			reduce(78), // ., reduce: TemplateForBlock
+			reduce(78), // :, reduce: TemplateForBlock
+			reduce(78), // %, reduce: TemplateForBlock
+			reduce(78), // !, reduce: TemplateForBlock
+			reduce(78), // |, reduce: TemplateForBlock
+			reduce(78), // |>, reduce: TemplateForBlock
+			reduce(78), // ^, reduce: TemplateForBlock
+			reduce(78), // &, reduce: TemplateForBlock
+			reduce(78), // <<, reduce: TemplateForBlock
+			reduce(78), // >>, reduce: TemplateForBlock
+			reduce(78), // =>, reduce: TemplateForBlock
+			reduce(78), // ->, reduce: TemplateForBlock
+			reduce(78), // /, reduce: TemplateForBlock
+			reduce(78), // +, reduce: TemplateForBlock
+			reduce(78), // -, reduce: TemplateForBlock
+			reduce(78), // ||, reduce: TemplateForBlock
+			reduce(78), // <>, reduce: TemplateForBlock
+			reduce(78), // !=, reduce: TemplateForBlock
+			reduce(78), // =, reduce: TemplateForBlock
+			reduce(78), // <, reduce: TemplateForBlock
+			reduce(78), // <=, reduce: TemplateForBlock
+			reduce(78), // >, reduce: TemplateForBlock
+			reduce(78), // >=, reduce: TemplateForBlock
+			reduce(78), // ;, reduce: TemplateForBlock
+			reduce(78), // @, reduce: TemplateForBlock
+			reduce(78), // {, reduce: TemplateForBlock
+			reduce(78), // }, reduce: TemplateForBlock
+			reduce(78), // ~, reduce: TemplateForBlock
+			reduce(78), // ?, reduce: TemplateForBlock
+			reduce(78), // else, reduce: TemplateForBlock
+			reduce(78), // if, reduce: TemplateForBlock
+			reduce(78), // for, reduce: TemplateForBlock
+			reduce(78), // endfor, reduce: TemplateForBlock
+			reduce(78), // elif, reduce: TemplateForBlock
+			reduce(78), // endif, reduce: TemplateForBlock
+			reduce(78), // set, reduce: TemplateForBlock
+			reduce(78), // comment, reduce: TemplateForBlock
+			nil,        // template_block_end
+			reduce(78), // template_block_start, reduce: TemplateForBlock
+			reduce(78), // template_comment, reduce: TemplateForBlock
+			reduce(78), // template_variable_end, reduce: TemplateForBlock
+			reduce(78), // template_variable_start, reduce: TemplateForBlock
 		},
 	},
 	actionRow{ // S314
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(53),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(86), // identifier, reduce: TemplateVariable
+			reduce(86), // bytes_literal, reduce: TemplateVariable
+			reduce(86), // string_literal, reduce: TemplateVariable
+			reduce(86), // integer_literal, reduce: TemplateVariable
+			reduce(86), // floating_point_literal, reduce: TemplateVariable
+			reduce(86), // newline, reduce: TemplateVariable
+			reduce(86), // dollar, reduce: TemplateVariable
+			reduce(86), // *, reduce: TemplateVariable
+			reduce(86), // [, reduce: TemplateVariable
+			reduce(86), // ], reduce: TemplateVariable
+			reduce(86), // (, reduce: TemplateVariable
+			reduce(86), // ), reduce: TemplateVariable
+			reduce(86), // ,, reduce: TemplateVariable
+			reduce(86), // ., reduce: TemplateVariable
+			reduce(86), // :, reduce: TemplateVariable
+			reduce(86), // %, reduce: TemplateVariable
+			reduce(86), // !, reduce: TemplateVariable
+			reduce(86), // |, reduce: TemplateVariable
+			reduce(86), // |>, reduce: TemplateVariable
+			reduce(86), // ^, reduce: TemplateVariable
+			reduce(86), // &, reduce: TemplateVariable
+			reduce(86), // <<, reduce: TemplateVariable
+			reduce(86), // >>, reduce: TemplateVariable
+			reduce(86), // =>, reduce: TemplateVariable
+			reduce(86), // ->, reduce: TemplateVariable
+			reduce(86), // /, reduce: TemplateVariable
+			reduce(86), // +, reduce: TemplateVariable
+			reduce(86), // -, reduce: TemplateVariable
+			reduce(86), // ||, reduce: TemplateVariable
+			reduce(86), // <>, reduce: TemplateVariable
+			reduce(86), // !=, reduce: TemplateVariable
+			reduce(86), // =, reduce: TemplateVariable
+			reduce(86), // <, reduce: TemplateVariable
+			reduce(86), // <=, reduce: TemplateVariable
+			reduce(86), // >, reduce: TemplateVariable
+			reduce(86), // >=, reduce: TemplateVariable
+			reduce(86), // ;, reduce: TemplateVariable
+			reduce(86), // @, reduce: TemplateVariable
+			reduce(86), // {, reduce: TemplateVariable
+			reduce(86), // }, reduce: TemplateVariable
+			reduce(86), // ~, reduce: TemplateVariable
+			reduce(86), // ?, reduce: TemplateVariable
+			reduce(86), // else, reduce: TemplateVariable
+			reduce(86), // if, reduce: TemplateVariable
+			reduce(86), // for, reduce: TemplateVariable
+			reduce(86), // endfor, reduce: TemplateVariable
+			reduce(86), // elif, reduce: TemplateVariable
+			reduce(86), // endif, reduce: TemplateVariable
+			reduce(86), // set, reduce: TemplateVariable
+			reduce(86), // comment, reduce: TemplateVariable
+			nil,        // template_block_end
+			reduce(86), // template_block_start, reduce: TemplateVariable
+			reduce(86), // template_comment, reduce: TemplateVariable
+			reduce(86), // template_variable_end, reduce: TemplateVariable
+			reduce(86), // template_variable_start, reduce: TemplateVariable
 		},
 	},
 	actionRow{ // S315
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(54),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(324), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S316
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(55),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(325), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S317
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(56),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(77), // identifier, reduce: TemplateElse
+			reduce(77), // bytes_literal, reduce: TemplateElse
+			reduce(77), // string_literal, reduce: TemplateElse
+			reduce(77), // integer_literal, reduce: TemplateElse
+			reduce(77), // floating_point_literal, reduce: TemplateElse
+			reduce(77), // newline, reduce: TemplateElse
+			reduce(77), // dollar, reduce: TemplateElse
+			reduce(77), // *, reduce: TemplateElse
+			reduce(77), // [, reduce: TemplateElse
+			reduce(77), // ], reduce: TemplateElse
+			reduce(77), // (, reduce: TemplateElse
+			reduce(77), // ), reduce: TemplateElse
+			reduce(77), // ,, reduce: TemplateElse
+			reduce(77), // ., reduce: TemplateElse
+			reduce(77), // :, reduce: TemplateElse
+			reduce(77), // %, reduce: TemplateElse
+			reduce(77), // !, reduce: TemplateElse
+			reduce(77), // |, reduce: TemplateElse
+			reduce(77), // |>, reduce: TemplateElse
+			reduce(77), // ^, reduce: TemplateElse
+			reduce(77), // &, reduce: TemplateElse
+			reduce(77), // <<, reduce: TemplateElse
+			reduce(77), // >>, reduce: TemplateElse
+			reduce(77), // =>, reduce: TemplateElse
+			reduce(77), // ->, reduce: TemplateElse
+			reduce(77), // /, reduce: TemplateElse
+			reduce(77), // +, reduce: TemplateElse
+			reduce(77), // -, reduce: TemplateElse
+			reduce(77), // ||, reduce: TemplateElse
+			reduce(77), // <>, reduce: TemplateElse
+			reduce(77), // !=, reduce: TemplateElse
+			reduce(77), // =, reduce: TemplateElse
+			reduce(77), // <, reduce: TemplateElse
+			reduce(77), // <=, reduce: TemplateElse
+			reduce(77), // >, reduce: TemplateElse
+			reduce(77), // >=, reduce: TemplateElse
+			reduce(77), // ;, reduce: TemplateElse
+			reduce(77), // @, reduce: TemplateElse
+			reduce(77), // {, reduce: TemplateElse
+			reduce(77), // }, reduce: TemplateElse
+			reduce(77), // ~, reduce: TemplateElse
+			reduce(77), // ?, reduce: TemplateElse
+			reduce(77), // else, reduce: TemplateElse
+			reduce(77), // if, reduce: TemplateElse
+			reduce(77), // for, reduce: TemplateElse
+			reduce(77), // endfor, reduce: TemplateElse
+			reduce(77), // elif, reduce: TemplateElse
+			reduce(77), // endif, reduce: TemplateElse
+			reduce(77), // set, reduce: TemplateElse
+			reduce(77), // comment, reduce: TemplateElse
+			nil,        // template_block_end
+			reduce(77), // template_block_start, reduce: TemplateElse
+			reduce(77), // template_comment, reduce: TemplateElse
+			nil,        // template_variable_end
+			reduce(77), // template_variable_start, reduce: TemplateElse
 		},
 	},
 	actionRow{ // S318
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(57),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(76), // ␚, reduce: TemplateIfEnd
+			reduce(76), // identifier, reduce: TemplateIfEnd
+			reduce(76), // bytes_literal, reduce: TemplateIfEnd
+			reduce(76), // string_literal, reduce: TemplateIfEnd
+			reduce(76), // integer_literal, reduce: TemplateIfEnd
+			reduce(76), // floating_point_literal, reduce: TemplateIfEnd
+			reduce(76), // newline, reduce: TemplateIfEnd
+			reduce(76), // dollar, reduce: TemplateIfEnd
+			reduce(76), // *, reduce: TemplateIfEnd
+			reduce(76), // [, reduce: TemplateIfEnd
+			reduce(76), // ], reduce: TemplateIfEnd
+			reduce(76), // (, reduce: TemplateIfEnd
+			reduce(76), // ), reduce: TemplateIfEnd
+			reduce(76), // ,, reduce: TemplateIfEnd
+			reduce(76), // ., reduce: TemplateIfEnd
+			reduce(76), // :, reduce: TemplateIfEnd
+			reduce(76), // %, reduce: TemplateIfEnd
+			reduce(76), // !, reduce: TemplateIfEnd
+			reduce(76), // |, reduce: TemplateIfEnd
+			reduce(76), // |>, reduce: TemplateIfEnd
+			reduce(76), // ^, reduce: TemplateIfEnd
+			reduce(76), // &, reduce: TemplateIfEnd
+			reduce(76), // <<, reduce: TemplateIfEnd
+			reduce(76), // >>, reduce: TemplateIfEnd
+			reduce(76), // =>, reduce: TemplateIfEnd
+			reduce(76), // ->, reduce: TemplateIfEnd
+			reduce(76), // /, reduce: TemplateIfEnd
+			reduce(76), // +, reduce: TemplateIfEnd
+			reduce(76), // -, reduce: TemplateIfEnd
+			reduce(76), // ||, reduce: TemplateIfEnd
+			reduce(76), // <>, reduce: TemplateIfEnd
+			reduce(76), // !=, reduce: TemplateIfEnd
+			reduce(76), // =, reduce: TemplateIfEnd
+			reduce(76), // <, reduce: TemplateIfEnd
+			reduce(76), // <=, reduce: TemplateIfEnd
+			reduce(76), // >, reduce: TemplateIfEnd
+			reduce(76), // >=, reduce: TemplateIfEnd
+			reduce(76), // ;, reduce: TemplateIfEnd
+			reduce(76), // @, reduce: TemplateIfEnd
+			reduce(76), // {, reduce: TemplateIfEnd
+			reduce(76), // }, reduce: TemplateIfEnd
+			reduce(76), // ~, reduce: TemplateIfEnd
+			reduce(76), // ?, reduce: TemplateIfEnd
+			reduce(76), // else, reduce: TemplateIfEnd
+			reduce(76), // if, reduce: TemplateIfEnd
+			reduce(76), // for, reduce: TemplateIfEnd
+			reduce(76), // endfor, reduce: TemplateIfEnd
+			reduce(76), // elif, reduce: TemplateIfEnd
+			reduce(76), // endif, reduce: TemplateIfEnd
+			reduce(76), // set, reduce: TemplateIfEnd
+			reduce(76), // comment, reduce: TemplateIfEnd
+			nil,        // template_block_end
+			reduce(76), // template_block_start, reduce: TemplateIfEnd
+			reduce(76), // template_comment, reduce: TemplateIfEnd
+			nil,        // template_variable_end
+			reduce(76), // template_variable_start, reduce: TemplateIfEnd
 		},
 	},
 	actionRow{ // S319
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(58),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(326), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S320
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(59),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(327), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S321
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(60),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			reduce(84), // ␚, reduce: TemplateForEnd
+			reduce(84), // identifier, reduce: TemplateForEnd
+			reduce(84), // bytes_literal, reduce: TemplateForEnd
+			reduce(84), // string_literal, reduce: TemplateForEnd
+			reduce(84), // integer_literal, reduce: TemplateForEnd
+			reduce(84), // floating_point_literal, reduce: TemplateForEnd
+			reduce(84), // newline, reduce: TemplateForEnd
+			reduce(84), // dollar, reduce: TemplateForEnd
+			reduce(84), // *, reduce: TemplateForEnd
+			reduce(84), // [, reduce: TemplateForEnd
+			reduce(84), // ], reduce: TemplateForEnd
+			reduce(84), // (, reduce: TemplateForEnd
+			reduce(84), // ), reduce: TemplateForEnd
+			reduce(84), // ,, reduce: TemplateForEnd
+			reduce(84), // ., reduce: TemplateForEnd
+			reduce(84), // :, reduce: TemplateForEnd
+			reduce(84), // %, reduce: TemplateForEnd
+			reduce(84), // !, reduce: TemplateForEnd
+			reduce(84), // |, reduce: TemplateForEnd
+			reduce(84), // |>, reduce: TemplateForEnd
+			reduce(84), // ^, reduce: TemplateForEnd
+			reduce(84), // &, reduce: TemplateForEnd
+			reduce(84), // <<, reduce: TemplateForEnd
+			reduce(84), // >>, reduce: TemplateForEnd
+			reduce(84), // =>, reduce: TemplateForEnd
+			reduce(84), // ->, reduce: TemplateForEnd
+			reduce(84), // /, reduce: TemplateForEnd
+			reduce(84), // +, reduce: TemplateForEnd
+			reduce(84), // -, reduce: TemplateForEnd
+			reduce(84), // ||, reduce: TemplateForEnd
+			reduce(84), // <>, reduce: TemplateForEnd
+			reduce(84), // !=, reduce: TemplateForEnd
+			reduce(84), // =, reduce: TemplateForEnd
+			reduce(84), // <, reduce: TemplateForEnd
+			reduce(84), // <=, reduce: TemplateForEnd
+			reduce(84), // >, reduce: TemplateForEnd
+			reduce(84), // >=, reduce: TemplateForEnd
+			reduce(84), // ;, reduce: TemplateForEnd
+			reduce(84), // @, reduce: TemplateForEnd
+			reduce(84), // {, reduce: TemplateForEnd
+			reduce(84), // }, reduce: TemplateForEnd
+			reduce(84), // ~, reduce: TemplateForEnd
+			reduce(84), // ?, reduce: TemplateForEnd
+			reduce(84), // else, reduce: TemplateForEnd
+			reduce(84), // if, reduce: TemplateForEnd
+			reduce(84), // for, reduce: TemplateForEnd
+			reduce(84), // endfor, reduce: TemplateForEnd
+			reduce(84), // elif, reduce: TemplateForEnd
+			reduce(84), // endif, reduce: TemplateForEnd
+			reduce(84), // set, reduce: TemplateForEnd
+			reduce(84), // comment, reduce: TemplateForEnd
+			nil,        // template_block_end
+			reduce(84), // template_block_start, reduce: TemplateForEnd
+			reduce(84), // template_comment, reduce: TemplateForEnd
+			nil,        // template_variable_end
+			reduce(84), // template_variable_start, reduce: TemplateForEnd
 		},
 	},
 	actionRow{ // S322
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(61),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(328), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S323
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(79),shift(80),shift(81),shift(82),shift(83),shift(84),shift(85),shift(86),shift(87),shift(88),shift(89),shift(90),shift(91),shift(92),shift(93),shift(94),shift(95),shift(96),shift(97),shift(98),shift(99),shift(100),shift(101),shift(102),shift(103),shift(104),shift(105),shift(106),shift(107),shift(108),shift(109),shift(110),shift(111),shift(112),shift(113),shift(114),shift(115),shift(116),shift(117),shift(118),shift(119),shift(120),shift(121),shift(122),shift(354),shift(55),shift(127),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			nil,        // identifier
+			nil,        // bytes_literal
+			nil,        // string_literal
+			nil,        // integer_literal
+			nil,        // floating_point_literal
+			nil,        // newline
+			nil,        // dollar
+			nil,        // *
+			nil,        // [
+			nil,        // ]
+			nil,        // (
+			nil,        // )
+			nil,        // ,
+			nil,        // .
+			nil,        // :
+			nil,        // %
+			nil,        // !
+			nil,        // |
+			nil,        // |>
+			nil,        // ^
+			nil,        // &
+			nil,        // <<
+			nil,        // >>
+			nil,        // =>
+			nil,        // ->
+			nil,        // /
+			nil,        // +
+			nil,        // -
+			nil,        // ||
+			nil,        // <>
+			nil,        // !=
+			nil,        // =
+			nil,        // <
+			nil,        // <=
+			nil,        // >
+			nil,        // >=
+			nil,        // ;
+			nil,        // @
+			nil,        // {
+			nil,        // }
+			nil,        // ~
+			nil,        // ?
+			nil,        // else
+			nil,        // if
+			nil,        // for
+			nil,        // endfor
+			nil,        // elif
+			nil,        // endif
+			nil,        // set
+			nil,        // comment
+			shift(329), // template_block_end
+			nil,        // template_block_start
+			nil,        // template_comment
+			nil,        // template_variable_end
+			nil,        // template_variable_start
 		},
 	},
 	actionRow{ // S324
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),nil,nil,shift(267),shift(131),nil,nil,nil,nil,nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(76), // identifier, reduce: TemplateIfEnd
+			reduce(76), // bytes_literal, reduce: TemplateIfEnd
+			reduce(76), // string_literal, reduce: TemplateIfEnd
+			reduce(76), // integer_literal, reduce: TemplateIfEnd
+			reduce(76), // floating_point_literal, reduce: TemplateIfEnd
+			reduce(76), // newline, reduce: TemplateIfEnd
+			reduce(76), // dollar, reduce: TemplateIfEnd
+			reduce(76), // *, reduce: TemplateIfEnd
+			reduce(76), // [, reduce: TemplateIfEnd
+			reduce(76), // ], reduce: TemplateIfEnd
+			reduce(76), // (, reduce: TemplateIfEnd
+			reduce(76), // ), reduce: TemplateIfEnd
+			reduce(76), // ,, reduce: TemplateIfEnd
+			reduce(76), // ., reduce: TemplateIfEnd
+			reduce(76), // :, reduce: TemplateIfEnd
+			reduce(76), // %, reduce: TemplateIfEnd
+			reduce(76), // !, reduce: TemplateIfEnd
+			reduce(76), // |, reduce: TemplateIfEnd
+			reduce(76), // |>, reduce: TemplateIfEnd
+			reduce(76), // ^, reduce: TemplateIfEnd
+			reduce(76), // &, reduce: TemplateIfEnd
+			reduce(76), // <<, reduce: TemplateIfEnd
+			reduce(76), // >>, reduce: TemplateIfEnd
+			reduce(76), // =>, reduce: TemplateIfEnd
+			reduce(76), // ->, reduce: TemplateIfEnd
+			reduce(76), // /, reduce: TemplateIfEnd
+			reduce(76), // +, reduce: TemplateIfEnd
+			reduce(76), // -, reduce: TemplateIfEnd
+			reduce(76), // ||, reduce: TemplateIfEnd
+			reduce(76), // <>, reduce: TemplateIfEnd
+			reduce(76), // !=, reduce: TemplateIfEnd
+			reduce(76), // =, reduce: TemplateIfEnd
+			reduce(76), // <, reduce: TemplateIfEnd
+			reduce(76), // <=, reduce: TemplateIfEnd
+			reduce(76), // >, reduce: TemplateIfEnd
+			reduce(76), // >=, reduce: TemplateIfEnd
+			reduce(76), // ;, reduce: TemplateIfEnd
+			reduce(76), // @, reduce: TemplateIfEnd
+			reduce(76), // {, reduce: TemplateIfEnd
+			reduce(76), // }, reduce: TemplateIfEnd
+			reduce(76), // ~, reduce: TemplateIfEnd
+			reduce(76), // ?, reduce: TemplateIfEnd
+			reduce(76), // else, reduce: TemplateIfEnd
+			reduce(76), // if, reduce: TemplateIfEnd
+			reduce(76), // for, reduce: TemplateIfEnd
+			reduce(76), // endfor, reduce: TemplateIfEnd
+			reduce(76), // elif, reduce: TemplateIfEnd
+			reduce(76), // endif, reduce: TemplateIfEnd
+			reduce(76), // set, reduce: TemplateIfEnd
+			reduce(76), // comment, reduce: TemplateIfEnd
+			reduce(76), // template_block_end, reduce: TemplateIfEnd
+			reduce(76), // template_block_start, reduce: TemplateIfEnd
+			reduce(76), // template_comment, reduce: TemplateIfEnd
+			nil,        // template_variable_end
+			reduce(76), // template_variable_start, reduce: TemplateIfEnd
 		},
 	},
 	actionRow{ // S325
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(355),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(84), // identifier, reduce: TemplateForEnd
+			reduce(84), // bytes_literal, reduce: TemplateForEnd
+			reduce(84), // string_literal, reduce: TemplateForEnd
+			reduce(84), // integer_literal, reduce: TemplateForEnd
+			reduce(84), // floating_point_literal, reduce: TemplateForEnd
+			reduce(84), // newline, reduce: TemplateForEnd
+			reduce(84), // dollar, reduce: TemplateForEnd
+			reduce(84), // *, reduce: TemplateForEnd
+			reduce(84), // [, reduce: TemplateForEnd
+			reduce(84), // ], reduce: TemplateForEnd
+			reduce(84), // (, reduce: TemplateForEnd
+			reduce(84), // ), reduce: TemplateForEnd
+			reduce(84), // ,, reduce: TemplateForEnd
+			reduce(84), // ., reduce: TemplateForEnd
+			reduce(84), // :, reduce: TemplateForEnd
+			reduce(84), // %, reduce: TemplateForEnd
+			reduce(84), // !, reduce: TemplateForEnd
+			reduce(84), // |, reduce: TemplateForEnd
+			reduce(84), // |>, reduce: TemplateForEnd
+			reduce(84), // ^, reduce: TemplateForEnd
+			reduce(84), // &, reduce: TemplateForEnd
+			reduce(84), // <<, reduce: TemplateForEnd
+			reduce(84), // >>, reduce: TemplateForEnd
+			reduce(84), // =>, reduce: TemplateForEnd
+			reduce(84), // ->, reduce: TemplateForEnd
+			reduce(84), // /, reduce: TemplateForEnd
+			reduce(84), // +, reduce: TemplateForEnd
+			reduce(84), // -, reduce: TemplateForEnd
+			reduce(84), // ||, reduce: TemplateForEnd
+			reduce(84), // <>, reduce: TemplateForEnd
+			reduce(84), // !=, reduce: TemplateForEnd
+			reduce(84), // =, reduce: TemplateForEnd
+			reduce(84), // <, reduce: TemplateForEnd
+			reduce(84), // <=, reduce: TemplateForEnd
+			reduce(84), // >, reduce: TemplateForEnd
+			reduce(84), // >=, reduce: TemplateForEnd
+			reduce(84), // ;, reduce: TemplateForEnd
+			reduce(84), // @, reduce: TemplateForEnd
+			reduce(84), // {, reduce: TemplateForEnd
+			reduce(84), // }, reduce: TemplateForEnd
+			reduce(84), // ~, reduce: TemplateForEnd
+			reduce(84), // ?, reduce: TemplateForEnd
+			reduce(84), // else, reduce: TemplateForEnd
+			reduce(84), // if, reduce: TemplateForEnd
+			reduce(84), // for, reduce: TemplateForEnd
+			reduce(84), // endfor, reduce: TemplateForEnd
+			reduce(84), // elif, reduce: TemplateForEnd
+			reduce(84), // endif, reduce: TemplateForEnd
+			reduce(84), // set, reduce: TemplateForEnd
+			reduce(84), // comment, reduce: TemplateForEnd
+			reduce(84), // template_block_end, reduce: TemplateForEnd
+			reduce(84), // template_block_start, reduce: TemplateForEnd
+			reduce(84), // template_comment, reduce: TemplateForEnd
+			nil,        // template_variable_end
+			reduce(84), // template_variable_start, reduce: TemplateForEnd
 		},
 	},
 	actionRow{ // S326
 		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),nil,reduce(67),reduce(67),nil,reduce(67),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(76), // identifier, reduce: TemplateIfEnd
+			reduce(76), // bytes_literal, reduce: TemplateIfEnd
+			reduce(76), // string_literal, reduce: TemplateIfEnd
+			reduce(76), // integer_literal, reduce: TemplateIfEnd
+			reduce(76), // floating_point_literal, reduce: TemplateIfEnd
+			reduce(76), // newline, reduce: TemplateIfEnd
+			reduce(76), // dollar, reduce: TemplateIfEnd
+			reduce(76), // *, reduce: TemplateIfEnd
+			reduce(76), // [, reduce: TemplateIfEnd
+			reduce(76), // ], reduce: TemplateIfEnd
+			reduce(76), // (, reduce: TemplateIfEnd
+			reduce(76), // ), reduce: TemplateIfEnd
+			reduce(76), // ,, reduce: TemplateIfEnd
+			reduce(76), // ., reduce: TemplateIfEnd
+			reduce(76), // :, reduce: TemplateIfEnd
+			reduce(76), // %, reduce: TemplateIfEnd
+			reduce(76), // !, reduce: TemplateIfEnd
+			reduce(76), // |, reduce: TemplateIfEnd
+			reduce(76), // |>, reduce: TemplateIfEnd
+			reduce(76), // ^, reduce: TemplateIfEnd
+			reduce(76), // &, reduce: TemplateIfEnd
+			reduce(76), // <<, reduce: TemplateIfEnd
+			reduce(76), // >>, reduce: TemplateIfEnd
+			reduce(76), // =>, reduce: TemplateIfEnd
+			reduce(76), // ->, reduce: TemplateIfEnd
+			reduce(76), // /, reduce: TemplateIfEnd
+			reduce(76), // +, reduce: TemplateIfEnd
+			reduce(76), // -, reduce: TemplateIfEnd
+			reduce(76), // ||, reduce: TemplateIfEnd
+			reduce(76), // <>, reduce: TemplateIfEnd
+			reduce(76), // !=, reduce: TemplateIfEnd
+			reduce(76), // =, reduce: TemplateIfEnd
+			reduce(76), // <, reduce: TemplateIfEnd
+			reduce(76), // <=, reduce: TemplateIfEnd
+			reduce(76), // >, reduce: TemplateIfEnd
+			reduce(76), // >=, reduce: TemplateIfEnd
+			reduce(76), // ;, reduce: TemplateIfEnd
+			reduce(76), // @, reduce: TemplateIfEnd
+			reduce(76), // {, reduce: TemplateIfEnd
+			reduce(76), // }, reduce: TemplateIfEnd
+			reduce(76), // ~, reduce: TemplateIfEnd
+			reduce(76), // ?, reduce: TemplateIfEnd
+			reduce(76), // else, reduce: TemplateIfEnd
+			reduce(76), // if, reduce: TemplateIfEnd
+			reduce(76), // for, reduce: TemplateIfEnd
+			reduce(76), // endfor, reduce: TemplateIfEnd
+			reduce(76), // elif, reduce: TemplateIfEnd
+			reduce(76), // endif, reduce: TemplateIfEnd
+			reduce(76), // set, reduce: TemplateIfEnd
+			reduce(76), // comment, reduce: TemplateIfEnd
+			nil,        // template_block_end
+			reduce(76), // template_block_start, reduce: TemplateIfEnd
+			reduce(76), // template_comment, reduce: TemplateIfEnd
+			nil,        // template_variable_end
+			reduce(76), // template_variable_start, reduce: TemplateIfEnd
 		},
 	},
 	actionRow{ // S327
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(140),shift(141),shift(142),shift(143),shift(144),shift(145),shift(146),shift(147),shift(148),shift(149),shift(150),shift(151),shift(152),shift(153),shift(154),shift(155),shift(156),shift(157),shift(158),shift(159),shift(160),shift(161),shift(162),shift(163),shift(164),shift(165),shift(166),shift(167),shift(168),shift(169),shift(170),shift(171),shift(172),shift(173),shift(174),shift(175),shift(176),shift(177),shift(178),shift(179),shift(180),shift(181),shift(182),shift(183),nil,shift(358),shift(190),nil,shift(64),
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(84), // identifier, reduce: TemplateForEnd
+			reduce(84), // bytes_literal, reduce: TemplateForEnd
+			reduce(84), // string_literal, reduce: TemplateForEnd
+			reduce(84), // integer_literal, reduce: TemplateForEnd
+			reduce(84), // floating_point_literal, reduce: TemplateForEnd
+			reduce(84), // newline, reduce: TemplateForEnd
+			reduce(84), // dollar, reduce: TemplateForEnd
+			reduce(84), // *, reduce: TemplateForEnd
+			reduce(84), // [, reduce: TemplateForEnd
+			reduce(84), // ], reduce: TemplateForEnd
+			reduce(84), // (, reduce: TemplateForEnd
+			reduce(84), // ), reduce: TemplateForEnd
+			reduce(84), // ,, reduce: TemplateForEnd
+			reduce(84), // ., reduce: TemplateForEnd
+			reduce(84), // :, reduce: TemplateForEnd
+			reduce(84), // %, reduce: TemplateForEnd
+			reduce(84), // !, reduce: TemplateForEnd
+			reduce(84), // |, reduce: TemplateForEnd
+			reduce(84), // |>, reduce: TemplateForEnd
+			reduce(84), // ^, reduce: TemplateForEnd
+			reduce(84), // &, reduce: TemplateForEnd
+			reduce(84), // <<, reduce: TemplateForEnd
+			reduce(84), // >>, reduce: TemplateForEnd
+			reduce(84), // =>, reduce: TemplateForEnd
+			reduce(84), // ->, reduce: TemplateForEnd
+			reduce(84), // /, reduce: TemplateForEnd
+			reduce(84), // +, reduce: TemplateForEnd
+			reduce(84), // -, reduce: TemplateForEnd
+			reduce(84), // ||, reduce: TemplateForEnd
+			reduce(84), // <>, reduce: TemplateForEnd
+			reduce(84), // !=, reduce: TemplateForEnd
+			reduce(84), // =, reduce: TemplateForEnd
+			reduce(84), // <, reduce: TemplateForEnd
+			reduce(84), // <=, reduce: TemplateForEnd
+			reduce(84), // >, reduce: TemplateForEnd
+			reduce(84), // >=, reduce: TemplateForEnd
+			reduce(84), // ;, reduce: TemplateForEnd
+			reduce(84), // @, reduce: TemplateForEnd
+			reduce(84), // {, reduce: TemplateForEnd
+			reduce(84), // }, reduce: TemplateForEnd
+			reduce(84), // ~, reduce: TemplateForEnd
+			reduce(84), // ?, reduce: TemplateForEnd
+			reduce(84), // else, reduce: TemplateForEnd
+			reduce(84), // if, reduce: TemplateForEnd
+			reduce(84), // for, reduce: TemplateForEnd
+			reduce(84), // endfor, reduce: TemplateForEnd
+			reduce(84), // elif, reduce: TemplateForEnd
+			reduce(84), // endif, reduce: TemplateForEnd
+			reduce(84), // set, reduce: TemplateForEnd
+			reduce(84), // comment, reduce: TemplateForEnd
+			nil,        // template_block_end
+			reduce(84), // template_block_start, reduce: TemplateForEnd
+			reduce(84), // template_comment, reduce: TemplateForEnd
+			nil,        // template_variable_end
+			reduce(84), // template_variable_start, reduce: TemplateForEnd
 		},
 	},
 	actionRow{ // S328
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(82),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(76), // identifier, reduce: TemplateIfEnd
+			reduce(76), // bytes_literal, reduce: TemplateIfEnd
+			reduce(76), // string_literal, reduce: TemplateIfEnd
+			reduce(76), // integer_literal, reduce: TemplateIfEnd
+			reduce(76), // floating_point_literal, reduce: TemplateIfEnd
+			reduce(76), // newline, reduce: TemplateIfEnd
+			reduce(76), // dollar, reduce: TemplateIfEnd
+			reduce(76), // *, reduce: TemplateIfEnd
+			reduce(76), // [, reduce: TemplateIfEnd
+			reduce(76), // ], reduce: TemplateIfEnd
+			reduce(76), // (, reduce: TemplateIfEnd
+			reduce(76), // ), reduce: TemplateIfEnd
+			reduce(76), // ,, reduce: TemplateIfEnd
+			reduce(76), // ., reduce: TemplateIfEnd
+			reduce(76), // :, reduce: TemplateIfEnd
+			reduce(76), // %, reduce: TemplateIfEnd
+			reduce(76), // !, reduce: TemplateIfEnd
+			reduce(76), // |, reduce: TemplateIfEnd
+			reduce(76), // |>, reduce: TemplateIfEnd
+			reduce(76), // ^, reduce: TemplateIfEnd
+			reduce(76), // &, reduce: TemplateIfEnd
+			reduce(76), // <<, reduce: TemplateIfEnd
+			reduce(76), // >>, reduce: TemplateIfEnd
+			reduce(76), // =>, reduce: TemplateIfEnd
+			reduce(76), // ->, reduce: TemplateIfEnd
+			reduce(76), // /, reduce: TemplateIfEnd
+			reduce(76), // +, reduce: TemplateIfEnd
+			reduce(76), // -, reduce: TemplateIfEnd
+			reduce(76), // ||, reduce: TemplateIfEnd
+			reduce(76), // <>, reduce: TemplateIfEnd
+			reduce(76), // !=, reduce: TemplateIfEnd
+			reduce(76), // =, reduce: TemplateIfEnd
+			reduce(76), // <, reduce: TemplateIfEnd
+			reduce(76), // <=, reduce: TemplateIfEnd
+			reduce(76), // >, reduce: TemplateIfEnd
+			reduce(76), // >=, reduce: TemplateIfEnd
+			reduce(76), // ;, reduce: TemplateIfEnd
+			reduce(76), // @, reduce: TemplateIfEnd
+			reduce(76), // {, reduce: TemplateIfEnd
+			reduce(76), // }, reduce: TemplateIfEnd
+			reduce(76), // ~, reduce: TemplateIfEnd
+			reduce(76), // ?, reduce: TemplateIfEnd
+			reduce(76), // else, reduce: TemplateIfEnd
+			reduce(76), // if, reduce: TemplateIfEnd
+			reduce(76), // for, reduce: TemplateIfEnd
+			reduce(76), // endfor, reduce: TemplateIfEnd
+			reduce(76), // elif, reduce: TemplateIfEnd
+			reduce(76), // endif, reduce: TemplateIfEnd
+			reduce(76), // set, reduce: TemplateIfEnd
+			reduce(76), // comment, reduce: TemplateIfEnd
+			nil,        // template_block_end
+			reduce(76), // template_block_start, reduce: TemplateIfEnd
+			reduce(76), // template_comment, reduce: TemplateIfEnd
+			reduce(76), // template_variable_end, reduce: TemplateIfEnd
+			reduce(76), // template_variable_start, reduce: TemplateIfEnd
 		},
 	},
 	actionRow{ // S329
 		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(208),shift(209),shift(210),shift(211),shift(212),shift(213),shift(214),shift(215),shift(216),shift(217),shift(218),shift(219),shift(220),shift(221),shift(222),shift(223),shift(224),shift(225),shift(226),shift(227),shift(228),shift(229),shift(230),shift(231),shift(232),shift(233),shift(234),shift(235),shift(236),shift(237),shift(238),shift(239),shift(240),shift(241),shift(242),shift(243),shift(244),shift(245),shift(246),shift(247),shift(248),shift(249),shift(250),shift(251),nil,shift(55),shift(255),shift(360),shift(64),
-		},
-	},
-	actionRow{ // S330
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),shift(361),nil,nil,shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S331
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),nil,reduce(75),reduce(75),nil,reduce(75),
-		},
-	},
-	actionRow{ // S332
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),nil,reduce(83),reduce(83),nil,reduce(83),
-		},
-	},
-	actionRow{ // S333
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(362),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S334
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),reduce(62),nil,reduce(62),reduce(62),reduce(62),reduce(62),
-		},
-	},
-	actionRow{ // S335
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(266),shift(129),shift(130),nil,nil,shift(363),shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S336
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),reduce(65),nil,reduce(65),reduce(65),reduce(65),reduce(65),
-		},
-	},
-	actionRow{ // S337
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(279),shift(280),shift(281),shift(282),shift(283),shift(284),shift(285),shift(286),shift(287),shift(288),shift(289),shift(290),shift(291),shift(292),shift(293),shift(294),shift(295),shift(296),shift(297),shift(298),shift(299),shift(300),shift(301),shift(302),shift(303),shift(304),shift(305),shift(306),shift(307),shift(308),shift(309),shift(310),shift(311),shift(312),shift(313),shift(314),shift(315),shift(316),shift(317),shift(318),shift(319),shift(320),shift(321),shift(322),nil,shift(365),shift(328),nil,shift(64),
-		},
-	},
-	actionRow{ // S338
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),shift(367),nil,nil,shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S339
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),reduce(75),nil,reduce(75),reduce(75),reduce(75),reduce(75),
-		},
-	},
-	actionRow{ // S340
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),reduce(83),nil,reduce(83),reduce(83),reduce(83),reduce(83),
-		},
-	},
-	actionRow{ // S341
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(368),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S342
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(369),nil,nil,nil,
-		},
-	},
-	actionRow{ // S343
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),nil,nil,shift(341),shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S344
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),nil,reduce(67),
-		},
-	},
-	actionRow{ // S345
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(371),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S346
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),reduce(74),nil,reduce(74),reduce(74),nil,reduce(74),
-		},
-	},
-	actionRow{ // S347
-		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),nil,reduce(73),reduce(73),nil,reduce(73),
-		},
-	},
-	actionRow{ // S348
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(372),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S349
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(373),nil,nil,nil,
-		},
-	},
-	actionRow{ // S350
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),nil,nil,shift(348),shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S351
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),nil,reduce(67),reduce(67),nil,reduce(67),
-		},
-	},
-	actionRow{ // S352
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(267),nil,nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S353
-		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),nil,reduce(66),reduce(66),nil,reduce(66),
-		},
-	},
-	actionRow{ // S354
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(62),nil,nil,nil,
-		},
-	},
-	actionRow{ // S355
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(266),shift(129),shift(130),nil,nil,shift(375),shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S356
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(65),nil,nil,nil,
-		},
-	},
-	actionRow{ // S357
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,shift(279),shift(280),shift(281),shift(282),shift(283),shift(284),shift(285),shift(286),shift(287),shift(288),shift(289),shift(290),shift(291),shift(292),shift(293),shift(294),shift(295),shift(296),shift(297),shift(298),shift(299),shift(300),shift(301),shift(302),shift(303),shift(304),shift(305),shift(306),shift(307),shift(308),shift(309),shift(310),shift(311),shift(312),shift(313),shift(314),shift(315),shift(316),shift(317),shift(318),shift(319),shift(320),shift(321),shift(322),nil,shift(377),shift(328),nil,shift(64),
-		},
-	},
-	actionRow{ // S358
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),shift(379),nil,nil,shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S359
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(75),nil,nil,nil,
-		},
-	},
-	actionRow{ // S360
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(83),nil,nil,nil,
-		},
-	},
-	actionRow{ // S361
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(380),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S362
-		canRecover: false,
-		actions: [numSymbols]action{nil,reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),nil,reduce(81),reduce(81),nil,reduce(81),
-		},
-	},
-	actionRow{ // S363
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(381),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S364
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(382),nil,nil,nil,
-		},
-	},
-	actionRow{ // S365
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),nil,nil,shift(363),shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S366
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),reduce(67),nil,reduce(67),reduce(67),reduce(67),reduce(67),
-		},
-	},
-	actionRow{ // S367
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(384),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S368
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),nil,reduce(73),
-		},
-	},
-	actionRow{ // S369
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(341),nil,nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S370
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),nil,reduce(66),
-		},
-	},
-	actionRow{ // S371
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),nil,reduce(81),
-		},
-	},
-	actionRow{ // S372
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),nil,reduce(73),reduce(73),nil,reduce(73),
-		},
-	},
-	actionRow{ // S373
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(348),nil,nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S374
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),nil,reduce(66),reduce(66),nil,reduce(66),
-		},
-	},
-	actionRow{ // S375
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(385),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S376
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(386),nil,nil,nil,
-		},
-	},
-	actionRow{ // S377
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(129),shift(130),nil,nil,shift(375),shift(131),nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S378
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(67),nil,nil,nil,
-		},
-	},
-	actionRow{ // S379
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(388),nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S380
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),nil,reduce(81),reduce(81),nil,reduce(81),
-		},
-	},
-	actionRow{ // S381
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),reduce(73),nil,reduce(73),reduce(73),reduce(73),reduce(73),
-		},
-	},
-	actionRow{ // S382
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(363),nil,nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S383
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),reduce(66),nil,reduce(66),reduce(66),reduce(66),reduce(66),
-		},
-	},
-	actionRow{ // S384
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),reduce(81),nil,reduce(81),reduce(81),reduce(81),reduce(81),
-		},
-	},
-	actionRow{ // S385
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(73),nil,nil,nil,
-		},
-	},
-	actionRow{ // S386
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,shift(375),nil,nil,nil,nil,nil,nil,nil,nil,
-		},
-	},
-	actionRow{ // S387
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(66),nil,nil,nil,
-		},
-	},
-	actionRow{ // S388
-		canRecover: false,
-		actions: [numSymbols]action{nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,reduce(81),nil,nil,nil,
+		actions: [numSymbols]action{
+			nil,        // INVALID
+			nil,        // ␚
+			reduce(84), // identifier, reduce: TemplateForEnd
+			reduce(84), // bytes_literal, reduce: TemplateForEnd
+			reduce(84), // string_literal, reduce: TemplateForEnd
+			reduce(84), // integer_literal, reduce: TemplateForEnd
+			reduce(84), // floating_point_literal, reduce: TemplateForEnd
+			reduce(84), // newline, reduce: TemplateForEnd
+			reduce(84), // dollar, reduce: TemplateForEnd
+			reduce(84), // *, reduce: TemplateForEnd
+			reduce(84), // [, reduce: TemplateForEnd
+			reduce(84), // ], reduce: TemplateForEnd
+			reduce(84), // (, reduce: TemplateForEnd
+			reduce(84), // ), reduce: TemplateForEnd
+			reduce(84), // ,, reduce: TemplateForEnd
+			reduce(84), // ., reduce: TemplateForEnd
+			reduce(84), // :, reduce: TemplateForEnd
+			reduce(84), // %, reduce: TemplateForEnd
+			reduce(84), // !, reduce: TemplateForEnd
+			reduce(84), // |, reduce: TemplateForEnd
+			reduce(84), // |>, reduce: TemplateForEnd
+			reduce(84), // ^, reduce: TemplateForEnd
+			reduce(84), // &, reduce: TemplateForEnd
+			reduce(84), // <<, reduce: TemplateForEnd
+			reduce(84), // >>, reduce: TemplateForEnd
+			reduce(84), // =>, reduce: TemplateForEnd
+			reduce(84), // ->, reduce: TemplateForEnd
+			reduce(84), // /, reduce: TemplateForEnd
+			reduce(84), // +, reduce: TemplateForEnd
+			reduce(84), // -, reduce: TemplateForEnd
+			reduce(84), // ||, reduce: TemplateForEnd
+			reduce(84), // <>, reduce: TemplateForEnd
+			reduce(84), // !=, reduce: TemplateForEnd
+			reduce(84), // =, reduce: TemplateForEnd
+			reduce(84), // <, reduce: TemplateForEnd
+			reduce(84), // <=, reduce: TemplateForEnd
+			reduce(84), // >, reduce: TemplateForEnd
+			reduce(84), // >=, reduce: TemplateForEnd
+			reduce(84), // ;, reduce: TemplateForEnd
+			reduce(84), // @, reduce: TemplateForEnd
+			reduce(84), // {, reduce: TemplateForEnd
+			reduce(84), // }, reduce: TemplateForEnd
+			reduce(84), // ~, reduce: TemplateForEnd
+			reduce(84), // ?, reduce: TemplateForEnd
+			reduce(84), // else, reduce: TemplateForEnd
+			reduce(84), // if, reduce: TemplateForEnd
+			reduce(84), // for, reduce: TemplateForEnd
+			reduce(84), // endfor, reduce: TemplateForEnd
+			reduce(84), // elif, reduce: TemplateForEnd
+			reduce(84), // endif, reduce: TemplateForEnd
+			reduce(84), // set, reduce: TemplateForEnd
+			reduce(84), // comment, reduce: TemplateForEnd
+			nil,        // template_block_end
+			reduce(84), // template_block_start, reduce: TemplateForEnd
+			reduce(84), // template_comment, reduce: TemplateForEnd
+			reduce(84), // template_variable_end, reduce: TemplateForEnd
+			reduce(84), // template_variable_start, reduce: TemplateForEnd
 		},
 	},
 }

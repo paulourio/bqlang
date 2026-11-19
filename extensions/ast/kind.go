@@ -2,8 +2,10 @@ package ast
 
 import "fmt"
 
+// Kind identifies the syntactic category of an extension AST node.
 type Kind int
 
+// Extension AST node kinds.
 const (
 	UnknownKind = iota
 	Comment

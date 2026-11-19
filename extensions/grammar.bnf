@@ -69,13 +69,13 @@ _single_line_comment_char:
 !whitespace: ' '|'\t'|'\r'|'\u00a0'|'\u2000'|'\u2001'|'\u2003'|'\u2004' ;
 
 newline: '\n' ;
+dollar:  '$' ;
 
 template_block_start: '{''%'['-'] ;
 template_block_end:   ['-']'%''}' ;
 
 template_comment:        _template_comment_start{.}['-']'#''}' ;
 _template_comment_start: '{''#'['-'] ;
-_template_comment_end:   ['-']'#''}' ;
 
 template_variable_start: '{''{'['-'] ;
 template_variable_end:   ['-']'}''}' ;
@@ -117,16 +117,6 @@ Script:
       << NewScript($0) >>
     | Script Element
       << WithExtraChild($0, $1) >>
-    | Script TemplateComment
-      << WithExtraChild($0, $1) >>
-    | Script TemplateForBlock
-      << WithExtraChild($0, $1) >>
-    | Script TemplateIfBlock
-      << WithExtraChild($0, $1) >>
-    | Script TemplateSetBlock
-      << WithExtraChild($0, $1) >>
-    | Script TemplateVariable
-      << WithExtraChild($0, $1) >>
     ;
 
 Element:
@@ -145,13 +135,13 @@ Element2:
     | string_literal
     | integer_literal
     | floating_point_literal
-    /* | whitespace */
     | newline
-    | "*" | "<" | ">" | "[" | "]" | "(" | ")" | "," | "."
-    | "|" | "^" | "&" | "<<" | ">>" | "=>" | "/"
+    | dollar
+    | "*" | "[" | "]" | "(" | ")" | "," | "." | ":" | "%" | "!"
+    | "|" | "|>" | "^" | "&" | "<<" | ">>" | "=>" | "->" | "/"
     | "+" | "-" | "||" | "<>" | "!=" | "=" | "<" | "<=" | ">" | ">="
-    | ";" | "." | "@" | "{" | "}" | "~" | "else" | "if" | "for"
-    | "endfor" | "elif" | "endif" | "set" | "?"
+    | ";" | "@" | "{" | "}" | "~" | "?"
+    | "else" | "if" | "for" | "endfor" | "elif" | "endif" | "set"
     ;
 
 Comment:
@@ -172,24 +162,24 @@ TemplateSetBlockPrefix:
     ;
 
 TemplateIfBlock:
-      TemplateIfBlockPrefix TemplateIfEnd
+      TemplateIfBranches TemplateIfEnd
       << UpdateLoc($0, $1) >>
-    | TemplateIfBlockPrefix TemplateElse Element TemplateIfEnd
-      <<
-      func() (Attrib, error) {
-          n, err := WithExtraChild($0, $2)
-          if err != nil { return nil, err }
-
-          return UpdateLoc(n, $3)
-      }()
-      >>
-    | TemplateIfBlockPrefix TemplateElse TemplateIfEnd
-      << UpdateLoc($0, $2) >>
+    | TemplateIfElseBody TemplateIfEnd
+      << UpdateLoc($0, $1) >>
     ;
 
-TemplateIfBlockPrefix:
+TemplateIfBranches:
       TemplateIfBegin
-    | TemplateIfBlockPrefix Element
+    | TemplateIfBranches Element
+      << WithExtraChild($0, $1) >>
+    | TemplateIfBranches TemplateElifBegin
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateIfElseBody:
+      TemplateIfBranches TemplateElse
+      << UpdateLoc($0, $1) >>
+    | TemplateIfElseBody Element
       << WithExtraChild($0, $1) >>
     ;
 
@@ -203,6 +193,18 @@ TemplateIfBeginPrefix:
       << NewTemplateIfBlock($0) >>
     | TemplateIfBeginPrefix Element
       << WithExtraChild($0, $1) >>
+    ;
+
+TemplateElifBegin:
+      TemplateElifBeginPrefix template_block_end
+      << $1, nil >>
+    ;
+
+TemplateElifBeginPrefix:
+      template_block_start "elif"
+      << $0, nil >>
+    | TemplateElifBeginPrefix Element
+      << $0, nil >>
     ;
 
 TemplateIfEnd:
@@ -221,8 +223,7 @@ TemplateForBlock:
     ;
 
 TemplateForBlockPrefix:
-      TemplateForBegin Element
-      << WithExtraChild($0, $1) >>
+      TemplateForBegin
     | TemplateForBlockPrefix Element
       << WithExtraChild($0, $1) >>
     ;

@@ -2,45 +2,77 @@ package extensions_test
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"github.com/paulourio/bqlang/extensions"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/paulourio/bqlang/extensions"
 )
 
 func TestComments(t *testing.T) {
-	tests := MustReadTest("testdata/extract.toml")
-	for i, c := range tests.Cases {
+	t.Parallel()
+
+	tests := MustReadTest(t, "testdata/extract.toml")
+
+	for i, tc := range tests.Cases {
 		name := fmt.Sprintf("case_%d", i+1)
 
 		t.Run(name, func(t *testing.T) {
-			cmts, err := extensions.ExtractComments(c.Input)
+			t.Parallel()
 
-			if assert.NoError(t, err) {
-				r := newCaseComments(cmts)
+			cmts, err := extensions.ExtractComments(tc.Input)
+			require.NoError(t, err)
 
-				if !assert.Equal(t, c.Comments, r) {
-					// Not equal, but both have the same length, compare
-					// them one by one so that the output is legible.
-					if assert.Equal(t, len(c.Comments), len(r)) {
-						for i := 0; i < len(r); i++ {
-							assert.Equal(t, c.Comments[i], r[i])
-						}
+			r := newCaseComments(cmts)
+
+			if !assert.Equal(t, tc.Comments, r) {
+				if assert.Len(t, r, len(tc.Comments)) {
+					for j := range r {
+						assert.Equal(t, tc.Comments[j], r[j])
 					}
 				}
-
-				erased := extensions.EraseComments(c.Input, cmts)
-				assert.Equal(
-					t,
-					strings.ReplaceAll(c.Erased, " ", "~"),
-					strings.ReplaceAll(erased, " ", "~"))
 			}
+
+			erased := extensions.EraseComments(tc.Input, cmts)
+			assert.Equal(
+				t,
+				strings.ReplaceAll(tc.Erased, " ", "~"),
+				strings.ReplaceAll(erased, " ", "~"),
+			)
 		})
 	}
+}
+
+func TestCommentEdgeCasesAndExtractAll(t *testing.T) {
+	t.Parallel()
+
+	_, err := extensions.NewComment(0, 1, "/", "/")
+	require.ErrorIs(t, err, extensions.ErrInvalidComment)
+
+	_, err = extensions.NewComment(0, 0, "", "")
+	require.ErrorIs(t, err, extensions.ErrInvalidComment)
+
+	input := strings.Join([]string{
+		"{# header #}",
+		"{% if a %}",
+		"SELECT 1 % 2, a != 1, x:y, $foo, a -> b",
+		"{% elif b %}",
+		"SELECT 2 |> WHERE true",
+		"{% else %}",
+		"SELECT 3 FROM t",
+		"{% endif %}",
+	}, "\n")
+
+	comms, elems, err := extensions.ExtractAll(input)
+	require.NoError(t, err)
+	require.Len(t, comms, 1)
+	assert.Equal(t, extensions.Jinja2Comment, comms[0].Kind)
+	assert.Equal(t, "JINJA2_COMMENT", comms[0].Kind.String())
+	require.Len(t, elems, 2)
 }
 
 type TestDataFile struct {
@@ -83,19 +115,20 @@ func newCaseComment(c *extensions.Comment) *CaseComment {
 	}
 }
 
-// MustReadTest reads the contents of file in path p.
-func MustReadTest(p string) *TestDataFile {
+func MustReadTest(tb testing.TB, p string) *TestDataFile {
+	tb.Helper()
+
 	f, err := os.Open(p)
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(tb, err)
 
-	var t TestDataFile
+	defer func() {
+		_ = f.Close()
+	}()
 
-	_, err = toml.NewDecoder(f).Decode(&t)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var td TestDataFile
 
-	return &t
+	_, err = toml.NewDecoder(f).Decode(&td)
+	require.NoError(tb, err)
+
+	return &td
 }

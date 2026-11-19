@@ -214,3 +214,20 @@ dump = """
 Script [9-22]
   TemplateComment [9-22]
 """
+
+[[cases]]
+description = "If / elif / else multi-token blocks and SQL operators"
+input = """
+{% if cond == 1 %}
+SELECT 10 % 3, a != 1
+{% elif cond == 2 %}
+SELECT {{ x }} FROM t |> WHERE true
+{% else %}
+SELECT $foo, x:y, a -> b FROM t
+{% endif %}
+"""
+dump = """
+Script [0-152]
+  TemplateIfBlock [0-152]
+    TemplateVariable [69-76]
+"""

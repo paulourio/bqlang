@@ -2,11 +2,12 @@ package parser_test
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
+	"testing"
 
 	"github.com/BurntSushi/toml"
+	"github.com/stretchr/testify/require"
 )
 
 // TestDataFile contains a single unit test data.
@@ -16,8 +17,7 @@ type TestDataFile struct {
 }
 
 // Setup defines the default configuration for a test case.
-type Setup struct {
-}
+type Setup struct{}
 
 // Case is a single test case specification.
 type Case struct {
@@ -30,28 +30,30 @@ func (c *Case) String() string {
 	var b strings.Builder
 
 	if c.Description != "" {
-		b.WriteString(fmt.Sprintf("Test Case: %s\n", c.Description))
+		fmt.Fprintf(&b, "Test Case: %s\n", c.Description)
 	}
 
-	b.WriteString(fmt.Sprintf("Input (%d bytes):\n%s\n\n", len(c.Input), c.Input))
-	b.WriteString(fmt.Sprintf("Expected Dump (%d bytes):\n%s\n", len(c.Dump), c.Dump))
+	fmt.Fprintf(&b, "Input (%d bytes):\n%s\n\n", len(c.Input), c.Input)
+	fmt.Fprintf(&b, "Expected Dump (%d bytes):\n%s\n", len(c.Dump), c.Dump)
 
 	return b.String()
 }
 
 // MustReadTest reads the contents of file in path p.
-func MustReadTest(p string) *TestDataFile {
+func MustReadTest(tb testing.TB, p string) *TestDataFile {
+	tb.Helper()
+
 	f, err := os.Open(p)
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(tb, err)
 
-	var t TestDataFile
+	defer func() {
+		_ = f.Close()
+	}()
 
-	_, err = toml.NewDecoder(f).Decode(&t)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var td TestDataFile
 
-	return &t
+	_, err = toml.NewDecoder(f).Decode(&td)
+	require.NoError(tb, err)
+
+	return &td
 }

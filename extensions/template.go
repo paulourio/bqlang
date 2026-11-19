@@ -5,86 +5,88 @@ import (
 	"strings"
 
 	"github.com/paulourio/bqlang/extensions/ast"
-	"github.com/paulourio/bqlang/extensions/errors"
-	"github.com/paulourio/bqlang/extensions/lexer"
-	"github.com/paulourio/bqlang/extensions/parser"
 )
 
+// TemplateElement represents a parsed Jinja2 expression, block, or comment with source offsets.
 type TemplateElement struct {
-	// Start is the bytes offset location the template starts in the
-	// input.
+	// Start is the bytes offset location the template starts in the input.
 	Start int
-	// End is the bytes offset location the comment ends in the input.
+	// End is the bytes offset location the template ends in the input.
 	End int
-	// Image contains the literal parsed comment token, with symbols
-	// included.
+	// Image contains the literal parsed template token, with delimiters included.
 	Image string
-	// Kind specifies the comment type.
+	// Kind specifies the template element type.
 	Kind ast.Kind
 
 	Children []*TemplateElement
+
+	atLineBegin bool
+	atLineEnd   bool
 }
 
+// ExtractTemplateElements parses input and extracts all top-level Jinja2 template elements.
 func ExtractTemplateElements(input string) ([]*TemplateElement, error) {
-	if strings.TrimSpace(input) == "" {
+	n, ok, err := parseExtensionAST(input)
+	if err != nil {
+		return nil, fmt.Errorf("ExtractTemplateElements: %w", err)
+	}
+
+	if !ok {
 		return nil, nil
 	}
 
-	l := lexer.NewLexer([]byte(input))
-	p := parser.NewParser()
-
-	s, err := p.Parse(l)
+	elems, err := extractTemplatesFromNode(n, input)
 	if err != nil {
-		msg := errors.FormatError(err, input)
-
-		return nil, fmt.Errorf("ExtractTemplateElements: %s", msg)
+		return elems, fmt.Errorf("ExtractTemplateElements: %w", err)
 	}
 
-	if n, ok := s.(ast.NodeHandler); ok {
-		r := make([]*TemplateElement, 0, 5)
+	return elems, nil
+}
 
-		for _, child := range n.Children() {
-			switch c := child.(type) {
-			case *ast.TemplateBlockNode:
-				a, b := c.StartLoc(), c.EndLoc()
+func extractTemplatesFromNode(n ast.NodeHandler, input string) ([]*TemplateElement, error) {
+	children := n.Children()
+	r := make([]*TemplateElement, 0, len(children))
 
-				nc, err := NewTemplateElement(
-					c.Kind(), c.StartLoc(), c.EndLoc(), input[a:b], input)
-				if err != nil {
-					return r, fmt.Errorf("ExtractTemplateElements: %w", err)
-				}
+	for _, child := range children {
+		switch c := child.(type) {
+		case *ast.TemplateBlockNode:
+			a, b := c.StartLoc(), c.EndLoc()
 
-				r = append(r, nc)
-			case *ast.TemplateVariableNode:
-				nc, err := NewTemplateElement(
-					c.Kind(), c.StartLoc(), c.EndLoc(), c.Image(), input)
-				if err != nil {
-					return r, fmt.Errorf("ExtractTemplateElements: %w", err)
-				}
-
-				r = append(r, nc)
-			case *ast.TemplateCommentNode:
-				a, b := c.StartLoc(), c.EndLoc()
-				nc, err := NewTemplateElement(c.Kind(), a, b, input[a:b], input)
-				if err != nil {
-					return r, fmt.Errorf("ExtractTemplateElements: %w", err)
-				}
-
-				r = append(r, nc)
+			nc, err := NewTemplateElement(c.Kind(), a, b, input[a:b], input)
+			if err != nil {
+				return r, err
 			}
-		}
 
-		return r, nil
+			r = append(r, nc)
+		case *ast.TemplateVariableNode:
+			a, b := c.StartLoc(), c.EndLoc()
+
+			nc, err := NewTemplateElement(c.Kind(), a, b, input[a:b], input)
+			if err != nil {
+				return r, err
+			}
+
+			r = append(r, nc)
+		case *ast.TemplateCommentNode:
+			a, b := c.StartLoc(), c.EndLoc()
+
+			nc, err := NewTemplateElement(c.Kind(), a, b, input[a:b], input)
+			if err != nil {
+				return r, err
+			}
+
+			r = append(r, nc)
+		}
 	}
 
-	return nil, nil
+	return r, nil
 }
 
 // NewTemplateElement returns an initialized template element.
 // The input is necessary to extract information about its surroundings.
 func NewTemplateElement(
-	kind ast.Kind, start int, end int,
-	img string, input string,
+	kind ast.Kind, start, end int,
+	img, input string,
 ) (*TemplateElement, error) {
 	c := &TemplateElement{
 		Start: start,
@@ -93,39 +95,61 @@ func NewTemplateElement(
 		Kind:  kind,
 	}
 
-	if err := c.update(input); err != nil {
-		return nil, fmt.Errorf("NewTemplateElement: %w", err)
-	}
+	c.update(input)
 
 	return c, nil
 }
 
-func (t *TemplateElement) update(input string) error {
-
-	return nil
+// AtLineBegin reports whether the element starts at column 0 of its line.
+func (t *TemplateElement) AtLineBegin() bool {
+	return t.atLineBegin
 }
 
-// BeginsLine scans the bytes before the comment until a line break or
-// the start of the input to check whether the comment is starting
-// a new line.
+// AtLineEnd reports whether only horizontal whitespace follows the element on its line.
+func (t *TemplateElement) AtLineEnd() bool {
+	return t.atLineEnd
+}
+
+// BeginsLine checks whether the element starts at column 0 of its line.
 func (t *TemplateElement) BeginsLine(input string) bool {
-	i := t.Start - 1
-
-	if i < 0 {
-		return true
+	if input == "" {
+		return t.atLineBegin
 	}
 
-	return input[i] == '\n'
+	return computeBeginsLine(input, t.Start)
 }
 
-// EndsLine scans the bytes after the comment until a line break or
-// the end of the input to check whether the comment is ending a line.
+// EndsLine checks whether only horizontal whitespace follows the element on its line.
 func (t *TemplateElement) EndsLine(input string) bool {
-	i := t.End
+	if input == "" {
+		return t.atLineEnd
+	}
 
-	if i == len(input) {
+	return computeEndsLine(input, t.End)
+}
+
+func (t *TemplateElement) update(input string) {
+	t.atLineBegin = computeBeginsLine(input, t.Start)
+	t.atLineEnd = computeEndsLine(input, t.End)
+}
+
+func computeBeginsLine(input string, start int) bool {
+	return start <= 0 || (start <= len(input) && input[start-1] == '\n')
+}
+
+func computeEndsLine(input string, end int) bool {
+	if end >= len(input) {
 		return true
 	}
 
-	return input[i] == '\n'
+	if end < 0 {
+		end = 0
+	}
+
+	i := end
+	for i < len(input) && input[i] != '\n' {
+		i++
+	}
+
+	return strings.TrimSpace(input[end:i]) == ""
 }

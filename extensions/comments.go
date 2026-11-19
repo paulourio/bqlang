@@ -10,14 +10,13 @@ import (
 	"github.com/paulourio/bqlang/extensions/parser"
 )
 
+// Comment represents an extracted SQL or Jinja2 comment and its line-context flags.
 type Comment struct {
-	// Start is the bytes offset location the comment starts in the
-	// input.
+	// Start is the bytes offset location the comment starts in the input.
 	Start int
 	// End is the bytes offset location the comment ends in the input.
 	End int
-	// Image contains the literal parsed comment token, with symbols
-	// included.
+	// Image contains the literal parsed comment token, with symbols included.
 	Image string
 	// Kind specifies the comment type.
 	Kind CommentKind
@@ -28,8 +27,10 @@ type Comment struct {
 	mustEndLine bool
 }
 
+// CommentKind classifies comment delimiter syntax.
 type CommentKind int
 
+// Supported SQL and Jinja2 comment delimiter kinds.
 const (
 	SlashStar     CommentKind = iota + 1 // "/* ... */"
 	DoubleSlash                          // "// ...\n"
@@ -48,14 +49,60 @@ func (k CommentKind) String() string {
 		return "DOUBLE_DASH"
 	case Pound:
 		return "POUND"
+	case Jinja2Comment:
+		return "JINJA2_COMMENT"
 	}
 
-	panic("unexpected kind")
+	panic(fmt.Sprintf("unexpected comment kind: %d", int(k)))
 }
 
+// ExtractAll parses input once and extracts both top-level comments and
+// top-level Jinja2 template elements.
+func ExtractAll(input string) ([]*Comment, []*TemplateElement, error) {
+	n, ok, err := parseExtensionAST(input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("ExtractAll: %w", err)
+	}
+
+	if !ok {
+		return nil, nil, nil
+	}
+
+	comms, err := extractCommentsFromNode(n, input)
+	if err != nil {
+		return comms, nil, fmt.Errorf("ExtractAll: %w", err)
+	}
+
+	elems, err := extractTemplatesFromNode(n, input)
+	if err != nil {
+		return comms, elems, fmt.Errorf("ExtractAll: %w", err)
+	}
+
+	return comms, elems, nil
+}
+
+// ExtractComments parses input and extracts all top-level SQL and Jinja2 comments.
 func ExtractComments(input string) ([]*Comment, error) {
-	if strings.TrimSpace(input) == "" {
+	n, ok, err := parseExtensionAST(input)
+	if err != nil {
+		return nil, fmt.Errorf("ExtractComments: %w", err)
+	}
+
+	if !ok {
 		return nil, nil
+	}
+
+	comms, err := extractCommentsFromNode(n, input)
+	if err != nil {
+		return comms, fmt.Errorf("ExtractComments: %w", err)
+	}
+
+	return comms, nil
+}
+
+func parseExtensionAST(input string) (ast.NodeHandler, bool, error) {
+	if strings.TrimSpace(input) == "" {
+		return nil, false, nil
 	}
 
 	l := lexer.NewLexer([]byte(input))
@@ -65,49 +112,63 @@ func ExtractComments(input string) ([]*Comment, error) {
 	if err != nil {
 		msg := errors.FormatError(err, input)
 
-		return nil, fmt.Errorf("ExtractComments: %s", msg)
+		return nil, false, fmt.Errorf("%w: %s", ErrParseExtension, msg)
 	}
 
-	if n, ok := s.(ast.NodeHandler); ok {
-		children := n.Children()
-		r := make([]*Comment, 0, len(children))
+	n, ok := s.(ast.NodeHandler)
+	if !ok {
+		return nil, false, nil
+	}
 
-		for _, child := range children {
-			switch c := child.(type) {
-			case *ast.CommentNode:
-				nc, err := NewComment(c.StartLoc(), c.EndLoc(), c.Image(), input)
-				if err != nil {
-					return r, fmt.Errorf("ExtractComments: %w", err)
-				}
+	return n, true, nil
+}
 
-				r = append(r, nc)
-			case *ast.TemplateCommentNode:
-				a, b := c.StartLoc(), c.EndLoc()
+func extractCommentsFromNode(n ast.NodeHandler, input string) ([]*Comment, error) {
+	children := n.Children()
+	r := make([]*Comment, 0, len(children))
 
-				nc, err := NewComment(a, b, input[a:b], input)
-				if err != nil {
-					return r, fmt.Errorf("ExtractComments: %w", err)
-				}
-
-				r = append(r, nc)
-			default:
-				// fmt.Printf("ExtractComments: Skipping %#v\n", child)
+	for _, child := range children {
+		switch c := child.(type) {
+		case *ast.CommentNode:
+			nc, err := NewComment(c.StartLoc(), c.EndLoc(), c.Image(), input)
+			if err != nil {
+				return r, err
 			}
-		}
 
-		return r, nil
+			r = append(r, nc)
+		case *ast.TemplateCommentNode:
+			a, b := c.StartLoc(), c.EndLoc()
+
+			nc, err := NewComment(a, b, input[a:b], input)
+			if err != nil {
+				return r, err
+			}
+
+			r = append(r, nc)
+		}
 	}
 
-	return nil, nil
+	return r, nil
 }
 
 // EraseComments returns script without comments without changing any of token
-// positions.  Comments are replaced by whitespace.
+// positions. Comments are replaced by whitespace.
 func EraseComments(script string, comments []*Comment) string {
 	buf := []byte(script)
 
 	for _, c := range comments {
-		for i := c.Start; i < c.End; i++ {
+		start := c.Start
+		end := c.End
+
+		if start < 0 {
+			start = 0
+		}
+
+		if end > len(buf) {
+			end = len(buf)
+		}
+
+		for i := start; i < end; i++ {
 			if buf[i] != '\n' {
 				buf[i] = ' '
 			}
@@ -143,9 +204,9 @@ func SplitComments(comments []*Comment, pos int) ([]*Comment, []*Comment) {
 	return comments[:i], comments[i:]
 }
 
-// NewComment returns an initialized comment.  The input is necessary
+// NewComment returns an initialized comment. The input is necessary
 // to extract information about its surroundings.
-func NewComment(start int, end int, img string, input string) (*Comment, error) {
+func NewComment(start, end int, img, input string) (*Comment, error) {
 	c := &Comment{
 		Start: start,
 		End:   end,
@@ -159,28 +220,32 @@ func NewComment(start int, end int, img string, input string) (*Comment, error) 
 	return c, nil
 }
 
+// AtLineBegin reports whether only whitespace precedes the comment on its line.
 func (c *Comment) AtLineBegin() bool {
 	return c.atLineBegin
 }
 
+// AtLineEnd reports whether only whitespace follows the comment on its line.
 func (c *Comment) AtLineEnd() bool {
 	return c.atLineEnd
 }
 
+// MustEndLine reports whether the comment syntax requires a trailing line break.
 func (c *Comment) MustEndLine() bool {
 	return c.mustEndLine
 }
 
+// EndsWithNewline reports whether c.Image terminates with a newline byte.
 func (c *Comment) EndsWithNewline() bool {
-	return c.Image[len(c.Image)-1] == '\n'
+	return len(c.Image) > 0 && c.Image[len(c.Image)-1] == '\n'
 }
 
-// IsOneline returns whether the comment appears on the same line as a
-// statement.
+// IsOneline returns whether the comment occupies its own single line.
 func (c *Comment) IsOneline() bool {
 	return c.AtLineBegin() && c.AtLineEnd() && !c.IsMultiline()
 }
 
+// IsMultiline reports whether the comment spans multiple lines.
 func (c *Comment) IsMultiline() bool {
 	return c.multiline
 }
@@ -207,6 +272,10 @@ func (c *Comment) updateKind() error {
 		c.mustEndLine = true
 
 		return nil
+	}
+
+	if len(c.Image) < 2 {
+		return ErrInvalidComment
 	}
 
 	switch c.Image[:2] {
@@ -238,7 +307,7 @@ func (c *Comment) updateType(input string) error {
 }
 
 func (c *Comment) containsLineBreaks() bool {
-	if c.Kind == SlashStar {
+	if c.Kind == SlashStar || c.Kind == Jinja2Comment {
 		return strings.Contains(c.Image, "\n")
 	}
 
@@ -246,13 +315,12 @@ func (c *Comment) containsLineBreaks() bool {
 }
 
 // beginsLine scans the bytes before the comment until a line break or
-// the start of the input to check whether the comment is starting
-// a new line.
+// the start of the input to check whether the comment starts a line.
 func (c *Comment) beginsLine(input string) bool {
-	i := c.Start
+	i := min(c.Start, len(input))
 
 	for i > 0 {
-		if input[i] == '\n' {
+		if input[i-1] == '\n' {
 			break
 		}
 
@@ -263,7 +331,7 @@ func (c *Comment) beginsLine(input string) bool {
 }
 
 // endsLine scans the bytes after the comment until a line break or
-// the end of the input to check whether the comment is ending a line.
+// the end of the input to check whether the comment ends a line.
 func (c *Comment) endsLine(input string) bool {
 	switch c.Kind {
 	case DoubleSlash, DoubleDash, Pound:
@@ -271,6 +339,10 @@ func (c *Comment) endsLine(input string) bool {
 	case SlashStar, Jinja2Comment:
 		i := c.End
 		n := len(input)
+
+		if i > n {
+			i = n
+		}
 
 		for i < n {
 			if input[i] == '\n' {
@@ -283,5 +355,5 @@ func (c *Comment) endsLine(input string) bool {
 		return len(strings.TrimSpace(input[c.End:i])) == 0
 	}
 
-	panic("unknown comment kind")
+	panic(fmt.Sprintf("unknown comment kind: %d", int(c.Kind)))
 }
