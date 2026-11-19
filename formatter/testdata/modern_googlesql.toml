@@ -386,3 +386,78 @@ FROM FILES (
   uris   = ['gs://bucket/p/*.parquet']
 );
 """
+
+[[cases]]
+description = "MATCH_RECOGNIZE in standard FROM clause and Pipe |> syntax"
+input = """
+select *
+  from stock_ticks
+       match_recognize (
+         partition by symbol
+         order by tick_ts
+         measures
+           match_number() as match_id,
+           first(a.price) as start_price,
+           last(b.price) as end_price,
+           array_agg(classifier()) as symbols
+         after match skip past last row
+         pattern (^ a (b | c)+ d{2} e{1, 3}? f{,2} () $)
+         define
+           a as a.price > 100,
+           b as b.price > prev(b.price) and b.price < next(b.price, 2),
+           c as c.price >= a.price,
+           d as d.volume > 0,
+           e as e.price < 200,
+           f as f.price > 0
+         options (use_longest_match=true)
+       ) as mr;
+
+from stock_ticks
+|> match_recognize (
+  order by tick_ts
+  measures
+    array_agg(high.price) as high_agg,
+    array_agg(low.price) as low_agg
+  after match skip to next row
+  pattern (low | high+)
+  define
+    low as low.price <= 100,
+    high as high.price > 100
+);
+"""
+formatted = """
+SELECT *
+  FROM stock_ticks
+       MATCH_RECOGNIZE (
+         PARTITION BY symbol
+         ORDER BY tick_ts
+         MEASURES
+           MATCH_NUMBER()          AS match_id,
+           FIRST(a.price)          AS start_price,
+           LAST(b.price)           AS end_price,
+           ARRAY_AGG(CLASSIFIER()) AS symbols
+         AFTER MATCH SKIP PAST LAST ROW
+         PATTERN (^ a (b | c)+ d{2} e{1, 3}? f{,2} () $)
+         DEFINE
+           a AS a.price > 100,
+           b AS b.price > PREV(b.price) AND b.price < NEXT(b.price, 2),
+           c AS c.price >= a.price,
+           d AS d.volume > 0,
+           e AS e.price < 200,
+           f AS f.price > 0
+         OPTIONS (use_longest_match=TRUE)
+       ) AS mr;
+
+FROM stock_ticks
+|> MATCH_RECOGNIZE (
+  ORDER BY tick_ts
+  MEASURES
+    ARRAY_AGG(high.price) AS high_agg,
+    ARRAY_AGG(low.price)  AS low_agg
+  AFTER MATCH SKIP TO NEXT ROW
+  PATTERN (low | high+)
+  DEFINE
+    low  AS low.price <= 100,
+    high AS high.price > 100
+);
+"""

@@ -103,10 +103,12 @@ func newBigQueryFunctionCatalog() stringMapSet {
 		// Approximate aggregate & HyperLogLog++ functions.
 		"APPROX_COUNT_DISTINCT", "APPROX_QUANTILES", "APPROX_TOP_COUNT", "APPROX_TOP_SUM",
 		"HLL_COUNT.EXTRACT", "HLL_COUNT.INIT", "HLL_COUNT.MERGE", "HLL_COUNT.MERGE_PARTIAL",
-		// Numbering & navigation functions.
+		// Numbering, navigation & MATCH_RECOGNIZE functions.
 		"CUME_DIST", "DENSE_RANK", "NTILE", "PERCENT_RANK", "RANK", "ROW_NUMBER",
 		"FIRST_VALUE", "LAG", "LAST_VALUE", "LEAD", "NTH_VALUE",
 		"PERCENTILE_CONT", "PERCENTILE_DISC",
+		"CLASSIFIER", "FIRST", "LAST", "MATCH_NUMBER", "MATCH_ROW_NUMBER",
+		"NEXT", "PREV",
 		// Bit & conversion functions.
 		"BIT_COUNT", "CAST", "PARSE_BIGNUMERIC", "PARSE_NUMERIC", "SAFE_CAST",
 		"ARRAY_TO_STRING", "BOOL", "DATE", "DATETIME", "FLOAT64", "FROM_BASE32",

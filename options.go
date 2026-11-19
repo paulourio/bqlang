@@ -66,6 +66,10 @@ func DefaultLanguageOptions() *googlesql.LanguageOptions {
 		panic(fmt.Errorf("DefaultLanguageOptions: enable GRAPH_TABLE: %w", err))
 	}
 
+	if err := lang.EnableReservableKeyword("MATCH_RECOGNIZE", true); err != nil {
+		panic(fmt.Errorf("DefaultLanguageOptions: enable MATCH_RECOGNIZE: %w", err))
+	}
+
 	entityTypes := []string{
 		"ASSIGNMENT",
 		"BI_CAPACITY",
@@ -194,6 +198,7 @@ func defaultEnabledFeatures() []googlesql.LanguageFeature {
 		googlesql.LanguageFeatureFeatureDifferentialPrivacyNested,
 		googlesql.LanguageFeatureFeatureV14LoadDataPartitions,
 		googlesql.LanguageFeatureFeatureV14LoadDataTempTable,
+		googlesql.LanguageFeatureFeatureV14MatchRecognize,
 		googlesql.LanguageFeatureFeatureV14RemoteModel,
 		googlesql.LanguageFeatureFeatureV14SqlGraph,
 		googlesql.LanguageFeatureFeatureV14SqlGraphAdvancedQuery,

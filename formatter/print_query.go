@@ -705,7 +705,7 @@ func (p *printer) visitOrderingExpression(n *googlesql.ASTOrderingExpression, d 
 func (p *printer) visitParenthesizedJoin(n *googlesql.ASTParenthesizedJoin, d printerData) {
 	p.moveBefore(n)
 	j, _ := n.Join()
-	sc, _ := n.SampleClause()
+	postOps := selectChildrenOfType[googlesql.ASTPostfixTableOperatorNode](n)
 
 	p.println("(")
 	p.incDepth()
@@ -713,7 +713,10 @@ func (p *printer) visitParenthesizedJoin(n *googlesql.ASTParenthesizedJoin, d pr
 	p.decDepth()
 	p.println("")
 	p.print(")")
-	p.accept(sc, d)
+
+	for _, op := range postOps {
+		p.accept(op, d)
+	}
 }
 
 func (p *printer) visitPartitionBy(n *googlesql.ASTPartitionBy, d printerData) {
@@ -1437,20 +1440,19 @@ func (p *printer) visitTablePathExpression(n *googlesql.ASTTablePathExpression, 
 	hint, _ := n.Hint()
 	alias, _ := n.Alias()
 	wo, _ := n.WithOffset()
-	pv, _ := n.PivotClause()
-	up, _ := n.UnpivotClause()
 	fst, _ := n.ForSystemTime()
-	sc, _ := n.SampleClause()
+	postOps := selectChildrenOfType[googlesql.ASTPostfixTableOperatorNode](n)
 
 	p.accept(pe, d)
 	p.accept(ue, d)
 	p.accept(hint, d)
 	p.accept(alias, d)
 	p.accept(wo, d)
-	p.accept(pv, d)
-	p.accept(up, d)
 	p.accept(fst, d)
-	p.accept(sc, d)
+
+	for _, op := range postOps {
+		p.accept(op, d)
+	}
 }
 
 func (p *printer) visitTableSubquery(n *googlesql.ASTTableSubquery, d printerData) {
@@ -1461,10 +1463,8 @@ func (p *printer) visitTableSubquery(n *googlesql.ASTTableSubquery, d printerDat
 	}
 
 	sub, _ := n.Subquery()
-	pv, _ := n.PivotClause()
-	up, _ := n.UnpivotClause()
-	sc, _ := n.SampleClause()
 	alias, _ := n.Alias()
+	postOps := selectChildrenOfType[googlesql.ASTPostfixTableOperatorNode](n)
 
 	p.println("(")
 	p.incDepth()
@@ -1472,10 +1472,11 @@ func (p *printer) visitTableSubquery(n *googlesql.ASTTableSubquery, d printerDat
 	p.println("")
 	p.decDepth()
 	p.print(")")
-	p.accept(pv, d)
-	p.accept(up, d)
-	p.accept(sc, d)
 	p.accept(alias, d)
+
+	for _, op := range postOps {
+		p.accept(op, d)
+	}
 }
 
 func (p *printer) visitTableClause(n *googlesql.ASTTableClause, d printerData) {
@@ -1537,11 +1538,16 @@ func (p *printer) visitTVF(n *googlesql.ASTTVF, d printerData) {
 
 	hint, _ := n.Hint()
 	alias, _ := n.Alias()
-	pv, _ := n.PivotClause()
-	up, _ := n.UnpivotClause()
-	sc, _ := n.SampleClause()
+	postOps := selectChildrenOfType[googlesql.ASTPostfixTableOperatorNode](n)
 
-	if b, e := locationRange(hint, alias, pv, up, sc); e > 0 {
+	tailNodes := make([]googlesql.ASTNode, 0, len(postOps)+2)
+	tailNodes = append(tailNodes, hint, alias)
+
+	for _, op := range postOps {
+		tailNodes = append(tailNodes, op)
+	}
+
+	if b, e := locationRange(tailNodes...); e > 0 {
 		p.fmt.flushCommentsUpTo(b)
 	} else {
 		p.movePast(n)
@@ -1555,9 +1561,11 @@ func (p *printer) visitTVF(n *googlesql.ASTTVF, d printerData) {
 	p.print(")")
 	p.accept(hint, d)
 	p.accept(alias, d)
-	p.accept(pv, d)
-	p.accept(up, d)
-	p.accept(sc, d)
+
+	for _, op := range postOps {
+		p.accept(op, d)
+	}
+
 	p.movePast(n)
 }
 
