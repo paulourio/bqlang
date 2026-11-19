@@ -369,3 +369,31 @@ func (p *printer) visitPipeAssert(n *googlesql.ASTPipeAssert, d printerData) {
 		p.accept(msgs[i], d)
 	}
 }
+
+func (p *printer) visitPipeWith(n *googlesql.ASTPipeWith, d printerData) {
+	wc, _ := n.WithClause()
+	if !nodeDefined(wc) {
+		return
+	}
+
+	p.moveBefore(wc)
+
+	if rec, _ := wc.Recursive(); rec {
+		p.println(p.keyword("WITH RECURSIVE"))
+	} else {
+		p.println(p.keyword("WITH"))
+	}
+
+	p.incDepth()
+
+	for i, e := range selectChildrenOfType[*googlesql.ASTWithClauseEntry](wc) {
+		if i > 0 {
+			p.println(",")
+		}
+
+		p.accept(e, d)
+	}
+
+	p.decDepth()
+	p.movePast(wc)
+}

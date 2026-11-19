@@ -221,3 +221,51 @@ AS
 SELECT f1, label
   FROM mydataset.train_data;
 """
+
+[[cases]]
+description = "Pipe WITH operator with multiple CTEs"
+input = """
+select 1 as key
+|> with t1 as (select 2 as key), t2 as (select 3 as key)
+|> union all (from t1), (from t2);
+"""
+formatted = """
+SELECT 1 AS key
+|> WITH
+  t1 AS (
+  SELECT 2 AS key
+  ),
+  t2 AS (
+  SELECT 3 AS key
+  )
+|> UNION ALL
+  (
+    FROM t1
+  ),
+  (
+    FROM t2
+  )
+"""
+
+[[cases]]
+description = "Chained function calls on literals, unary expressions, and multi-part SAFE paths"
+input = """
+select (1).abs() as int_abs,
+       (1.5).round(1) as flt_rnd,
+       (-1).(safe.sqrt)() as neg_sqrt,
+       (raw_json).(safe.parse_json)() as parsed_json,
+       (date '2026-01-01').format_date('%Y') as yr,
+       (' hello ').trim() as paren_str,
+       ' world '.trim() as bare_str
+  from input_fact;
+"""
+formatted = """
+SELECT (1).ABS()                             AS int_abs,
+       (1.5).ROUND(1)                        AS flt_rnd,
+       (-1).(SAFE.SQRT)()                    AS neg_sqrt,
+       (raw_json).(SAFE.PARSE_JSON)()        AS parsed_json,
+       (DATE '2026-01-01').FORMAT_DATE('%Y') AS yr,
+       (' hello ').TRIM()                    AS paren_str,
+       ' world '.TRIM()                      AS bare_str
+  FROM input_fact
+"""

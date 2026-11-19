@@ -834,7 +834,7 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 	callArgs := allArgs
 
 	if chained && len(allArgs) > 0 {
-		pp.accept(allArgs[0], d)
+		pp.printChainedBase(allArgs[0], d)
 		pp.print(".")
 
 		callArgs = allArgs[1:]
@@ -847,7 +847,7 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 		allTrue(p.mapIsSimpleExprs(callArgs)) &&
 		!p.hasComplexFunctionModifier(n)
 
-	pp.print(pp.function(expr))
+	pp.printFunctionName(fn, expr, chained)
 	pp.print("(")
 
 	if !simple {
@@ -864,29 +864,7 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 	}
 
 	pp2 := pp.nest()
-
-	for i, arg := range callArgs {
-		if i > 0 {
-			pp2.print(",")
-
-			if !simple {
-				pp2.println("")
-			}
-		}
-
-		printedArg := strings.Trim(pp2.toString(arg, d), "\n")
-		if strings.Contains(printedArg, "\n") {
-			pp2.println("")
-		}
-
-		if _, ok := arg.(*googlesql.ASTPathExpression); ok {
-			sigStyle := signature.PrintCaseAt(i + sigOffset)
-			pp2.print(pp2.identifierWithCase(printedArg, sigStyle))
-		} else {
-			pp2.print(printedArg)
-		}
-	}
-
+	pp2.printFunctionCallArgs(callArgs, signature, sigOffset, simple, d)
 	p.printFunctionCallModifiers(pp2, n, simple, len(callArgs) > 0, d)
 	pp.print(pp2.unnest())
 
@@ -903,6 +881,47 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 
 	pp.printCloseParenIfNeeded(n)
 	p.print(pp.unnest())
+}
+
+func (p *printer) printFunctionName(fn *googlesql.ASTPathExpression, expr string, chained bool) {
+	fnFormatted := p.function(expr)
+	if chained && len(selectChildrenOfType[*googlesql.ASTIdentifier](fn)) > 1 {
+		p.print("(" + fnFormatted + ")")
+
+		return
+	}
+
+	p.print(fnFormatted)
+}
+
+func (p *printer) printFunctionCallArgs(
+	callArgs []googlesql.ASTExpressionNode,
+	signature interface{ PrintCaseAt(int) PrintCase },
+	sigOffset int,
+	simple bool,
+	d printerData,
+) {
+	for i, arg := range callArgs {
+		if i > 0 {
+			p.print(",")
+
+			if !simple {
+				p.println("")
+			}
+		}
+
+		printedArg := strings.Trim(p.toString(arg, d), "\n")
+		if strings.Contains(printedArg, "\n") {
+			p.println("")
+		}
+
+		if _, ok := arg.(*googlesql.ASTPathExpression); ok {
+			sigStyle := signature.PrintCaseAt(i + sigOffset)
+			p.print(p.identifierWithCase(printedArg, sigStyle))
+		} else {
+			p.print(printedArg)
+		}
+	}
 }
 
 func (p *printer) printFunctionCallModifiers(
@@ -1549,4 +1568,170 @@ func (p *printer) visitWithExpression(n *googlesql.ASTWithExpression, d printerD
 	p.print(")")
 	p.printCloseParenIfNeeded(n)
 	p.movePast(n)
+}
+
+func (p *printer) printChainedBase(baseExpr googlesql.ASTExpressionNode, d printerData) {
+	forceParen := needsChainedBaseParens(baseExpr)
+	if forceParen {
+		p.print("(")
+	}
+
+	p.accept(baseExpr, d)
+
+	if forceParen {
+		p.print(")")
+	}
+}
+
+func needsChainedBaseParens(n googlesql.ASTExpressionNode) bool {
+	if !nodeDefined(n) {
+		return false
+	}
+
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstIntLiteral,
+		googlesql.ASTNodeKindAstFloatLiteral,
+		googlesql.ASTNodeKindAstUnaryExpression,
+		googlesql.ASTNodeKindAstDateOrTimeLiteral,
+		googlesql.ASTNodeKindAstNumericLiteral,
+		googlesql.ASTNodeKindAstBignumericLiteral,
+		googlesql.ASTNodeKindAstJsonLiteral,
+		googlesql.ASTNodeKindAstIntervalExpr:
+		return true
+	case googlesql.ASTNodeKindAstStringLiteral,
+		googlesql.ASTNodeKindAstBytesLiteral,
+		googlesql.ASTNodeKindAstBooleanLiteral,
+		googlesql.ASTNodeKindAstNullLiteral,
+		googlesql.ASTNodeKindAstParameterExpr:
+		paren, _ := n.Parenthesized()
+
+		return paren
+	default:
+		return false
+	}
+}
+
+func (p *printer) visitChainedBaseExpr(n *googlesql.ASTChainedBaseExpr, d printerData) {
+	p.moveBefore(n)
+	expr, _ := n.Expr()
+	p.printChainedBase(expr, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitExtendedPathExpression(n *googlesql.ASTExtendedPathExpression, d printerData) {
+	p.moveBefore(n)
+	pp, _ := n.ParenthesizedPath()
+	gp, _ := n.GeneralizedPathExpression()
+
+	p.accept(pp, d)
+	p.print(".")
+	p.accept(gp, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitLikeExpression(n *googlesql.ASTLikeExpression, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+
+	lhs, _ := n.Lhs()
+	isNot, _ := n.IsNot()
+	op, _ := n.Op()
+	hint, _ := n.Hint()
+	inList, _ := n.InList()
+	unnest, _ := n.UnnestExpr()
+	q, _ := n.Query()
+
+	p.accept(lhs, d)
+
+	if isNot {
+		p.print(p.keyword("NOT LIKE"))
+	} else {
+		p.print(p.keyword("LIKE"))
+	}
+
+	p.printQuantifiedRHS(op, hint, inList, unnest, q, d)
+	p.printCloseParenIfNeeded(n)
+	p.movePast(n)
+}
+
+func (p *printer) visitQuantifiedComparisonExpression(
+	n *googlesql.ASTQuantifiedComparisonExpression,
+	d printerData,
+) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
+
+	lhs, _ := n.Lhs()
+	sqlOp, _ := n.GetSQLForOperator()
+	quant, _ := n.Quantifier()
+	hint, _ := n.Hint()
+	inList, _ := n.InList()
+	unnest, _ := n.UnnestExpr()
+	q, _ := n.Query()
+
+	p.accept(lhs, d)
+	p.print(sqlOp)
+	p.printQuantifiedRHS(quant, hint, inList, unnest, q, d)
+	p.printCloseParenIfNeeded(n)
+	p.movePast(n)
+}
+
+func (p *printer) printQuantifiedRHS(
+	quant *googlesql.ASTAnySomeAllOp,
+	hint *googlesql.ASTHint,
+	inList *googlesql.ASTInList,
+	unnest *googlesql.ASTUnnestExpression,
+	q *googlesql.ASTQuery,
+	d printerData,
+) {
+	needParenSpace := nodeDefined(inList) || nodeDefined(q)
+
+	if kw := anySomeAllKeyword(quant); kw != "" {
+		if needParenSpace && !nodeDefined(hint) {
+			p.print(p.keyword(kw) + " ")
+		} else {
+			p.print(p.keyword(kw))
+		}
+	}
+
+	if nodeDefined(hint) {
+		p.accept(hint, d)
+
+		if needParenSpace {
+			p.fmt.buffer.WriteByte(' ')
+			p.fmt.last = ' '
+		}
+	}
+
+	p.accept(inList, d)
+	p.accept(unnest, d)
+
+	if nodeDefined(q) {
+		p.println("(")
+		p.incDepth()
+		p.accept(q, d)
+		p.decDepth()
+		p.println("")
+		p.print(")")
+	}
+}
+
+func anySomeAllKeyword(n *googlesql.ASTAnySomeAllOp) string {
+	if !nodeDefined(n) {
+		return ""
+	}
+
+	op, _ := n.Op()
+	switch op {
+	case googlesql.ASTAnySomeAllOpEnums_OpKAny:
+		return "ANY"
+	case googlesql.ASTAnySomeAllOpEnums_OpKSome:
+		return "SOME"
+	case googlesql.ASTAnySomeAllOpEnums_OpKAll:
+		return "ALL"
+	case googlesql.ASTAnySomeAllOpEnums_OpKUninitialized:
+		return ""
+	}
+
+	return ""
 }

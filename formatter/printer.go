@@ -144,6 +144,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTCaseStatement]():                      makeVisitor((*printer).visitCaseStatement),
 		reflect.TypeFor[*googlesql.ASTCaseValueExpression]():                makeVisitor((*printer).visitCaseValueExpression),
 		reflect.TypeFor[*googlesql.ASTCastExpression]():                     makeVisitor((*printer).visitCastExpression),
+		reflect.TypeFor[*googlesql.ASTChainedBaseExpr]():                    makeVisitor((*printer).visitChainedBaseExpr),
 		reflect.TypeFor[*googlesql.ASTCheckConstraint]():                    makeVisitor((*printer).visitCheckConstraint),
 		reflect.TypeFor[*googlesql.ASTClampedBetweenModifier]():             makeVisitor((*printer).visitClampedBetweenModifier),
 		reflect.TypeFor[*googlesql.ASTCloneDataSource]():                    makeVisitor((*printer).visitCloneDataSource),
@@ -202,6 +203,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTExecuteUsingClause]():                 makeVisitor((*printer).visitExecuteUsingClause),
 		reflect.TypeFor[*googlesql.ASTExportDataStatement]():                makeVisitor((*printer).visitExportDataStatement),
 		reflect.TypeFor[*googlesql.ASTExpressionSubquery]():                 makeVisitor((*printer).visitExpressionSubquery),
+		reflect.TypeFor[*googlesql.ASTExtendedPathExpression]():             makeVisitor((*printer).visitExtendedPathExpression),
 		reflect.TypeFor[*googlesql.ASTExtractExpression]():                  makeVisitor((*printer).visitExtractExpression),
 		reflect.TypeFor[*googlesql.ASTFilterUsingClause]():                  makeVisitor((*printer).visitFilterUsingClause),
 		reflect.TypeFor[*googlesql.ASTFloatLiteral]():                       makeVisitor((*printer).visitFloatLiteral),
@@ -243,6 +245,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTJoin]():                               makeVisitor((*printer).visitJoin),
 		reflect.TypeFor[*googlesql.ASTLabel]():                              makeVisitor((*printer).visitLabel),
 		reflect.TypeFor[*googlesql.ASTLambda]():                             makeVisitor((*printer).visitLambda),
+		reflect.TypeFor[*googlesql.ASTLikeExpression]():                     makeVisitor((*printer).visitLikeExpression),
 		reflect.TypeFor[*googlesql.ASTLimitOffset]():                        makeVisitor((*printer).visitLimitOffset),
 		reflect.TypeFor[*googlesql.ASTLoopStatement]():                      makeVisitor((*printer).visitLoopStatement),
 		reflect.TypeFor[*googlesql.ASTMapType]():                            makeVisitor((*printer).visitMapType),
@@ -295,6 +298,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTPipeUnpivot]():                        makeVisitor((*printer).visitPipeUnpivot),
 		reflect.TypeFor[*googlesql.ASTPipeWhere]():                          makeVisitor((*printer).visitPipeWhere),
 		reflect.TypeFor[*googlesql.ASTPipeWindow]():                         makeVisitor((*printer).visitPipeWindow),
+		reflect.TypeFor[*googlesql.ASTPipeWith]():                           makeVisitor((*printer).visitPipeWith),
 		reflect.TypeFor[*googlesql.ASTPivotClause]():                        makeVisitor((*printer).visitPivotClause),
 		reflect.TypeFor[*googlesql.ASTPivotExpression]():                    makeVisitor((*printer).visitPivotExpression),
 		reflect.TypeFor[*googlesql.ASTPivotExpressionList]():                makeVisitor((*printer).visitPivotExpressionList),
@@ -305,6 +309,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTPrimaryKeyElement]():                  makeVisitor((*printer).visitPrimaryKeyElement),
 		reflect.TypeFor[*googlesql.ASTPrimaryKeyElementList]():              makeVisitor((*printer).visitPrimaryKeyElementList),
 		reflect.TypeFor[*googlesql.ASTQualify]():                            makeVisitor((*printer).visitQualify),
+		reflect.TypeFor[*googlesql.ASTQuantifiedComparisonExpression]():     makeVisitor((*printer).visitQuantifiedComparisonExpression),
 		reflect.TypeFor[*googlesql.ASTQuery]():                              makeVisitor((*printer).visitQuery),
 		reflect.TypeFor[*googlesql.ASTQueryStatement]():                     makeVisitor((*printer).visitQueryStatement),
 		reflect.TypeFor[*googlesql.ASTRaiseStatement]():                     makeVisitor((*printer).visitRaiseStatement),
@@ -951,7 +956,10 @@ func precedenceNum(n googlesql.ASTNode) int {
 		}
 	case googlesql.ASTNodeKindAstConcatExpr:
 		return 10
-	case googlesql.ASTNodeKindAstBetweenExpression:
+	case googlesql.ASTNodeKindAstBetweenExpression,
+		googlesql.ASTNodeKindAstInExpression,
+		googlesql.ASTNodeKindAstLikeExpression,
+		googlesql.ASTNodeKindAstQuantifiedComparisonExpression:
 		return 5
 	default:
 		return 1000

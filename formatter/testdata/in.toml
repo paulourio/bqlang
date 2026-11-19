@@ -253,3 +253,54 @@ select x IN UNNEST(x + y)
 formatted = """
 SELECT x IN UNNEST(x + y)
 """
+
+[[cases]]
+description = "Quantified LIKE ANY, SOME, and ALL with tuple lists"
+input = """
+select val like any ('Intend%', '%intention%') as a,
+       val not like some ('foo%', 'bar%') as b,
+       val like all ('%ity%') as c
+  from Words;
+"""
+formatted = """
+SELECT val LIKE ANY ('Intend%', '%intention%') AS a,
+       val NOT LIKE SOME ('foo%', 'bar%')      AS b,
+       val LIKE ALL ('%ity%')                  AS c
+  FROM Words
+"""
+
+[[cases]]
+description = "Quantified LIKE ANY with UNNEST and subquery"
+input = """
+select *
+  from Words
+ where val like any unnest(['%ion%', '%and%'])
+    or val not like all (select pat from patterns);
+"""
+formatted = """
+SELECT *
+  FROM Words
+ WHERE val LIKE ANY UNNEST(['%ion%', '%and%'])
+    OR val NOT LIKE ALL (
+         SELECT pat
+           FROM patterns
+       )
+"""
+
+[[cases]]
+description = "Quantified comparison operators (= ANY, != ALL, > SOME)"
+input = """
+select x = any (1, 2, 3) as eq_any,
+       x != all unnest([4, 5]) as ne_all,
+       x > some (select y from T2) as gt_some
+  from T1;
+"""
+formatted = """
+SELECT x = ANY (1, 2, 3)       AS eq_any,
+       x != ALL UNNEST([4, 5]) AS ne_all,
+       x > SOME (
+         SELECT y
+           FROM T2
+       ) AS gt_some
+  FROM T1
+"""

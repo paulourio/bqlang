@@ -930,6 +930,8 @@ func (p *printer) queryParenCount(n *googlesql.ASTQuery) int {
 		case googlesql.ASTNodeKindAstTableSubquery,
 			googlesql.ASTNodeKindAstExpressionSubquery,
 			googlesql.ASTNodeKindAstInExpression,
+			googlesql.ASTNodeKindAstLikeExpression,
+			googlesql.ASTNodeKindAstQuantifiedComparisonExpression,
 			googlesql.ASTNodeKindAstForInStatement,
 			googlesql.ASTNodeKindAstAliasedQuery:
 			parentOwnsOne = true
