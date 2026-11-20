@@ -572,6 +572,21 @@ func TestRegressions(t *testing.T) {
 				contains: []string{"BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE, READ ONLY"},
 			},
 			{
+				name:     "pipe recursive union, if, fork, tee, log, and aliased query expression",
+				sql:      "(FROM t) AS q1 |> RECURSIVE UNION ALL WITH DEPTH AS d MAX 3 (|> WHERE x > 0) AS r |> IF x = 1 THEN (|> WHERE a = 1) ELSE (|> WHERE a = 2) |> FORK (|> WHERE b = 1), (|> WHERE b = 2) |> TEE (|> WHERE c = 1) |> LOG (|> WHERE d = 1)",
+				contains: []string{"AS q1", "|> RECURSIVE UNION ALL", "WITH DEPTH AS d MAX 3", "|> IF x = 1 THEN", "|> FORK", "|> TEE", "|> LOG"},
+			},
+			{
+				name:     "create/alter sequence, clone data, set as json, set transaction",
+				sql:      "CREATE SEQUENCE ds.s OPTIONS (description = 'x'); ALTER SEQUENCE ds.s SET OPTIONS (description = 'y'); CLONE DATA INTO ds.dst FROM ds.src1 UNION ALL ds.src2; ALTER RESERVATION p.r SET AS JSON r'{\"k\":1}'; SET TRANSACTION READ ONLY;",
+				contains: []string{"CREATE SEQUENCE ds.s", "ALTER SEQUENCE ds.s", "CLONE DATA INTO ds.dst", "SET AS JSON r'{\"k\":1}'", "SET TRANSACTION READ ONLY"},
+			},
+			{
+				name:     "replace_fields, safe.cast alias, sequence arg, and function type",
+				sql:      "CREATE FUNCTION f(fn FUNCTION<(INT64, STRING) -> BOOL>) AS (1); SELECT REPLACE_FIELDS(p, 1 AS f1), SAFE.CAST(1 AS INT32), SUM(SEQUENCE s1);",
+				contains: []string{"FUNCTION<(INT64, STRING) -> BOOL>", "REPLACE_FIELDS(p, 1 AS f1)", "SAFE.CAST(1 AS INT32)", "SUM(SEQUENCE s1)"},
+			},
+			{
 				name:     "parenthesized OR inside WHERE AND stays inline without stray tab padding",
 				sql:      "SELECT id FROM t WHERE _PARTITIONDATE = @RunDate AND @@project_id = 'prod' AND (region = 'US' OR region = 'EU')",
 				contains: []string{"AND (region = 'US' OR region = 'EU')"},

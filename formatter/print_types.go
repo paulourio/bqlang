@@ -376,3 +376,114 @@ func (p *printer) visitTypeParameterList(n *googlesql.ASTTypeParameterList, d pr
 	printNestedWithSep(p, params, d, ",")
 	p.print(")")
 }
+
+func (p *printer) visitFunctionType(n *googlesql.ASTFunctionType, d printerData) {
+	p.moveBefore(n)
+
+	argList, _ := n.ArgList()
+	retType, _ := n.ReturnType()
+	tp, _ := n.TypeParameters()
+	collate, _ := n.Collate()
+
+	args := selectChildrenOfType[googlesql.ASTTypeNode](argList)
+
+	pp := p.nest()
+	argPrinters, argsMultiline := pp.renderFunctionTypeArgs(args, d)
+
+	pRet := pp.nest()
+	pRet.accept(retType, d)
+	pRet.flushCommentsBeforeFunctionTypeClose(n, retType)
+
+	retRaw := pRet.String()
+	retMultiline := hasLineBreakOrLineComment(retRaw)
+
+	if !argsMultiline && !retMultiline {
+		argStrs := alignedPrinterStrings(argPrinters)
+		pp.print(pp.keyword("FUNCTION") + "<(" + strings.Join(argStrs, ", ") + ") -> " + alignNested(retRaw) + ">")
+	} else {
+		pp.printMultilineFunctionType(argPrinters, argsMultiline, pRet)
+	}
+
+	pp.accept(tp, d)
+	pp.accept(collate, d)
+
+	p.print(pp.unnest())
+	p.movePast(n)
+}
+
+func (p *printer) renderFunctionTypeArgs(args []googlesql.ASTTypeNode, d printerData) ([]*printer, bool) {
+	argPrinters := make([]*printer, len(args))
+	multiline := false
+
+	for i, arg := range args {
+		ap := p.nest()
+		ap.accept(arg, d)
+		argPrinters[i] = ap
+
+		if hasLineBreakOrLineComment(ap.String()) {
+			multiline = true
+		}
+	}
+
+	return argPrinters, multiline
+}
+
+func (p *printer) flushCommentsBeforeFunctionTypeClose(
+	n *googlesql.ASTFunctionType,
+	retType googlesql.ASTTypeNode,
+) {
+	_, retEnd := nodeByteRange(retType)
+	_, nEnd := nodeByteRange(n)
+	if retEnd <= 0 || nEnd <= retEnd {
+		return
+	}
+
+	if gtIdx := strings.IndexByte(p.viewErasedInput(retEnd, nEnd), '>'); gtIdx >= 0 {
+		p.moveAt(retEnd + gtIdx)
+	}
+}
+
+func (p *printer) printMultilineFunctionType(argPrinters []*printer, argsMultiline bool, pRet *printer) {
+	p.println(p.keyword("FUNCTION") + "<")
+	p.incDepth()
+
+	if !argsMultiline {
+		argStrs := alignedPrinterStrings(argPrinters)
+		p.println("(" + strings.Join(argStrs, ", ") + ") ->")
+	} else {
+		p.println("(")
+		p.incDepth()
+
+		for i, ap := range argPrinters {
+			if i > 0 {
+				p.println(",")
+			}
+
+			p.print(ap.unnest())
+		}
+
+		p.println("")
+		p.decDepth()
+		p.println(") ->")
+	}
+
+	p.incDepth()
+	p.print(pRet.unnest())
+	p.println("")
+	p.decDepth()
+	p.decDepth()
+	p.print(">")
+}
+
+func alignedPrinterStrings(printers []*printer) []string {
+	out := make([]string, len(printers))
+	for i, pr := range printers {
+		out[i] = alignNested(pr.String())
+	}
+
+	return out
+}
+
+func hasLineBreakOrLineComment(s string) bool {
+	return strings.Contains(s, "\n") || strings.Contains(s, trailingCommentPlaceholder)
+}

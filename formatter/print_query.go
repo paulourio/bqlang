@@ -2078,3 +2078,19 @@ func (p *printer) visitUnnestExpressionWithOptAliasAndOffset(
 	p.accept(wo, d)
 	p.movePast(n)
 }
+
+func (p *printer) visitAliasedQueryExpression(n *googlesql.ASTAliasedQueryExpression, d printerData) {
+	p.moveBefore(n)
+
+	q, _ := n.Query()
+	alias, _ := n.Alias()
+
+	p.println("(")
+	p.incDepth()
+	p.acceptNested(q, d)
+	p.println("")
+	p.decDepth()
+	p.print(")")
+	p.accept(alias, d)
+	p.movePast(n)
+}

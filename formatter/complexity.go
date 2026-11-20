@@ -74,6 +74,10 @@ func (p *printer) isSimpleExpr(n googlesql.ASTExpressionNode) bool {
 		expr, _ := b.Expr()
 
 		return p.isSimpleExpr2(expr)
+	case *googlesql.ASTExpressionWithAlias:
+		expr, _ := b.Expression()
+
+		return p.isSimpleExpr2(expr)
 	default:
 		return false
 	}
@@ -96,7 +100,8 @@ func isSimpleAtomKind(k googlesql.ASTNodeKind) bool {
 		googlesql.ASTNodeKindAstIdentifier,
 		googlesql.ASTNodeKindAstDefaultLiteral,
 		googlesql.ASTNodeKindAstMaxLiteral,
-		googlesql.ASTNodeKindAstInputTableArgument:
+		googlesql.ASTNodeKindAstInputTableArgument,
+		googlesql.ASTNodeKindAstSequenceArg:
 		return true
 	default:
 		return false

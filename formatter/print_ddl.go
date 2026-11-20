@@ -339,7 +339,13 @@ func (p *printer) visitCloneDataSource(n *googlesql.ASTCloneDataSource, d printe
 	pe, _ := n.PathExpr()
 	fst, _ := n.ForSystemTime()
 	wc, _ := n.WhereClause()
-	p.printTableDataSource("CLONE", n, pe, fst, wc, d)
+
+	kw := "CLONE"
+	if nodeKind(nodeParent(n)) == googlesql.ASTNodeKindAstCloneDataSourceList {
+		kw = ""
+	}
+
+	p.printTableDataSource(kw, n, pe, fst, wc, d)
 }
 
 func (p *printer) visitCopyDataSource(n *googlesql.ASTCopyDataSource, d printerData) {
@@ -358,10 +364,14 @@ func (p *printer) printTableDataSource(
 	d printerData,
 ) {
 	p.moveBefore(n)
-	p.print(p.keyword(kw))
+
+	if kw != "" {
+		p.print(p.keyword(kw))
+	}
+
 	p.accept(pe, d)
-	p.accept(fst, d)
-	p.lnaccept(wc, d)
+	p.lnacceptAligned(fst, d)
+	p.lnacceptAligned(wc, d)
 	p.movePast(n)
 }
 
@@ -2219,5 +2229,67 @@ func (p *printer) visitAuxLoadDataPartitionsClause(
 	p.print(p.keyword("PARTITIONS") + " (")
 	p.accept(pf, d)
 	p.print(")")
+	p.movePast(n)
+}
+
+func (p *printer) visitAlterSequenceStatement(n *googlesql.ASTAlterSequenceStatement, d printerData) {
+	p.visitAlterStatementBase("ALTER SEQUENCE", n, d)
+}
+
+func (p *printer) visitCloneDataStatement(n *googlesql.ASTCloneDataStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("CLONE DATA INTO"))
+
+	target, _ := n.TargetPath()
+	p.accept(target, d)
+
+	if dsl, _ := n.DataSourceList(); nodeDefined(dsl) {
+		p.println("")
+		p.print(p.keyword("FROM"))
+		p.printCloneDataSourceList(dsl, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printCloneDataSourceList(n *googlesql.ASTCloneDataSourceList, d printerData) {
+	p.moveBefore(n)
+
+	for i, src := range selectChildrenOfType[*googlesql.ASTCloneDataSource](n) {
+		if i > 0 {
+			p.println("")
+			p.print(p.keyword("UNION ALL"))
+		}
+
+		p.accept(src, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitCreateSequenceStatement(n *googlesql.ASTCreateSequenceStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword(createStatementKeywords(n, false, "SEQUENCE")))
+
+	name, _ := n.Name()
+	opt, _ := n.OptionsList()
+
+	p.accept(name, d)
+	p.lnaccept(opt, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitSetAsAction(n *googlesql.ASTSetAsAction, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("SET AS"))
+
+	if jb, _ := n.JsonBody(); nodeDefined(jb) {
+		p.accept(jb, d)
+	}
+
+	if tb, _ := n.TextBody(); nodeDefined(tb) {
+		p.accept(tb, d)
+	}
+
 	p.movePast(n)
 }

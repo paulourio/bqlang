@@ -69,13 +69,23 @@ func (p *printer) visitSubpipelineStatement(n *googlesql.ASTSubpipelineStatement
 func (p *printer) visitSubpipeline(n *googlesql.ASTSubpipeline, d printerData) {
 	p.moveBefore(n)
 	paren, _ := n.Parenthesized()
+	ops := selectChildrenOfType[googlesql.ASTPipeOperatorNode](n)
 
 	if paren {
+		p.ensureSpaceBeforeParen()
+
+		if len(ops) == 0 {
+			p.print("(")
+			p.movePast(n)
+			p.print(")")
+
+			return
+		}
+
 		p.println("(")
 		p.incDepth()
 	}
 
-	ops := selectChildrenOfType[googlesql.ASTPipeOperatorNode](n)
 	p.printPipeOperatorList(ops, d, !paren)
 
 	if paren {
@@ -85,6 +95,12 @@ func (p *printer) visitSubpipeline(n *googlesql.ASTSubpipeline, d printerData) {
 	}
 
 	p.movePast(n)
+}
+
+func (p *printer) ensureSpaceBeforeParen() {
+	if p.fmt.buffer.Len() > 0 && !p.fmt.bufferEndsWithWhitespace() && p.fmt.last != '(' {
+		p.fmt.writeSpace()
+	}
 }
 
 func (p *printer) printPipeOperatorList(
@@ -101,7 +117,19 @@ func (p *printer) printPipeOperatorList(
 		pp := p.nest()
 		pp.print("|>")
 		pp.accept(op, d)
-		p.print(strings.TrimLeft(pp.unnestLeft(), "\v"))
+
+		for j, line := range strings.Split(leftAlignNested(pp.String()), "\n") {
+			if j > 0 {
+				p.println("")
+			}
+
+			if line == "" {
+				p.printBlankLine()
+			} else {
+				p.print(line)
+			}
+		}
+
 		p.movePast(op)
 	}
 }
@@ -428,4 +456,127 @@ func (p *printer) visitPipeWith(n *googlesql.ASTPipeWith, d printerData) {
 
 	p.decDepth()
 	p.movePast(wc)
+}
+
+func (p *printer) visitPipeFork(n *googlesql.ASTPipeFork, d printerData) {
+	p.moveBefore(n)
+
+	hint, _ := n.Hint()
+	subs := selectChildrenOfType[*googlesql.ASTSubpipeline](n)
+	p.printPipeSubpipelineBranch("FORK", hint, subs, d)
+
+	p.movePast(n)
+}
+
+func (p *printer) visitPipeTee(n *googlesql.ASTPipeTee, d printerData) {
+	p.moveBefore(n)
+
+	hint, _ := n.Hint()
+	subs := selectChildrenOfType[*googlesql.ASTSubpipeline](n)
+	p.printPipeSubpipelineBranch("TEE", hint, subs, d)
+
+	p.movePast(n)
+}
+
+func (p *printer) printPipeSubpipelineBranch(
+	kw string,
+	hint *googlesql.ASTHint,
+	subs []*googlesql.ASTSubpipeline,
+	d printerData,
+) {
+	p.print(p.keyword(kw))
+
+	if nodeDefined(hint) {
+		p.accept(hint, d)
+	}
+
+	for i, sub := range subs {
+		if i > 0 {
+			p.print(",")
+		}
+
+		p.accept(sub, d)
+	}
+}
+
+func (p *printer) visitPipeIf(n *googlesql.ASTPipeIf, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("IF"))
+
+	if hint, _ := n.Hint(); nodeDefined(hint) {
+		p.accept(hint, d)
+	}
+
+	for i, c := range selectChildrenOfType[*googlesql.ASTPipeIfCase](n) {
+		if i > 0 {
+			p.println("")
+			p.print(p.keyword("ELSEIF"))
+		}
+
+		p.printPipeIfCase(c, d)
+	}
+
+	if elseSub, _ := n.ElseSubpipeline(); nodeDefined(elseSub) {
+		p.println("")
+		p.print(p.keyword("ELSE"))
+		p.accept(elseSub, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printPipeIfCase(n *googlesql.ASTPipeIfCase, d printerData) {
+	p.moveBefore(n)
+
+	cond, _ := n.Condition()
+	sub, _ := n.Subpipeline()
+
+	p.accept(cond, d)
+	p.print(p.keyword("THEN"))
+	p.accept(sub, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitPipeLog(n *googlesql.ASTPipeLog, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("LOG"))
+
+	if hint, _ := n.Hint(); nodeDefined(hint) {
+		p.accept(hint, d)
+	}
+
+	if sub, _ := n.Subpipeline(); nodeDefined(sub) {
+		p.accept(sub, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitPipeRecursiveUnion(n *googlesql.ASTPipeRecursiveUnion, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("RECURSIVE"))
+
+	if meta, _ := n.Metadata(); nodeDefined(meta) {
+		hdr := p.nest()
+		hdr.printSetOperationHeader(meta, d)
+		p.print(strings.ReplaceAll(hdr.String(), "\v", ""))
+	}
+
+	if rdm, _ := n.RecursionDepthModifier(); nodeDefined(rdm) {
+		p.printRecursionDepthModifier(rdm, d)
+	}
+
+	if sub, _ := n.InputSubpipeline(); nodeDefined(sub) {
+		p.accept(sub, d)
+	} else if subq, _ := n.InputSubquery(); nodeDefined(subq) {
+		p.moveBefore(subq)
+		p.ensureSpaceBeforeParen()
+		p.accept(subq, d)
+	}
+
+	if alias, _ := n.Alias(); nodeDefined(alias) {
+		p.accept(alias, d)
+	}
+
+	p.movePast(n)
 }

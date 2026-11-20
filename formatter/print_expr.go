@@ -6,6 +6,8 @@ import (
 	"unicode"
 
 	"github.com/goccy/go-googlesql"
+
+	"github.com/paulourio/bqlang/extensions"
 )
 
 func (p *printer) visitAnalyticFunctionCall(n *googlesql.ASTAnalyticFunctionCall, d printerData) {
@@ -1982,5 +1984,128 @@ func (p *printer) visitMaxLiteral(n *googlesql.ASTMaxLiteral, _ printerData) {
 func (p *printer) visitInputTableArgument(n *googlesql.ASTInputTableArgument, _ printerData) {
 	p.moveBefore(n)
 	p.print(p.keyword("INPUT TABLE"))
+	p.movePast(n)
+}
+
+func (p *printer) visitExpressionWithAlias(n *googlesql.ASTExpressionWithAlias, d printerData) {
+	p.moveBefore(n)
+
+	expr, _ := n.Expression()
+	alias, _ := n.Alias()
+
+	p.accept(expr, d)
+	p.moveBefore(alias)
+	p.accept(alias, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitReplaceFieldsExpression(n *googlesql.ASTReplaceFieldsExpression, d printerData) {
+	p.moveBefore(n)
+
+	expr, _ := n.Expr()
+	args := selectChildrenOfType[*googlesql.ASTReplaceFieldsArg](n)
+	simple := len(args) <= 3 &&
+		!p.hasCommentsInside(n) &&
+		p.isSimpleExpr(expr) &&
+		p.areSimpleReplaceFieldsArgs(args)
+
+	pp := p.nest()
+	pp.printOpenParenIfNeeded(n)
+	pp.print(pp.keyword("REPLACE_FIELDS") + "(")
+
+	if !simple {
+		pp.println("")
+		pp.incDepth()
+		pp.acceptNested(expr, d)
+	} else {
+		pp.accept(expr, d)
+	}
+
+	for i, arg := range args {
+		pp.print(",")
+
+		if !simple {
+			if i == 0 {
+				pp.movePastLine(expr)
+			} else {
+				pp.movePastLine(args[i-1])
+			}
+
+			pp.println("")
+		}
+
+		pp.printReplaceFieldsArg(arg, simple, d)
+	}
+
+	paren, _ := n.Parenthesized()
+	if !paren {
+		pp.movePast(n)
+	}
+
+	if !simple {
+		pp.println("")
+		pp.decDepth()
+	}
+
+	pp.print(")")
+
+	if paren {
+		pp.movePast(n)
+	}
+
+	pp.printCloseParenIfNeeded(n)
+	p.print(pp.unnest())
+}
+
+func (p *printer) hasCommentsInside(n googlesql.ASTNode) bool {
+	_, end := nodeByteRange(n)
+	if end <= 0 {
+		return false
+	}
+
+	lhs, _ := extensions.SplitComments(p.fmt.comments.comments, end-1)
+
+	return len(lhs) > 0
+}
+
+func (p *printer) areSimpleReplaceFieldsArgs(args []*googlesql.ASTReplaceFieldsArg) bool {
+	return allMatch(args, func(arg *googlesql.ASTReplaceFieldsArg) bool {
+		expr, _ := arg.Expression()
+
+		return p.isSimpleExpr(expr)
+	})
+}
+
+func (p *printer) printReplaceFieldsArg(arg *googlesql.ASTReplaceFieldsArg, simple bool, d printerData) {
+	expr, _ := arg.Expression()
+	path, _ := arg.PathExpression()
+
+	if simple {
+		p.moveBefore(arg)
+		p.accept(expr, d)
+		p.flushCommentsBeforeOperator(expr, path)
+		p.print(p.keyword("AS") + " ")
+		p.accept(path, d)
+		p.movePast(arg)
+
+		return
+	}
+
+	pp := p.nest()
+	pp.moveBefore(arg)
+	pp.acceptNested(expr, d)
+	pp.flushCommentsBeforeOperator(expr, path)
+	pp.print(pp.keyword("AS") + " ")
+	pp.accept(path, d)
+	pp.movePast(arg)
+	p.print(pp.unnestLeft())
+}
+
+func (p *printer) visitSequenceArg(n *googlesql.ASTSequenceArg, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("SEQUENCE"))
+
+	seqPath, _ := n.SequencePath()
+	p.accept(seqPath, d)
 	p.movePast(n)
 }
