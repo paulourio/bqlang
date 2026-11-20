@@ -392,4 +392,95 @@ func TestRegressions(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, gotAlterIdx, "INDEX myidx ON MyDataset.MyTable")
 	})
+
+	t.Run("NewlineBeforeClause false does not append clauses onto trailing line comments", func(t *testing.T) {
+		t.Parallel()
+
+		opts := &formatter.PrintOptions{}
+
+		for _, sql := range []string{
+			"SELECT id, target_date -- note\nFROM DataForTargetDate;",
+			"SELECT a FROM t GROUP BY a -- gcomment\nHAVING a > 1",
+		} {
+			got, err := formatter.Format(sql, opts)
+			require.NoError(t, err)
+
+			got2, err := formatter.Format(got, opts)
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		}
+	})
+
+	t.Run("ColumnListTrailingComma Always omits illegal trailing commas outside SQL projections", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.ColumnListTrailingComma = formatter.Always
+		opts.MaxColumnsForSingleLineSelect = 0
+
+		for _, sql := range []string{
+			"INSERT INTO t (a, b, c, d, e) VALUES (1, 2, 3, 4, 5)",
+			"SELECT * FROM ticks MATCH_RECOGNIZE (ORDER BY ts MEASURES FIRST(a.x) AS x, LAST(b.x) AS y AFTER MATCH SKIP TO NEXT ROW PATTERN (a b) DEFINE a AS a.x > 0, b AS b.x > 0)",
+			"GRAPH db.FinGraph MATCH (p:Person) WITH DISTINCT p, p AS q RETURN p.name AS nm, q.name AS nm2",
+			"{{ statement }}\nSELECT a, b FROM {{ tbl }}",
+		} {
+			got, err := formatter.Format(sql, opts)
+			require.NoError(t, err)
+
+			got2, err := formatter.Format(got, opts)
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		}
+	})
+
+	t.Run("Multi-component string and bytes literals format each component cleanly", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.StringStyle = formatter.PreferDoubleQuote
+		opts.BytesStyle = formatter.PreferDoubleQuote
+
+		got, err := formatter.Format(`SELECT 'abc' "def", 'one' 'two', b'x' b"y", NUMERIC '1' "2"`, opts)
+		require.NoError(t, err)
+		assert.Equal(
+			t,
+			"SELECT \"abc\" \"def\", \"one\" \"two\", b\"x\" b\"y\", NUMERIC \"1\" \"2\"\n",
+			got,
+		)
+	})
+
+	t.Run("Zero-space trailing comments at node boundaries remain idempotent", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.ColumnListTrailingComma = formatter.Always
+
+		for _, tc := range []struct {
+			sql  string
+			opts *formatter.PrintOptions
+		}{
+			{sql: "SELECT 1 + 2--comment\n, 3", opts: formatter.DefaultPrintOptions()},
+			{sql: "SELECT (1 + 2--comment\n)", opts: formatter.DefaultPrintOptions()},
+			{sql: "SELECT a, b--comment\n", opts: formatter.DefaultPrintOptions()},
+			{sql: "select--comment\n--comment\n1 -- comment\n+--\n2--comment\n", opts: opts},
+		} {
+			got, err := formatter.Format(tc.sql, tc.opts)
+			require.NoError(t, err)
+
+			got2, err := formatter.Format(got, tc.opts)
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		}
+	})
+
+	t.Run("Parenthesized OR inside WHERE AND stays inline without stray tab padding", func(t *testing.T) {
+		t.Parallel()
+
+		got, err := formatter.Format(
+			"SELECT id FROM t WHERE _PARTITIONDATE = @RunDate AND @@project_id = 'prod' AND (region = 'US' OR region = 'EU')",
+			formatter.DefaultPrintOptions(),
+		)
+		require.NoError(t, err)
+		assert.Contains(t, got, "AND (region = 'US' OR region = 'EU')")
+	})
 }

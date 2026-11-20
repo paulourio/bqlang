@@ -538,7 +538,9 @@ func (p *printer) movePast(n googlesql.ASTNode) {
 	}
 
 	_, end := nodeByteRange(n)
-	p.fmt.flushCommentsUpTo(end)
+	if end > 0 {
+		p.fmt.flushCommentsUpTo(end - 1)
+	}
 }
 
 func (p *printer) moveAt(pos int) {
@@ -592,7 +594,7 @@ func (p *printer) moveBeforeSuccessorOf(n googlesql.ASTNode) {
 	}
 
 	if next := min(maybeNext, maxPos); next > 0 {
-		p.fmt.flushCommentsUpTo(next)
+		p.fmt.flushCommentsUpTo(next - 1)
 	}
 }
 

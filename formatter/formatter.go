@@ -39,6 +39,10 @@ func (p *formatterState) Format(s string) {
 		}
 	}()
 
+	if p.buffer.Len() > 0 && p.last != '\n' && p.currentLineHasLineComment() {
+		p.FlushLine()
+	}
+
 	if p.buffer.Len() == 0 {
 		p.writeIndent()
 		p.writeToken(s)
@@ -129,7 +133,7 @@ func (p *formatterState) emitComment(c *extensions.Comment) {
 	}
 
 	trimmed := strings.TrimRight(image, "\n")
-	if p.opts != nil && p.opts.AlignTrailingComments && isLineCommentKind(c.Kind) {
+	if isLineCommentKind(c.Kind) {
 		trimmed = trailingCommentPlaceholder + trimmed
 	}
 
@@ -158,6 +162,13 @@ func isLineCommentKind(k extensions.CommentKind) bool {
 
 func (p *formatterState) bufferEndsWithWhitespace() bool {
 	return p.buffer.Len() > 0 && unicode.IsSpace(p.last)
+}
+
+func (p *formatterState) currentLineHasLineComment() bool {
+	buf := p.buffer.String()
+	start := strings.LastIndexByte(buf, '\n') + 1
+
+	return strings.Contains(buf[start:], trailingCommentPlaceholder)
 }
 
 func (p *formatterState) lastIsSeparator() bool {

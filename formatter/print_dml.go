@@ -28,10 +28,6 @@ func (p *printer) visitColumnList(n *googlesql.ASTColumnList, d printerData) {
 	}
 
 	if !simple {
-		if len(cols) > 0 && p.fmt.opts.ColumnListTrailingComma == Always {
-			p.print(",")
-		}
-
 		p.println("")
 		p.decDepth()
 	}

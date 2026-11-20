@@ -255,8 +255,10 @@ func (p *printer) maybeSingleLineColumns(n *googlesql.ASTSelect) bool {
 	}
 
 	_, e := nodeByteRange(n)
-	if lhs, _ := extensions.SplitComments(p.fmt.comments.comments, e); len(lhs) > 0 {
-		return false
+	if e > 0 {
+		if lhs, _ := extensions.SplitComments(p.fmt.comments.comments, e-1); len(lhs) > 0 {
+			return false
+		}
 	}
 
 	functions := 0

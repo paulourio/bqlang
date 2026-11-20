@@ -1225,12 +1225,50 @@ func (p *printer) visitSelectList(n *googlesql.ASTSelectList, d printerData) {
 		prev = c
 	}
 
-	if !singleLine && len(cols) > 0 && p.fmt.opts.ColumnListTrailingComma == Always {
+	if !singleLine && len(cols) > 0 &&
+		p.fmt.opts.ColumnListTrailingComma == Always &&
+		p.allowsSelectListTrailingComma(n, cols) {
 		pp.print(",")
 	}
 
 	pp.movePastLine(prev)
 	p.print(pp.unnestLeft())
+}
+
+func (p *printer) allowsSelectListTrailingComma(
+	n *googlesql.ASTSelectList,
+	cols []*googlesql.ASTSelectColumn,
+) bool {
+	parent := nodeParent(n)
+	switch nodeKind(parent) {
+	case googlesql.ASTNodeKindAstTransformClause,
+		googlesql.ASTNodeKindAstReturningClause:
+		return true
+	case googlesql.ASTNodeKindAstSelect:
+		_, isGQL := nodeParent(parent).(googlesql.ASTGqlOperatorNode)
+
+		return !isGQL && !p.isStandaloneTemplateSelect(parent, cols)
+	default:
+		return false
+	}
+}
+
+func (p *printer) isStandaloneTemplateSelect(
+	parent googlesql.ASTNode,
+	cols []*googlesql.ASTSelectColumn,
+) bool {
+	if len(cols) != 1 || !strings.HasPrefix(p.nodeInput(cols[0]), "__bqfmt_tmpl_") {
+		return false
+	}
+
+	sel, ok := parent.(*googlesql.ASTSelect)
+	if !ok {
+		return false
+	}
+
+	fc, _ := sel.FromClause()
+
+	return !nodeDefined(fc)
 }
 
 func (p *printer) printSetOperationHeader(meta *googlesql.ASTSetOperationMetadata, d printerData) {

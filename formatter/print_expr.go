@@ -164,20 +164,55 @@ func prefixAlignedAndLines(s string, andLines []int, andTok string) string {
 
 func (p *printer) visitOrExpr(n *googlesql.ASTOrExpr, d printerData) {
 	disjuncts := selectChildrenOfType[googlesql.ASTExpressionNode](n)
-	p1 := p.nest()
-	inClause := isInsideOfWhereClause(n) || isInsideOfOnClause(n)
+	paren := p.isParenNeeded(n)
+	inClause := !paren && (isInsideOfWhereClause(n) || isInsideOfOnClause(n))
 	simple := len(disjuncts) < 4 && p.areSimpleExprs(disjuncts)
 
 	p.moveBefore(n)
 
-	if p.isParenNeeded(n) {
-		if !simple {
-			p.println("(")
-			p.incDepth()
-		} else {
-			p.print("(")
-		}
+	if paren {
+		p.openLogicalParen(simple)
 	}
+
+	p1 := p.printOrDisjuncts(disjuncts, simple, inClause, d)
+
+	if paren && simple {
+		p.print(leftAlignNested(p1.String()))
+	} else {
+		p.print(p1.unnestLeft())
+	}
+
+	if paren {
+		p.closeLogicalParen(simple)
+	}
+}
+
+func (p *printer) openLogicalParen(simple bool) {
+	if !simple {
+		p.println("(")
+		p.incDepth()
+
+		return
+	}
+
+	p.print("(")
+}
+
+func (p *printer) closeLogicalParen(simple bool) {
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+
+	p.print(")")
+}
+
+func (p *printer) printOrDisjuncts(
+	disjuncts []googlesql.ASTExpressionNode,
+	simple, inClause bool,
+	d printerData,
+) *printer {
+	p1 := p.nest()
 
 	for i, disjunct := range disjuncts {
 		if i > 0 {
@@ -202,16 +237,7 @@ func (p *printer) visitOrExpr(n *googlesql.ASTOrExpr, d printerData) {
 		p1.movePastLine(disjunct)
 	}
 
-	p.print(p1.unnestLeft())
-
-	if p.isParenNeeded(n) {
-		if !simple {
-			p.println("")
-			p.decDepth()
-		}
-
-		p.print(")")
-	}
+	return p1
 }
 
 func (p *printer) visitArrayConstructor(n *googlesql.ASTArrayConstructor, d printerData) {
@@ -1110,6 +1136,26 @@ func isTablePath(path *googlesql.ASTPathExpression) bool {
 		tbl, _ := stmt.Path()
 
 		return sameNodeSpan(path, tbl)
+	case *googlesql.ASTTableClause:
+		tbl, _ := stmt.TablePath()
+
+		return sameNodeSpan(path, tbl)
+	case *googlesql.ASTGraphElementTable:
+		tbl, _ := stmt.Name()
+
+		return sameNodeSpan(path, tbl)
+	case *googlesql.ASTRenameToClause:
+		nn, _ := stmt.NewName()
+
+		return sameNodeSpan(path, nn) && isTableRenameClause(stmt)
+	case *googlesql.ASTGrantStatement:
+		tbl, _ := stmt.TargetPath()
+
+		return sameNodeSpan(path, tbl) && isTablePrivilegeTarget(stmt)
+	case *googlesql.ASTRevokeStatement:
+		tbl, _ := stmt.TargetPath()
+
+		return sameNodeSpan(path, tbl) && isTablePrivilegeTarget(stmt)
 	case tableNameHolder:
 		tbl, _ := stmt.TableName()
 
@@ -1131,12 +1177,50 @@ func isTablePath(path *googlesql.ASTPathExpression) bool {
 		googlesql.ASTNodeKindAstDropSnapshotTableStatement,
 		googlesql.ASTNodeKindAstAuxLoadDataStatement,
 		googlesql.ASTNodeKindAstCloneDataSource,
+		googlesql.ASTNodeKindAstCloneDataStatement,
 		googlesql.ASTNodeKindAstCopyDataSource,
+		googlesql.ASTNodeKindAstDefineTableStatement,
 		googlesql.ASTNodeKindAstInsertStatement,
 		googlesql.ASTNodeKindAstDeleteStatement,
 		googlesql.ASTNodeKindAstUpdateStatement,
 		googlesql.ASTNodeKindAstMergeStatement,
 		googlesql.ASTNodeKindAstTruncateStatement:
+		return true
+	default:
+		return false
+	}
+}
+
+func isTableRenameClause(n *googlesql.ASTRenameToClause) bool {
+	parent := nodeParent(n)
+	if nodeKind(parent) == googlesql.ASTNodeKindAstAlterActionList {
+		parent = nodeParent(parent)
+	}
+
+	switch nodeKind(parent) {
+	case googlesql.ASTNodeKindAstAlterTableStatement,
+		googlesql.ASTNodeKindAstAlterViewStatement,
+		googlesql.ASTNodeKindAstAlterMaterializedViewStatement:
+		return true
+	default:
+		return false
+	}
+}
+
+func isTablePrivilegeTarget(stmt googlesql.ASTNode) bool {
+	parts := selectChildrenOfType[*googlesql.ASTIdentifier](stmt)
+	if len(parts) == 0 {
+		return false
+	}
+
+	words := make([]string, 0, len(parts))
+	for _, part := range parts {
+		s, _ := part.GetAsString()
+		words = append(words, strings.ToUpper(s))
+	}
+
+	switch strings.Join(words, " ") {
+	case "TABLE", "EXTERNAL TABLE", "SNAPSHOT TABLE", "VIEW", "MATERIALIZED VIEW":
 		return true
 	default:
 		return false

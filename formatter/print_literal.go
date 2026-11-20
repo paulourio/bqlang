@@ -19,9 +19,19 @@ func (p *printer) visitBoolLiteral(n *googlesql.ASTBooleanLiteral, _ printerData
 }
 
 func (p *printer) visitBytesLiteral(n *googlesql.ASTBytesLiteral, _ printerData) {
-	p.printFormattedLiteral(n, p.nodeInput(n), "invalid bytes literal", func(raw string) (string, error) {
+	formatBytes := func(raw string) (string, error) {
 		return FormatBytes(raw, p.fmt.opts.BytesStyle)
-	})
+	}
+
+	if comps := selectChildrenOfType[*googlesql.ASTBytesLiteralComponent](n); len(comps) > 1 {
+		for _, comp := range comps {
+			p.printFormattedLiteral(comp, p.nodeInput(comp), "invalid bytes literal", formatBytes)
+		}
+
+		return
+	}
+
+	p.printFormattedLiteral(n, p.nodeInput(n), "invalid bytes literal", formatBytes)
 }
 
 func (p *printer) visitDateOrTimeLiteral(n *googlesql.ASTDateOrTimeLiteral, d printerData) {
@@ -66,8 +76,6 @@ func (p *printer) visitIntLiteral(n *googlesql.ASTIntLiteral, _ printerData) {
 	} else {
 		p.print("0x" + applyPrintCase(v[2:], p.fmt.opts.HexStyle))
 	}
-
-	p.movePast(n)
 }
 
 func (p *printer) visitJSONLiteral(n *googlesql.ASTJSONLiteral, d printerData) {
@@ -104,9 +112,8 @@ func (p *printer) printScaledNumericLiteral(
 }
 
 func (p *printer) printNumericStringLiteral(sl *googlesql.ASTStringLiteral) {
-	raw := applyNumericCase(p.nodeInput(sl), p.fmt.opts.NumericStyle)
-	p.printFormattedLiteral(sl, raw, "invalid string literal", func(s string) (string, error) {
-		return FormatString(s, p.fmt.opts.StringStyle)
+	p.printStringLiteralWith(sl, func(raw string) (string, error) {
+		return FormatString(applyNumericCase(raw, p.fmt.opts.NumericStyle), p.fmt.opts.StringStyle)
 	})
 }
 
@@ -123,9 +130,24 @@ func (p *printer) visitRangeLiteral(n *googlesql.ASTRangeLiteral, d printerData)
 }
 
 func (p *printer) visitStringLiteral(n *googlesql.ASTStringLiteral, _ printerData) {
-	p.printFormattedLiteral(n, p.nodeInput(n), "invalid string literal", func(raw string) (string, error) {
+	p.printStringLiteralWith(n, func(raw string) (string, error) {
 		return FormatString(raw, p.fmt.opts.StringStyle)
 	})
+}
+
+func (p *printer) printStringLiteralWith(
+	n *googlesql.ASTStringLiteral,
+	formatFn func(string) (string, error),
+) {
+	if comps := selectChildrenOfType[*googlesql.ASTStringLiteralComponent](n); len(comps) > 1 {
+		for _, comp := range comps {
+			p.printFormattedLiteral(comp, p.nodeInput(comp), "invalid string literal", formatFn)
+		}
+
+		return
+	}
+
+	p.printFormattedLiteral(n, p.nodeInput(n), "invalid string literal", formatFn)
 }
 
 func (p *printer) printFormattedLiteral(
