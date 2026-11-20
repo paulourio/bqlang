@@ -16,18 +16,57 @@ func (p *printer) visitAddColumnAction(n *googlesql.ASTAddColumnAction, d printe
 
 	cd, _ := n.ColumnDefinition()
 	p.accept(cd, d)
+
+	if pos, _ := n.ColumnPosition(); nodeDefined(pos) {
+		p.printColumnPosition(pos, d)
+	}
+
+	if fill, _ := n.FillExpression(); nodeDefined(fill) {
+		p.print(p.keyword("FILL USING"))
+		p.accept(fill, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printColumnPosition(n *googlesql.ASTColumnPosition, d printerData) {
+	p.moveBefore(n)
+
+	posType, _ := n.Type()
+	if posType == googlesql.ASTColumnPositionEnums_RelativePositionTypePreceding {
+		p.print(p.keyword("PRECEDING"))
+	} else {
+		p.print(p.keyword("FOLLOWING"))
+	}
+
+	id, _ := n.Identifier()
+	p.accept(id, d)
+	p.movePast(n)
 }
 
 func (p *printer) visitAddConstraintAction(n *googlesql.ASTAddConstraintAction, d printerData) {
 	p.moveBefore(n)
 	p.print(p.keyword("ADD"))
 
-	if ine, _ := n.IsIfNotExists(); ine {
-		p.print(p.keyword("IF NOT EXISTS"))
-	}
-
 	c, _ := n.Constraint()
 	p.accept(c, d)
+	p.movePast(n)
+}
+
+func (p *printer) printConstraintName(cn *googlesql.ASTIdentifier, parent googlesql.ASTNode, d printerData) {
+	if !nodeDefined(cn) {
+		return
+	}
+
+	p.print(p.keyword("CONSTRAINT"))
+
+	if aca, ok := parent.(*googlesql.ASTAddConstraintAction); ok {
+		if ine, _ := aca.IsIfNotExists(); ine {
+			p.print(p.keyword("IF NOT EXISTS"))
+		}
+	}
+
+	p.accept(cn, d)
 }
 
 func (p *printer) visitAlterActionList(n *googlesql.ASTAlterActionList, d printerData) {
@@ -334,15 +373,43 @@ func (p *printer) visitCreateExternalTableStatement(n *googlesql.ASTCreateExtern
 
 	name, _ := n.Name()
 	tel, _ := n.TableElementList()
-	wcc, _ := n.WithConnectionClause()
+	co, _ := n.Collate()
+	like, _ := n.LikeTableName()
 	wpc, _ := n.WithPartitionColumnsClause()
+	wcc, _ := n.WithConnectionClause()
 	ol, _ := n.OptionsList()
 
 	p.accept(name, d)
 	p.lnaccept(tel, d)
-	p.lnaccept(wcc, d)
+
+	if nodeDefined(co) {
+		p.println("")
+		p.print(p.keyword("DEFAULT"))
+		p.accept(co, d)
+	}
+
+	if nodeDefined(like) {
+		p.println("")
+		p.print(p.keyword("LIKE"))
+		p.accept(like, d)
+	}
+
 	p.lnaccept(wpc, d)
+	p.lnaccept(wcc, d)
 	p.lnaccept(ol, d)
+}
+
+func (p *printer) printSQLSecurity(sec googlesql.ASTCreateStatementEnums_SqlSecurity) {
+	switch sec {
+	case googlesql.ASTCreateStatementEnums_SqlSecuritySqlSecurityUnspecified:
+		// Nothing.
+	case googlesql.ASTCreateStatementEnums_SqlSecuritySqlSecurityDefiner:
+		p.println("")
+		p.print(p.keyword("SQL SECURITY DEFINER"))
+	case googlesql.ASTCreateStatementEnums_SqlSecuritySqlSecurityInvoker:
+		p.println("")
+		p.print(p.keyword("SQL SECURITY INVOKER"))
+	}
 }
 
 func (p *printer) visitCreateFunctionStatement(n *googlesql.ASTCreateFunctionStatement, d printerData) {
@@ -370,6 +437,9 @@ func (p *printer) visitCreateFunctionStatement(n *googlesql.ASTCreateFunctionSta
 	}
 
 	p.print(pp.unnestLeft())
+
+	sec, _ := n.SqlSecurity()
+	p.printSQLSecurity(sec)
 
 	wcc, _ := n.WithConnectionClause()
 	body, _ := n.SqlFunctionBody()
@@ -420,11 +490,17 @@ func (p *printer) visitCreateFunctionStatement(n *googlesql.ASTCreateFunctionSta
 func (p *printer) visitCreateMaterializedViewStatement(n *googlesql.ASTCreateMaterializedViewStatement, d printerData) {
 	p.moveBefore(n)
 
-	cs := createStatementKeywords(n, false, "MATERIALIZED VIEW")
+	obj := "MATERIALIZED VIEW"
+	if rec, _ := n.Recursive(); rec {
+		obj = "MATERIALIZED RECURSIVE VIEW"
+	}
+
+	cs := createStatementKeywords(n, false, obj)
 	p.print(p.keyword(cs))
 
 	name, _ := n.Name()
 	cwol, _ := n.ColumnWithOptionsList()
+	sec, _ := n.SqlSecurity()
 	pb, _ := n.PartitionBy()
 	cb, _ := n.ClusterBy()
 	opt, _ := n.OptionsList()
@@ -433,6 +509,7 @@ func (p *printer) visitCreateMaterializedViewStatement(n *googlesql.ASTCreateMat
 
 	p.accept(name, d)
 	p.lnaccept(cwol, d)
+	p.printSQLSecurity(sec)
 	p.printPartitionAndClusterBy(pb, cb, d)
 
 	if nodeDefined(opt) {
@@ -461,6 +538,10 @@ func (p *printer) visitCreateModelStatement(n *googlesql.ASTCreateModelStatement
 
 	name, _ := n.Name()
 	p.accept(name, d)
+
+	if ioc, _ := n.InputOutputClause(); nodeDefined(ioc) {
+		p.printInputOutputClause(ioc, d)
+	}
 
 	if tc, _ := n.TransformClause(); nodeDefined(tc) {
 		sl, _ := tc.SelectList()
@@ -508,12 +589,43 @@ func (p *printer) visitCreateModelStatement(n *googlesql.ASTCreateModelStatement
 	p.movePast(n)
 }
 
+func (p *printer) printInputOutputClause(n *googlesql.ASTInputOutputClause, d printerData) {
+	p.moveBefore(n)
+
+	if in, _ := n.Input(); nodeDefined(in) {
+		p.println("")
+		p.print(p.keyword("INPUT"))
+		p.printModelElementList(in, d)
+	}
+
+	if out, _ := n.Output(); nodeDefined(out) {
+		p.println("")
+		p.print(p.keyword("OUTPUT"))
+		p.printModelElementList(out, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printModelElementList(tel *googlesql.ASTTableElementList, d printerData) {
+	if len(selectChildrenOfType[googlesql.ASTTableElementNode](tel)) == 0 {
+		p.moveBefore(tel)
+		p.print(" ()")
+		p.movePast(tel)
+
+		return
+	}
+
+	p.accept(tel, d)
+}
+
 func (p *printer) visitCreateProcedureStatement(n *googlesql.ASTCreateProcedureStatement, d printerData) {
 	p.moveBefore(n)
 	p.print(p.keyword(createStatementKeywords(n, false, "PROCEDURE")))
 
 	name, _ := n.Name()
 	params, _ := n.Parameters()
+	extSec, _ := n.ExternalSecurity()
 	wcc, _ := n.WithConnectionClause()
 	opt, _ := n.OptionsList()
 	body, _ := n.Body()
@@ -531,14 +643,33 @@ func (p *printer) visitCreateProcedureStatement(n *googlesql.ASTCreateProcedureS
 		}
 	}
 
+	switch extSec {
+	case googlesql.ASTCreateStatementEnums_SqlSecuritySqlSecurityUnspecified:
+		// Nothing.
+	case googlesql.ASTCreateStatementEnums_SqlSecuritySqlSecurityDefiner:
+		p.println("")
+		p.print(p.keyword("EXTERNAL SECURITY DEFINER"))
+	case googlesql.ASTCreateStatementEnums_SqlSecuritySqlSecurityInvoker:
+		p.println("")
+		p.print(p.keyword("EXTERNAL SECURITY INVOKER"))
+	}
+
 	p.lnaccept(wcc, d)
 	p.lnaccept(opt, d)
 	p.lnaccept(body, d)
 
 	if lang, _ := n.Language(); nodeDefined(lang) {
 		p.println("")
+		p.moveBefore(lang)
 		p.print(p.keyword("LANGUAGE"))
-		p.accept(lang, d)
+
+		langName, _ := lang.GetAsString()
+		if quoted, _ := lang.IsQuoted(); quoted {
+			langName = "`" + langName + "`"
+		}
+
+		p.print(p.identifier(langName))
+		p.movePast(lang)
 	}
 
 	if code, _ := n.Code(); nodeDefined(code) {
@@ -689,11 +820,13 @@ func (p *printer) visitCreateTableFunctionStatement(n *googlesql.ASTCreateTableF
 
 	fd, _ := n.FunctionDeclaration()
 	rtvf, _ := n.ReturnTvfSchema()
+	sec, _ := n.SqlSecurity()
 	opt, _ := n.OptionsList()
 	q, _ := n.Query()
 
 	p.accept(fd, d)
 	p.lnaccept(rtvf, d)
+	p.printSQLSecurity(sec)
 	p.lnaccept(opt, d)
 
 	if nodeDefined(q) {
@@ -705,15 +838,23 @@ func (p *printer) visitCreateTableFunctionStatement(n *googlesql.ASTCreateTableF
 
 func (p *printer) visitCreateViewStatement(n *googlesql.ASTCreateViewStatement, d printerData) {
 	p.moveBefore(n)
-	p.print(p.keyword(createStatementKeywords(n, false, "VIEW")))
+
+	obj := "VIEW"
+	if rec, _ := n.Recursive(); rec {
+		obj = "RECURSIVE VIEW"
+	}
+
+	p.print(p.keyword(createStatementKeywords(n, false, obj)))
 
 	name, _ := n.Name()
 	cwol, _ := n.ColumnWithOptionsList()
+	sec, _ := n.SqlSecurity()
 	opt, _ := n.OptionsList()
 	q, _ := n.Query()
 
 	p.accept(name, d)
 	p.lnaccept(cwol, d)
+	p.printSQLSecurity(sec)
 	p.lnaccept(opt, d)
 
 	if nodeDefined(q) {
@@ -833,7 +974,22 @@ func (p *printer) printPrivileges(privs *googlesql.ASTPrivileges, d printerData)
 		paths, _ := item.Paths()
 
 		p.accept(act, d)
-		p.accept(paths, d)
+
+		if nodeDefined(paths) {
+			p.moveBefore(paths)
+			p.print("(")
+
+			for j, path := range selectChildrenOfType[*googlesql.ASTPathExpression](paths) {
+				if j > 0 {
+					p.print(",")
+				}
+
+				p.accept(path, d)
+			}
+
+			p.print(")")
+			p.movePast(paths)
+		}
 	}
 }
 
@@ -933,9 +1089,24 @@ func (p *printer) visitDropEntityStatement(n *googlesql.ASTDropEntityStatement, 
 }
 
 func (p *printer) visitDropFunctionStatement(n *googlesql.ASTDropFunctionStatement, d printerData) {
+	p.moveBefore(n)
+
 	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
-	p.printDropNamedObject(n, "FUNCTION", ie, name, nil, d)
+	params, _ := n.Parameters()
+
+	p.print(p.keyword(dropKeyword(ie, "FUNCTION")))
+	p.accept(name, d)
+
+	if nodeDefined(params) {
+		if isSimpleFunctionParameters(params, p.fmt.opts.MaxParamsForSingleLineFunction) {
+			p.print(strings.TrimLeft(p.toString(params, d), "\v"))
+		} else {
+			p.lnaccept(params, d)
+		}
+	}
+
+	p.movePast(n)
 }
 
 func (p *printer) visitDropMaterializedViewStatement(n *googlesql.ASTDropMaterializedViewStatement, d printerData) {
@@ -1063,6 +1234,10 @@ func schemaObjectKindString(sok googlesql.SchemaObjectKind) string {
 	switch sok {
 	case googlesql.SchemaObjectKindKAggregateFunction:
 		return " AGGREGATE FUNCTION"
+	case googlesql.SchemaObjectKindKApproxView:
+		return " APPROX VIEW"
+	case googlesql.SchemaObjectKindKConnection:
+		return " CONNECTION"
 	case googlesql.SchemaObjectKindKConstant:
 		return " CONSTANT"
 	case googlesql.SchemaObjectKindKDatabase:
@@ -1081,6 +1256,8 @@ func schemaObjectKindString(sok googlesql.SchemaObjectKind) string {
 		return " PROCEDURE"
 	case googlesql.SchemaObjectKindKSchema:
 		return " SCHEMA"
+	case googlesql.SchemaObjectKindKSequence:
+		return " SEQUENCE"
 	case googlesql.SchemaObjectKindKTable:
 		return " TABLE"
 	case googlesql.SchemaObjectKindKTableFunction:
@@ -1121,10 +1298,8 @@ func (p *printer) visitFilterUsingClause(n *googlesql.ASTFilterUsingClause, d pr
 func (p *printer) visitCheckConstraint(n *googlesql.ASTCheckConstraint, d printerData) {
 	p.moveBefore(n)
 
-	if cn, _ := n.ConstraintName(); nodeDefined(cn) {
-		p.print(p.keyword("CONSTRAINT"))
-		p.accept(cn, d)
-	}
+	cn, _ := n.ConstraintName()
+	p.printConstraintName(cn, nodeParent(n), d)
 
 	expr, _ := n.Expression()
 
@@ -1138,16 +1313,18 @@ func (p *printer) visitCheckConstraint(n *googlesql.ASTCheckConstraint, d printe
 		p.print(p.keyword("NOT ENFORCED"))
 	}
 
+	if ol, _ := n.OptionsList(); nodeDefined(ol) {
+		p.accept(ol, d)
+	}
+
 	p.movePast(n)
 }
 
 func (p *printer) visitForeignKey(n *googlesql.ASTForeignKey, d printerData) {
 	p.moveBefore(n)
 
-	if cn, _ := n.ConstraintName(); nodeDefined(cn) {
-		p.print(p.keyword("CONSTRAINT"))
-		p.accept(cn, d)
-	}
+	cn, _ := n.ConstraintName()
+	p.printConstraintName(cn, nodeParent(n), d)
 
 	cl, _ := n.ColumnList()
 	ref, _ := n.Reference()
@@ -1155,6 +1332,12 @@ func (p *printer) visitForeignKey(n *googlesql.ASTForeignKey, d printerData) {
 	p.print(p.keyword("FOREIGN KEY") + " ")
 	p.accept(cl, d)
 	p.lnaccept(ref, d)
+
+	if ol, _ := n.OptionsList(); nodeDefined(ol) {
+		p.accept(ol, d)
+	}
+
+	p.movePast(n)
 }
 
 func (p *printer) visitForeignKeyReference(n *googlesql.ASTForeignKeyReference, d printerData) {
@@ -1162,16 +1345,50 @@ func (p *printer) visitForeignKeyReference(n *googlesql.ASTForeignKeyReference, 
 
 	tbl, _ := n.TableName()
 	cl, _ := n.ColumnList()
+	match, _ := n.Match()
+	actions, _ := n.Actions()
 	enf, _ := n.Enforced()
 
 	p.print(p.keyword("REFERENCES"))
 	p.accept(tbl, d)
 	p.accept(cl, d)
 
+	switch match {
+	case googlesql.ASTForeignKeyReferenceEnums_MatchSimple:
+		// Default match mode.
+	case googlesql.ASTForeignKeyReferenceEnums_MatchFull:
+		p.print(p.keyword("MATCH FULL"))
+	case googlesql.ASTForeignKeyReferenceEnums_MatchNotDistinct:
+		p.print(p.keyword("MATCH NOT DISTINCT"))
+	}
+
+	if nodeDefined(actions) {
+		if upd, _ := actions.UpdateAction(); upd != googlesql.ASTForeignKeyActionsEnums_ActionNoAction {
+			p.print(p.keyword("ON UPDATE " + foreignKeyActionKeyword(upd)))
+		}
+
+		if del, _ := actions.DeleteAction(); del != googlesql.ASTForeignKeyActionsEnums_ActionNoAction {
+			p.print(p.keyword("ON DELETE " + foreignKeyActionKeyword(del)))
+		}
+	}
+
 	if enf {
 		p.print(p.keyword("ENFORCED"))
 	} else {
 		p.print(p.keyword("NOT ENFORCED"))
+	}
+}
+
+func foreignKeyActionKeyword(act googlesql.ASTForeignKeyActionsEnums_Action) string {
+	switch act {
+	case googlesql.ASTForeignKeyActionsEnums_ActionRestrict:
+		return "RESTRICT"
+	case googlesql.ASTForeignKeyActionsEnums_ActionCascade:
+		return "CASCADE"
+	case googlesql.ASTForeignKeyActionsEnums_ActionSetNull:
+		return "SET NULL"
+	default:
+		return "NO ACTION"
 	}
 }
 
@@ -1223,6 +1440,10 @@ func (p *printer) visitFunctionParameter(n *googlesql.ASTFunctionParameter, d pr
 		p.acceptNested(tpt, d)
 	} else if tvf, _ := n.TvfSchema(); nodeDefined(tvf) {
 		p.acceptNested(tvf, d)
+	}
+
+	if alias, _ := n.Alias(); nodeDefined(alias) {
+		p.accept(alias, d)
 	}
 
 	if dv, _ := n.DefaultValue(); nodeDefined(dv) {
@@ -1322,10 +1543,8 @@ func (p *printer) visitGrantToClause(n *googlesql.ASTGrantToClause, d printerDat
 func (p *printer) visitPrimaryKey(n *googlesql.ASTPrimaryKey, d printerData) {
 	p.moveBefore(n)
 
-	if cn, _ := n.ConstraintName(); nodeDefined(cn) {
-		p.print(p.keyword("CONSTRAINT"))
-		p.accept(cn, d)
-	}
+	cn, _ := n.ConstraintName()
+	p.printConstraintName(cn, nodeParent(n), d)
 
 	el, _ := n.ElementList()
 	enf, _ := n.Enforced()

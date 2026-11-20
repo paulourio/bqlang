@@ -473,14 +473,120 @@ func TestRegressions(t *testing.T) {
 		}
 	})
 
-	t.Run("Parenthesized OR inside WHERE AND stays inline without stray tab padding", func(t *testing.T) {
+	t.Run("GoogleSQL parser corpus syntax and AST preservation regressions", func(t *testing.T) {
 		t.Parallel()
 
-		got, err := formatter.Format(
-			"SELECT id FROM t WHERE _PARTITIONDATE = @RunDate AND @@project_id = 'prod' AND (region = 'US' OR region = 'EU')",
-			formatter.DefaultPrintOptions(),
-		)
-		require.NoError(t, err)
-		assert.Contains(t, got, "AND (region = 'US' OR region = 'EU')")
+		for _, tc := range []struct {
+			name     string
+			sql      string
+			contains []string
+		}{
+			{
+				name:     "set op full propagation and corresponding order",
+				sql:      "SELECT 1 FULL UNION ALL CORRESPONDING SELECT 2",
+				contains: []string{"FULL UNION ALL CORRESPONDING"},
+			},
+			{
+				name:     "set op strict corresponding by order",
+				sql:      "SELECT 1 UNION ALL STRICT CORRESPONDING BY (a) SELECT 2",
+				contains: []string{"UNION ALL STRICT CORRESPONDING BY (a)"},
+			},
+			{
+				name:     "pipe set op all before by name",
+				sql:      "SELECT 1 |> UNION ALL BY NAME (SELECT 2)",
+				contains: []string{"|> UNION ALL BY NAME"},
+			},
+			{
+				name:     "parenthesized query before pipe operator",
+				sql:      "(SELECT 1 UNION ALL SELECT 2 |> WHERE 2) |> WHERE 3",
+				contains: []string{"(\n  SELECT 1", ")\n|> WHERE 3"},
+			},
+			{
+				name:     "select with modifier all disambiguation",
+				sql:      "SELECT WITH kind ALL OPTIONS (a = 1) FROM t",
+				contains: []string{"WITH KIND ALL OPTIONS(a = 1)"},
+			},
+			{
+				name:     "nested DML in update set keeps parens and assert_rows_modified",
+				sql:      "UPDATE T SET (DELETE a WITH OFFSET WHERE TRUE ASSERT_ROWS_MODIFIED 1) WHERE TRUE ASSERT_ROWS_MODIFIED 2",
+				contains: []string{"SET (", "ASSERT_ROWS_MODIFIED 1", "ASSERT_ROWS_MODIFIED 2"},
+			},
+			{
+				name:     "insert mode and on conflict clause",
+				sql:      "INSERT OR REPLACE INTO T (a, b) VALUES (1, 2) ON CONFLICT (a) DO UPDATE SET b = 3 WHERE a > 0",
+				contains: []string{"INSERT OR REPLACE INTO T", "ON CONFLICT(a) DO UPDATE", "SET b = 3", "WHERE a > 0"},
+			},
+			{
+				name:     "merge insert column list row",
+				sql:      "MERGE INTO T USING S ON t1 = s1 WHEN NOT MATCHED BY SOURCE THEN INSERT (t1) ROW",
+				contains: []string{"INSERT", "(t1)", "ROW"},
+			},
+			{
+				name:     "dashed path does not duplicate prefix",
+				sql:      "UPDATE a-100.b.c SET x = y",
+				contains: []string{"UPDATE a-100.b.c\n"},
+			},
+			{
+				name:     "parenthesized numeric literal before dot",
+				sql:      "SELECT (1).new, (1).(x), (1.).(x)",
+				contains: []string{"(1).new", "(1).(x)", "(1.).(x)"},
+			},
+			{
+				name:     "multi-arg and named-arg unnest",
+				sql:      "SELECT * FROM UNNEST([1, 2] AS a1, [2, 3] AS a2)",
+				contains: []string{"UNNEST([1, 2] AS a1, [2, 3] AS a2)"},
+			},
+			{
+				name:     "create procedure external security and single language keyword",
+				sql:      "CREATE PROCEDURE p() EXTERNAL SECURITY INVOKER LANGUAGE PYTHON",
+				contains: []string{"EXTERNAL SECURITY INVOKER", "\nLANGUAGE PYTHON\n"},
+			},
+			{
+				name:     "alter table add constraint if not exists order",
+				sql:      "ALTER TABLE t ADD CONSTRAINT IF NOT EXISTS c CHECK (a > 0)",
+				contains: []string{"ADD CONSTRAINT IF NOT EXISTS c CHECK (a > 0)"},
+			},
+			{
+				name:     "drop sequence and connection",
+				sql:      "DROP SEQUENCE foo; DROP CONNECTION bar;",
+				contains: []string{"DROP SEQUENCE foo;", "DROP CONNECTION bar;"},
+			},
+			{
+				name:     "create external table partition columns before connection",
+				sql:      "CREATE EXTERNAL TABLE t (x INT64) WITH PARTITION COLUMNS WITH CONNECTION a.b.c OPTIONS (x = 'bar')",
+				contains: []string{"WITH PARTITION COLUMNS\nWITH CONNECTION a.b.c"},
+			},
+			{
+				name:     "revoke single-column privilege keeps parens",
+				sql:      "REVOKE DELETE, UPDATE(col2) ON VIEW foo FROM 'mdbgroup/bar'",
+				contains: []string{"UPDATE(col2)"},
+			},
+			{
+				name:     "drop function parameters and sql security",
+				sql:      "DROP FUNCTION foo(INT64); CREATE RECURSIVE VIEW v SQL SECURITY INVOKER AS SELECT 1;",
+				contains: []string{"DROP FUNCTION foo(INT64);", "CREATE RECURSIVE VIEW v\nSQL SECURITY INVOKER"},
+			},
+			{
+				name:     "begin transaction modes",
+				sql:      "BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE, READ ONLY",
+				contains: []string{"BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE, READ ONLY"},
+			},
+			{
+				name:     "parenthesized OR inside WHERE AND stays inline without stray tab padding",
+				sql:      "SELECT id FROM t WHERE _PARTITIONDATE = @RunDate AND @@project_id = 'prod' AND (region = 'US' OR region = 'EU')",
+				contains: []string{"AND (region = 'US' OR region = 'EU')"},
+			},
+		} {
+			got, err := formatter.Format(tc.sql, formatter.DefaultPrintOptions())
+			require.NoError(t, err, tc.name)
+
+			for _, sub := range tc.contains {
+				assert.Contains(t, got, sub, tc.name)
+			}
+
+			got2, err := formatter.Format(got, formatter.DefaultPrintOptions())
+			require.NoError(t, err, tc.name)
+			assert.Equal(t, got, got2, tc.name)
+		}
 	})
 }
