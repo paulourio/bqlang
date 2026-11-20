@@ -1287,13 +1287,42 @@ func (p *printer) visitSelectList(n *googlesql.ASTSelectList, d printerData) {
 	}
 
 	if !singleLine && len(cols) > 0 &&
-		p.fmt.opts.ColumnListTrailingComma == Always &&
-		p.allowsSelectListTrailingComma(n, cols) {
+		p.shouldPrintSelectListTrailingComma(n, cols) {
 		pp.print(",")
 	}
 
 	pp.movePastLine(prev)
 	p.print(pp.unnestLeft())
+}
+
+func (p *printer) shouldPrintSelectListTrailingComma(
+	n *googlesql.ASTSelectList,
+	cols []*googlesql.ASTSelectColumn,
+) bool {
+	if !p.allowsSelectListTrailingComma(n, cols) {
+		return false
+	}
+
+	switch p.fmt.opts.ColumnListTrailingComma {
+	case Always:
+		return true
+	case Auto:
+		return p.hasTrailingComma(n, cols[len(cols)-1])
+	case Never, UnspecifiedWhen:
+		return false
+	default:
+		return false
+	}
+}
+
+func (p *printer) hasTrailingComma(list, lastItem googlesql.ASTNode) bool {
+	_, listEnd := nodeByteRange(list)
+	_, lastEnd := nodeByteRange(lastItem)
+	if lastEnd >= listEnd {
+		return false
+	}
+
+	return strings.TrimSpace(p.viewErasedInput(lastEnd, listEnd)) == ","
 }
 
 func (p *printer) allowsSelectListTrailingComma(

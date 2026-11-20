@@ -15,8 +15,10 @@ type PrintOptions struct {
 	// NewlineBeforeClause sets whether newlines are emitted before clauses like FROM, WHERE, etc.
 	NewlineBeforeClause bool `toml:"newline_before_clause" json:"newline_before_clause"`
 	// AlignLogicalWithClauses specifies whether AND and OR expressions align with WHERE/ON/HAVING/QUALIFY.
-	AlignLogicalWithClauses        bool            `toml:"align_logical_with_clauses" json:"align_logical_with_clauses"`
-	AlignTrailingComments          bool            `toml:"align_trailing_comments" json:"align_trailing_comments"`
+	AlignLogicalWithClauses bool `toml:"align_logical_with_clauses" json:"align_logical_with_clauses"`
+	AlignTrailingComments   bool `toml:"align_trailing_comments" json:"align_trailing_comments"`
+	// ColumnListTrailingComma controls trailing commas in multiline SQL projection lists:
+	// ALWAYS emits one, NEVER omits it, and AUTO preserves a trailing comma only when present in input.
 	ColumnListTrailingComma        When            `toml:"column_list_trailing_comma" json:"column_list_trailing_comma"`
 	Indentation                    int             `toml:"indentation" json:"indentation"`
 	IndentCaseWhen                 bool            `toml:"indent_case_when" json:"indent_case_when"`

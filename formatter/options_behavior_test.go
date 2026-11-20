@@ -210,11 +210,9 @@ func TestPrintOptionsLayout(t *testing.T) {
 		// Single-line SELECT never receives a trailing comma even under Always.
 		assert.Equal(t, "SELECT a, b\n  FROM t\n", formatWithOpts(t, singleLine, alwaysOpts))
 
-		// Never, Auto, and UnspecifiedWhen omit trailing commas (preserving
-		// compatibility with existing AUTO golden tests such as create_table_as_select.toml).
+		// Never and UnspecifiedWhen always omit trailing commas.
 		for _, mode := range []formatter.When{
 			formatter.Never,
-			formatter.Auto,
 			formatter.UnspecifiedWhen,
 		} {
 			opts := cloneOpts(func(o *formatter.PrintOptions) {
@@ -224,14 +222,44 @@ func TestPrintOptionsLayout(t *testing.T) {
 			assert.Equal(t, wantNoComma, formatWithOpts(t, multiWithTrailing, opts), "mode=%q with input comma", mode)
 		}
 
-		// DML THEN RETURN supports trailing commas under Always.
-		dml := "DELETE FROM t WHERE id = 1 THEN RETURN a, b, c, d, e"
-		dmlAlways := formatWithOpts(t, dml, alwaysOpts)
-		dmlNever := formatWithOpts(t, dml, cloneOpts(func(o *formatter.PrintOptions) {
+		// Auto preserves a trailing comma when present and does not add one when absent.
+		autoOpts := cloneOpts(func(o *formatter.PrintOptions) {
+			o.ColumnListTrailingComma = formatter.Auto
+		})
+		assert.Equal(t, wantNoComma, formatWithOpts(t, multiNoTrailing, autoOpts))
+		assert.Equal(t, wantWithComma, formatWithOpts(t, multiWithTrailing, autoOpts))
+		assert.Equal(t, "SELECT a, b\n  FROM t\n", formatWithOpts(t, "SELECT a, b, FROM t", autoOpts))
+
+		// Auto handles comments around the trailing comma and ignores commas inside comments.
+		withCommentBeforeComma := "SELECT a, b, c, d, e /* note */, FROM t"
+		assert.Equal(
+			t,
+			"SELECT a,\n       b,\n       c,\n       d,\n       e,  /* note */\n  FROM t\n",
+			formatWithOpts(t, withCommentBeforeComma, autoOpts),
+		)
+		withCommaInsideComment := "SELECT a, b, c, d, e /* , */ FROM t"
+		assert.Equal(
+			t,
+			"SELECT a,\n       b,\n       c,\n       d,\n       e  /* , */\n  FROM t\n",
+			formatWithOpts(t, withCommaInsideComment, autoOpts),
+		)
+
+		// DML THEN RETURN and pipe SELECT honor Always, Auto, and Never.
+		dmlNoComma := "DELETE FROM t WHERE id = 1 THEN RETURN a, b, c, d, e"
+		dmlWithComma := "DELETE FROM t WHERE id = 1 THEN RETURN a, b, c, d, e,"
+		dmlAlways := formatWithOpts(t, dmlNoComma, alwaysOpts)
+		dmlNever := formatWithOpts(t, dmlWithComma, cloneOpts(func(o *formatter.PrintOptions) {
 			o.ColumnListTrailingComma = formatter.Never
 		}))
 		assert.Contains(t, dmlAlways, "e,\n")
 		assert.NotContains(t, dmlNever, "e,\n")
+		assert.NotContains(t, formatWithOpts(t, dmlNoComma, autoOpts), "e,\n")
+		assert.Contains(t, formatWithOpts(t, dmlWithComma, autoOpts), "e,\n")
+
+		pipeNoComma := "FROM t |> SELECT a, b, c, d, e"
+		pipeWithComma := "FROM t |> SELECT a, b, c, d, e,"
+		assert.NotContains(t, formatWithOpts(t, pipeNoComma, autoOpts), "e,\n")
+		assert.Contains(t, formatWithOpts(t, pipeWithComma, autoOpts), "e,\n")
 
 		// Non-leakage: GQL RETURN must not emit an illegal trailing comma even under Always.
 		gql := "GRAPH g MATCH (n) RETURN n.a, n.b, n.c, n.d, n.e"

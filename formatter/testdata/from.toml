@@ -276,5 +276,5 @@ select 1 a, 'foo' b,
 """
 formatted = """
 SELECT 1     AS a,
-       'foo' AS b
+       'foo' AS b,
 """
