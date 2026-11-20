@@ -188,4 +188,43 @@ function_name_style = "AS_IS"
 		assert.Equal(t, 2, code)
 		assert.Contains(t, stderr.String(), "invalid print option")
 	})
+
+	t.Run("rejects invalid include glob, conflicting sections, and missing default_style", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+
+		cases := []struct {
+			name    string
+			toml    string
+			wantErr string
+		}{
+			{
+				name:    "invalid_glob.toml",
+				toml:    "[[styles]]\nname = \"s\"\ninclude = \"[unclosed\"\n",
+				wantErr: "syntax error in pattern",
+			},
+			{
+				name:    "conflicting.toml",
+				toml:    "[options]\nindentation = 2\n[print_options]\nindentation = 4\n",
+				wantErr: "conflicting configuration sections",
+			},
+			{
+				name:    "missing_default.toml",
+				toml:    "default_style = \"missing\"\n[[styles]]\nname = \"present\"\n",
+				wantErr: "default_style \"missing\" not found",
+			},
+		}
+
+		for _, tc := range cases {
+			cfgPath := filepath.Join(dir, tc.name)
+			require.NoError(t, os.WriteFile(cfgPath, []byte(tc.toml), 0o600))
+
+			var stdout, stderr bytes.Buffer
+
+			code := run([]string{"-config", cfgPath}, strings.NewReader("SELECT 1"), &stdout, &stderr)
+			assert.Equal(t, 2, code)
+			assert.Contains(t, stderr.String(), tc.wantErr)
+		}
+	})
 }

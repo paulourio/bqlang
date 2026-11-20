@@ -209,6 +209,26 @@ func parseConfigFile(path string) (*parsedConfig, error) {
 		return nil, fmt.Errorf("parse config %s: %w", path, err)
 	}
 
+	sections := 0
+	if len(raw.Styles) > 0 {
+		sections++
+	}
+
+	if raw.Options != nil {
+		sections++
+	}
+
+	if raw.PrintOptions != nil {
+		sections++
+	}
+
+	if sections > 1 {
+		return nil, fmt.Errorf(
+			"config %s: conflicting configuration sections; specify at most one of styles, options, or print_options",
+			path,
+		)
+	}
+
 	if len(raw.Styles) > 0 {
 		return buildMultiStyleConfig(path, md, &raw)
 	}
@@ -261,43 +281,72 @@ func buildMultiStyleConfig(path string, md toml.MetaData, raw *rawConfigFile) (*
 	styles := make([]compiledStyle, 0, len(raw.Styles))
 
 	for _, entry := range raw.Styles {
-		opts := formatter.DefaultPrintOptions()
-
-		if entry.Options != nil {
-			if err := md.PrimitiveDecode(*entry.Options, opts); err != nil {
-				return nil, fmt.Errorf("config %s style %q: %w", path, entry.Name, err)
-			}
+		compiled, err := compileStyleEntry(path, md, entry)
+		if err != nil {
+			return nil, err
 		}
 
-		if err := opts.Validate(); err != nil {
-			return nil, fmt.Errorf("config %s style %q: %w", path, entry.Name, err)
-		}
-
-		var compiledRe *regexp.Regexp
-
-		if entry.Regex != "" {
-			re, err := regexp.Compile(entry.Regex)
-			if err != nil {
-				return nil, fmt.Errorf("config %s style %q regex: %w", path, entry.Name, err)
-			}
-
-			compiledRe = re
-		}
-
-		styles = append(styles, compiledStyle{
-			name:    entry.Name,
-			re:      compiledRe,
-			include: entry.Include,
-			options: opts,
-		})
+		styles = append(styles, compiled)
 	}
 
 	if undecoded := md.Undecoded(); len(undecoded) > 0 {
 		return nil, fmt.Errorf("config %s: unknown option %q", path, undecoded[0].String())
 	}
 
+	if raw.DefaultStyle != "" && !hasNamedStyle(styles, raw.DefaultStyle) {
+		return nil, fmt.Errorf("config %s: default_style %q not found in styles", path, raw.DefaultStyle)
+	}
+
 	return &parsedConfig{
 		defaultStyle: raw.DefaultStyle,
 		styles:       styles,
 	}, nil
+}
+
+func compileStyleEntry(path string, md toml.MetaData, entry rawStyleEntry) (compiledStyle, error) {
+	opts := formatter.DefaultPrintOptions()
+
+	if entry.Options != nil {
+		if err := md.PrimitiveDecode(*entry.Options, opts); err != nil {
+			return compiledStyle{}, fmt.Errorf("config %s style %q: %w", path, entry.Name, err)
+		}
+	}
+
+	if err := opts.Validate(); err != nil {
+		return compiledStyle{}, fmt.Errorf("config %s style %q: %w", path, entry.Name, err)
+	}
+
+	var compiledRe *regexp.Regexp
+
+	if entry.Regex != "" {
+		re, err := regexp.Compile(entry.Regex)
+		if err != nil {
+			return compiledStyle{}, fmt.Errorf("config %s style %q regex: %w", path, entry.Name, err)
+		}
+
+		compiledRe = re
+	}
+
+	if entry.Include != "" {
+		if _, err := filepath.Match(entry.Include, ""); err != nil {
+			return compiledStyle{}, fmt.Errorf("config %s style %q include: %w", path, entry.Name, err)
+		}
+	}
+
+	return compiledStyle{
+		name:    entry.Name,
+		re:      compiledRe,
+		include: entry.Include,
+		options: opts,
+	}, nil
+}
+
+func hasNamedStyle(styles []compiledStyle, name string) bool {
+	for _, s := range styles {
+		if s.name == name {
+			return true
+		}
+	}
+
+	return false
 }
