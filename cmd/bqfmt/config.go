@@ -233,6 +233,10 @@ func parseConfigFile(path string) (*parsedConfig, error) {
 		return buildMultiStyleConfig(path, md, &raw)
 	}
 
+	if raw.DefaultStyle != "" {
+		return nil, fmt.Errorf("config %s: default_style requires a styles section", path)
+	}
+
 	if raw.Options != nil {
 		return buildSectionConfig(path, md, *raw.Options)
 	}

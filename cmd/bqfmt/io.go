@@ -64,7 +64,13 @@ func (c *cliRunner) readFile(filename string, info fs.FileInfo, in io.Reader) ([
 }
 
 // writeFile updates a file with the new formatted data using a temporary backup.
-func (c *cliRunner) writeFile(filename string, orig, formatted []byte, perm fs.FileMode, size int64) error {
+func (c *cliRunner) writeFile(
+	filename string,
+	orig, formatted []byte,
+	perm fs.FileMode,
+	size int64,
+	r *reporter,
+) error {
 	bakname, err := c.backupFile(filename, orig, perm)
 	if err != nil {
 		return err
@@ -82,7 +88,7 @@ func (c *cliRunner) writeFile(filename string, orig, formatted []byte, perm fs.F
 	defer func() { _ = fout.Close() }()
 
 	restoreFail := func(rerr error) {
-		fmt.Fprintf(c.stderr, "bqfmt: %s: error restoring file to original: %v; backup in %s\n", filename, rerr, bakname)
+		r.Warnf("bqfmt: %s: error restoring file to original: %v; backup in %s\n", filename, rerr, bakname)
 	}
 
 	n, err := fout.Write(formatted)
@@ -103,7 +109,7 @@ func (c *cliRunner) writeFile(filename string, orig, formatted []byte, perm fs.F
 	}
 
 	if err := fout.Close(); err != nil {
-		restoreFail(err)
+		r.Warnf("bqfmt: %s: error closing file: %v; backup in %s\n", filename, err, bakname)
 
 		return fmt.Errorf("close %s: %w", filename, err)
 	}

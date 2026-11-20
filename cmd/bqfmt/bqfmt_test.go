@@ -214,6 +214,11 @@ function_name_style = "AS_IS"
 				toml:    "default_style = \"missing\"\n[[styles]]\nname = \"present\"\n",
 				wantErr: "default_style \"missing\" not found",
 			},
+			{
+				name:    "orphan_default_style.toml",
+				toml:    "default_style = \"custom\"\n[options]\nindentation = 2\n",
+				wantErr: "default_style requires a styles section",
+			},
 		}
 
 		for _, tc := range cases {

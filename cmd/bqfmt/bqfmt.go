@@ -18,13 +18,12 @@ import (
 )
 
 type cliRunner struct {
-	list   bool
-	write  bool
-	debug  bool
-	cfg    *configLoader
-	fdSem  chan struct{}
-	stdin  io.Reader
-	stderr io.Writer
+	list  bool
+	write bool
+	debug bool
+	cfg   *configLoader
+	fdSem chan struct{}
+	stdin io.Reader
 }
 
 const maxOpenFiles = 200
@@ -69,13 +68,12 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	}
 
 	runner := &cliRunner{
-		list:   *listFlag,
-		write:  *writeFlag,
-		debug:  *debugFlag,
-		cfg:    cfgLoader,
-		fdSem:  make(chan struct{}, maxOpenFiles),
-		stdin:  stdin,
-		stderr: stderr,
+		list:  *listFlag,
+		write: *writeFlag,
+		debug: *debugFlag,
+		cfg:   cfgLoader,
+		fdSem: make(chan struct{}, maxOpenFiles),
+		stdin: stdin,
 	}
 
 	maxWeight := (2 << 20) * int64(runtime.GOMAXPROCS(0))
@@ -230,7 +228,7 @@ func (c *cliRunner) emitResult(
 		}
 
 		perm := info.Mode().Perm()
-		if werr := c.writeFile(filename, src, []byte(result), perm, info.Size()); werr != nil {
+		if werr := c.writeFile(filename, src, []byte(result), perm, info.Size(), r); werr != nil {
 			return werr
 		}
 	}
