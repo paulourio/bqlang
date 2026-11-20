@@ -38,4 +38,8 @@ func TestDefaultOptionsAndMarshalJSON(t *testing.T) {
 	nilBytes, err := bqlang.MarshalJSON(nil)
 	require.NoError(t, err)
 	assert.Nil(t, nilBytes)
+
+	nilNode, err := bqlang.NewASTNode(nil)
+	require.ErrorIs(t, err, bqlang.ErrNilASTNode)
+	assert.Nil(t, nilNode)
 }

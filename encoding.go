@@ -2,10 +2,14 @@ package bqlang
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/goccy/go-googlesql"
 )
+
+// ErrNilASTNode is returned when NewASTNode is called with a nil AST node.
+var ErrNilASTNode = errors.New("nil AST node")
 
 // ASTNode exports a GoogleSQL AST subtree to a language-independent JSON structure.
 type ASTNode struct {
@@ -62,6 +66,10 @@ func MarshalJSON(n googlesql.ASTNode) ([]byte, error) {
 
 // NewASTNode converts a GoogleSQL ASTNode into an exportable ASTNode record.
 func NewASTNode(n googlesql.ASTNode) (*ASTNode, error) {
+	if n == nil {
+		return nil, ErrNilASTNode
+	}
+
 	numChildren32, err := n.NumChildren()
 	if err != nil {
 		return nil, fmt.Errorf("NewASTNode: NumChildren: %w", err)
