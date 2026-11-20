@@ -59,7 +59,7 @@ func (p *printer) isSimpleExpr(n googlesql.ASTExpressionNode) bool {
 	case *googlesql.ASTConcatExpr:
 		ops := selectChildrenOfType[googlesql.ASTExpressionNode](n)
 
-		return allTrue(p.mapIsSimpleExprs2(ops))
+		return p.areSimpleExprs2(ops)
 	case *googlesql.ASTUnaryExpression:
 		op, _ := b.Operand()
 
@@ -73,7 +73,7 @@ func (p *printer) isSimpleExpr(n googlesql.ASTExpressionNode) bool {
 		elems := countFunctionCallElements(b)
 
 		return len(args) <= 4 && elems <= 1 &&
-			allTrue(p.mapIsSimpleExprs2(args)) &&
+			p.areSimpleExprs2(args) &&
 			!p.hasComplexFunctionModifier(b)
 	case *googlesql.ASTNamedArgument:
 		expr, _ := b.Expr()
@@ -114,26 +114,14 @@ func (p *printer) isSimpleExpr2(n googlesql.ASTExpressionNode) bool {
 		return true
 	}
 
-	switch nodeKind(n) {
-	case googlesql.ASTNodeKindAstPathExpression,
-		googlesql.ASTNodeKindAstStar,
-		googlesql.ASTNodeKindAstBignumericLiteral,
-		googlesql.ASTNodeKindAstBooleanLiteral,
-		googlesql.ASTNodeKindAstBytesLiteral,
-		googlesql.ASTNodeKindAstDateOrTimeLiteral,
-		googlesql.ASTNodeKindAstFloatLiteral,
-		googlesql.ASTNodeKindAstIntLiteral,
-		googlesql.ASTNodeKindAstJsonLiteral,
-		googlesql.ASTNodeKindAstNullLiteral,
-		googlesql.ASTNodeKindAstNumericLiteral,
-		googlesql.ASTNodeKindAstParameterExpr,
-		googlesql.ASTNodeKindAstStringLiteral,
-		googlesql.ASTNodeKindAstSystemVariableExpr,
-		googlesql.ASTNodeKindAstIdentifier,
-		googlesql.ASTNodeKindAstDefaultLiteral,
-		googlesql.ASTNodeKindAstMaxLiteral,
-		googlesql.ASTNodeKindAstInputTableArgument:
+	k := nodeKind(n)
+	if isSimpleAtomKind(k) ||
+		k == googlesql.ASTNodeKindAstBytesLiteral ||
+		k == googlesql.ASTNodeKindAstStringLiteral {
 		return true
+	}
+
+	switch k {
 	case googlesql.ASTNodeKindAstBinaryExpression, googlesql.ASTNodeKindAstConcatExpr:
 		parent := nodeParent(n)
 
@@ -150,7 +138,7 @@ func (p *printer) isSimpleExpr2(n googlesql.ASTExpressionNode) bool {
 			elems := countFunctionCallElements(f)
 
 			return len(args) <= 2 && elems <= 1 &&
-				allTrue(p.mapIsSimpleExprs2(args)) &&
+				p.areSimpleExprs2(args) &&
 				!p.hasComplexFunctionModifier(f)
 		}
 	default:
@@ -184,7 +172,7 @@ func (p *printer) isSimpleAndExpr(n *googlesql.ASTAndExpr) bool {
 		}
 	}
 
-	return len(conjuncts) <= 4 && allTrue(p.mapIsSimpleExprs2(conjuncts))
+	return len(conjuncts) <= 4 && p.areSimpleExprs2(conjuncts)
 }
 
 func (p *printer) isSimpleOrExpr(n *googlesql.ASTOrExpr) bool {
@@ -200,7 +188,7 @@ func (p *printer) isSimpleOrExpr(n *googlesql.ASTOrExpr) bool {
 		}
 	}
 
-	return len(disjuncts) <= 4 && allTrue(p.mapIsSimpleExprs2(disjuncts))
+	return len(disjuncts) <= 4 && p.areSimpleExprs2(disjuncts)
 }
 
 func isSimpleColumnSchema(n googlesql.ASTColumnSchemaNode) bool {
@@ -208,11 +196,11 @@ func isSimpleColumnSchema(n googlesql.ASTColumnSchemaNode) bool {
 		return true
 	}
 
-	num := nodeNumChildren(n)
-
 	switch nodeKind(n) {
-	case googlesql.ASTNodeKindAstArrayColumnSchema, googlesql.ASTNodeKindAstRangeColumnSchema:
-		if num > 1 {
+	case googlesql.ASTNodeKindAstArrayColumnSchema,
+		googlesql.ASTNodeKindAstRangeColumnSchema,
+		googlesql.ASTNodeKindAstStructColumnSchema:
+		if nodeNumChildren(n) > 1 {
 			return false
 		}
 
@@ -221,12 +209,6 @@ func isSimpleColumnSchema(n googlesql.ASTColumnSchemaNode) bool {
 		return false
 	case googlesql.ASTNodeKindAstSimpleColumnSchema:
 		return true
-	case googlesql.ASTNodeKindAstStructColumnSchema:
-		if num > 1 {
-			return false
-		}
-
-		return isSimpleColumnSchema2(nodeChild(n, 0))
 	default:
 		return false
 	}
@@ -236,8 +218,6 @@ func isSimpleColumnSchema2(n googlesql.ASTNode) bool {
 	if !nodeDefined(n) {
 		return false
 	}
-
-	num := nodeNumChildren(n)
 
 	switch cs := n.(type) {
 	case *googlesql.ASTArrayColumnSchema,
@@ -252,7 +232,7 @@ func isSimpleColumnSchema2(n googlesql.ASTNode) bool {
 
 		return isSimpleColumnSchema(schema)
 	case *googlesql.ASTStructColumnSchema:
-		if num > 1 {
+		if nodeNumChildren(n) > 1 {
 			return false
 		}
 
@@ -280,7 +260,6 @@ func (p *printer) maybeSingleLineColumns(n *googlesql.ASTSelect) bool {
 		return false
 	}
 
-	r := make([]bool, 0, len(cols))
 	functions := 0
 	aliases := 0
 
@@ -298,169 +277,120 @@ func (p *printer) maybeSingleLineColumns(n *googlesql.ASTSelect) bool {
 			aliases++
 		}
 
-		r = append(r, p.isSimpleExpr2(expr))
+		if functions > 1 || aliases > 1 || !p.isSimpleExpr2(expr) {
+			return false
+		}
 	}
 
-	return functions <= 1 && aliases <= 1 && allTrue(r)
+	return true
 }
 
-func (p *printer) mapIsAlignable(exprs []googlesql.ASTExpressionNode) []bool {
-	r := make([]bool, 0, len(exprs))
-
-	for _, e := range exprs {
-		var simple bool
-
+func (p *printer) areAlignable(exprs []googlesql.ASTExpressionNode) bool {
+	return allMatch(exprs, func(e googlesql.ASTExpressionNode) bool {
 		switch nodeKind(e) {
 		case googlesql.ASTNodeKindAstBinaryExpression, googlesql.ASTNodeKindAstConcatExpr:
-			simple = p.isSimpleExpr(e)
+			return p.isSimpleExpr(e)
 		case googlesql.ASTNodeKindAstUnaryExpression:
-			simple = true
+			return true
 		default:
-			simple = false
+			return false
 		}
-
-		r = append(r, simple)
-	}
-
-	return r
+	})
 }
 
-func mapIsSimpleFunctionParameters(params []*googlesql.ASTFunctionParameter) []bool {
-	r := make([]bool, 0, len(params))
-
-	for _, param := range params {
-		simple := false
-
+func areSimpleFunctionParameters(params []*googlesql.ASTFunctionParameter) bool {
+	return allMatch(params, func(param *googlesql.ASTFunctionParameter) bool {
 		if typ, _ := param.Type(); nodeDefined(typ) {
-			simple = isSimpleType(typ)
-		} else if tpt, _ := param.TemplatedParameterType(); nodeDefined(tpt) {
-			simple = true
+			return isSimpleType(typ)
 		}
 
-		r = append(r, simple)
-	}
+		tpt, _ := param.TemplatedParameterType()
 
-	return r
+		return nodeDefined(tpt)
+	})
 }
 
-func mapIsSimpleTVFSchema(cols []*googlesql.ASTTVFSchemaColumn) []bool {
-	r := make([]bool, 0, len(cols))
-
-	for _, c := range cols {
+func areSimpleTVFSchemaColumns(cols []*googlesql.ASTTVFSchemaColumn) bool {
+	return allMatch(cols, func(c *googlesql.ASTTVFSchemaColumn) bool {
 		typ, _ := c.Type()
-		r = append(r, isSimpleType(typ))
-	}
 
-	return r
+		return isSimpleType(typ)
+	})
 }
 
-func (p *printer) mapIsSimpleOptionsList(n *googlesql.ASTOptionsList) []bool {
+func (p *printer) isSimpleOptionsList(n *googlesql.ASTOptionsList) bool {
 	entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](n)
-	r := make([]bool, 0, len(entries))
 
-	for _, e := range entries {
+	return allMatch(entries, func(e *googlesql.ASTOptionsEntry) bool {
 		val, _ := e.Value()
-		r = append(r, p.isSimpleExpr(val))
-	}
 
-	return r
+		return p.isSimpleExpr(val)
+	})
 }
 
-func (p *printer) mapIsSimplePathExpressionList(n *googlesql.ASTPathExpressionList) []bool {
+func (p *printer) isSimplePathExpressionList(n *googlesql.ASTPathExpressionList) bool {
 	paths := selectChildrenOfType[*googlesql.ASTPathExpression](n)
-	r := make([]bool, 0, len(paths))
 
-	for _, path := range paths {
-		r = append(r, p.isSimpleExpr(path))
-	}
-
-	return r
+	return allMatch(paths, func(path *googlesql.ASTPathExpression) bool {
+		return p.isSimpleExpr(path)
+	})
 }
 
-func (p *printer) mapIsSimplePivotExpressionList(n *googlesql.ASTPivotExpressionList) []bool {
+func (p *printer) isSimplePivotExpressionList(n *googlesql.ASTPivotExpressionList) bool {
 	exprs := selectChildrenOfType[*googlesql.ASTPivotExpression](n)
-	r := make([]bool, 0, len(exprs))
 
-	for _, a := range exprs {
+	return allMatch(exprs, func(a *googlesql.ASTPivotExpression) bool {
 		expr, _ := a.Expression()
 		alias, _ := a.Alias()
-		r = append(r, p.isSimpleExpr(expr) && !nodeDefined(alias))
-	}
 
-	return r
+		return p.isSimpleExpr(expr) && !nodeDefined(alias)
+	})
 }
 
-func (p *printer) mapIsSimplePivotForExpression(n *googlesql.ASTPivotClause) []bool {
-	lhs, _ := n.ForExpression()
-	vl, _ := n.PivotValues()
-
-	lhsSimple := p.isSimpleExpr(lhs)
-	vlSimple := p.mapIsSimplePivotValueList(vl)
-
-	return append([]bool{lhsSimple}, vlSimple...)
-}
-
-func (p *printer) mapIsSimplePivotValueList(n *googlesql.ASTPivotValueList) []bool {
+func (p *printer) isSimplePivotValueList(n *googlesql.ASTPivotValueList) bool {
 	if !nodeDefined(n) {
-		return nil
+		return true
 	}
 
 	exprs := selectChildrenOfType[*googlesql.ASTPivotValue](n)
-	r := make([]bool, 0, len(exprs))
 
-	for _, a := range exprs {
+	return allMatch(exprs, func(a *googlesql.ASTPivotValue) bool {
 		val, _ := a.Value()
 		alias, _ := a.Alias()
-		r = append(r, p.isSimpleExpr(val) && !nodeDefined(alias))
-	}
 
-	return r
+		return p.isSimpleExpr(val) && !nodeDefined(alias)
+	})
 }
 
-func (p *printer) mapIsSimpleStructConstructorArg(args []*googlesql.ASTStructConstructorArg) []bool {
-	r := make([]bool, 0, len(args))
-
-	for _, a := range args {
+func (p *printer) areSimpleStructConstructorArgs(args []*googlesql.ASTStructConstructorArg) bool {
+	return allMatch(args, func(a *googlesql.ASTStructConstructorArg) bool {
 		expr, _ := a.Expression()
-		r = append(r, p.isSimpleExpr(expr))
-	}
 
-	return r
+		return p.isSimpleExpr(expr)
+	})
 }
 
-func mapIsSimpleStructFields(fields []*googlesql.ASTStructField) []bool {
-	r := make([]bool, 0, len(fields))
-
-	for _, f := range fields {
+func areSimpleStructFields(fields []*googlesql.ASTStructField) bool {
+	return allMatch(fields, func(f *googlesql.ASTStructField) bool {
 		typ, _ := f.Type()
-		r = append(r, isSimpleType(typ))
-	}
 
-	return r
+		return isSimpleType(typ)
+	})
 }
 
-func (p *printer) mapIsSimpleTVFArguments(args []*googlesql.ASTTVFArgument) []bool {
-	r := make([]bool, 0, len(args))
-
-	for _, a := range args {
-		r = append(r, p.isSimpleTVFArgument(a))
-	}
-
-	return r
+func (p *printer) areSimpleTVFArguments(args []*googlesql.ASTTVFArgument) bool {
+	return allMatch(args, p.isSimpleTVFArgument)
 }
 
-func (p *printer) mapIsSimpleUnpivotInItemList(n *googlesql.ASTUnpivotInItemList) []bool {
+func (p *printer) isSimpleUnpivotInItemList(n *googlesql.ASTUnpivotInItemList) bool {
 	items := selectChildrenOfType[*googlesql.ASTUnpivotInItem](n)
-	r := make([]bool, 0, len(items))
 
-	for _, item := range items {
+	return allMatch(items, func(item *googlesql.ASTUnpivotInItem) bool {
 		cols, _ := item.UnpivotColumns()
 		alias, _ := item.Alias()
-		simple := allTrue(p.mapIsSimplePathExpressionList(cols))
-		r = append(r, simple && !nodeDefined(alias))
-	}
 
-	return r
+		return !nodeDefined(alias) && p.isSimplePathExpressionList(cols)
+	})
 }
 
 func (p *printer) isSimpleTVFArgument(n *googlesql.ASTTVFArgument) bool {
@@ -487,24 +417,12 @@ func (p *printer) isSimpleTVFArgument(n *googlesql.ASTTVFArgument) bool {
 	return true
 }
 
-func (p *printer) mapIsSimpleExprs(n []googlesql.ASTExpressionNode) []bool {
-	r := make([]bool, 0, len(n))
-
-	for _, e := range n {
-		r = append(r, p.isSimpleExpr(e))
-	}
-
-	return r
+func (p *printer) areSimpleExprs(exprs []googlesql.ASTExpressionNode) bool {
+	return allMatch(exprs, p.isSimpleExpr)
 }
 
-func (p *printer) mapIsSimpleExprs2(n []googlesql.ASTExpressionNode) []bool {
-	r := make([]bool, 0, len(n))
-
-	for _, e := range n {
-		r = append(r, p.isSimpleExpr2(e))
-	}
-
-	return r
+func (p *printer) areSimpleExprs2(exprs []googlesql.ASTExpressionNode) bool {
+	return allMatch(exprs, p.isSimpleExpr2)
 }
 
 func countFunctionCallElements(n *googlesql.ASTFunctionCall) int {
@@ -569,7 +487,7 @@ func (p *printer) hasComplexFunctionModifier(n *googlesql.ASTFunctionCall) bool 
 	if wr, _ := n.WithReportModifier(); nodeDefined(wr) {
 		if ol, _ := wr.OptionsList(); nodeDefined(ol) {
 			entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](ol)
-			if len(entries) > 1 || !allTrue(p.mapIsSimpleOptionsList(ol)) {
+			if len(entries) > 1 || !p.isSimpleOptionsList(ol) {
 				return true
 			}
 		}

@@ -1,6 +1,8 @@
 package formatter_test
 
 import (
+	"bytes"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -133,5 +135,18 @@ func TestRegressions(t *testing.T) {
 		assert.Contains(t, got, "MyDataset.MyTable")
 		assert.Contains(t, got, "@MyParam")
 		assert.Contains(t, got, "@@project_id")
+	})
+
+	t.Run("WithLogger emits debug trace sections cleanly", func(t *testing.T) {
+		t.Parallel()
+
+		var buf bytes.Buffer
+		bqf := formatter.NewBigQueryFormatter(formatter.WithLogger(log.New(&buf, "", 0)))
+
+		got, err := bqf.Format("SELECT {{ col }} FROM t -- note")
+		require.NoError(t, err)
+		assert.Equal(t, "SELECT {{ col }}\n  FROM t  -- note\n", got)
+		assert.Contains(t, buf.String(), "# BigQuery Format")
+		assert.Contains(t, buf.String(), "## Input AST")
 	})
 }

@@ -70,12 +70,12 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 	}
 
 	if f.Logger != nil {
-		f.debug(strings.Repeat("\n", 4))
-		f.debug("# BigQuery Format\n\n")
-		f.debug("## Options")
+		f.log(strings.Repeat("\n", 4))
+		f.log("# BigQuery Format\n\n")
+		f.log("## Options")
 
 		if dopts, merr := json.MarshalIndent(opts, "", "  "); merr == nil {
-			f.debug(string(dopts) + "\n\n")
+			f.log(string(dopts) + "\n\n")
 		}
 	}
 
@@ -117,7 +117,7 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 
 	var bqCatalog stringMapSet
 	if opts.FunctionCatalog == BigQueryCatalog {
-		bqCatalog = newBigQueryFunctionCatalog()
+		bqCatalog = bigQueryFunctionCatalog
 	}
 
 	p := &printer{
@@ -132,7 +132,6 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 		tracker:     tracker,
 		logger:      f.Logger,
 		errs:        errs,
-		visitors:    newVisitorMap(),
 	}
 
 	d := make(printerData, 10)
@@ -184,20 +183,20 @@ func (f *SQLFormatter) logDebugInputs(
 	}
 
 	if ds, derr := root.DebugString(100); derr == nil {
-		f.debug("## Input AST\n\n")
-		f.debugf("```\n%s\n```\n", ds)
+		f.log("## Input AST\n\n")
+		f.logf("```\n%s\n```\n", ds)
 	}
 
-	f.debug("## Input\n\n")
-	f.debugf("```\n%s\n```\n", inputOriginal)
+	f.log("## Input\n\n")
+	f.logf("```\n%s\n```\n", inputOriginal)
 
 	f.log("## Preprocessed\n\n")
 	f.logf("```\n%s\n```\n\n", input)
 
-	f.debug("## Template Elements")
+	f.log("## Template Elements")
 
 	for i, e := range elems {
-		f.debugf("Element %d: %#v", i+1, e)
+		f.logf("Element %d: %#v", i+1, e)
 	}
 
 	f.log("## Pre-processed input without comments\n\n")
@@ -219,14 +218,6 @@ func (f *SQLFormatter) logf(format string, args ...any) {
 	}
 
 	f.Logger.Printf(format, args...)
-}
-
-func (f *SQLFormatter) debug(msg string, keyvals ...any) {
-	f.log(msg, keyvals...)
-}
-
-func (f *SQLFormatter) debugf(format string, args ...any) {
-	f.logf(format, args...)
 }
 
 func (f *SQLFormatter) errorf(format string, args ...any) {

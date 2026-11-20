@@ -44,7 +44,7 @@ func (p *printer) printMatchRecognizeBody(
 
 	if meas, _ := n.Measures(); nodeDefined(meas) {
 		ctx := maps.Clone(d)
-		ctx.SetBool("single_line_cols", false)
+		ctx.SetBool(keySingleLineCols, false)
 
 		p.println(p.keyword("MEASURES"))
 		p.incDepth()

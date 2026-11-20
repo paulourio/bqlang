@@ -59,14 +59,14 @@ func (p *printer) visitAndExpr(n *googlesql.ASTAndExpr, d printerData) {
 	simple := p.isSimpleAndExpr(n)
 	ctx := maps.Clone(d)
 
-	budget := d["align_binary_op_budget"]
+	budget := d[keyAlignBinaryOpBudget]
 	alignAnd := budget > 0
 
 	if simple && alignAnd {
-		d["align_binary_op_budget"]--
+		d[keyAlignBinaryOpBudget]--
 	}
 
-	if alignAnd || inMerge || (!simple && allTrue(p.mapIsAlignable(conjuncts))) {
+	if alignAnd || inMerge || (!simple && p.areAlignable(conjuncts)) {
 		budget = 1
 	}
 
@@ -129,7 +129,7 @@ func (p *printer) formatAndConjuncts(
 			p1.print("\v")
 		}
 
-		ctx["align_binary_op_budget"] = budget
+		ctx[keyAlignBinaryOpBudget] = budget
 
 		if !simple {
 			p1.accept(conjunct, ctx)
@@ -172,7 +172,7 @@ func (p *printer) visitOrExpr(n *googlesql.ASTOrExpr, d printerData) {
 	disjuncts := selectChildrenOfType[googlesql.ASTExpressionNode](n)
 	p1 := p.nest()
 	inClause := isInsideOfWhereClause(n) || isInsideOfOnClause(n)
-	simple := allTrue(p.mapIsSimpleExprs(disjuncts)) && len(disjuncts) < 4
+	simple := len(disjuncts) < 4 && p.areSimpleExprs(disjuncts)
 
 	p.moveBefore(n)
 
@@ -235,7 +235,7 @@ func (p *printer) visitArrayConstructor(n *googlesql.ASTArrayConstructor, d prin
 	}
 
 	elems := selectChildrenOfType[googlesql.ASTExpressionNode](n)
-	simple := allTrue(p.mapIsSimpleExprs(elems))
+	simple := p.areSimpleExprs(elems)
 
 	if simple {
 		pp.print("[")
@@ -307,8 +307,8 @@ func (p *printer) visitBinaryExpression(n *googlesql.ASTBinaryExpression, d prin
 
 	var lhsAlign, rhsAlign string
 
-	if capacity := d["align_binary_op_budget"]; capacity > 0 {
-		d["align_binary_op_budget"]--
+	if capacity := d[keyAlignBinaryOpBudget]; capacity > 0 {
+		d[keyAlignBinaryOpBudget]--
 		lhsAlign = "\v"
 		rhsAlign = " \v"
 	}
@@ -322,7 +322,7 @@ func (p *printer) visitBinaryExpression(n *googlesql.ASTBinaryExpression, d prin
 	_, b := nodeByteRange(lhs)
 	e, _ := nodeByteRange(rhs)
 	view := p.viewErasedInput(b, e)
-	binPos := indexFunc(view, unicode.IsSpace, false)
+	binPos := strings.IndexFunc(view, isNonSpace)
 
 	if binPos >= 0 {
 		p.fmt.flushCommentsUpTo(b + binPos)
@@ -415,13 +415,17 @@ func (p *printer) printNotKeywordOp(isNot bool, posKw, negKw, lhsAlign, rhsAlign
 	}
 }
 
+func isNonSpace(r rune) bool {
+	return !unicode.IsSpace(r)
+}
+
 func (p *printer) visitConcatExpr(n *googlesql.ASTConcatExpr, d printerData) {
 	p.printOpenParenIfNeeded(n)
 
 	var lhsAlign, rhsAlign string
 
-	if capacity := d["align_binary_op_budget"]; capacity > 0 {
-		d["align_binary_op_budget"]--
+	if capacity := d[keyAlignBinaryOpBudget]; capacity > 0 {
+		d[keyAlignBinaryOpBudget]--
 		lhsAlign = "\v"
 		rhsAlign = " \v"
 	}
@@ -434,7 +438,7 @@ func (p *printer) visitConcatExpr(n *googlesql.ASTConcatExpr, d printerData) {
 			_, b := nodeByteRange(prev)
 			e, _ := nodeByteRange(operand)
 			view := p.viewErasedInput(b, e)
-			binPos := indexFunc(view, unicode.IsSpace, false)
+			binPos := strings.IndexFunc(view, isNonSpace)
 
 			if binPos >= 0 {
 				p.fmt.flushCommentsUpTo(b + binPos)
@@ -483,9 +487,8 @@ func (p *printer) visitCaseNoValueExpression(n *googlesql.ASTCaseNoValueExpressi
 	}
 
 	args := selectChildrenOfType[googlesql.ASTExpressionNode](n)
-	argsSimple := p.mapIsSimpleExprs(args)
-	simple := allTrue(argsSimple)
-	d.SetBool("simple_case", simple)
+	simple := p.areSimpleExprs(args)
+	d.SetBool(keySimpleCase, simple)
 
 	pp := p.nest()
 	p.visitCaseArgs(pp, args, d)
@@ -507,13 +510,12 @@ func (p *printer) visitCaseValueExpression(n *googlesql.ASTCaseValueExpression, 
 	p.print(p.keyword("CASE"))
 
 	args := selectChildrenOfType[googlesql.ASTExpressionNode](n)
-	argsSimple := p.mapIsSimpleExprs(args)
-	simple := allTrue(argsSimple)
 	value := args[0]
-	valueSimple := argsSimple[0]
+	valueSimple := p.isSimpleExpr(value)
+	simple := valueSimple && p.areSimpleExprs(args[1:])
 	indentWhen := p.fmt.opts.IndentCaseWhen
 
-	d.SetBool("simple_case", simple)
+	d.SetBool(keySimpleCase, simple)
 
 	if !simple || !valueSimple {
 		p.println("")
@@ -560,7 +562,7 @@ func (p *printer) visitCaseValueExpression(n *googlesql.ASTCaseValueExpression, 
 
 func (p *printer) visitCaseArgs(target *printer, args []googlesql.ASTExpressionNode, d printerData) {
 	pp := target.nest()
-	simple := d.IsEnabled("simple_case")
+	simple := d.IsEnabled(keySimpleCase)
 	initAlignBinOpBudget := 0
 
 	if simple && p.onlyBinaryExprOnCaseLHS(args) {
@@ -596,7 +598,7 @@ func (p *printer) visitCaseWhenPair(
 ) {
 	lhsData := maps.Clone(d)
 	if simple {
-		lhsData["align_binary_op_budget"] = alignBudget
+		lhsData[keyAlignBinaryOpBudget] = alignBudget
 	}
 
 	pp.print(pp.keyword("WHEN"))
@@ -876,7 +878,7 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 	elems := countFunctionCallElements(n)
 	simple := len(callArgs) <= 4 &&
 		elems <= 1 &&
-		allTrue(p.mapIsSimpleExprs(callArgs)) &&
+		p.areSimpleExprs(callArgs) &&
 		!p.hasComplexFunctionModifier(n)
 
 	pp.printFunctionName(fn, expr, chained)
@@ -928,7 +930,7 @@ func (p *printer) printFunctionName(fn *googlesql.ASTPathExpression, expr string
 
 func (p *printer) printFunctionCallArgs(
 	callArgs []googlesql.ASTExpressionNode,
-	signature interface{ PrintCaseAt(int) PrintCase },
+	signature *functionSignature,
 	sigOffset int,
 	simple bool,
 	d printerData,
@@ -1078,7 +1080,8 @@ func (p *printer) visitIdentifier(n *googlesql.ASTIdentifier, _ printerData) {
 func (p *printer) rawIdentifier(n *googlesql.ASTIdentifier) string {
 	start, end := nodeByteRange(n)
 
-	if start < end && p.viewInput(start, start+1) != "`" && start > 0 && viewStringAt(p.input, start-1) == '`' {
+	if 0 < start && start < end && end <= len(p.input) &&
+		p.input[start] != '`' && p.input[start-1] == '`' {
 		start--
 		end++
 	}
@@ -1153,34 +1156,8 @@ func (p *printer) visitInExpression(n *googlesql.ASTInExpression, d printerData)
 
 func (p *printer) visitInList(n *googlesql.ASTInList, d printerData) {
 	p.moveBefore(n)
-	p.print("(")
-
 	elems := selectChildrenOfType[googlesql.ASTExpressionNode](n)
-	simple := allTrue(p.mapIsSimpleExprs(elems))
-
-	if !simple {
-		p.println("")
-		p.incDepth()
-	}
-
-	for i, elem := range elems {
-		if i > 0 {
-			p.print(",")
-
-			if !simple {
-				p.println("")
-			}
-		}
-
-		p.accept(elem, d)
-	}
-
-	if !simple {
-		p.println("")
-		p.decDepth()
-	}
-
-	p.print(")")
+	printParenList(p, elems, p.areSimpleExprs(elems), d)
 }
 
 func (p *printer) visitIntervalExpr(n *googlesql.ASTIntervalExpr, d printerData) {
@@ -1282,7 +1259,7 @@ func (p *printer) visitPathExpressionList(n *googlesql.ASTPathExpressionList, d 
 		p.print("(")
 	}
 
-	simple := allTrue(p.mapIsSimplePathExpressionList(n))
+	simple := p.isSimplePathExpressionList(n)
 
 	for i, name := range exprs {
 		if i > 0 {
@@ -1397,30 +1374,7 @@ func (p *printer) visitStructConstructorWithKeyword(n *googlesql.ASTStructConstr
 	}
 
 	fields := selectChildrenOfType[*googlesql.ASTStructConstructorArg](n)
-	simple := allTrue(p.mapIsSimpleStructConstructorArg(fields))
-
-	if !simple {
-		p.println("")
-		p.incDepth()
-	}
-
-	for i, e := range fields {
-		if i > 0 {
-			p.print(",")
-
-			if !simple {
-				p.println("")
-			}
-		}
-
-		p.accept(e, d)
-	}
-
-	if !simple {
-		p.println("")
-		p.decDepth()
-	}
-
+	printParenBody(p, fields, p.areSimpleStructConstructorArgs(fields), d)
 	p.print(")")
 	p.printCloseParenIfNeededWithDepth(n)
 }
@@ -1428,34 +1382,9 @@ func (p *printer) visitStructConstructorWithKeyword(n *googlesql.ASTStructConstr
 func (p *printer) visitStructConstructorWithParens(n *googlesql.ASTStructConstructorWithParens, d printerData) {
 	p.moveBefore(n)
 	p.printOpenParenIfNeededWithDepth(n)
-	p.print("(")
 
 	fields := selectChildrenOfType[googlesql.ASTExpressionNode](n)
-	simple := allTrue(p.mapIsSimpleExprs(fields))
-
-	if !simple {
-		p.println("")
-		p.incDepth()
-	}
-
-	for i, e := range fields {
-		if i > 0 {
-			p.print(",")
-
-			if !simple {
-				p.println("")
-			}
-		}
-
-		p.accept(e, d)
-	}
-
-	if !simple {
-		p.println("")
-		p.decDepth()
-	}
-
-	p.print(")")
+	printParenList(p, fields, p.areSimpleExprs(fields), d)
 	p.printCloseParenIfNeededWithDepth(n)
 }
 

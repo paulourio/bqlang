@@ -60,20 +60,10 @@ func (p *printer) visitDeleteStatement(n *googlesql.ASTDeleteStatement, d printe
 		pTarget.print(pTarget.keyword("FROM"))
 	}
 
-	pTarget.accept(target, d)
-
-	if hint, _ := n.Hint(); nodeDefined(hint) {
-		pTarget.accept(hint, d)
-	}
-
-	if alias, _ := n.Alias(); nodeDefined(alias) {
-		pTarget.accept(alias, d)
-	}
-
-	if off, _ := n.Offset(); nodeDefined(off) {
-		pTarget.accept(off, d)
-	}
-
+	hint, _ := n.Hint()
+	alias, _ := n.Alias()
+	off, _ := n.Offset()
+	pTarget.acceptDMLTarget(target, hint, alias, off, d)
 	pp.print(pTarget.unnest())
 
 	if where, _ := n.Where(); nodeDefined(where) {
@@ -90,6 +80,19 @@ func (p *printer) visitDeleteStatement(n *googlesql.ASTDeleteStatement, d printe
 	p.movePast(n)
 }
 
+func (p *printer) acceptDMLTarget(
+	target googlesql.ASTGeneralizedPathExpressionNode,
+	hint *googlesql.ASTHint,
+	alias *googlesql.ASTAlias,
+	off *googlesql.ASTWithOffset,
+	d printerData,
+) {
+	p.accept(target, d)
+	p.accept(hint, d)
+	p.accept(alias, d)
+	p.accept(off, d)
+}
+
 func (p *printer) visitUpdateStatement(n *googlesql.ASTUpdateStatement, d printerData) {
 	p.moveBefore(n)
 
@@ -98,20 +101,10 @@ func (p *printer) visitUpdateStatement(n *googlesql.ASTUpdateStatement, d printe
 
 	pTarget := pp.nest()
 	target, _ := n.TargetPath()
-	pTarget.accept(target, d)
-
-	if hint, _ := n.Hint(); nodeDefined(hint) {
-		pTarget.accept(hint, d)
-	}
-
-	if alias, _ := n.Alias(); nodeDefined(alias) {
-		pTarget.accept(alias, d)
-	}
-
-	if off, _ := n.Offset(); nodeDefined(off) {
-		pTarget.accept(off, d)
-	}
-
+	hint, _ := n.Hint()
+	alias, _ := n.Alias()
+	off, _ := n.Offset()
+	pTarget.acceptDMLTarget(target, hint, alias, off, d)
 	pp.print(pTarget.unnest())
 
 	if items, _ := n.UpdateItemList(); nodeDefined(items) {
@@ -218,33 +211,9 @@ func (p *printer) visitInsertValuesRow(n *googlesql.ASTInsertValuesRow, d printe
 	p.moveBefore(n)
 
 	values := selectChildrenOfType[googlesql.ASTExpressionNode](n)
-	simple := len(values) <= 4 && allTrue(p.mapIsSimpleExprs(values))
+	simple := len(values) <= 4 && p.areSimpleExprs(values)
 
-	p.print("(")
-
-	if !simple {
-		p.println("")
-		p.incDepth()
-	}
-
-	for i, r := range values {
-		if i > 0 {
-			p.print(",")
-
-			if !simple {
-				p.println("")
-			}
-		}
-
-		p.accept(r, d)
-	}
-
-	if !simple {
-		p.println("")
-		p.decDepth()
-	}
-
-	p.print(")")
+	printParenList(p, values, simple, d)
 	p.movePast(n)
 }
 

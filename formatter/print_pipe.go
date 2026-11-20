@@ -145,7 +145,7 @@ func (p *printer) printPipeSelectLike(kw string, sel *googlesql.ASTSelect, d pri
 	}
 
 	singleLine := p.maybeSingleLineColumns(sel)
-	d.SetBool("single_line_cols", singleLine)
+	d.SetBool(keySingleLineCols, singleLine)
 
 	if sl, _ := sel.SelectList(); nodeDefined(sl) {
 		p.accept(sl, d)
@@ -216,7 +216,7 @@ func (p *printer) visitPipeAggregate(n *googlesql.ASTPipeAggregate, d printerDat
 	}
 
 	singleLine := p.maybeSingleLineColumns(sel)
-	d.SetBool("single_line_cols", singleLine)
+	d.SetBool(keySingleLineCols, singleLine)
 
 	if sl, _ := sel.SelectList(); nodeDefined(sl) && nodeNumChildren(sl) > 0 {
 		p.accept(sl, d)

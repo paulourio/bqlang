@@ -63,99 +63,74 @@ func (p *printer) visitAlterAllRowAccessPoliciesStatement(
 }
 
 func (p *printer) visitAlterColumnDropDefaultAction(n *googlesql.ASTAlterColumnDropDefaultAction, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER COLUMN"))
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
-	p.accept(cn, d)
-	p.println("")
-	p.incDepth()
-	p.println(p.keyword("DROP DEFAULT"))
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterColumnAction(n, ie, cn, d, func() {
+		p.print(p.keyword("DROP DEFAULT"))
+	})
 }
 
 func (p *printer) visitAlterColumnDropNotNullAction(n *googlesql.ASTAlterColumnDropNotNullAction, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER COLUMN"))
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
-	p.accept(cn, d)
-	p.println("")
-	p.incDepth()
-	p.println(p.keyword("DROP NOT NULL"))
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterColumnAction(n, ie, cn, d, func() {
+		p.print(p.keyword("DROP NOT NULL"))
+	})
 }
 
 func (p *printer) visitAlterColumnOptionsAction(n *googlesql.ASTAlterColumnOptionsAction, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER COLUMN"))
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
 	ol, _ := n.OptionsList()
-
-	p.accept(cn, d)
-	p.println("")
-	p.incDepth()
-	p.print(p.keyword("SET"))
-	p.accept(ol, d)
-	p.println("")
-	p.decDepth()
+	p.printAlterColumnAction(n, ie, cn, d, func() {
+		p.print(p.keyword("SET"))
+		p.accept(ol, d)
+	})
 }
 
 func (p *printer) visitAlterColumnSetDefaultAction(n *googlesql.ASTAlterColumnSetDefaultAction, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER COLUMN"))
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
 	de, _ := n.DefaultExpression()
-
-	p.accept(cn, d)
-	p.println("")
-	p.incDepth()
-	p.print(p.keyword("SET DEFAULT"))
-	p.accept(de, d)
-	p.println("")
-	p.decDepth()
+	p.printAlterColumnAction(n, ie, cn, d, func() {
+		p.print(p.keyword("SET DEFAULT"))
+		p.accept(de, d)
+	})
 }
 
 func (p *printer) visitAlterColumnTypeAction(n *googlesql.ASTAlterColumnTypeAction, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER COLUMN"))
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
 	sc, _ := n.Schema()
 	co, _ := n.Collate()
+	p.printAlterColumnAction(n, ie, cn, d, func() {
+		p.print(p.keyword("SET DATA TYPE"))
+		p.accept(sc, d)
+		p.accept(co, d)
+	})
+}
 
-	p.accept(cn, d)
+func (p *printer) printAlterColumnAction(
+	n googlesql.ASTNode,
+	ifExists bool,
+	colName *googlesql.ASTIdentifier,
+	d printerData,
+	bodyFn func(),
+) {
+	p.moveBefore(n)
+	p.print(p.keyword("ALTER COLUMN"))
+
+	if ifExists {
+		p.print(p.keyword("IF EXISTS"))
+	}
+
+	p.accept(colName, d)
 	p.println("")
 	p.incDepth()
-	p.print(p.keyword("SET DATA TYPE"))
-	p.accept(sc, d)
-	p.accept(co, d)
+	bodyFn()
 	p.println("")
 	p.decDepth()
+	p.movePast(n)
 }
 
 func (p *printer) visitAlterConstraintEnforcementAction(
@@ -333,25 +308,29 @@ func (p *printer) visitAlterViewStatement(n *googlesql.ASTAlterViewStatement, d 
 }
 
 func (p *printer) visitCloneDataSource(n *googlesql.ASTCloneDataSource, d printerData) {
-	p.moveBefore(n)
 	pe, _ := n.PathExpr()
 	fst, _ := n.ForSystemTime()
 	wc, _ := n.WhereClause()
-
-	p.print(p.keyword("CLONE"))
-	p.accept(pe, d)
-	p.accept(fst, d)
-	p.lnaccept(wc, d)
-	p.movePast(n)
+	p.printTableDataSource("CLONE", n, pe, fst, wc, d)
 }
 
 func (p *printer) visitCopyDataSource(n *googlesql.ASTCopyDataSource, d printerData) {
-	p.moveBefore(n)
 	pe, _ := n.PathExpr()
 	fst, _ := n.ForSystemTime()
 	wc, _ := n.WhereClause()
+	p.printTableDataSource("COPY", n, pe, fst, wc, d)
+}
 
-	p.print(p.keyword("COPY"))
+func (p *printer) printTableDataSource(
+	kw string,
+	n googlesql.ASTNode,
+	pe *googlesql.ASTPathExpression,
+	fst *googlesql.ASTForSystemTime,
+	wc *googlesql.ASTWhereClause,
+	d printerData,
+) {
+	p.moveBefore(n)
+	p.print(p.keyword(kw))
 	p.accept(pe, d)
 	p.accept(fst, d)
 	p.lnaccept(wc, d)
@@ -554,7 +533,7 @@ func (p *printer) visitCreateProcedureStatement(n *googlesql.ASTCreateProcedureS
 
 	if nodeDefined(params) {
 		entries := selectChildrenOfType[*googlesql.ASTFunctionParameter](params)
-		simple := allTrue(mapIsSimpleFunctionParameters(entries))
+		simple := areSimpleFunctionParameters(entries)
 
 		if simple {
 			p.print(strings.TrimLeft(p.toString(params, d), "\v"))
@@ -759,43 +738,13 @@ func (p *printer) visitColumnWithOptionsList(n *googlesql.ASTColumnWithOptionsLi
 	p.moveBefore(n)
 
 	cols := selectChildrenOfType[*googlesql.ASTColumnWithOptions](n)
-	hasOpts := false
+	simple := len(cols) <= 4 && allMatch(cols, func(c *googlesql.ASTColumnWithOptions) bool {
+		ol, _ := c.OptionsList()
 
-	for _, c := range cols {
-		if ol, _ := c.OptionsList(); nodeDefined(ol) {
-			hasOpts = true
+		return !nodeDefined(ol)
+	})
 
-			break
-		}
-	}
-
-	simple := len(cols) <= 4 && !hasOpts
-
-	p.print("(")
-
-	if !simple {
-		p.println("")
-		p.incDepth()
-	}
-
-	for i, c := range cols {
-		if i > 0 {
-			p.print(",")
-
-			if !simple {
-				p.println("")
-			}
-		}
-
-		p.accept(c, d)
-	}
-
-	if !simple {
-		p.println("")
-		p.decDepth()
-	}
-
-	p.print(")")
+	printParenList(p, cols, simple, d)
 	p.movePast(n)
 }
 
@@ -870,53 +819,12 @@ func (p *printer) visitAuxLoadDataStatement(n *googlesql.ASTAuxLoadDataStatement
 		ffOpt, _ := ff.OptionsList()
 
 		p.println("")
-		p.print(p.keyword("FROM FILES") + " ")
-		p.printOptionsEntriesParens(ffOpt, d)
+		p.printOptionsListBody(ffOpt, "FROM FILES", d)
 	}
 
 	p.lnaccept(wpc, d)
 	p.lnaccept(wcc, d)
 	p.movePast(n)
-}
-
-func (p *printer) printOptionsEntriesParens(n *googlesql.ASTOptionsList, d printerData) {
-	if !nodeDefined(n) {
-		return
-	}
-
-	entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](n)
-	simple := len(entries) <= 1 && allTrue(p.mapIsSimpleOptionsList(n))
-	d.SetBool("options_simple", simple)
-
-	p.print("(")
-
-	if !simple {
-		p.println("")
-		p.incDepth()
-	}
-
-	p1 := p.nest()
-
-	for i, e := range entries {
-		if i > 0 {
-			p1.print(",")
-
-			if !simple {
-				p1.println("")
-			}
-		}
-
-		p1.accept(e, d)
-	}
-
-	p.print(p1.unnestLeft())
-
-	if !simple {
-		p.println("")
-		p.decDepth()
-	}
-
-	p.print(")")
 }
 
 func (p *printer) printPrivileges(privs *googlesql.ASTPrivileges, d printerData) {
@@ -941,33 +849,32 @@ func (p *printer) printPrivileges(privs *googlesql.ASTPrivileges, d printerData)
 }
 
 func (p *printer) visitGrantStatement(n *googlesql.ASTGrantStatement, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("GRANT"))
-
-	if privs, _ := n.Privileges(); nodeDefined(privs) {
-		p.printPrivileges(privs, d)
-	}
-
-	p.print(p.keyword("ON"))
-
-	for _, part := range selectChildrenOfType[*googlesql.ASTIdentifier](n) {
-		p.print(p.keyword(p.toString(part, d)))
-	}
-
+	privs, _ := n.Privileges()
 	target, _ := n.TargetPath()
 	grantees, _ := n.GranteeList()
-
-	p.accept(target, d)
-	p.print(p.keyword("TO"))
-	p.accept(grantees, d)
-	p.movePast(n)
+	p.printPrivilegeDCL("GRANT", "TO", n, privs, target, grantees, d)
 }
 
 func (p *printer) visitRevokeStatement(n *googlesql.ASTRevokeStatement, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("REVOKE"))
+	privs, _ := n.Privileges()
+	target, _ := n.TargetPath()
+	grantees, _ := n.GranteeList()
+	p.printPrivilegeDCL("REVOKE", "FROM", n, privs, target, grantees, d)
+}
 
-	if privs, _ := n.Privileges(); nodeDefined(privs) {
+func (p *printer) printPrivilegeDCL(
+	stmtKw string,
+	recipientKw string,
+	n googlesql.ASTNode,
+	privs *googlesql.ASTPrivileges,
+	target *googlesql.ASTPathExpression,
+	grantees *googlesql.ASTGranteeList,
+	d printerData,
+) {
+	p.moveBefore(n)
+	p.print(p.keyword(stmtKw))
+
+	if nodeDefined(privs) {
 		p.printPrivileges(privs, d)
 	}
 
@@ -977,11 +884,8 @@ func (p *printer) visitRevokeStatement(n *googlesql.ASTRevokeStatement, d printe
 		p.print(p.keyword(p.toString(part, d)))
 	}
 
-	target, _ := n.TargetPath()
-	grantees, _ := n.GranteeList()
-
 	p.accept(target, d)
-	p.print(p.keyword("FROM"))
+	p.print(p.keyword(recipientKw))
 	p.accept(grantees, d)
 	p.movePast(n)
 }
@@ -1015,27 +919,18 @@ func (p *printer) visitDropAllRowAccessPoliciesStatement(
 }
 
 func (p *printer) visitDropColumnAction(n *googlesql.ASTDropColumnAction, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
-
-	p.print(p.keyword(dropKeyword(ie, "COLUMN")))
-	p.print(p.identifier(p.toString(cn, d)))
-	p.movePast(n)
+	p.printDropNamedObject(n, "COLUMN", ie, cn, nil, d)
 }
 
 func (p *printer) visitDropConstraintAction(n *googlesql.ASTDropConstraintAction, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	cn, _ := n.ConstraintName()
-
-	p.print(p.keyword(dropKeyword(ie, "CONSTRAINT")))
-	p.print(p.identifier(p.toString(cn, d)))
-	p.movePast(n)
+	p.printDropNamedObject(n, "CONSTRAINT", ie, cn, nil, d)
 }
 
 func (p *printer) visitDropEntityStatement(n *googlesql.ASTDropEntityStatement, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	target, _ := n.Name()
 	et, _ := n.EntityType()
@@ -1045,29 +940,19 @@ func (p *printer) visitDropEntityStatement(n *googlesql.ASTDropEntityStatement, 
 		obj = strings.ToUpper(p.toString(et, d))
 	}
 
-	p.print(p.keyword(dropKeyword(ie, obj)))
-	p.print(p.identifier(p.toString(target, d)))
-	p.movePast(n)
+	p.printDropNamedObject(n, obj, ie, target, nil, d)
 }
 
 func (p *printer) visitDropFunctionStatement(n *googlesql.ASTDropFunctionStatement, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
-
-	p.print(p.keyword(dropKeyword(ie, "FUNCTION")))
-	p.print(p.identifier(p.toString(name, d)))
-	p.movePast(n)
+	p.printDropNamedObject(n, "FUNCTION", ie, name, nil, d)
 }
 
 func (p *printer) visitDropMaterializedViewStatement(n *googlesql.ASTDropMaterializedViewStatement, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
-
-	p.print(p.keyword(dropKeyword(ie, "MATERIALIZED VIEW")))
-	p.print(p.identifier(p.toString(name, d)))
-	p.movePast(n)
+	p.printDropNamedObject(n, "MATERIALIZED VIEW", ie, name, nil, d)
 }
 
 func (p *printer) visitDropPrimaryKeyAction(n *googlesql.ASTDropPrimaryKeyAction, _ printerData) {
@@ -1102,53 +987,29 @@ func (p *printer) visitDropPrivilegeRestrictionStatement(
 }
 
 func (p *printer) visitDropRowAccessPolicyStatement(n *googlesql.ASTDropRowAccessPolicyStatement, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
 	tbl, _ := n.TableName()
-
-	p.print(p.keyword(dropKeyword(ie, "ROW ACCESS POLICY")))
-	p.print(p.identifier(p.toString(name, d)))
-	p.print(p.keyword("ON"))
-	p.accept(tbl, d)
-	p.movePast(n)
+	p.printDropNamedObject(n, "ROW ACCESS POLICY", ie, name, tbl, d)
 }
 
 func (p *printer) visitDropSearchIndexStatement(n *googlesql.ASTDropSearchIndexStatement, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
 	tbl, _ := n.TableName()
-
-	p.print(p.keyword(dropKeyword(ie, "SEARCH INDEX")))
-	p.print(p.identifier(p.toString(name, d)))
-
-	if nodeDefined(tbl) {
-		p.print(p.keyword("ON"))
-		p.accept(tbl, d)
-	}
-
-	p.movePast(n)
+	p.printDropNamedObject(n, "SEARCH INDEX", ie, name, tbl, d)
 }
 
 func (p *printer) visitDropSnapshotTableStatement(n *googlesql.ASTDropSnapshotTableStatement, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
-
-	p.print(p.keyword(dropKeyword(ie, "SNAPSHOT TABLE")))
-	p.print(p.identifier(p.toString(name, d)))
-	p.movePast(n)
+	p.printDropNamedObject(n, "SNAPSHOT TABLE", ie, name, nil, d)
 }
 
 func (p *printer) visitDropTableFunctionStatement(n *googlesql.ASTDropTableFunctionStatement, d printerData) {
-	p.moveBefore(n)
 	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
-
-	p.print(p.keyword(dropKeyword(ie, "TABLE FUNCTION")))
-	p.print(p.identifier(p.toString(name, d)))
-	p.movePast(n)
+	p.printDropNamedObject(n, "TABLE FUNCTION", ie, name, nil, d)
 }
 
 func (p *printer) visitDropStatement(n *googlesql.ASTDropStatement, d printerData) {
@@ -1333,7 +1194,7 @@ func (p *printer) visitFunctionDeclaration(n *googlesql.ASTFunctionDeclaration, 
 	name := p.function(p.toString(fnName, d))
 	params := p.toString(fnParams, d)
 
-	if d.IsEnabled("function_params_simple") {
+	if d.IsEnabled(keyFunctionParamsSimple) {
 		p.print(name + params)
 	} else {
 		p.println(name)
@@ -1360,7 +1221,7 @@ func (p *printer) visitFunctionParameter(n *googlesql.ASTFunctionParameter, d pr
 
 	name, _ := n.Name()
 	if nodeDefined(name) {
-		if !d.IsEnabled("function_params_simple") && d.IsEnabled("procedure_params") {
+		if !d.IsEnabled(keyFunctionParamsSimple) && d.IsEnabled(keyProcedureParams) {
 			p.acceptNested(name, d)
 		} else {
 			p.accept(name, d)
@@ -1395,12 +1256,12 @@ func (p *printer) visitFunctionParameters(n *googlesql.ASTFunctionParameters, d 
 		maxParams = 2
 	}
 
-	simple := len(entries) <= maxParams && allTrue(mapIsSimpleFunctionParameters(entries))
-	d.SetBool("function_params_simple", simple)
+	simple := len(entries) <= maxParams && areSimpleFunctionParameters(entries)
+	d.SetBool(keyFunctionParamsSimple, simple)
 
 	parent := nodeParent(n)
 	if nodeDefined(parent) {
-		d.SetBool("procedure_params", nodeKind(parent) == googlesql.ASTNodeKindAstCreateProcedureStatement)
+		d.SetBool(keyProcedureParams, nodeKind(parent) == googlesql.ASTNodeKindAstCreateProcedureStatement)
 	}
 
 	pp := p.nest()
@@ -1506,55 +1367,18 @@ func (p *printer) visitPrimaryKey(n *googlesql.ASTPrimaryKey, d printerData) {
 func (p *printer) visitPrimaryKeyElementList(n *googlesql.ASTPrimaryKeyElementList, d printerData) {
 	p.moveBefore(n)
 	elems := selectChildrenOfType[*googlesql.ASTPrimaryKeyElement](n)
-	simple := len(elems) <= 4
-
-	p.print("(")
-
-	if !simple {
-		p.println("")
-		p.incDepth()
-	}
-
-	for i, e := range elems {
-		if i > 0 {
-			p.print(",")
-
-			if !simple {
-				p.println("")
-			}
-		}
-
-		p.accept(e, d)
-	}
-
-	if !simple {
-		p.println("")
-		p.decDepth()
-	}
-
-	p.print(")")
+	printParenList(p, elems, len(elems) <= 4, d)
 	p.movePast(n)
 }
 
 func (p *printer) visitPrimaryKeyElement(n *googlesql.ASTPrimaryKeyElement, d printerData) {
 	p.moveBefore(n)
 	col, _ := n.Column()
-	p.accept(col, d)
-
 	spec, _ := n.OrderingSpec()
-	switch spec {
-	case googlesql.ASTOrderingExpressionEnums_OrderingSpecAsc:
-		p.print(p.keyword("ASC"))
-	case googlesql.ASTOrderingExpressionEnums_OrderingSpecDesc:
-		p.print(p.keyword("DESC"))
-	case googlesql.ASTOrderingExpressionEnums_OrderingSpecNotSet:
-		// Nothing.
-	}
+	no, _ := n.NullOrder()
 
-	if no, _ := n.NullOrder(); nodeDefined(no) {
-		p.accept(no, d)
-	}
-
+	p.accept(col, d)
+	p.printOrderingSpec(spec, no, d)
 	p.movePast(n)
 }
 
@@ -1794,44 +1618,24 @@ func (p *printer) visitAlterColumnSetGeneratedAction(
 	n *googlesql.ASTAlterColumnSetGeneratedAction,
 	d printerData,
 ) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER COLUMN"))
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
 	gci, _ := n.GeneratedColumnInfo()
-
-	p.accept(cn, d)
-	p.println("")
-	p.incDepth()
-	p.print(p.keyword("SET"))
-	p.accept(gci, d)
-	p.println("")
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterColumnAction(n, ie, cn, d, func() {
+		p.print(p.keyword("SET"))
+		p.accept(gci, d)
+	})
 }
 
 func (p *printer) visitAlterColumnDropGeneratedAction(
 	n *googlesql.ASTAlterColumnDropGeneratedAction,
 	d printerData,
 ) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER COLUMN"))
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	ie, _ := n.IsIfExists()
 	cn, _ := n.ColumnName()
-	p.accept(cn, d)
-	p.println("")
-	p.incDepth()
-	p.println(p.keyword("DROP GENERATED"))
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterColumnAction(n, ie, cn, d, func() {
+		p.print(p.keyword("DROP GENERATED"))
+	})
 }
 
 func (p *printer) visitForeignKeyColumnAttribute(n *googlesql.ASTForeignKeyColumnAttribute, d printerData) {
@@ -1963,27 +1767,29 @@ func (p *printer) visitAlterIndexStatement(n *googlesql.ASTAlterIndexStatement, 
 }
 
 func (p *printer) visitDropIndexStatement(n *googlesql.ASTDropIndexStatement, d printerData) {
-	p.printDropIndexBody("INDEX", n.IsIfExists, n.Name, n.TableName, n, d)
+	ie, _ := n.IsIfExists()
+	name, _ := n.Name()
+	tbl, _ := n.TableName()
+	p.printDropNamedObject(n, "INDEX", ie, name, tbl, d)
 }
 
 func (p *printer) visitDropVectorIndexStatement(n *googlesql.ASTDropVectorIndexStatement, d printerData) {
-	p.printDropIndexBody("VECTOR INDEX", n.IsIfExists, n.Name, n.TableName, n, d)
+	ie, _ := n.IsIfExists()
+	name, _ := n.Name()
+	tbl, _ := n.TableName()
+	p.printDropNamedObject(n, "VECTOR INDEX", ie, name, tbl, d)
 }
 
-func (p *printer) printDropIndexBody(
-	kind string,
-	ifExistsFn func() (bool, error),
-	nameFn func() (*googlesql.ASTPathExpression, error),
-	tblFn func() (*googlesql.ASTPathExpression, error),
+func (p *printer) printDropNamedObject(
 	n googlesql.ASTNode,
+	kind string,
+	ifExists bool,
+	name googlesql.ASTNode,
+	tbl googlesql.ASTNode,
 	d printerData,
 ) {
 	p.moveBefore(n)
-	ie, _ := ifExistsFn()
-	name, _ := nameFn()
-	tbl, _ := tblFn()
-
-	p.print(p.keyword(dropKeyword(ie, kind)))
+	p.print(p.keyword(dropKeyword(ifExists, kind)))
 	p.print(p.identifier(p.toString(name, d)))
 
 	if nodeDefined(tbl) {

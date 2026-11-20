@@ -3,6 +3,7 @@ package formatter
 import (
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/paulourio/bqlang/extensions"
 )
@@ -41,45 +42,45 @@ func (p *formatterState) Format(s string) {
 		}
 	}()
 
-	data := []rune(s)
-
 	if p.buffer.Len() == 0 {
 		p.writeIndent()
-		p.writeRunes(data)
+		p.writeToken(s)
 
 		return
 	}
 
 	switch p.last {
 	case '\n':
-		p.writeRunes(append([]rune{'\n'}, data...))
+		p.buffer.WriteByte('\n')
+		p.writeToken(s)
 	case '(', '[', '@', '.', '~', ' ', '\v', '\b':
-		p.writeRunes(data)
+		p.writeToken(s)
 	default:
-		p.formatAfterToken(data)
+		p.formatAfterToken(s)
 	}
 }
 
-func (p *formatterState) formatAfterToken(data []rune) {
+func (p *formatterState) formatAfterToken(s string) {
 	if p.lastWasSingleCharUnary {
-		p.writeRunes(data)
+		p.writeToken(s)
 
 		return
 	}
 
-	curr := data[0]
+	curr, _ := utf8.DecodeRuneInString(s)
 	if curr == '(' {
 		if p.lastIsSeparator() {
-			p.writeRunes(append([]rune{' '}, data...))
-		} else {
-			p.writeRunes(data)
+			p.buffer.WriteByte(' ')
 		}
+
+		p.writeToken(s)
 
 		return
 	}
 
 	if curr == ';' && p.lastWasNewLine {
-		p.writeRunes(append([]rune{'\n'}, data...))
+		p.buffer.WriteByte('\n')
+		p.writeToken(s)
 
 		return
 	}
@@ -88,18 +89,15 @@ func (p *formatterState) formatAfterToken(data []rune) {
 		curr == '[' ||
 		curr == ']' ||
 		(curr == '.' && p.last != ',') ||
-		(curr == ';' && p.last != '\n') ||
+		curr == ';' ||
 		curr == ',' {
-		p.writeRunes(data)
+		p.writeToken(s)
 
 		return
 	}
 
-	if p.last == ' ' && data[0] == ' ' {
-		p.writeRunes(data)
-	} else {
-		p.writeRunes(append([]rune{' '}, data...))
-	}
+	p.buffer.WriteByte(' ')
+	p.writeToken(s)
 }
 
 // FormatLine formats s and unconditionally flushes the line.
@@ -139,19 +137,20 @@ func (p *formatterState) flushCommentsUpTo(pos int) {
 			image = strings.ReplaceAll(c.Image, "\n", lineBreakPlaceholder)
 		}
 
+		trimmed := strings.TrimRight(image, "\n")
+
 		switch {
 		case c.AtLineBegin() && p.buffer.Len() > 0:
 			p.FlushLine()
-			p.Format(strings.TrimRight(image, "\n"))
+			p.Format(trimmed)
 		case !c.AtLineBegin() && (p.formatted.Len()+p.buffer.Len()) > 0:
-			sp := " "
 			if p.buffer.Len() == 0 || p.bufferEndsWithWhitespace() {
-				sp = ""
+				p.Format(trimmed)
+			} else {
+				p.Format(" " + trimmed)
 			}
-
-			p.Format(sp + strings.TrimRight(image, "\n"))
 		default:
-			p.Format(strings.TrimRight(image, "\n"))
+			p.Format(trimmed)
 		}
 
 		if c.MustEndLine() || c.AtLineEnd() {
@@ -216,9 +215,9 @@ func (p *formatterState) writeIndent() {
 	}
 }
 
-func (p *formatterState) writeRunes(d []rune) {
-	p.buffer.WriteString(string(d))
-	p.last = d[len(d)-1]
+func (p *formatterState) writeToken(s string) {
+	p.buffer.WriteString(s)
+	p.last, _ = utf8.DecodeLastRuneInString(s)
 }
 
 func isLetter(c byte) bool {

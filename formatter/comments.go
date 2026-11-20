@@ -7,6 +7,8 @@ import (
 	"github.com/paulourio/bqlang/extensions"
 )
 
+var trailingCommentPattern = regexp.MustCompile(`^(.*)((--|//|#)[^\n]+)$`)
+
 // commentsQueue is a shared queue of comments consumed across all nested
 // printers during formatting.
 type commentsQueue struct {
@@ -22,13 +24,12 @@ func alignTrailingComments(input string) string {
 		return input
 	}
 
-	trailingComment := regexp.MustCompile(`^(.*)((--|//|#)[^\n]+)$`)
 	inputLines := strings.Split(input, "\n")
 	lines := make([]string, len(inputLines))
 	match := false
 
 	for i, line := range inputLines {
-		m := trailingComment.FindStringSubmatchIndex(line)
+		m := trailingCommentPattern.FindStringSubmatchIndex(line)
 		if m != nil && strings.TrimSpace(line[m[2]:m[3]]) != "" {
 			match = true
 			pos := m[4]

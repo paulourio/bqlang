@@ -1,7 +1,7 @@
 package formatter
 
 import (
-	"sort"
+	"slices"
 
 	"github.com/goccy/go-googlesql"
 )
@@ -24,33 +24,21 @@ func newStartLocationTracker(s string, root googlesql.ASTNode) *locationTracker 
 }
 
 func (t *locationTracker) initNodePos(root googlesql.ASTNode) {
-	n := int(float64(countNodes(root)) * 0.6)
-	set := make(map[int]bool, n)
-
 	_ = walkAST(root, func(node googlesql.ASTNode) error {
-		if !nodeDefined(node) {
-			return nil
-		}
-
 		// Skip synthetic ASTLocation helper nodes so comment flushing aligns
 		// with semantic AST nodes identically to the classic grammar.
-		if nodeKind(node) == googlesql.ASTNodeKindAstLocation {
+		if !nodeDefined(node) || nodeKind(node) == googlesql.ASTNodeKindAstLocation {
 			return nil
 		}
 
 		start, _ := nodeByteRange(node)
-		set[start] = true
+		t.Pos = append(t.Pos, start)
 
 		return nil
 	})
 
-	t.Pos = make([]int, 0, len(set))
-
-	for p := range set {
-		t.Pos = append(t.Pos, p)
-	}
-
-	sort.Ints(t.Pos)
+	slices.Sort(t.Pos)
+	t.Pos = slices.Compact(t.Pos)
 }
 
 func (t *locationTracker) initLines(s string) {
@@ -69,22 +57,14 @@ func (t *locationTracker) NextPos(pos int) int {
 
 // MaybeNextPos returns the start position of the next node after pos, or -1.
 func (t *locationTracker) MaybeNextPos(pos int) int {
-	j := sort.Search(len(t.Pos), func(i int) bool { return t.Pos[i] > pos })
-	if j == len(t.Pos) {
+	j, found := slices.BinarySearch(t.Pos, pos)
+	if found {
+		j++
+	}
+
+	if j >= len(t.Pos) {
 		return -1
 	}
 
 	return t.Pos[j]
-}
-
-func countNodes(root googlesql.ASTNode) int {
-	count := 0
-
-	_ = walkAST(root, func(_ googlesql.ASTNode) error {
-		count++
-
-		return nil
-	})
-
-	return count
 }

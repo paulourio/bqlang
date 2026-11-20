@@ -248,7 +248,7 @@ func (p *printer) visitStructType(n *googlesql.ASTStructType, d printerData) {
 	pp.moveBefore(n)
 
 	fields := selectChildrenOfType[*googlesql.ASTStructField](n)
-	simple := allTrue(mapIsSimpleStructFields(fields))
+	simple := areSimpleStructFields(fields)
 	pp2 := pp.nest()
 
 	for i, f := range fields {
@@ -290,9 +290,8 @@ func (p *printer) visitTemplatedParameterType(n *googlesql.ASTTemplatedParameter
 	kind, _ := n.Kind()
 
 	switch kind {
-	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindUninitialized:
-		p.print(p.typename("ANY TYPE"))
-	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyType:
+	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindUninitialized,
+		googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyType:
 		p.print(p.typename("ANY TYPE"))
 	case googlesql.ASTTemplatedParameterTypeEnums_TemplatedTypeKindAnyProto:
 		p.print(p.typename("ANY PROTO"))
@@ -311,7 +310,7 @@ func (p *printer) visitTemplatedParameterType(n *googlesql.ASTTemplatedParameter
 
 func (p *printer) visitTVFSchema(n *googlesql.ASTTVFSchema, d printerData) {
 	cols := selectChildrenOfType[*googlesql.ASTTVFSchemaColumn](n)
-	simple := len(cols) <= 4 && allTrue(mapIsSimpleTVFSchema(cols))
+	simple := len(cols) <= 4 && areSimpleTVFSchemaColumns(cols)
 
 	pp := p.nest()
 	pp.moveBefore(n)

@@ -15,9 +15,10 @@ import (
 	"github.com/paulourio/bqlang/formatter"
 )
 
-type WriteStringer interface {
-	WriteString(str string) (int, error)
-}
+var (
+	parseLocPat = regexp.MustCompile(`\[\d+\-\d+\]`)
+	valuesPat   = regexp.MustCompile(`\([^\)]+\)`)
+)
 
 type TestDataFile struct {
 	Setup *Setup  `toml:"setup"`
@@ -88,8 +89,8 @@ func (c *CaseResult) String() string {
 	return b.String()
 }
 
-func writeBlock(w WriteStringer, title, content string) {
-	_, _ = w.WriteString(fmt.Sprintf("%s (%d bytes):\n%s\n\n", title, len(content), content))
+func writeBlock(w *strings.Builder, title, content string) {
+	fmt.Fprintf(w, "%s (%d bytes):\n%s\n\n", title, len(content), content)
 }
 
 func MustReadTest(tb testing.TB, p string) *TestDataFile {
@@ -145,9 +146,6 @@ func parseScript(script string, parserOpts *googlesql.ParserOptions) (*googlesql
 }
 
 func cleanupDebugString(ds string) string {
-	parseLocPat := regexp.MustCompile(`\[\d+\-\d+\]`)
-	valuesPat := regexp.MustCompile(`\([^\)]+\)`)
-
 	return valuesPat.ReplaceAllLiteralString(
 		parseLocPat.ReplaceAllLiteralString(ds, ""),
 		"",

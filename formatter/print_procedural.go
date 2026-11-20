@@ -94,25 +94,25 @@ func (p *printer) visitBeginEndBlock(n *googlesql.ASTBeginEndBlock, d printerDat
 	p.println("")
 }
 
-func (p *printer) visitBeginStatementNode(n *googlesql.ASTBeginStatement, _ printerData) {
+func (p *printer) visitBeginStatement(n *googlesql.ASTBeginStatement, _ printerData) {
 	p.moveBefore(n)
 	p.println(p.keyword("BEGIN TRANSACTION"))
 	p.movePast(n)
 }
 
-func (p *printer) visitRollbackStatementNode(n *googlesql.ASTRollbackStatement, _ printerData) {
+func (p *printer) visitRollbackStatement(n *googlesql.ASTRollbackStatement, _ printerData) {
 	p.moveBefore(n)
 	p.println(p.keyword("ROLLBACK TRANSACTION"))
 	p.movePast(n)
 }
 
-func (p *printer) visitExceptionHandlerListNode(n *googlesql.ASTExceptionHandlerList, d printerData) {
+func (p *printer) visitExceptionHandlerList(n *googlesql.ASTExceptionHandlerList, d printerData) {
 	for _, node := range selectChildrenOfType[*googlesql.ASTExceptionHandler](n) {
 		p.accept(node, d)
 	}
 }
 
-func (p *printer) visitExceptionHandlerNode(n *googlesql.ASTExceptionHandler, d printerData) {
+func (p *printer) visitExceptionHandler(n *googlesql.ASTExceptionHandler, d printerData) {
 	sl, _ := n.StatementList()
 	p.accept(sl, d)
 }
@@ -125,7 +125,7 @@ func (p *printer) visitCallStatement(n *googlesql.ASTCallStatement, d printerDat
 	p.accept(procName, d)
 
 	args := selectChildrenOfType[*googlesql.ASTTVFArgument](n)
-	simple := len(args) < 4 && allTrue(p.mapIsSimpleTVFArguments(args))
+	simple := len(args) < 4 && p.areSimpleTVFArguments(args)
 
 	pp := p.nest()
 
@@ -248,13 +248,8 @@ func (p *printer) visitIfStatement(n *googlesql.ASTIfStatement, d printerData) {
 			p.accept(ec, d)
 			p.println(p.keyword("THEN"))
 
-			if body, _ := e.Body(); nodeDefined(body) && nodeNumChildren(body) > 0 {
-				p.incDepth()
-				p.acceptNested(body, d)
-				p.println("")
-				p.decDepth()
-			}
-
+			body, _ := e.Body()
+			p.printIndentedBody(body, true, d)
 			p.movePast(e)
 		}
 
@@ -264,14 +259,7 @@ func (p *printer) visitIfStatement(n *googlesql.ASTIfStatement, d printerData) {
 	if e, _ := n.ElseList(); nodeDefined(e) {
 		p.println(p.keyword("ELSE"))
 		p.moveBefore(e)
-
-		if nodeNumChildren(e) > 0 {
-			p.incDepth()
-			p.acceptNested(e, d)
-			p.println("")
-			p.decDepth()
-		}
-
+		p.printIndentedBody(e, true, d)
 		p.movePast(e)
 	}
 
@@ -301,26 +289,15 @@ func (p *printer) visitCaseStatement(n *googlesql.ASTCaseStatement, d printerDat
 			p.accept(cond, d)
 			p.println(p.keyword("THEN"))
 
-			if body, _ := wt.Body(); nodeDefined(body) && nodeNumChildren(body) > 0 {
-				p.incDepth()
-				p.acceptNested(body, d)
-				p.println("")
-				p.decDepth()
-			}
-
+			body, _ := wt.Body()
+			p.printIndentedBody(body, true, d)
 			p.movePast(wt)
 		}
 	}
 
 	if el, _ := n.ElseList(); nodeDefined(el) {
 		p.println(p.keyword("ELSE"))
-
-		if nodeNumChildren(el) > 0 {
-			p.incDepth()
-			p.acceptNested(el, d)
-			p.println("")
-			p.decDepth()
-		}
+		p.printIndentedBody(el, true, d)
 	}
 
 	if p.fmt.opts.IndentCaseWhen {
@@ -343,13 +320,7 @@ func (p *printer) visitWhileStatement(n *googlesql.ASTWhileStatement, d printerD
 	p.print(p.keyword("WHILE"))
 	p.accept(cond, d)
 	p.println(p.keyword("DO"))
-
-	if nodeDefined(body) && nodeNumChildren(body) > 0 {
-		p.incDepth()
-		p.accept(body, d)
-		p.println("")
-		p.decDepth()
-	}
+	p.printIndentedBody(body, false, d)
 
 	p.print(p.keyword("END WHILE"))
 	p.printTrailingLabelIfPresent(n, label, d)
@@ -363,12 +334,8 @@ func (p *printer) visitLoopStatement(n *googlesql.ASTLoopStatement, d printerDat
 	p.printLeadingLabel(label, d)
 	p.println(p.keyword("LOOP"))
 
-	if body, _ := n.Body(); nodeDefined(body) && nodeNumChildren(body) > 0 {
-		p.incDepth()
-		p.accept(body, d)
-		p.println("")
-		p.decDepth()
-	}
+	body, _ := n.Body()
+	p.printIndentedBody(body, false, d)
 
 	p.print(p.keyword("END LOOP"))
 	p.printTrailingLabelIfPresent(n, label, d)
@@ -382,12 +349,8 @@ func (p *printer) visitRepeatStatement(n *googlesql.ASTRepeatStatement, d printe
 	p.printLeadingLabel(label, d)
 	p.println(p.keyword("REPEAT"))
 
-	if body, _ := n.Body(); nodeDefined(body) && nodeNumChildren(body) > 0 {
-		p.incDepth()
-		p.accept(body, d)
-		p.println("")
-		p.decDepth()
-	}
+	body, _ := n.Body()
+	p.printIndentedBody(body, false, d)
 
 	if until, _ := n.UntilClause(); nodeDefined(until) {
 		cond, _ := until.Condition()
@@ -420,17 +383,28 @@ func (p *printer) visitForInStatement(n *googlesql.ASTForInStatement, d printerD
 	p.println("")
 	p.decDepth()
 	p.println(") " + p.keyword("DO"))
-
-	if nodeDefined(body) && nodeNumChildren(body) > 0 {
-		p.incDepth()
-		p.accept(body, d)
-		p.println("")
-		p.decDepth()
-	}
+	p.printIndentedBody(body, false, d)
 
 	p.print(p.keyword("END FOR"))
 	p.printTrailingLabelIfPresent(n, label, d)
 	p.movePast(n)
+}
+
+func (p *printer) printIndentedBody(body *googlesql.ASTStatementList, nested bool, d printerData) {
+	if !nodeDefined(body) || nodeNumChildren(body) == 0 {
+		return
+	}
+
+	p.incDepth()
+
+	if nested {
+		p.acceptNested(body, d)
+	} else {
+		p.accept(body, d)
+	}
+
+	p.println("")
+	p.decDepth()
 }
 
 func (p *printer) visitBreakStatement(n *googlesql.ASTBreakStatement, d printerData) {
@@ -472,15 +446,9 @@ func (p *printer) visitRaiseStatement(n *googlesql.ASTRaiseStatement, d printerD
 }
 
 func (p *printer) visitParameterAssignment(n *googlesql.ASTParameterAssignment, d printerData) {
-	p.moveBefore(n)
 	param, _ := n.Parameter()
 	expr, _ := n.Expression()
-
-	p.print(p.keyword("SET"))
-	p.accept(param, d)
-	p.print("=")
-	p.accept(expr, d)
-	p.movePast(n)
+	p.printSetAssignment(n, param, expr, d)
 }
 
 func (p *printer) visitReturnStatement(n *googlesql.ASTReturnStatement, _ printerData) {
@@ -490,26 +458,23 @@ func (p *printer) visitReturnStatement(n *googlesql.ASTReturnStatement, _ printe
 }
 
 func (p *printer) visitSystemVariableAssignment(n *googlesql.ASTSystemVariableAssignment, d printerData) {
-	p.moveBefore(n)
 	sv, _ := n.SystemVariable()
 	expr, _ := n.Expression()
-
-	p.print(p.keyword("SET"))
-	p.accept(sv, d)
-	p.print("=")
-	p.accept(expr, d)
-	p.movePast(n)
+	p.printSetAssignment(n, sv, expr, d)
 }
 
 func (p *printer) visitSingleAssignment(n *googlesql.ASTSingleAssignment, d printerData) {
-	p.moveBefore(n)
 	v, _ := n.Variable()
 	expr, _ := n.Expression()
+	p.printSetAssignment(n, v, expr, d)
+}
 
+func (p *printer) printSetAssignment(n, lhs, rhs googlesql.ASTNode, d printerData) {
+	p.moveBefore(n)
 	p.print(p.keyword("SET"))
-	p.accept(v, d)
+	p.accept(lhs, d)
 	p.print("=")
-	p.accept(expr, d)
+	p.accept(rhs, d)
 	p.movePast(n)
 }
 

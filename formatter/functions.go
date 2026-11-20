@@ -7,50 +7,21 @@ import (
 )
 
 type functionSignature struct {
-	Params    []*functionParameter
-	positions map[string]int
+	paramStyles []PrintCase
 }
 
-type functionParameter struct {
-	name  string
-	style PrintCase
-}
-
-func newFunctionSignature(params ...*functionParameter) *functionSignature {
-	f := &functionSignature{
-		Params:    params,
-		positions: make(map[string]int, len(params)),
-	}
-
-	for i, p := range params {
-		f.positions[p.name] = i
-	}
-
-	return f
-}
-
-func newFunctionParam(name string, style PrintCase) *functionParameter {
-	return &functionParameter{name, style}
-}
-
-func (f *functionSignature) PrintCaseByName(name string) PrintCase {
-	if f == nil {
-		return Unspecified
-	}
-
-	if i, ok := f.positions[name]; ok {
-		return f.Params[i].style
-	}
-
-	return Unspecified
-}
+var (
+	sigSecondArgUpper       = &functionSignature{paramStyles: []PrintCase{Unspecified, UpperCase}}
+	sigFirstArgUpper        = &functionSignature{paramStyles: []PrintCase{UpperCase}}
+	bigQueryFunctionCatalog = newBigQueryFunctionCatalog()
+)
 
 func (f *functionSignature) PrintCaseAt(pos int) PrintCase {
-	if f == nil || pos < 0 || pos >= len(f.Params) {
+	if f == nil || pos < 0 || pos >= len(f.paramStyles) {
 		return Unspecified
 	}
 
-	return f.Params[pos].style
+	return f.paramStyles[pos]
 }
 
 func (p *printer) getFunctionSignature(n *googlesql.ASTFunctionCall) *functionSignature {
@@ -65,25 +36,16 @@ func (p *printer) getFunctionSignature(n *googlesql.ASTFunctionCall) *functionSi
 	name := strings.ToUpper(pp.String())
 
 	switch name {
-	case "DATE_TRUNC", "DATETIME_TRUNC", "TIME_TRUNC", "TIMESTAMP_TRUNC", "LAST_DAY":
-		return newFunctionSignature(
-			newFunctionParam("date_expression", Unspecified),
-			newFunctionParam("date_part", UpperCase),
-		)
-	case "NORMALIZE":
-		return newFunctionSignature(
-			newFunctionParam("value", Unspecified),
-			newFunctionParam("normalize", UpperCase),
-		)
-	case "NORMALIZE_AND_CASEFOLD":
-		return newFunctionSignature(
-			newFunctionParam("value", Unspecified),
-			newFunctionParam("normalization_mode", UpperCase),
-		)
+	case "DATE_TRUNC",
+		"DATETIME_TRUNC",
+		"TIME_TRUNC",
+		"TIMESTAMP_TRUNC",
+		"LAST_DAY",
+		"NORMALIZE",
+		"NORMALIZE_AND_CASEFOLD":
+		return sigSecondArgUpper
 	case "WEEK":
-		return newFunctionSignature(
-			newFunctionParam("weekday", UpperCase),
-		)
+		return sigFirstArgUpper
 	default:
 		return nil
 	}

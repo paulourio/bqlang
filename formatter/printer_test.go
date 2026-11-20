@@ -1,9 +1,7 @@
 package formatter_test
 
 import (
-	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"sync/atomic"
@@ -58,12 +56,7 @@ func testCase(t *testing.T, f *TestDataFile, c *Case) bool {
 	parserOpts := getParserOpts(f)
 	input := ExtractScriptInfo(c.Input, parserOpts)
 
-	var logBuf bytes.Buffer
-	logBuf.Grow(len(c.Input) * 10)
-	logger := log.New(&logBuf, "", 0)
-
 	bqfmt := formatter.NewBigQueryFormatter(
-		formatter.WithLogger(logger),
 		formatter.WithParserOptions(parserOpts),
 		formatter.WithPrintOptions(f.Setup.PrintOptions),
 	)

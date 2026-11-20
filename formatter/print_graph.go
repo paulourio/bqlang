@@ -344,7 +344,7 @@ func (p *printer) visitGraphTableQuery(n *googlesql.ASTGraphTableQuery, d printe
 
 	if shape, _ := n.GraphTableShape(); nodeDefined(shape) {
 		ctx := maps.Clone(d)
-		ctx.SetBool("single_line_cols", false)
+		ctx.SetBool(keySingleLineCols, false)
 		p.println(p.keyword("COLUMNS") + " (")
 		p.incDepth()
 		p.printlnBlock(strings.TrimSpace(leftAlignNested(p.toString(shape, ctx))))
@@ -372,9 +372,8 @@ func (p *printer) visitGqlQuery(n *googlesql.ASTGqlQuery, d printerData) {
 		return
 	}
 
-	if ref, _ := gt.GraphReference(); nodeDefined(ref) {
-		p.println(p.keyword("GRAPH") + " " + strings.TrimSpace(p.toString(ref, d)))
-	}
+	ref, _ := gt.GraphReference()
+	p.printGqlGraphHeader(ref, d)
 
 	if op, _ := gt.GraphOp(); nodeDefined(op) {
 		p.accept(op, d)
@@ -382,9 +381,8 @@ func (p *printer) visitGqlQuery(n *googlesql.ASTGqlQuery, d printerData) {
 }
 
 func (p *printer) visitGqlGraphPatternQuery(n *googlesql.ASTGqlGraphPatternQuery, d printerData) {
-	if ref, _ := n.GraphReference(); nodeDefined(ref) {
-		p.println(p.keyword("GRAPH") + " " + strings.TrimSpace(p.toString(ref, d)))
-	}
+	ref, _ := n.GraphReference()
+	p.printGqlGraphHeader(ref, d)
 
 	if gp, _ := n.GraphPattern(); nodeDefined(gp) {
 		p.accept(gp, d)
@@ -392,12 +390,17 @@ func (p *printer) visitGqlGraphPatternQuery(n *googlesql.ASTGqlGraphPatternQuery
 }
 
 func (p *printer) visitGqlLinearOpsQuery(n *googlesql.ASTGqlLinearOpsQuery, d printerData) {
-	if ref, _ := n.GraphReference(); nodeDefined(ref) {
-		p.println(p.keyword("GRAPH") + " " + strings.TrimSpace(p.toString(ref, d)))
-	}
+	ref, _ := n.GraphReference()
+	p.printGqlGraphHeader(ref, d)
 
 	if ops, _ := n.LinearOps(); nodeDefined(ops) {
 		p.accept(ops, d)
+	}
+}
+
+func (p *printer) printGqlGraphHeader(ref *googlesql.ASTPathExpression, d printerData) {
+	if nodeDefined(ref) {
+		p.println(p.keyword("GRAPH") + " " + strings.TrimSpace(p.toString(ref, d)))
 	}
 }
 
@@ -547,7 +550,7 @@ func (p *printer) printGqlProjection(kw string, sel *googlesql.ASTSelect, d prin
 	if sl, _ := sel.SelectList(); nodeDefined(sl) {
 		cols := selectChildrenOfType[*googlesql.ASTSelectColumn](sl)
 		ctx := maps.Clone(d)
-		ctx.SetBool("single_line_cols", len(cols) <= 1)
+		ctx.SetBool(keySingleLineCols, len(cols) <= 1)
 
 		slStr := strings.TrimSpace(leftAlignNested(p.toString(sl, ctx)))
 		p.printPrefixedBlock(header+" ", slStr)

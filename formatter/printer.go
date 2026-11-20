@@ -6,6 +6,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"sync"
 	"text/tabwriter"
 
 	"github.com/goccy/go-googlesql"
@@ -18,7 +19,6 @@ type printer struct {
 	tracker     *locationTracker
 	logger      *log.Logger
 	errs        *errorQueue
-	visitors    map[reflect.Type]nodeVisitorFunc
 }
 
 type printerData map[string]int
@@ -33,10 +33,31 @@ type parenthesizableNode interface {
 const (
 	lineBreakPlaceholder        = "\x21\x1a10"
 	literalLineBreakPlaceholder = "\x21\x1a11"
+
+	keyAlignBinaryOpBudget  = "align_binary_op_budget"
+	keyFunctionParamsSimple = "function_params_simple"
+	keyJoinCount            = "join_count"
+	keyOptionsSimple        = "options_simple"
+	keyPivotForValuesSimple = "pivot_for_expr_values_simple"
+	keyProcedureParams      = "procedure_params"
+	keySimpleCase           = "simple_case"
+	keySingleLineCols       = "single_line_cols"
+	keyUnpivotInItemSimple  = "unpivot_in_item_simple"
 )
 
-func (d printerData) Enable(key string) {
-	d[key] = 1
+var (
+	nodeVisitorsOnce sync.Once
+	nodeVisitors     map[reflect.Type]nodeVisitorFunc
+)
+
+func lookupVisitor(t reflect.Type) (nodeVisitorFunc, bool) {
+	nodeVisitorsOnce.Do(func() {
+		nodeVisitors = newVisitorMap()
+	})
+
+	fn, ok := nodeVisitors[t]
+
+	return fn, ok
 }
 
 func (d printerData) SetBool(key string, value bool) {
@@ -80,11 +101,7 @@ func (p *printer) visit(n googlesql.ASTNode, newline bool, d printerData) {
 		p.println("")
 	}
 
-	if p.visitors == nil {
-		p.visitors = newVisitorMap()
-	}
-
-	if handler, ok := p.visitors[reflect.TypeOf(n)]; ok {
+	if handler, ok := lookupVisitor(reflect.TypeOf(n)); ok {
 		handler(p, n, d)
 
 		return
@@ -140,7 +157,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTAuxLoadDataPartitionsClause]():           makeVisitor((*printer).visitAuxLoadDataPartitionsClause),
 		reflect.TypeFor[*googlesql.ASTAuxLoadDataStatement]():                  makeVisitor((*printer).visitAuxLoadDataStatement),
 		reflect.TypeFor[*googlesql.ASTBeginEndBlock]():                         makeVisitor((*printer).visitBeginEndBlock),
-		reflect.TypeFor[*googlesql.ASTBeginStatement]():                        makeVisitor((*printer).visitBeginStatementNode),
+		reflect.TypeFor[*googlesql.ASTBeginStatement]():                        makeVisitor((*printer).visitBeginStatement),
 		reflect.TypeFor[*googlesql.ASTBetweenExpression]():                     makeVisitor((*printer).visitBetweenExpression),
 		reflect.TypeFor[*googlesql.ASTBigNumericLiteral]():                     makeVisitor((*printer).visitBigNumericLiteral),
 		reflect.TypeFor[*googlesql.ASTBinaryExpression]():                      makeVisitor((*printer).visitBinaryExpression),
@@ -215,8 +232,8 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTDropTableFunctionStatement]():            makeVisitor((*printer).visitDropTableFunctionStatement),
 		reflect.TypeFor[*googlesql.ASTDropVectorIndexStatement]():              makeVisitor((*printer).visitDropVectorIndexStatement),
 		reflect.TypeFor[*googlesql.ASTEmptyRowPattern]():                       makeVisitor((*printer).visitEmptyRowPattern),
-		reflect.TypeFor[*googlesql.ASTExceptionHandler]():                      makeVisitor((*printer).visitExceptionHandlerNode),
-		reflect.TypeFor[*googlesql.ASTExceptionHandlerList]():                  makeVisitor((*printer).visitExceptionHandlerListNode),
+		reflect.TypeFor[*googlesql.ASTExceptionHandler]():                      makeVisitor((*printer).visitExceptionHandler),
+		reflect.TypeFor[*googlesql.ASTExceptionHandlerList]():                  makeVisitor((*printer).visitExceptionHandlerList),
 		reflect.TypeFor[*googlesql.ASTExecuteImmediateStatement]():             makeVisitor((*printer).visitExecuteImmediateStatement),
 		reflect.TypeFor[*googlesql.ASTExecuteIntoClause]():                     makeVisitor((*printer).visitExecuteIntoClause),
 		reflect.TypeFor[*googlesql.ASTExecuteUsingArgument]():                  makeVisitor((*printer).visitExecuteUsingArgument),
@@ -414,7 +431,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTReturningClause]():                       makeVisitor((*printer).visitReturningClause),
 		reflect.TypeFor[*googlesql.ASTRevokeFromClause]():                      makeVisitor((*printer).visitRevokeFromClause),
 		reflect.TypeFor[*googlesql.ASTRevokeStatement]():                       makeVisitor((*printer).visitRevokeStatement),
-		reflect.TypeFor[*googlesql.ASTRollbackStatement]():                     makeVisitor((*printer).visitRollbackStatementNode),
+		reflect.TypeFor[*googlesql.ASTRollbackStatement]():                     makeVisitor((*printer).visitRollbackStatement),
 		reflect.TypeFor[*googlesql.ASTRollup]():                                makeVisitor((*printer).visitRollup),
 		reflect.TypeFor[*googlesql.ASTRowPatternAnchor]():                      makeVisitor((*printer).visitRowPatternAnchor),
 		reflect.TypeFor[*googlesql.ASTRowPatternOperation]():                   makeVisitor((*printer).visitRowPatternOperation),
@@ -576,9 +593,12 @@ func (p *printer) moveBeforeSuccessorOf(n googlesql.ASTNode) {
 		parent = nodeParent(parent)
 	}
 
-	next := min(p.tracker.MaybeNextPos(e), maxPos)
+	maybeNext := p.tracker.MaybeNextPos(e)
+	if maybeNext < 0 {
+		return
+	}
 
-	if next > 0 {
+	if next := min(maybeNext, maxPos); next > 0 {
 		p.fmt.flushCommentsUpTo(next)
 	}
 }
@@ -623,7 +643,6 @@ func (p *printer) nest() *printer {
 		tracker:     p.tracker,
 		logger:      p.logger,
 		errs:        p.errs,
-		visitors:    p.visitors,
 	}
 }
 
@@ -658,13 +677,37 @@ func printNestedWithSep[T googlesql.ASTNode](p *printer, items []T, d printerDat
 	p.print(pp.unnest())
 }
 
-func (p *printer) acceptNested(n googlesql.ASTNode, d printerData) {
-	pp := p.nest()
-	pp.accept(n, d)
-	p.print(pp.unnest())
+func printParenList[T googlesql.ASTNode](p *printer, items []T, simple bool, d printerData) {
+	p.print("(")
+	printParenBody(p, items, simple, d)
+	p.print(")")
 }
 
-func (p *printer) acceptNestedLeft(n googlesql.ASTNode, d printerData) {
+func printParenBody[T googlesql.ASTNode](p *printer, items []T, simple bool, d printerData) {
+	if !simple {
+		p.println("")
+		p.incDepth()
+	}
+
+	for i, item := range items {
+		if i > 0 {
+			p.print(",")
+
+			if !simple {
+				p.println("")
+			}
+		}
+
+		p.accept(item, d)
+	}
+
+	if !simple {
+		p.println("")
+		p.decDepth()
+	}
+}
+
+func (p *printer) acceptNested(n googlesql.ASTNode, d printerData) {
 	pp := p.nest()
 	pp.accept(n, d)
 	p.print(pp.unnest())
@@ -832,29 +875,11 @@ func (p *printer) fallbackFunction(s string) string {
 		return s
 	}
 
-	switch p.fmt.opts.FunctionNameStyle {
-	case AsIs, Unspecified:
-		return s
-	case UpperCase:
-		return strings.ToUpper(s)
-	case LowerCase:
-		return strings.ToLower(s)
-	}
-
-	return s
+	return applyPrintCase(s, p.fmt.opts.FunctionNameStyle)
 }
 
 func (p *printer) keyword(s string) string {
-	switch p.fmt.opts.KeywordStyle {
-	case AsIs, Unspecified:
-		return s
-	case UpperCase:
-		return strings.ToUpper(s)
-	case LowerCase:
-		return strings.ToLower(s)
-	}
-
-	return s
+	return applyPrintCase(s, p.fmt.opts.KeywordStyle)
 }
 
 func (p *printer) typename(s string) string {
@@ -862,16 +887,7 @@ func (p *printer) typename(s string) string {
 		return s
 	}
 
-	switch p.fmt.opts.TypeStyle {
-	case AsIs, Unspecified:
-		return s
-	case UpperCase:
-		return strings.ToUpper(s)
-	case LowerCase:
-		return strings.ToLower(s)
-	}
-
-	return s
+	return applyPrintCase(s, p.fmt.opts.TypeStyle)
 }
 
 func (p *printer) identifierWithCase(s string, c PrintCase) string {
@@ -879,18 +895,11 @@ func (p *printer) identifierWithCase(s string, c PrintCase) string {
 		return s
 	}
 
-	switch c {
-	case AsIs:
-		return s
-	case UpperCase:
-		return strings.ToUpper(s)
-	case LowerCase:
-		return strings.ToLower(s)
-	case Unspecified:
+	if c == Unspecified {
 		return p.identifier(s)
 	}
 
-	return s
+	return applyPrintCase(s, c)
 }
 
 func (p *printer) nodeInput(n googlesql.ASTNode) string {
@@ -924,19 +933,17 @@ func (p *printer) viewInput(begin, end int) string {
 }
 
 func alignNested(s string) string {
-	var buf bytes.Buffer
-
-	w := tabwriter.NewWriter(&buf, 0, 0, 0, ' ', tabwriter.AlignRight)
-	_, _ = fmt.Fprint(w, s)
-	_ = w.Flush()
-
-	return strings.Trim(buf.String(), "\n")
+	return alignTabwriter(s, tabwriter.AlignRight)
 }
 
 func leftAlignNested(s string) string {
+	return alignTabwriter(s, 0)
+}
+
+func alignTabwriter(s string, flags uint) string {
 	var buf bytes.Buffer
 
-	w := tabwriter.NewWriter(&buf, 0, 0, 0, ' ', 0)
+	w := tabwriter.NewWriter(&buf, 0, 0, 0, ' ', flags)
 	_, _ = fmt.Fprint(w, s)
 	_ = w.Flush()
 
@@ -1001,28 +1008,15 @@ func hasLowerPrecedence(parent, child googlesql.ASTNode) (eval, ok bool) {
 func lowestPrecedenceBelow(n googlesql.ASTNode) int {
 	switch t := n.(type) {
 	case *googlesql.ASTBinaryExpression:
-		minPrec := precedenceNum(n)
 		lhsNode, _ := t.Lhs()
 		rhsNode, _ := t.Rhs()
-		lhs := precedenceNum(lhsNode)
-		rhs := precedenceNum(rhsNode)
 
-		if lhs < minPrec {
-			minPrec = lhs
-		}
-
-		if rhs < minPrec {
-			minPrec = rhs
-		}
-
-		return minPrec
+		return min(precedenceNum(n), precedenceNum(lhsNode), precedenceNum(rhsNode))
 	case *googlesql.ASTConcatExpr:
 		minPrec := precedenceNum(n)
 
 		for _, op := range selectChildrenOfType[googlesql.ASTExpressionNode](t) {
-			if p := precedenceNum(op); p < minPrec {
-				minPrec = p
-			}
+			minPrec = min(minPrec, precedenceNum(op))
 		}
 
 		return minPrec

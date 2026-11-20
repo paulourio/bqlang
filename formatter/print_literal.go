@@ -8,18 +8,14 @@ import (
 )
 
 func (p *printer) visitBigNumericLiteral(n *googlesql.ASTBigNumericLiteral, _ printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("BIGNUMERIC"))
-
-	if sl, _ := n.StringLiteral(); nodeDefined(sl) {
-		p.printNumericStringLiteral(sl)
-	}
+	sl, _ := n.StringLiteral()
+	p.printScaledNumericLiteral("BIGNUMERIC", n, sl)
 }
 
 func (p *printer) visitBoolLiteral(n *googlesql.ASTBooleanLiteral, _ printerData) {
 	p.moveBefore(n)
 	img, _ := n.Image()
-	p.print(formatPrintStyle(img, p.fmt.opts.BoolStyle))
+	p.print(applyPrintCase(img, p.fmt.opts.BoolStyle))
 }
 
 func (p *printer) visitBytesLiteral(n *googlesql.ASTBytesLiteral, _ printerData) {
@@ -67,15 +63,7 @@ func (p *printer) visitDateOrTimeLiteral(n *googlesql.ASTDateOrTimeLiteral, d pr
 func (p *printer) visitFloatLiteral(n *googlesql.ASTFloatLiteral, _ printerData) {
 	p.moveBefore(n)
 	img, _ := n.Image()
-
-	switch p.fmt.opts.NumericStyle {
-	case UpperCase:
-		p.print(strings.ToUpper(img))
-	case AsIs:
-		p.print(img)
-	case LowerCase, Unspecified:
-		p.print(strings.ToLower(img))
-	}
+	p.print(applyNumericCase(img, p.fmt.opts.NumericStyle))
 }
 
 func (p *printer) visitIntLiteral(n *googlesql.ASTIntLiteral, _ printerData) {
@@ -85,7 +73,7 @@ func (p *printer) visitIntLiteral(n *googlesql.ASTIntLiteral, _ printerData) {
 	if !maybeHexValue(v) {
 		p.print(v)
 	} else {
-		p.print("0x" + formatPrintStyle(v[2:], p.fmt.opts.HexStyle))
+		p.print("0x" + applyPrintCase(v[2:], p.fmt.opts.HexStyle))
 	}
 
 	p.movePast(n)
@@ -103,14 +91,23 @@ func (p *printer) visitJSONLiteral(n *googlesql.ASTJSONLiteral, d printerData) {
 func (p *printer) visitNullLiteral(n *googlesql.ASTNullLiteral, _ printerData) {
 	p.moveBefore(n)
 	img, _ := n.Image()
-	p.print(formatPrintStyle(img, p.fmt.opts.NullStyle))
+	p.print(applyPrintCase(img, p.fmt.opts.NullStyle))
 }
 
 func (p *printer) visitNumericLiteral(n *googlesql.ASTNumericLiteral, _ printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("NUMERIC"))
+	sl, _ := n.StringLiteral()
+	p.printScaledNumericLiteral("NUMERIC", n, sl)
+}
 
-	if sl, _ := n.StringLiteral(); nodeDefined(sl) {
+func (p *printer) printScaledNumericLiteral(
+	kw string,
+	n googlesql.ASTNode,
+	sl *googlesql.ASTStringLiteral,
+) {
+	p.moveBefore(n)
+	p.print(p.keyword(kw))
+
+	if nodeDefined(sl) {
 		p.printNumericStringLiteral(sl)
 	}
 }
@@ -118,15 +115,7 @@ func (p *printer) visitNumericLiteral(n *googlesql.ASTNumericLiteral, _ printerD
 func (p *printer) printNumericStringLiteral(sl *googlesql.ASTStringLiteral) {
 	p.moveBefore(sl)
 
-	raw := p.nodeInput(sl)
-	switch p.fmt.opts.NumericStyle {
-	case UpperCase:
-		raw = strings.ToUpper(raw)
-	case AsIs:
-		// Keep original casing.
-	case LowerCase, Unspecified:
-		raw = strings.ToLower(raw)
-	}
+	raw := applyNumericCase(p.nodeInput(sl), p.fmt.opts.NumericStyle)
 
 	s, err := FormatString(raw, p.fmt.opts.StringStyle)
 	if err != nil {
@@ -165,14 +154,14 @@ func (p *printer) visitStringLiteral(n *googlesql.ASTStringLiteral, _ printerDat
 	p.print(strings.ReplaceAll(s, "\n", literalLineBreakPlaceholder))
 }
 
-func formatPrintStyle(s string, style PrintCase) string {
+func applyNumericCase(s string, style PrintCase) string {
 	switch style {
-	case Unspecified, AsIs:
-		return s
-	case LowerCase:
-		return strings.ToLower(s)
 	case UpperCase:
 		return strings.ToUpper(s)
+	case AsIs:
+		return s
+	case LowerCase, Unspecified:
+		return strings.ToLower(s)
 	}
 
 	return s
