@@ -858,12 +858,9 @@ func (p *printer) visitPivotValueList(n *googlesql.ASTPivotValueList, d printerD
 }
 
 func (p *printer) visitQualify(n *googlesql.ASTQualify, d printerData) {
-	pp := p.nest()
-	pp.moveBefore(n)
+	p.moveBefore(n)
 	expr, _ := n.Expression()
 	p.visitMaybeClauseAligned(expr, d)
-	pp.moveBeforeSuccessorOf(n)
-	p.print(pp.unnest())
 }
 
 func (p *printer) visitQuery(n *googlesql.ASTQuery, d printerData) {

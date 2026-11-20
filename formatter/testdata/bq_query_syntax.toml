@@ -1223,7 +1223,7 @@ formatted = """
         ) AS rank
    FROM Produce
   WHERE Produce.category = 'vegetable'
-QUALIFY rank <= 3 ;
+QUALIFY rank <= 3;
 
  SELECT item
    FROM Produce
@@ -1231,7 +1231,7 @@ QUALIFY rank <= 3 ;
 QUALIFY RANK() OVER (
           PARTITION BY category
               ORDER BY purchases DESC
-        ) <= 3 ;
+        ) <= 3;
 """
 
 [[cases]]
