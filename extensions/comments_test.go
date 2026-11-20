@@ -56,6 +56,11 @@ func TestCommentEdgeCasesAndExtractAll(t *testing.T) {
 	_, err = extensions.NewComment(0, 0, "", "")
 	require.ErrorIs(t, err, extensions.ErrInvalidComment)
 
+	clamped, err := extensions.NewComment(-5, 999, "/* block */", "/* block */")
+	require.NoError(t, err)
+	assert.True(t, clamped.AtLineBegin())
+	assert.True(t, clamped.AtLineEnd())
+
 	input := strings.Join([]string{
 		"{# header #}",
 		"{% if a %}",

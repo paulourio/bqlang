@@ -259,7 +259,9 @@ func (c *Comment) update(input string) error {
 		return err
 	}
 
-	return c.updateType(input)
+	c.updateType(input)
+
+	return nil
 }
 
 func (c *Comment) updateKind() error {
@@ -298,12 +300,10 @@ func (c *Comment) updateKind() error {
 	return nil
 }
 
-func (c *Comment) updateType(input string) error {
+func (c *Comment) updateType(input string) {
 	c.multiline = c.containsLineBreaks()
 	c.atLineBegin = c.beginsLine(input)
 	c.atLineEnd = c.endsLine(input)
-
-	return nil
 }
 
 func (c *Comment) containsLineBreaks() bool {
@@ -317,17 +317,14 @@ func (c *Comment) containsLineBreaks() bool {
 // beginsLine scans the bytes before the comment until a line break or
 // the start of the input to check whether the comment starts a line.
 func (c *Comment) beginsLine(input string) bool {
-	i := min(c.Start, len(input))
+	start := max(0, min(c.Start, len(input)))
+	i := start
 
-	for i > 0 {
-		if input[i-1] == '\n' {
-			break
-		}
-
+	for i > 0 && input[i-1] != '\n' {
 		i--
 	}
 
-	return len(strings.TrimSpace(input[i:c.Start])) == 0
+	return strings.TrimSpace(input[i:start]) == ""
 }
 
 // endsLine scans the bytes after the comment until a line break or
@@ -337,22 +334,14 @@ func (c *Comment) endsLine(input string) bool {
 	case DoubleSlash, DoubleDash, Pound:
 		return true
 	case SlashStar, Jinja2Comment:
-		i := c.End
-		n := len(input)
+		end := max(0, min(c.End, len(input)))
+		i := end
 
-		if i > n {
-			i = n
-		}
-
-		for i < n {
-			if input[i] == '\n' {
-				break
-			}
-
+		for i < len(input) && input[i] != '\n' {
 			i++
 		}
 
-		return len(strings.TrimSpace(input[c.End:i])) == 0
+		return strings.TrimSpace(input[end:i]) == ""
 	}
 
 	panic(fmt.Sprintf("unknown comment kind: %d", int(c.Kind)))
