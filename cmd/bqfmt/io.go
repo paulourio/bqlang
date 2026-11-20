@@ -97,7 +97,7 @@ func (c *cliRunner) writeFile(filename string, orig, formatted []byte, perm fs.F
 			return fmt.Errorf("write %s: %w", filename, err)
 		}
 
-		c.restoreOriginal(fout, orig, n, bakname, restoreFail)
+		restoreOriginal(fout, orig, n, bakname, restoreFail)
 
 		return fmt.Errorf("write %s: %w", filename, err)
 	}
@@ -113,7 +113,7 @@ func (c *cliRunner) writeFile(filename string, orig, formatted []byte, perm fs.F
 	return nil
 }
 
-func (c *cliRunner) restoreOriginal(
+func restoreOriginal(
 	fout *os.File,
 	orig []byte,
 	written int,

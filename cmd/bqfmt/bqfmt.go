@@ -109,10 +109,8 @@ func (c *cliRunner) execute(s *sequencer, paths []string) {
 		}
 
 		if !info.IsDir() {
-			fileArg := target
-
-			s.Add(fileWeight(fileArg, info), func(r *reporter) error {
-				return c.processFile(fileArg, info, nil, r)
+			s.Add(fileWeight(target, info), func(r *reporter) error {
+				return c.processFile(target, info, nil, r)
 			})
 
 			continue
@@ -188,7 +186,7 @@ func (c *cliRunner) processFile(filename string, info fs.FileInfo, in io.Reader,
 		return fmt.Errorf("%s: cannot format input: %w", filename, err)
 	}
 
-	debugBuf.Reset()
+	bqFormatter.Logger = nil
 
 	result2, err := bqFormatter.Format(result)
 	if err != nil {
