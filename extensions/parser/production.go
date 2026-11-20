@@ -11,22 +11,7 @@ import (
 
 // NewComment constructs an ast.CommentNode from a scanned token attribute.
 func NewComment(a Attrib) (Attrib, error) {
-	c, err := ast.NewComment()
-	if err != nil {
-		return nil, fmt.Errorf("NewComment: %w", err)
-	}
-
-	return InitLiteral(c, a)
-}
-
-// NewNewLine constructs an ast.NewLineNode from a scanned token attribute.
-func NewNewLine(a Attrib) (Attrib, error) {
-	c, err := ast.NewNewLine()
-	if err != nil {
-		return nil, fmt.Errorf("NewNewLine: %w", err)
-	}
-
-	return InitLiteral(c, a)
+	return InitLiteral(ast.NewComment(), a)
 }
 
 // NewScript constructs the root ast.ScriptNode from a parsed attribute.
@@ -35,10 +20,7 @@ func NewScript(a Attrib) (Attrib, error) {
 		return nil, fmt.Errorf("%w: nil script attribute", errors.ErrMalformedParser)
 	}
 
-	n, err := ast.NewScript()
-	if err != nil {
-		return nil, fmt.Errorf("NewScript: %w", err)
-	}
+	n := ast.NewScript()
 
 	if _, ok := a.(*token.Token); !ok {
 		return WithExtraChild(n, a)
@@ -47,66 +29,27 @@ func NewScript(a Attrib) (Attrib, error) {
 	return n, nil
 }
 
-// NewTemplateBlock constructs a generic ast.TemplateBlockNode.
-func NewTemplateBlock(a Attrib) (Attrib, error) {
-	if a == nil {
-		return nil, fmt.Errorf("%w: nil template block attribute", errors.ErrMalformedParser)
-	}
-
-	i, err := ast.NewTemplateBlock()
-	if err != nil {
-		return nil, fmt.Errorf("NewTemplateBlock: %w", err)
-	}
-
-	return UpdateLoc(i, a)
-}
-
 // NewTemplateForBlock constructs an ast.TemplateBlockNode of kind TemplateForBlock.
 func NewTemplateForBlock(a Attrib) (Attrib, error) {
-	if a == nil {
-		return nil, fmt.Errorf("%w: nil template for block attribute", errors.ErrMalformedParser)
-	}
-
-	i, err := ast.NewTemplateBlock()
-	if err != nil {
-		return nil, fmt.Errorf("NewTemplateForBlock: %w", err)
-	}
-
-	i.SetKind(ast.TemplateForBlock)
-
-	return UpdateLoc(i, a)
+	return newTemplateBlock(a, ast.TemplateForBlock, "template for block")
 }
 
 // NewTemplateIfBlock constructs an ast.TemplateBlockNode of kind TemplateIfBlock.
 func NewTemplateIfBlock(a Attrib) (Attrib, error) {
-	if a == nil {
-		return nil, fmt.Errorf("%w: nil template if block attribute", errors.ErrMalformedParser)
-	}
-
-	i, err := ast.NewTemplateBlock()
-	if err != nil {
-		return nil, fmt.Errorf("NewTemplateIfBlock: %w", err)
-	}
-
-	i.SetKind(ast.TemplateIfBlock)
-
-	return UpdateLoc(i, a)
+	return newTemplateBlock(a, ast.TemplateIfBlock, "template if block")
 }
 
 // NewTemplateSetBlock constructs an ast.TemplateBlockNode of kind TemplateSetBlock.
 func NewTemplateSetBlock(a Attrib) (Attrib, error) {
+	return newTemplateBlock(a, ast.TemplateSetBlock, "template set block")
+}
+
+func newTemplateBlock(a Attrib, kind ast.Kind, label string) (Attrib, error) {
 	if a == nil {
-		return nil, fmt.Errorf("%w: nil template set block attribute", errors.ErrMalformedParser)
+		return nil, fmt.Errorf("%w: nil %s attribute", errors.ErrMalformedParser, label)
 	}
 
-	i, err := ast.NewTemplateBlock()
-	if err != nil {
-		return nil, fmt.Errorf("NewTemplateSetBlock: %w", err)
-	}
-
-	i.SetKind(ast.TemplateSetBlock)
-
-	return UpdateLoc(i, a)
+	return UpdateLoc(ast.NewTemplateBlock(kind), a)
 }
 
 // NewTemplateComment constructs an ast.TemplateCommentNode from a scanned token.
@@ -115,12 +58,7 @@ func NewTemplateComment(a Attrib) (Attrib, error) {
 		return nil, fmt.Errorf("%w: nil template comment attribute", errors.ErrMalformedParser)
 	}
 
-	i, err := ast.NewTemplateComment()
-	if err != nil {
-		return nil, fmt.Errorf("NewTemplateComment: %w", err)
-	}
-
-	return InitLiteral(i, a)
+	return InitLiteral(ast.NewTemplateComment(), a)
 }
 
 // NewTemplateVariable constructs an ast.TemplateVariableNode spanning delimiters a and b.
@@ -129,26 +67,7 @@ func NewTemplateVariable(a, b Attrib) (Attrib, error) {
 		return nil, fmt.Errorf("%w: nil template variable attribute", errors.ErrMalformedParser)
 	}
 
-	i, err := ast.NewTemplateVariable()
-	if err != nil {
-		return nil, fmt.Errorf("NewTemplateVariable: %w", err)
-	}
-
-	return UpdateLoc(i, a, b)
-}
-
-// NewTemplateStatement constructs an ast.TemplateStatementNode from a scanned token.
-func NewTemplateStatement(a Attrib) (Attrib, error) {
-	if a == nil {
-		return nil, fmt.Errorf("%w: nil template statement attribute", errors.ErrMalformedParser)
-	}
-
-	i, err := ast.NewTemplateStatement()
-	if err != nil {
-		return nil, fmt.Errorf("NewTemplateStatement: %w", err)
-	}
-
-	return InitLiteral(i, a)
+	return UpdateLoc(ast.NewTemplateVariable(), a, b)
 }
 
 // InitLiteral populates a leaf node's text and byte offsets from token t.

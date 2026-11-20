@@ -15,11 +15,6 @@ type SyntaxError struct {
 	Msg string
 }
 
-// NewSyntaxError constructs a SyntaxError at loc with message msg.
-func NewSyntaxError(loc ast.Loc, msg string) *SyntaxError {
-	return &SyntaxError{loc, msg}
-}
-
 // Error formats the syntax error message.
 func (e *SyntaxError) Error() string {
 	return "Syntax error: " + e.Msg

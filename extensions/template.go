@@ -2,7 +2,6 @@ package extensions
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/paulourio/bqlang/extensions/ast"
 )
@@ -17,8 +16,6 @@ type TemplateElement struct {
 	Image string
 	// Kind specifies the template element type.
 	Kind ast.Kind
-
-	Children []*TemplateElement
 
 	atLineBegin bool
 	atLineEnd   bool
@@ -35,15 +32,10 @@ func ExtractTemplateElements(input string) ([]*TemplateElement, error) {
 		return nil, nil
 	}
 
-	elems, err := extractTemplatesFromNode(n, input)
-	if err != nil {
-		return elems, fmt.Errorf("ExtractTemplateElements: %w", err)
-	}
-
-	return elems, nil
+	return extractTemplatesFromNode(n, input), nil
 }
 
-func extractTemplatesFromNode(n ast.NodeHandler, input string) ([]*TemplateElement, error) {
+func extractTemplatesFromNode(n ast.NodeHandler, input string) []*TemplateElement {
 	children := n.Children()
 	r := make([]*TemplateElement, 0, len(children))
 
@@ -51,17 +43,11 @@ func extractTemplatesFromNode(n ast.NodeHandler, input string) ([]*TemplateEleme
 		switch child.(type) {
 		case *ast.TemplateBlockNode, *ast.TemplateVariableNode, *ast.TemplateCommentNode:
 			a, b := child.StartLoc(), child.EndLoc()
-
-			nc, err := NewTemplateElement(child.Kind(), a, b, input[a:b], input)
-			if err != nil {
-				return r, err
-			}
-
-			r = append(r, nc)
+			r = append(r, NewTemplateElement(child.Kind(), a, b, input[a:b], input))
 		}
 	}
 
-	return r, nil
+	return r
 }
 
 // NewTemplateElement returns an initialized template element.
@@ -69,17 +55,17 @@ func extractTemplatesFromNode(n ast.NodeHandler, input string) ([]*TemplateEleme
 func NewTemplateElement(
 	kind ast.Kind, start, end int,
 	img, input string,
-) (*TemplateElement, error) {
+) *TemplateElement {
 	c := &TemplateElement{
-		Start: start,
-		End:   end,
-		Image: img,
-		Kind:  kind,
+		Start:       start,
+		End:         end,
+		Image:       img,
+		Kind:        kind,
+		atLineBegin: computeBeginsLine(input, start),
+		atLineEnd:   endsLineAt(input, end),
 	}
 
-	c.update(input)
-
-	return c, nil
+	return c
 }
 
 // AtLineBegin reports whether the element starts at column 0 of its line.
@@ -92,46 +78,6 @@ func (t *TemplateElement) AtLineEnd() bool {
 	return t.atLineEnd
 }
 
-// BeginsLine checks whether the element starts at column 0 of its line.
-func (t *TemplateElement) BeginsLine(input string) bool {
-	if input == "" {
-		return t.atLineBegin
-	}
-
-	return computeBeginsLine(input, t.Start)
-}
-
-// EndsLine checks whether only horizontal whitespace follows the element on its line.
-func (t *TemplateElement) EndsLine(input string) bool {
-	if input == "" {
-		return t.atLineEnd
-	}
-
-	return computeEndsLine(input, t.End)
-}
-
-func (t *TemplateElement) update(input string) {
-	t.atLineBegin = computeBeginsLine(input, t.Start)
-	t.atLineEnd = computeEndsLine(input, t.End)
-}
-
 func computeBeginsLine(input string, start int) bool {
 	return start <= 0 || (start <= len(input) && input[start-1] == '\n')
-}
-
-func computeEndsLine(input string, end int) bool {
-	if end >= len(input) {
-		return true
-	}
-
-	if end < 0 {
-		end = 0
-	}
-
-	i := end
-	for i < len(input) && input[i] != '\n' {
-		i++
-	}
-
-	return strings.TrimSpace(input[end:i]) == ""
 }

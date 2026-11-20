@@ -2,6 +2,7 @@ package extensions
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/paulourio/bqlang/extensions/ast"
@@ -73,10 +74,7 @@ func ExtractAll(input string) ([]*Comment, []*TemplateElement, error) {
 		return comms, nil, fmt.Errorf("ExtractAll: %w", err)
 	}
 
-	elems, err := extractTemplatesFromNode(n, input)
-	if err != nil {
-		return comms, elems, fmt.Errorf("ExtractAll: %w", err)
-	}
+	elems := extractTemplatesFromNode(n, input)
 
 	return comms, elems, nil
 }
@@ -128,23 +126,16 @@ func extractCommentsFromNode(n ast.NodeHandler, input string) ([]*Comment, error
 	r := make([]*Comment, 0, len(children))
 
 	for _, child := range children {
-		switch c := child.(type) {
-		case *ast.CommentNode:
-			nc, err := NewComment(c.StartLoc(), c.EndLoc(), c.Image(), input)
-			if err != nil {
-				return r, err
+		switch child.(type) {
+		case *ast.CommentNode, *ast.TemplateCommentNode:
+			if leaf, ok := child.(ast.LeafHandler); ok {
+				nc, err := NewComment(leaf.StartLoc(), leaf.EndLoc(), leaf.Image(), input)
+				if err != nil {
+					return r, err
+				}
+
+				r = append(r, nc)
 			}
-
-			r = append(r, nc)
-		case *ast.TemplateCommentNode:
-			a, b := c.StartLoc(), c.EndLoc()
-
-			nc, err := NewComment(a, b, input[a:b], input)
-			if err != nil {
-				return r, err
-			}
-
-			r = append(r, nc)
 		}
 	}
 
@@ -157,16 +148,8 @@ func EraseComments(script string, comments []*Comment) string {
 	buf := []byte(script)
 
 	for _, c := range comments {
-		start := c.Start
-		end := c.End
-
-		if start < 0 {
-			start = 0
-		}
-
-		if end > len(buf) {
-			end = len(buf)
-		}
+		start := max(0, min(c.Start, len(buf)))
+		end := max(0, min(c.End, len(buf)))
 
 		for i := start; i < end; i++ {
 			if buf[i] != '\n' {
@@ -183,15 +166,9 @@ func EraseComments(script string, comments []*Comment) string {
 // requested pos, and the right-hand side slice contains the remaining
 // elements.
 func SplitComments(comments []*Comment, pos int) ([]*Comment, []*Comment) {
-	i := 0
-
-	for _, c := range comments {
-		if c.Start > pos {
-			break
-		}
-
-		i++
-	}
+	i := sort.Search(len(comments), func(j int) bool {
+		return comments[j].Start > pos
+	})
 
 	if i == 0 {
 		return nil, comments
@@ -233,11 +210,6 @@ func (c *Comment) AtLineEnd() bool {
 // MustEndLine reports whether the comment syntax requires a trailing line break.
 func (c *Comment) MustEndLine() bool {
 	return c.mustEndLine
-}
-
-// EndsWithNewline reports whether c.Image terminates with a newline byte.
-func (c *Comment) EndsWithNewline() bool {
-	return len(c.Image) > 0 && c.Image[len(c.Image)-1] == '\n'
 }
 
 // IsOneline returns whether the comment occupies its own single line.
@@ -334,15 +306,19 @@ func (c *Comment) endsLine(input string) bool {
 	case DoubleSlash, DoubleDash, Pound:
 		return true
 	case SlashStar, Jinja2Comment:
-		end := max(0, min(c.End, len(input)))
-		i := end
-
-		for i < len(input) && input[i] != '\n' {
-			i++
-		}
-
-		return strings.TrimSpace(input[end:i]) == ""
+		return endsLineAt(input, c.End)
 	}
 
 	panic(fmt.Sprintf("unknown comment kind: %d", int(c.Kind)))
+}
+
+func endsLineAt(input string, end int) bool {
+	end = max(0, min(end, len(input)))
+	i := end
+
+	for i < len(input) && input[i] != '\n' {
+		i++
+	}
+
+	return strings.TrimSpace(input[end:i]) == ""
 }

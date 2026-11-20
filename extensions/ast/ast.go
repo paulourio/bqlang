@@ -77,11 +77,6 @@ type CommentNode struct {
 	Leaf
 }
 
-// NewLineNode represents a line break token in the extension AST.
-type NewLineNode struct {
-	Leaf
-}
-
 // ScriptNode represents the root sequence of comments and template elements.
 type ScriptNode struct {
 	Node
@@ -99,11 +94,6 @@ type TemplateCommentNode struct {
 
 // TemplateVariableNode represents a Jinja2 expression tag ({{ ... }}).
 type TemplateVariableNode struct {
-	Leaf
-}
-
-// TemplateStatementNode represents a single Jinja2 statement clause inside a block.
-type TemplateStatementNode struct {
 	Leaf
 }
 
@@ -155,21 +145,15 @@ func (n *Node) Children() []NodeHandler { return n.children }
 
 // ExpandLoc widens the node's [Start, End) span to cover [start, end).
 func (n *Node) ExpandLoc(start, end int) {
-	s := n.StartLoc()
-	e := n.EndLoc()
+	if n.Start == 0 && n.End == 0 {
+		n.Start = start
+		n.End = end
 
-	if s == 0 && e == 0 {
-		n.SetStartLoc(start)
-		n.SetEndLoc(end)
-	} else {
-		if s > start {
-			n.SetStartLoc(start)
-		}
-
-		if e < end {
-			n.SetEndLoc(end)
-		}
+		return
 	}
+
+	n.Start = min(n.Start, start)
+	n.End = max(n.End, end)
 }
 
 // SingleNodeDebugString returns the node kind name.
@@ -179,8 +163,8 @@ func (n *Node) SingleNodeDebugString() string {
 
 // DebugString formats the subtree rooted at n as an indented multi-line string.
 func (n *Node) DebugString(_ string) string {
-	d := newDumper(n, "\n", 256)
-	d.Dump()
+	d := newDumper("\n", 256)
+	d.dump(n, 0)
 
 	return d.String()
 }
@@ -191,57 +175,41 @@ func (n *Node) String() string {
 }
 
 // NewComment allocates an initialized CommentNode.
-func NewComment() (*CommentNode, error) {
+func NewComment() *CommentNode {
 	c := &CommentNode{}
 	c.SetKind(Comment)
 
-	return c, nil
-}
-
-// NewNewLine allocates an initialized NewLineNode.
-func NewNewLine() (*NewLineNode, error) {
-	c := &NewLineNode{}
-	c.SetKind(NewLine)
-
-	return c, nil
+	return c
 }
 
 // NewScript allocates an initialized ScriptNode.
-func NewScript() (*ScriptNode, error) {
+func NewScript() *ScriptNode {
 	n := &ScriptNode{}
 	n.SetKind(Script)
 
-	return n, nil
+	return n
 }
 
-// NewTemplateBlock allocates an initialized TemplateBlockNode.
-func NewTemplateBlock() (*TemplateBlockNode, error) {
+// NewTemplateBlock allocates an initialized TemplateBlockNode of kind k.
+func NewTemplateBlock(k Kind) *TemplateBlockNode {
 	n := &TemplateBlockNode{}
-	n.SetKind(TemplateBlock)
+	n.SetKind(k)
 
-	return n, nil
+	return n
 }
 
 // NewTemplateComment allocates an initialized TemplateCommentNode.
-func NewTemplateComment() (*TemplateCommentNode, error) {
+func NewTemplateComment() *TemplateCommentNode {
 	n := &TemplateCommentNode{}
 	n.SetKind(TemplateComment)
 
-	return n, nil
+	return n
 }
 
 // NewTemplateVariable allocates an initialized TemplateVariableNode.
-func NewTemplateVariable() (*TemplateVariableNode, error) {
+func NewTemplateVariable() *TemplateVariableNode {
 	n := &TemplateVariableNode{}
 	n.SetKind(TemplateVariable)
 
-	return n, nil
-}
-
-// NewTemplateStatement allocates an initialized TemplateStatementNode.
-func NewTemplateStatement() (*TemplateStatementNode, error) {
-	n := &TemplateStatementNode{}
-	n.SetKind(TemplateStatement)
-
-	return n, nil
+	return n
 }

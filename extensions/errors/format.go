@@ -64,13 +64,7 @@ func findDescription(err error, lines []string) (desc string, line, col int) {
 
 func tokenError(err *Error) (desc string, line, col int) {
 	tokDesc := describeUnexpectedToken(err.ErrorToken)
-
-	if len(err.ExpectedTokens) > 0 && isExpected("JOIN", err.ExpectedTokens) {
-		desc = "Expected keyword JOIN but got " + tokDesc
-	} else {
-		desc = "Unexpected " + tokDesc
-	}
-
+	desc = "Unexpected " + tokDesc
 	line = err.ErrorToken.Line
 	col = err.ErrorToken.Column
 
@@ -81,11 +75,9 @@ func tokenError(err *Error) (desc string, line, col int) {
 		line++
 		col = 1
 		desc = "Unexpected end of statement"
-	case token.TokMap.Type("unterminated_escaped_identifier"):
-		desc = "Unclosed identifier literal"
 	default:
 		if isExpected("$", err.ExpectedTokens) {
-			desc = "Expected end of input but got " + describeUnexpectedToken(err.ErrorToken)
+			desc = "Expected end of input but got " + tokDesc
 		}
 	}
 
@@ -112,9 +104,8 @@ func describeUnexpectedToken(tok *token.Token) string {
 }
 
 func isExpected(elem string, expected []string) bool {
-	elem = strings.ToUpper(elem)
 	for _, sym := range expected {
-		if strings.ToUpper(sym) == elem {
+		if strings.EqualFold(sym, elem) {
 			return true
 		}
 	}
