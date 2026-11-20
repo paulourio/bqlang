@@ -14,8 +14,8 @@ type commentsQueue struct {
 
 // alignTrailingComments performs a post-pass on the formatted output to align
 // trailing line comments marked during comment flushing.
-func alignTrailingComments(input string) string {
-	if !strings.Contains(input, trailingCommentPlaceholder) {
+func alignTrailingComments(input, marker string) string {
+	if !strings.Contains(input, marker) {
 		return input
 	}
 
@@ -23,7 +23,7 @@ func alignTrailingComments(input string) string {
 	match := false
 
 	for i, line := range lines {
-		before, after, ok := strings.Cut(line, trailingCommentPlaceholder)
+		before, after, ok := strings.Cut(line, marker)
 		if !ok {
 			continue
 		}

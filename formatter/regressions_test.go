@@ -591,6 +591,11 @@ func TestRegressions(t *testing.T) {
 				sql:      "SELECT id FROM t WHERE _PARTITIONDATE = @RunDate AND @@project_id = 'prod' AND (region = 'US' OR region = 'EU')",
 				contains: []string{"AND (region = 'US' OR region = 'EU')"},
 			},
+			{
+				name:     "control bytes and vertical tabs inside literals are preserved verbatim",
+				sql:      "SELECT '!\x1a10', '\x1e\x1f1', '\v' AS vt -- note\v",
+				contains: []string{"'!\x1a10'", "'\x1e\x1f1'", "'\v' AS vt", "-- note\v"},
+			},
 		} {
 			got, err := formatter.Format(tc.sql, formatter.DefaultPrintOptions())
 			require.NoError(t, err, tc.name)

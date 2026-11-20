@@ -395,7 +395,7 @@ func (p *printer) visitFunctionType(n *googlesql.ASTFunctionType, d printerData)
 	pRet.flushCommentsBeforeFunctionTypeClose(n, retType)
 
 	retRaw := pRet.String()
-	retMultiline := hasLineBreakOrLineComment(retRaw)
+	retMultiline := p.hasLineBreakOrLineComment(retRaw)
 
 	if !argsMultiline && !retMultiline {
 		argStrs := alignedPrinterStrings(argPrinters)
@@ -420,7 +420,7 @@ func (p *printer) renderFunctionTypeArgs(args []googlesql.ASTTypeNode, d printer
 		ap.accept(arg, d)
 		argPrinters[i] = ap
 
-		if hasLineBreakOrLineComment(ap.String()) {
+		if p.hasLineBreakOrLineComment(ap.String()) {
 			multiline = true
 		}
 	}
@@ -484,6 +484,6 @@ func alignedPrinterStrings(printers []*printer) []string {
 	return out
 }
 
-func hasLineBreakOrLineComment(s string) bool {
-	return strings.Contains(s, "\n") || strings.Contains(s, trailingCommentPlaceholder)
+func (p *printer) hasLineBreakOrLineComment(s string) bool {
+	return strings.Contains(s, "\n") || strings.Contains(s, p.fmt.sentinels.trailingComment)
 }

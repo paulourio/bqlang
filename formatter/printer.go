@@ -40,11 +40,26 @@ type parenthesizableNode interface {
 	Parenthesized() (bool, error)
 }
 
-const (
-	lineBreakPlaceholder        = "\x21\x1a10"
-	literalLineBreakPlaceholder = "\x21\x1a11"
-	trailingCommentPlaceholder  = "\x21\x1a12"
-)
+type formatSentinels struct {
+	lineBreak        string
+	literalLineBreak string
+	trailingComment  string
+	verticalTab      string
+}
+
+func newFormatSentinels(input string) formatSentinels {
+	prefix := "\x1e\x1f"
+	for strings.Contains(input, prefix) {
+		prefix += "0"
+	}
+
+	return formatSentinels{
+		lineBreak:        prefix + "1",
+		literalLineBreak: prefix + "2",
+		trailingComment:  prefix + "3",
+		verticalTab:      prefix + "4",
+	}
+}
 
 // Initialized via sync.Once to break the visitor -> visit -> newVisitorMap cycle.
 var (
@@ -644,6 +659,7 @@ func (p *printer) nest() *printer {
 			opts:      p.fmt.opts,
 			comments:  p.fmt.comments,
 			bqCatalog: p.fmt.bqCatalog,
+			sentinels: p.fmt.sentinels,
 			maxLength: capacity,
 		},
 		input:       p.input,

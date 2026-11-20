@@ -12,6 +12,7 @@ type formatterState struct {
 	opts                   *PrintOptions
 	comments               *commentsQueue
 	bqCatalog              stringMapSet
+	sentinels              formatSentinels
 	buffer                 strings.Builder
 	formatted              strings.Builder
 	maxLength              int
@@ -127,14 +128,14 @@ func (p *formatterState) flushCommentsUpTo(pos int) {
 }
 
 func (p *formatterState) emitComment(c *extensions.Comment) {
-	image := c.Image
+	image := strings.ReplaceAll(c.Image, "\v", p.sentinels.verticalTab)
 	if c.IsMultiline() {
-		image = strings.ReplaceAll(c.Image, "\n", lineBreakPlaceholder)
+		image = strings.ReplaceAll(image, "\n", p.sentinels.lineBreak)
 	}
 
 	trimmed := strings.TrimRight(image, "\n")
 	if isLineCommentKind(c.Kind) {
-		trimmed = trailingCommentPlaceholder + trimmed
+		trimmed = p.sentinels.trailingComment + trimmed
 	}
 
 	switch {
@@ -168,7 +169,7 @@ func (p *formatterState) currentLineHasLineComment() bool {
 	buf := p.buffer.String()
 	start := strings.LastIndexByte(buf, '\n') + 1
 
-	return strings.Contains(buf[start:], trailingCommentPlaceholder)
+	return strings.Contains(buf[start:], p.sentinels.trailingComment)
 }
 
 func (p *formatterState) lastIsSeparator() bool {

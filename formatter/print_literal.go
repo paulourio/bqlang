@@ -164,7 +164,8 @@ func (p *printer) printFormattedLiteral(
 		s = raw
 	}
 
-	p.print(strings.ReplaceAll(s, "\n", literalLineBreakPlaceholder))
+	s = strings.ReplaceAll(s, "\v", p.fmt.sentinels.verticalTab)
+	p.print(strings.ReplaceAll(s, "\n", p.fmt.sentinels.literalLineBreak))
 }
 
 func applyNumericCase(s string, style PrintCase) string {

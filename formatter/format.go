@@ -123,11 +123,14 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 		bqCatalog = bigQueryFunctionCatalog
 	}
 
+	sentinels := newFormatSentinels(input)
+
 	p := &printer{
 		fmt: &formatterState{
 			opts:      opts,
 			comments:  &commentsQueue{comms},
 			bqCatalog: bqCatalog,
+			sentinels: sentinels,
 			maxLength: opts.SoftMaxColumns,
 		},
 		input:       input,
@@ -147,16 +150,17 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 
 	result := p.unnest()
 	if p.fmt.opts.AlignTrailingComments {
-		result = alignTrailingComments(result)
+		result = alignTrailingComments(result, sentinels.trailingComment)
 	}
 
-	result = strings.ReplaceAll(result, trailingCommentPlaceholder, "")
+	result = strings.ReplaceAll(result, sentinels.trailingComment, "")
 	result = strings.ReplaceAll(result, "\v", "") + "\n"
-	result = strings.ReplaceAll(result, lineBreakPlaceholder, "\n")
+	result = strings.ReplaceAll(result, sentinels.lineBreak, "\n")
 	result = rowsTrimRight(result)
-	// Restore multi-line literal newlines AFTER rowsTrimRight so literal bytes
-	// and internal trailing spaces are preserved verbatim.
-	result = strings.ReplaceAll(result, literalLineBreakPlaceholder, "\n")
+	// Restore multi-line literal newlines and escaped vertical tabs AFTER
+	// rowsTrimRight and tabwriter cleanup so literal bytes are preserved verbatim.
+	result = strings.ReplaceAll(result, sentinels.literalLineBreak, "\n")
+	result = strings.ReplaceAll(result, sentinels.verticalTab, "\v")
 
 	f.log("## Formatted print\n\n")
 	f.logf("```\n%s\n```\n\n", result)

@@ -1143,7 +1143,7 @@ func (p *printer) rawIdentifier(n *googlesql.ASTIdentifier) string {
 		end++
 	}
 
-	return p.viewInput(start, end)
+	return strings.ReplaceAll(p.viewInput(start, end), "\v", p.fmt.sentinels.verticalTab)
 }
 
 type tableNameHolder interface {
