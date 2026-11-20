@@ -274,3 +274,62 @@ FROM GRAPH_TABLE (
      )
 |> AGGREGATE COUNT(*) AS cnt GROUP BY customer_id;
 """
+
+[[cases]]
+description = "Dynamic labels/properties, GQL TABLESAMPLE, and shorthand EXISTS graph pattern"
+input = """
+create property graph myds.dyn_graph
+node tables (
+  myds.nodes
+    key (id)
+    dynamic label (lbl_col)
+    dynamic properties (props_col)
+)
+edge tables (
+  myds.edges
+    key (src_id, dst_id)
+    source key (src_id) references nodes (id)
+    destination key (dst_id) references nodes (id)
+    dynamic label (edge_lbl)
+    dynamic properties (edge_props)
+);
+
+select *
+  from graph_table (
+    myds.dyn_graph
+    match (a:Person)
+    where exists { (a)-[:Knows]->(b:Person) where b.age > 30 }
+    tablesample reservoir (10 rows) with weight as w repeatable (7)
+    return a.id as id, w
+  ) as gt;
+"""
+formatted = """
+CREATE PROPERTY GRAPH myds.dyn_graph
+  NODE TABLES (
+    myds.nodes
+      KEY (id)
+      DYNAMIC LABEL (lbl_col)
+      DYNAMIC PROPERTIES (props_col)
+  )
+  EDGE TABLES (
+    myds.edges
+      KEY (src_id, dst_id)
+      SOURCE KEY (src_id) REFERENCES nodes (id)
+      DESTINATION KEY (dst_id) REFERENCES nodes (id)
+      DYNAMIC LABEL (edge_lbl)
+      DYNAMIC PROPERTIES (edge_props)
+  );
+
+SELECT *
+  FROM GRAPH_TABLE (
+         myds.dyn_graph
+         MATCH (a:Person)
+         WHERE EXISTS {
+                 (a)-[:Knows]->(b:Person)
+                 WHERE b.age > 30
+               }
+         TABLESAMPLE RESERVOIR (10 ROWS) WITH WEIGHT AS w REPEATABLE(7)
+         RETURN a.id AS id,
+                w
+       ) AS gt;
+"""

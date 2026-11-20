@@ -467,3 +467,269 @@ FROM stock_ticks
     high AS high.price > 100
 );
 """
+
+[[cases]]
+description = "Extended pipe operators: WINDOW, CALL, TABLESAMPLE, AS, PIVOT, UNPIVOT, ASSERT, DESCRIBE, sinks, subpipeline"
+input = """
+from myds.sales
+|> as s
+|> window sum(s.amount) over (partition by s.dept order by s.dt) as running_total,
+          avg(s.amount) over (order by s.dt rows between 2 preceding and current row) as moving_avg
+|> tablesample reservoir (100 rows partition by dept) with weight as w repeatable (42)
+|> call myds.enrich(10, table myds.ref) as enriched
+|> call myds.post_proc() @{hint=1} as p
+|> assert amount > 0, 'non-positive amount', id
+|> pivot (sum(amt) as total for qtr in ('Q1', 'Q2')) as pv
+|> unpivot include nulls (val for quarter in (Q1, Q2)) as up
+|> describe;
+
+from myds.orders |> static_describe;
+
+from myds.src
+|> where active = true
+|> create or replace table myds.dst
+   options (description = 'piped');
+
+from myds.src
+|> where active = true
+|> insert into myds.dst (id, name);
+
+from myds.src
+|> where active = true
+|> export data
+   with connection `myproj.us.myconn`
+   options (uri = 'gs://bucket/*.parquet', format = 'PARQUET');
+
+|> where active = true
+|> aggregate count(*) as cnt group by region;
+"""
+formatted = """
+FROM myds.sales
+|> AS s
+|> WINDOW SUM(s.amount) OVER (
+            PARTITION BY s.dept
+                ORDER BY s.dt
+          ) AS running_total,
+          AVG(s.amount) OVER (
+            ORDER BY s.dt
+             ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+          ) AS moving_avg
+|> TABLESAMPLE RESERVOIR (100 ROWS PARTITION BY dept) WITH WEIGHT AS w REPEATABLE(42)
+|> CALL myds.enrich(
+  10,
+  TABLE myds.ref
+) AS enriched
+|> CALL myds.post_proc() @{hint=1} AS p
+|> ASSERT amount > 0, 'non-positive amount', id
+|> PIVOT (
+  SUM(amt) AS total
+  FOR qtr IN ('Q1', 'Q2')
+) AS pv
+|> UNPIVOT INCLUDE NULLS (
+  val
+  FOR quarter IN (Q1, Q2)
+) AS up
+|> DESCRIBE;
+
+FROM myds.orders
+|> STATIC_DESCRIBE;
+
+FROM myds.src
+|> WHERE active = TRUE
+|> CREATE OR REPLACE TABLE myds.dst
+OPTIONS (description='piped');
+
+FROM myds.src
+|> WHERE active = TRUE
+|> INSERT INTO myds.dst
+  (id, name);
+
+FROM myds.src
+|> WHERE active = TRUE
+|> EXPORT DATA
+WITH CONNECTION `myproj.us.myconn`
+OPTIONS (
+  uri    = 'gs://bucket/*.parquet',
+  format = 'PARQUET'
+);
+
+|> WHERE active = TRUE
+|> AGGREGATE COUNT(*) AS cnt GROUP BY region;
+"""
+
+[[cases]]
+description = "Extended DDL: UNDROP, ALTER CONSTRAINT, PRIVILEGE RESTRICTION, ROW ACCESS POLICIES, INDEX UNNEST, ALTER objects"
+input = """
+undrop schema if not exists myds
+for system time as of timestamp_sub(current_timestamp(), interval 1 hour)
+options (description = 'restored', default_table_expiration_days = 7);
+
+alter table myds.orders
+  alter constraint if exists pk_orders not enforced,
+  alter constraint fk_cust enforced,
+  alter constraint chk_amt set options (description = 'positive');
+
+alter privilege restriction if exists on select, update on table myds.sensitive
+  restrict to ('user:a@b.com'),
+  add if not exists ('group:sec@b.com'),
+  remove if exists ('user:old@b.com');
+
+alter privilege restriction on select on table myds.sensitive
+  restrict to ();
+
+drop privilege restriction if exists on select on table myds.sensitive;
+
+alter row access policy if exists pol1 on myds.t
+  grant to ('user:a@b.com'),
+  revoke from ('user:old@b.com'),
+  filter using (region = 'US'),
+  rename to pol2;
+
+alter row access policy pol1 on myds.t revoke from all;
+
+alter all row access policies on myds.t grant to ('group:eng@b.com');
+
+alter external schema if exists myds.ext_s set options (description = 'ext');
+alter connection if exists myproj.us.myconn set options (description = 'conn');
+alter database mydb set options (default_time_zone = 'UTC');
+alter model if exists myds.churn set options (description = 'v2');
+alter schema myds alter replica if exists us_rep set options (description = 'primary');
+
+create index myds.idx1 on myds.t t
+  unnest(t.tags) as tag
+  unnest(tag.items) as item with offset as off
+  (item, id desc)
+  storing (name, amount)
+  partition by date(created_at)
+  options (description = 'tag idx');
+
+drop index if exists myds.idx1;
+"""
+formatted = """
+UNDROP SCHEMA IF NOT EXISTS myds
+FOR SYSTEM_TIME AS OF TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
+OPTIONS (
+  description                   = 'restored',
+  default_table_expiration_days = 7
+);
+
+ALTER TABLE myds.orders
+  ALTER CONSTRAINT IF EXISTS pk_orders NOT ENFORCED,
+  ALTER CONSTRAINT fk_cust ENFORCED,
+  ALTER CONSTRAINT chk_amt SET OPTIONS (description='positive');
+
+ALTER PRIVILEGE RESTRICTION IF EXISTS ON select, update ON TABLE myds.sensitive
+  RESTRICT TO ('user:a@b.com'),
+  ADD IF NOT EXISTS ('group:sec@b.com'),
+  REMOVE IF EXISTS ('user:old@b.com');
+
+ALTER PRIVILEGE RESTRICTION ON select ON TABLE myds.sensitive
+  RESTRICT TO ();
+
+DROP PRIVILEGE RESTRICTION IF EXISTS ON select ON TABLE myds.sensitive;
+
+ALTER ROW ACCESS POLICY IF EXISTS pol1 ON myds.t
+  GRANT TO ('user:a@b.com'),
+  REVOKE FROM ('user:old@b.com'),
+  FILTER USING (region = 'US'),
+  RENAME TO pol2;
+
+ALTER ROW ACCESS POLICY pol1 ON myds.t
+  REVOKE FROM ALL;
+
+ALTER ALL ROW ACCESS POLICIES ON myds.t
+  GRANT TO ('group:eng@b.com');
+
+ALTER EXTERNAL SCHEMA IF EXISTS myds.ext_s
+  SET OPTIONS (description='ext');
+
+ALTER CONNECTION IF EXISTS myproj.us.myconn
+  SET OPTIONS (description='conn');
+
+ALTER DATABASE mydb
+  SET OPTIONS (default_time_zone='UTC');
+
+ALTER MODEL IF EXISTS myds.churn
+  SET OPTIONS (description='v2');
+
+ALTER SCHEMA myds
+  ALTER REPLICA IF EXISTS us_rep SET OPTIONS (description='primary');
+
+CREATE INDEX myds.idx1
+ON myds.t AS t
+UNNEST(t.tags) AS tag
+UNNEST(tag.items) AS item WITH OFFSET off
+(item, id DESC)
+STORING (name, amount)
+PARTITION BY DATE(created_at)
+OPTIONS (description='tag idx');
+
+DROP INDEX IF EXISTS myds.idx1;
+"""
+
+[[cases]]
+description = "IDENTITY, HIDDEN, inferred-type columns, RANGE/MAP/MAX types, concat, chained calls, extended paths, REPEAT"
+input = """
+create table myds.typed_tbl (
+  id int64 generated always as identity (start with 10 increment by 2 maxvalue 1000 minvalue 1 cycle),
+  secret string hidden,
+  total as (a + b) stored,
+  label string(max),
+  raw_blob bytes(max),
+  span range<date>,
+  attrs map<string, int64>,
+  nested array<struct<x int64, y string>> not null options (description = 'arr', rounding_mode = 'ROUND_HALF_EVEN')
+);
+
+select range<date> '[2025-01-01, 2025-12-31)' as r,
+       cast(null as map<string, int64>) as m,
+       'a' || 'b' || 'c' as cat,
+       (123).abs() as n,
+       (a.b).c as ext_p
+  from myds.typed_tbl;
+
+outer_rep: repeat
+  set y = y + 1;
+  if y = 3 then
+    leave outer_rep;
+  end if;
+until y >= 5
+end repeat outer_rep;
+"""
+formatted = """
+CREATE TABLE myds.typed_tbl
+(
+  id       INT64 GENERATED ALWAYS AS IDENTITY(START WITH 10 INCREMENT BY 2 MAXVALUE 1000 MINVALUE 1 CYCLE),
+  secret   STRING HIDDEN,
+  total    GENERATED ALWAYS AS (a + b) STORED,
+  label    STRING(MAX),
+  raw_blob BYTES(MAX),
+  span     RANGE<DATE>,
+  attrs    MAP<STRING, INT64>,
+  nested   ARRAY<
+             STRUCT<
+               x INT64,
+               y STRING
+             >
+           > NOT NULL OPTIONS (
+             description   = 'arr',
+             rounding_mode = 'ROUND_HALF_EVEN'
+           )
+);
+
+SELECT RANGE<DATE> '[2025-01-01, 2025-12-31)' AS r,
+       CAST(NULL AS MAP<STRING, INT64>)       AS m,
+       'a' || 'b' || 'c'                      AS cat,
+       (123).ABS()                            AS n,
+       (a.b).c                                AS ext_p
+  FROM myds.typed_tbl;
+
+outer_rep: REPEAT
+  SET y = y + 1;
+
+  IF y = 3 THEN
+    LEAVE outer_rep;
+  END IF;
+UNTIL y >= 5
+END REPEAT outer_rep;
+"""
