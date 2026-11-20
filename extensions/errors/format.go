@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/paulourio/bqlang/extensions/token"
@@ -76,7 +77,7 @@ func tokenError(err *Error) (desc string, line, col int) {
 		col = 1
 		desc = "Unexpected end of statement"
 	default:
-		if isExpected("$", err.ExpectedTokens) {
+		if slices.Contains(err.ExpectedTokens, "$") {
 			desc = "Expected end of input but got " + tokDesc
 		}
 	}
@@ -103,18 +104,8 @@ func describeUnexpectedToken(tok *token.Token) string {
 	return fmt.Sprintf("%s %s", name, value)
 }
 
-func isExpected(elem string, expected []string) bool {
-	for _, sym := range expected {
-		if strings.EqualFold(sym, elem) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func computeLineCol(lines []string, offset int) (line, col int) {
-	for line < len(lines) && offset > len(lines[line])-1 {
+	for line < len(lines) && offset > len(lines[line]) {
 		offset -= len(lines[line]) + 1
 		line++
 	}

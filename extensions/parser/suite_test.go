@@ -12,12 +12,8 @@ import (
 
 // TestDataFile contains a single unit test data.
 type TestDataFile struct {
-	Setup *Setup  `toml:"setup"`
 	Cases []*Case `toml:"cases"`
 }
-
-// Setup defines the default configuration for a test case.
-type Setup struct{}
 
 // Case is a single test case specification.
 type Case struct {

@@ -7,7 +7,7 @@ type Kind int
 
 // Extension AST node kinds.
 const (
-	UnknownKind = iota
+	UnknownKind Kind = iota
 	Comment
 	Script
 	TemplateComment

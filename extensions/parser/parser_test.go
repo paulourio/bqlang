@@ -33,8 +33,8 @@ func TestParser(t *testing.T) {
 			var b strings.Builder
 
 			b.Grow(len(tcase.Input) * 2)
-			fmt.Fprintf(&b, "Input (%d bytes):\n%s\n\n", len(tcase.Input), tcase.Input)
-			fmt.Fprintf(&b, "Expected Dump (%d bytes):\n%s\n\n", len(tcase.Dump), tcase.Dump)
+			b.WriteString(tcase.String())
+			b.WriteByte('\n')
 
 			l := lexer.NewLexer([]byte(tcase.Input))
 			p := parser.NewParser()

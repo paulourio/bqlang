@@ -21,7 +21,7 @@ func (d *dumper) dump(n NodeHandler, depth int) {
 
 	if depth >= d.maxDepth {
 		d.indent(depth)
-		fmt.Fprintf(&d.out, "  Subtree skipped (reached max depth %d)", d.maxDepth)
+		fmt.Fprintf(&d.out, "  Subtree skipped (reached max depth %d)%s", d.maxDepth, d.sep)
 
 		return
 	}
