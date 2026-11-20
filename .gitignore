@@ -1,0 +1,20 @@
+# Local binaries
+/bqfmt
+/bqdump
+
+# Go test, coverage, and profiling artifacts
+*.test
+*.out
+*.prof
+coverage.*
+
+# Local tool caches
+.cache/
+
+# Editor and OS files
+*.code-workspace
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
