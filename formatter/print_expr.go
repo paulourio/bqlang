@@ -1,6 +1,7 @@
 package formatter
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 
@@ -748,7 +749,7 @@ func (p *printer) visitDotIdentifier(n *googlesql.ASTDotIdentifier, d printerDat
 	expr, _ := n.Expr()
 	name, _ := n.Name()
 
-	p.accept(expr, d)
+	p.printDotBase(expr, d)
 	p.print(".")
 	p.accept(name, d)
 	p.printCloseParenIfNeeded(n)
@@ -760,7 +761,7 @@ func (p *printer) visitDotGeneralizedField(n *googlesql.ASTDotGeneralizedField, 
 	expr, _ := n.Expr()
 	path, _ := n.Path()
 
-	p.accept(expr, d)
+	p.printDotBase(expr, d)
 	p.print(".(")
 	p.accept(path, d)
 	p.print(")")
@@ -770,7 +771,7 @@ func (p *printer) visitDotGeneralizedField(n *googlesql.ASTDotGeneralizedField, 
 func (p *printer) visitDotStar(n *googlesql.ASTDotStar, d printerData) {
 	p.moveBefore(n)
 	expr, _ := n.Expr()
-	p.accept(expr, d)
+	p.printDotBase(expr, d)
 	p.print(".*")
 }
 
@@ -779,9 +780,40 @@ func (p *printer) visitDotStarWithModifiers(n *googlesql.ASTDotStarWithModifiers
 	expr, _ := n.Expr()
 	mods, _ := n.Modifiers()
 
-	p.accept(expr, d)
+	p.printDotBase(expr, d)
 	p.print(".*")
 	p.accept(mods, d)
+}
+
+func (p *printer) printDotBase(expr googlesql.ASTExpressionNode, d printerData) {
+	needParen := needsInnerParenBeforeDot(expr)
+	if needParen {
+		p.print("(")
+	}
+
+	p.accept(expr, d)
+
+	if needParen {
+		p.print(")")
+	}
+}
+
+func needsInnerParenBeforeDot(n googlesql.ASTExpressionNode) bool {
+	if !nodeDefined(n) {
+		return false
+	}
+
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstIntLiteral,
+		googlesql.ASTNodeKindAstFloatLiteral:
+		return true
+	case googlesql.ASTNodeKindAstSystemVariableExpr:
+		paren, _ := n.Parenthesized()
+
+		return !paren
+	default:
+		return false
+	}
 }
 
 func (p *printer) visitExpressionSubquery(n *googlesql.ASTExpressionSubquery, d printerData) {
@@ -1369,15 +1401,100 @@ func (p *printer) visitPathExpression(n *googlesql.ASTPathExpression, d printerD
 	p.moveBefore(n)
 	p.printOpenParenIfNeeded(n)
 
-	for i, name := range selectChildrenOfType[*googlesql.ASTIdentifier](n) {
+	names := selectChildrenOfType[*googlesql.ASTIdentifier](n)
+	sharedSegs := p.sharedSpanPathSegments(names)
+	tablePath := p.fmt.opts.TableNameStyle != Unspecified && isTablePath(n)
+
+	for i, name := range names {
 		if i > 0 {
 			p.print(".")
 		}
 
-		p.accept(name, d)
+		if i < len(sharedSegs) {
+			p.moveBefore(name)
+			p.printPathIdentifier(sharedSegs[i], tablePath)
+		} else {
+			p.accept(name, d)
+		}
 	}
 
 	p.printCloseParenIfNeeded(n)
+}
+
+func (p *printer) printPathIdentifier(raw string, tablePath bool) {
+	if tablePath {
+		p.print(p.identifierWithCase(raw, p.fmt.opts.TableNameStyle))
+
+		return
+	}
+
+	p.print(p.identifier(raw))
+}
+
+// sharedSpanPathSegments handles dashed/slashed path prefixes where GoogleSQL's
+// SeparatedIdentifierTmpNode::BuildPathParts assigns the combined prefix byte
+// range to every leading ASTIdentifier child. When two or more leading children
+// share an identical byte span, it extracts each segment's raw text (preserving
+// backticks and original casing) instead of letting rawIdentifier repeat the
+// combined span for every child.
+func (p *printer) sharedSpanPathSegments(names []*googlesql.ASTIdentifier) []string {
+	if len(names) < 2 || !sameNodeSpan(names[0], names[1]) {
+		return nil
+	}
+
+	sharedCount := 2
+	for sharedCount < len(names) && sameNodeSpan(names[0], names[sharedCount]) {
+		sharedCount++
+	}
+
+	start, end := nodeByteRange(names[0])
+	if segs := splitPathSegments(p.viewErasedInput(start, end)); len(segs) == sharedCount && !slices.Contains(segs, "") {
+		return segs
+	}
+
+	fallback := make([]string, sharedCount)
+	for i := range sharedCount {
+		s, _ := names[i].GetAsString()
+		fallback[i] = s
+	}
+
+	return fallback
+}
+
+func splitPathSegments(s string) []string {
+	var (
+		segs       []string
+		segStart   int
+		inBacktick bool
+	)
+
+	for i := 0; i < len(s); i++ {
+		if inBacktick {
+			if s[i] == '\\' && i+1 < len(s) {
+				i++
+
+				continue
+			}
+
+			if s[i] == '`' {
+				inBacktick = false
+			}
+
+			continue
+		}
+
+		switch s[i] {
+		case '`':
+			inBacktick = true
+		case '.':
+			segs = append(segs, strings.TrimSpace(s[segStart:i]))
+			segStart = i + 1
+		}
+	}
+
+	segs = append(segs, strings.TrimSpace(s[segStart:]))
+
+	return segs
 }
 
 func (p *printer) visitPathExpressionList(n *googlesql.ASTPathExpressionList, d printerData) {
@@ -1599,6 +1716,8 @@ func isUnaryParenNeeded(n *googlesql.ASTUnaryExpression) bool {
 		switch nodeKind(parent) {
 		case googlesql.ASTNodeKindAstDotIdentifier,
 			googlesql.ASTNodeKindAstDotGeneralizedField,
+			googlesql.ASTNodeKindAstDotStar,
+			googlesql.ASTNodeKindAstDotStarWithModifiers,
 			googlesql.ASTNodeKindAstArrayElement:
 			return true
 		default:
@@ -1613,21 +1732,21 @@ func (p *printer) visitUnnestExpression(n *googlesql.ASTUnnestExpression, d prin
 	p.moveBefore(n)
 	p.print(p.keyword("UNNEST") + "(")
 
-	if expr, _ := n.Expression(); nodeDefined(expr) {
-		p.accept(expr, d)
-	} else {
-		for i, e := range selectChildrenOfType[*googlesql.ASTExpressionWithOptAlias](n) {
-			if i > 0 {
-				p.print(",")
-			}
-
-			p.accept(e, d)
-		}
-
-		if zm, _ := n.ArrayZipMode(); nodeDefined(zm) {
+	exprs := selectChildrenOfType[*googlesql.ASTExpressionWithOptAlias](n)
+	for i, e := range exprs {
+		if i > 0 {
 			p.print(",")
-			p.accept(zm, d)
 		}
+
+		p.accept(e, d)
+	}
+
+	if zm, _ := n.ArrayZipMode(); nodeDefined(zm) {
+		if len(exprs) > 0 {
+			p.print(",")
+		}
+
+		p.accept(zm, d)
 	}
 
 	p.print(")")

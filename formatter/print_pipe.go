@@ -136,18 +136,52 @@ func (p *printer) visitPipeWindow(n *googlesql.ASTPipeWindow, d printerData) {
 func (p *printer) printPipeSelectLike(kw string, sel *googlesql.ASTSelect, d printerData) {
 	p.print(p.keyword(kw))
 
-	if distinct, _ := sel.Distinct(); distinct {
-		p.print(p.keyword("DISTINCT"))
+	if hint, _ := sel.Hint(); nodeDefined(hint) {
+		p.accept(hint, d)
 	}
 
-	if sa, _ := sel.SelectAs(); nodeDefined(sa) {
+	wm, _ := sel.WithModifier()
+	if nodeDefined(wm) {
+		p.accept(wm, d)
+	}
+
+	distinct, _ := sel.Distinct()
+	sa, _ := sel.SelectAs()
+	sl, _ := sel.SelectList()
+
+	if distinct {
+		p.print(p.keyword("DISTINCT"))
+	} else if p.needsSelectAllAfterWithModifier(wm, sa, sl) {
+		p.print(p.keyword("ALL"))
+	}
+
+	if nodeDefined(sa) {
 		p.accept(sa, d)
 	}
 
 	d.singleLineCols = p.maybeSingleLineColumns(sel)
 
-	if sl, _ := sel.SelectList(); nodeDefined(sl) {
+	if nodeDefined(sl) {
 		p.accept(sl, d)
+	}
+
+	if win, _ := sel.WindowClause(); nodeDefined(win) {
+		p.println("")
+		p.incDepth()
+
+		pWin := p.nest()
+		pWin.print(pWin.keyword("WINDOW"))
+		pWin.acceptNested(win, d)
+
+		for i, line := range strings.Split(leftAlignNested(pWin.String()), "\n") {
+			if i > 0 {
+				p.println("")
+			}
+
+			p.print(line)
+		}
+
+		p.decDepth()
 	}
 }
 

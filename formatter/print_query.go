@@ -907,13 +907,33 @@ func (p *printer) visitQuery(n *googlesql.ASTQuery, d printerData) {
 	}
 }
 
+func (p *printer) queryNeedsParen(n *googlesql.ASTQuery, parent googlesql.ASTNode) bool {
+	if p.isParenNeeded(n) {
+		return true
+	}
+
+	nested, _ := n.IsNested()
+	if !nested {
+		return false
+	}
+
+	if !nodeDefined(parent) {
+		return true
+	}
+
+	k := nodeKind(parent)
+
+	return k != googlesql.ASTNodeKindAstTableSubquery &&
+		k != googlesql.ASTNodeKindAstAliasedQueryExpression
+}
+
 func (p *printer) queryParenCount(n *googlesql.ASTQuery) int {
-	if !p.isParenNeeded(n) {
+	parent := nodeParent(n)
+	if !p.queryNeedsParen(n, parent) {
 		return 0
 	}
 
 	start, end := nodeByteRange(n)
-	parent := nodeParent(n)
 	minStart := 0
 	maxEnd := len(p.erasedInput)
 	parentOwnsOne := false
@@ -927,7 +947,8 @@ func (p *printer) queryParenCount(n *googlesql.ASTQuery) int {
 			googlesql.ASTNodeKindAstLikeExpression,
 			googlesql.ASTNodeKindAstQuantifiedComparisonExpression,
 			googlesql.ASTNodeKindAstForInStatement,
-			googlesql.ASTNodeKindAstAliasedQuery:
+			googlesql.ASTNodeKindAstAliasedQuery,
+			googlesql.ASTNodeKindAstAliasedQueryExpression:
 			parentOwnsOne = true
 		default:
 			parentOwnsOne = false
@@ -1098,6 +1119,12 @@ func (p *printer) visitSelect(n *googlesql.ASTSelect, d printerData) {
 		if !nodeDefined(sa) && !singleLine {
 			pp3.println("")
 		}
+	} else if p.needsSelectAllAfterWithModifier(wm, sa, sl) {
+		pp3.print(pp3.keyword("ALL"))
+
+		if !nodeDefined(sa) && !singleLine {
+			pp3.println("")
+		}
 	}
 
 	pp3.accept(sa, d)
@@ -1162,6 +1189,33 @@ func (p *printer) visitWithModifier(n *googlesql.ASTWithModifier, d printerData)
 	p.print(p.keyword("WITH"))
 	p.print(p.rawKeywordIdent(id))
 	p.accept(opts, d)
+}
+
+func (p *printer) needsSelectAllAfterWithModifier(
+	wm *googlesql.ASTWithModifier,
+	sa *googlesql.ASTSelectAs,
+	sl *googlesql.ASTSelectList,
+) bool {
+	if !nodeDefined(wm) || nodeDefined(sa) || !nodeDefined(sl) {
+		return false
+	}
+
+	if opts, _ := wm.Options(); nodeDefined(opts) {
+		return false
+	}
+
+	s := strings.TrimLeft(p.nodeErasedInput(sl), " \t\n\r")
+	end := 0
+
+	for end < len(s) && isIdentChar(s[end]) {
+		end++
+	}
+
+	return strings.EqualFold(s[:end], "OPTIONS")
+}
+
+func isIdentChar(b byte) bool {
+	return b == '_' || (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9')
 }
 
 func (p *printer) visitSelectAs(n *googlesql.ASTSelectAs, d printerData) {
@@ -1276,6 +1330,22 @@ func (p *printer) printSetOperationHeader(meta *googlesql.ASTSetOperationMetadat
 		return
 	}
 
+	var propMode googlesql.ASTSetOperationEnums_ColumnPropagationMode
+	if cpm, _ := meta.ColumnPropagationMode(); nodeDefined(cpm) {
+		propMode, _ = cpm.Value()
+	}
+
+	switch propMode {
+	case googlesql.ASTSetOperationEnums_ColumnPropagationModeInner:
+		p.print(p.keyword("INNER"))
+	case googlesql.ASTSetOperationEnums_ColumnPropagationModeLeft:
+		p.print(p.keyword("LEFT"))
+	case googlesql.ASTSetOperationEnums_ColumnPropagationModeFull:
+		p.print(p.keyword("FULL"))
+	case googlesql.ASTSetOperationEnums_ColumnPropagationModeStrict:
+		// STRICT is emitted after ALL/DISTINCT and before CORRESPONDING.
+	}
+
 	opNode, _ := meta.OpType()
 	opVal := googlesql.ASTSetOperationEnums_OperationTypeNotSet
 
@@ -1300,13 +1370,29 @@ func (p *printer) printSetOperationHeader(meta *googlesql.ASTSetOperationMetadat
 		p.accept(hint, d)
 	}
 
+	if aod, _ := meta.AllOrDistinct(); nodeDefined(aod) {
+		val, _ := aod.Value()
+		switch val {
+		case googlesql.ASTSetOperationEnums_AllOrDistinctDistinct:
+			p.print(p.keyword("DISTINCT"))
+		case googlesql.ASTSetOperationEnums_AllOrDistinctAll:
+			p.print(p.keyword("ALL"))
+		default:
+			// Unset.
+		}
+	}
+
+	if propMode == googlesql.ASTSetOperationEnums_ColumnPropagationModeStrict {
+		p.print(p.keyword("STRICT"))
+	}
+
 	if cmm, _ := meta.ColumnMatchMode(); nodeDefined(cmm) {
 		val, _ := cmm.Value()
 		switch val {
 		case googlesql.ASTSetOperationEnums_ColumnMatchModeCorresponding:
 			p.print(p.keyword("CORRESPONDING"))
 		case googlesql.ASTSetOperationEnums_ColumnMatchModeCorrespondingBy:
-			p.print(p.keyword("CORRESPONDING BY"))
+			p.print(p.keyword("CORRESPONDING BY") + " ")
 		case googlesql.ASTSetOperationEnums_ColumnMatchModeByName:
 			p.print(p.keyword("BY NAME"))
 		case googlesql.ASTSetOperationEnums_ColumnMatchModeByNameOn:
@@ -1318,18 +1404,6 @@ func (p *printer) printSetOperationHeader(meta *googlesql.ASTSetOperationMetadat
 
 	if cbcl, _ := meta.CorrespondingByColumnList(); nodeDefined(cbcl) {
 		p.accept(cbcl, d)
-	}
-
-	if aod, _ := meta.AllOrDistinct(); nodeDefined(aod) {
-		val, _ := aod.Value()
-		switch val {
-		case googlesql.ASTSetOperationEnums_AllOrDistinctDistinct:
-			p.print(p.keyword("DISTINCT"))
-		case googlesql.ASTSetOperationEnums_AllOrDistinctAll:
-			p.print(p.keyword("ALL"))
-		default:
-			// Unset.
-		}
 	}
 }
 
@@ -1893,6 +1967,75 @@ func (p *printer) visitAliasedQuery(n *googlesql.ASTAliasedQuery, d printerData)
 	}
 
 	p.print(")")
+
+	if mods, _ := n.Modifiers(); nodeDefined(mods) {
+		p.printAliasedQueryModifiers(mods, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printAliasedQueryModifiers(n *googlesql.ASTAliasedQueryModifiers, d printerData) {
+	p.moveBefore(n)
+
+	if rdm, _ := n.RecursionDepthModifier(); nodeDefined(rdm) {
+		p.printRecursionDepthModifier(rdm, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printRecursionDepthModifier(n *googlesql.ASTRecursionDepthModifier, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("WITH DEPTH"))
+
+	if alias, _ := n.Alias(); nodeDefined(alias) {
+		p.accept(alias, d)
+	}
+
+	lb, _ := n.LowerBound()
+	ub, _ := n.UpperBound()
+
+	var lbExpr, ubExpr googlesql.ASTExpressionNode
+	if nodeDefined(lb) {
+		lbExpr, _ = lb.Bound()
+	}
+
+	if nodeDefined(ub) {
+		ubExpr, _ = ub.Bound()
+	}
+
+	switch {
+	case !nodeDefined(lbExpr) && !nodeDefined(ubExpr):
+		// Unbounded default: plain `WITH DEPTH [AS alias]`.
+	case !nodeDefined(lbExpr) && nodeDefined(ubExpr):
+		p.print(p.keyword("MAX"))
+		p.accept(ubExpr, d)
+	default:
+		p.print(p.keyword("BETWEEN"))
+		p.printIntOrUnbounded(lb, d)
+		p.print(p.keyword("AND"))
+		p.printIntOrUnbounded(ub, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printIntOrUnbounded(n *googlesql.ASTIntOrUnbounded, d printerData) {
+	if !nodeDefined(n) {
+		p.print(p.keyword("UNBOUNDED"))
+
+		return
+	}
+
+	p.moveBefore(n)
+
+	if bound, _ := n.Bound(); nodeDefined(bound) {
+		p.accept(bound, d)
+	} else {
+		p.print(p.keyword("UNBOUNDED"))
+	}
+
 	p.movePast(n)
 }
 
