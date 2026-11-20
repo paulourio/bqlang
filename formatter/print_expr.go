@@ -465,6 +465,7 @@ func (p *printer) visitConcatExpr(n *googlesql.ASTConcatExpr, d printerData) {
 
 func (p *printer) visitBitwiseShiftExpression(n *googlesql.ASTBitwiseShiftExpression, d printerData) {
 	p.moveBefore(n)
+	p.printOpenParenIfNeeded(n)
 	lhs, _ := n.Lhs()
 	rhs, _ := n.Rhs()
 	isLeft, _ := n.IsLeftShift()
@@ -478,6 +479,7 @@ func (p *printer) visitBitwiseShiftExpression(n *googlesql.ASTBitwiseShiftExpres
 	}
 
 	p.accept(rhs, d)
+	p.printCloseParenIfNeeded(n)
 }
 
 func (p *printer) visitCaseNoValueExpression(n *googlesql.ASTCaseNoValueExpression, d printerData) {
@@ -1069,12 +1071,12 @@ func (p *printer) visitIdentifier(n *googlesql.ASTIdentifier, _ printerData) {
 	raw := p.rawIdentifier(n)
 	parent := nodeParent(n)
 
-	if p.fmt.opts.TableNameStyle != Unspecified &&
-		nodeKind(parent) == googlesql.ASTNodeKindAstPathExpression &&
-		isTablePathParent(nodeParent(parent)) {
-		p.print(p.identifierWithCase(raw, p.fmt.opts.TableNameStyle))
+	if p.fmt.opts.TableNameStyle != Unspecified {
+		if path, ok := parent.(*googlesql.ASTPathExpression); ok && isTablePath(path) {
+			p.print(p.identifierWithCase(raw, p.fmt.opts.TableNameStyle))
 
-		return
+			return
+		}
 	}
 
 	p.print(p.identifier(raw))
@@ -1092,8 +1094,14 @@ func (p *printer) rawIdentifier(n *googlesql.ASTIdentifier) string {
 	return p.viewInput(start, end)
 }
 
-func isTablePathParent(n googlesql.ASTNode) bool {
-	switch stmt := n.(type) {
+type tableNameHolder interface {
+	TableName() (*googlesql.ASTPathExpression, error)
+}
+
+func isTablePath(path *googlesql.ASTPathExpression) bool {
+	parent := nodeParent(path)
+
+	switch stmt := parent.(type) {
 	case *googlesql.ASTDropStatement:
 		sok, _ := stmt.SchemaObjectKind()
 
@@ -1102,9 +1110,21 @@ func isTablePathParent(n googlesql.ASTNode) bool {
 		sok, _ := stmt.SchemaObjectKind()
 
 		return isTableSchemaObjectKind(sok)
+	case *googlesql.ASTCreateRowAccessPolicyStatement:
+		tbl, _ := stmt.TargetPath()
+
+		return sameNodeSpan(path, tbl)
+	case *googlesql.ASTAlterRowAccessPolicyStatement:
+		tbl, _ := stmt.Path()
+
+		return sameNodeSpan(path, tbl)
+	case tableNameHolder:
+		tbl, _ := stmt.TableName()
+
+		return sameNodeSpan(path, tbl)
 	}
 
-	switch nodeKind(n) {
+	switch nodeKind(parent) {
 	case googlesql.ASTNodeKindAstTablePathExpression,
 		googlesql.ASTNodeKindAstCreateTableStatement,
 		googlesql.ASTNodeKindAstCreateViewStatement,
@@ -1117,7 +1137,6 @@ func isTablePathParent(n googlesql.ASTNode) bool {
 		googlesql.ASTNodeKindAstAlterAllRowAccessPoliciesStatement,
 		googlesql.ASTNodeKindAstDropMaterializedViewStatement,
 		googlesql.ASTNodeKindAstDropSnapshotTableStatement,
-		googlesql.ASTNodeKindAstDropAllRowAccessPoliciesStatement,
 		googlesql.ASTNodeKindAstAuxLoadDataStatement,
 		googlesql.ASTNodeKindAstCloneDataSource,
 		googlesql.ASTNodeKindAstCopyDataSource,
@@ -1130,6 +1149,17 @@ func isTablePathParent(n googlesql.ASTNode) bool {
 	default:
 		return false
 	}
+}
+
+func sameNodeSpan(a, b googlesql.ASTNode) bool {
+	if !nodeDefined(a) || !nodeDefined(b) {
+		return false
+	}
+
+	sa, ea := nodeByteRange(a)
+	sb, eb := nodeByteRange(b)
+
+	return sa == sb && ea == eb
 }
 
 func isTableSchemaObjectKind(sok googlesql.SchemaObjectKind) bool {
@@ -1202,16 +1232,13 @@ func (p *printer) visitIntervalExpr(n *googlesql.ASTIntervalExpr, d printerData)
 
 	p.print(p.keyword("INTERVAL"))
 	p.accept(val, d)
-
-	pp := p.nest()
-	pp.accept(dp, d)
+	p.print(p.rawKeywordIdent(dp))
 
 	if nodeDefined(dpTo) {
-		pp.print(pp.keyword("TO"))
-		pp.accept(dpTo, d)
+		p.print(p.keyword("TO"))
+		p.print(p.rawKeywordIdent(dpTo))
 	}
 
-	p.print(p.keyword(pp.unnest()))
 	p.movePast(n)
 }
 
@@ -1444,6 +1471,11 @@ func (p *printer) visitSystemVariableExpr(n *googlesql.ASTSystemVariableExpr, d 
 func (p *printer) visitUnaryExpression(n *googlesql.ASTUnaryExpression, d printerData) {
 	p.moveBefore(n)
 
+	needParen := isUnaryParenNeeded(n)
+	if needParen {
+		p.print("(")
+	}
+
 	op, _ := n.Op()
 	switch op {
 	case googlesql.ASTUnaryExpressionEnums_OpNotSet:
@@ -1466,14 +1498,45 @@ func (p *printer) visitUnaryExpression(n *googlesql.ASTUnaryExpression, d printe
 
 	switch op {
 	case googlesql.ASTUnaryExpressionEnums_OpIsUnknown:
-		p.fmt.addUnary(p.keyword("IS UNKNOWN"))
+		p.print(p.keyword("IS UNKNOWN"))
 	case googlesql.ASTUnaryExpressionEnums_OpIsNotUnknown:
-		p.fmt.addUnary(p.keyword("IS NOT UNKNOWN"))
+		p.print(p.keyword("IS NOT UNKNOWN"))
 	default:
 		// Prefix unary handled before operand.
 	}
 
+	if needParen {
+		p.print(")")
+	}
+
 	p.movePast(n)
+}
+
+func isUnaryParenNeeded(n *googlesql.ASTUnaryExpression) bool {
+	parent := nodeParent(n)
+	if !nodeDefined(parent) {
+		return false
+	}
+
+	pp := precedenceNum(parent)
+	cp := precedenceUnaryExpr(n)
+
+	if pp < 1000 && cp > 0 && pp > cp {
+		return true
+	}
+
+	if paren, _ := n.Parenthesized(); paren {
+		switch nodeKind(parent) {
+		case googlesql.ASTNodeKindAstDotIdentifier,
+			googlesql.ASTNodeKindAstDotGeneralizedField,
+			googlesql.ASTNodeKindAstArrayElement:
+			return true
+		default:
+			// Parentheses not required by postfix access.
+		}
+	}
+
+	return false
 }
 
 func (p *printer) visitUnnestExpression(n *googlesql.ASTUnnestExpression, d printerData) {

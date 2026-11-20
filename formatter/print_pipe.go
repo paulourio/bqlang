@@ -302,7 +302,7 @@ func (p *printer) visitPipeTablesample(n *googlesql.ASTPipeTablesample, d printe
 	suffix, _ := sc.SampleSuffix()
 
 	p.print(p.keyword("TABLESAMPLE"))
-	p.print(p.keyword(p.toString(method, d)) + " (")
+	p.print(p.rawKeywordIdent(method) + " (")
 	p.accept(size, d)
 	p.print(")")
 	p.accept(suffix, d)

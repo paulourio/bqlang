@@ -44,7 +44,7 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 		t.counter++
 		tok := t.makeName()
 
-		if strings.Contains(strings.ToUpper(e.Image), "SELECT") {
+		if containsKeywordToken(e.Image, "SELECT") {
 			r = &placeholderInfo{
 				Element:     e,
 				Placeholder: "SELECT " + tok,

@@ -369,7 +369,7 @@ func (p *printer) visitTruncateStatement(n *googlesql.ASTTruncateStatement, d pr
 	if w, _ := n.Where(); nodeDefined(w) {
 		p.println("")
 		p.print(p.keyword("WHERE"))
-		p.accept(w, d)
+		p.visitWhereExprBody(w, d)
 	}
 
 	p.movePast(n)

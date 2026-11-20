@@ -548,7 +548,7 @@ func (p *printer) visitClauseAlignedItems(
 				p.printClause(p.keyword(kw))
 				pp = p.nest()
 			} else {
-				p.printClause(p.keyword(kw))
+				pp.printClause(pp.keyword(kw))
 			}
 		}
 
@@ -1019,7 +1019,7 @@ func (p *printer) visitSampleClause(n *googlesql.ASTSampleClause, d printerData)
 
 	p.println("")
 	p.print(p.keyword("TABLESAMPLE"))
-	p.print(p.keyword(p.toString(method, d)) + " ")
+	p.print(p.rawKeywordIdent(method) + " ")
 	p.print("(")
 	p.accept(size, d)
 	p.print(")")
@@ -1160,7 +1160,7 @@ func (p *printer) visitWithModifier(n *googlesql.ASTWithModifier, d printerData)
 	opts, _ := n.Options()
 
 	p.print(p.keyword("WITH"))
-	p.print(p.keyword(p.toString(id, d)))
+	p.print(p.rawKeywordIdent(id))
 	p.accept(opts, d)
 }
 

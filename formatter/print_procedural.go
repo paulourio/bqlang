@@ -2,6 +2,8 @@ package formatter
 
 import (
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/goccy/go-googlesql"
 )
@@ -47,7 +49,12 @@ func (p *printer) printLeadingLabel(label *googlesql.ASTLabel, d printerData) {
 	}
 }
 
-func (p *printer) printTrailingLabelIfPresent(n googlesql.ASTNode, label *googlesql.ASTLabel, d printerData) {
+func (p *printer) printTrailingLabelIfPresent(
+	n googlesql.ASTNode,
+	label *googlesql.ASTLabel,
+	endKeyword string,
+	d printerData,
+) {
 	if !nodeDefined(label) {
 		return
 	}
@@ -57,12 +64,28 @@ func (p *printer) printTrailingLabelIfPresent(n googlesql.ASTNode, label *google
 		return
 	}
 
-	labelText := p.toString(name, d)
-	raw := strings.TrimSpace(p.nodeErasedInput(n))
-
-	if strings.HasSuffix(strings.ToUpper(raw), strings.ToUpper(labelText)) {
-		p.print(labelText)
+	if hasTrailingLabel(p.nodeErasedInput(n), endKeyword, p.rawIdentifier(name)) {
+		p.print(p.toString(name, d))
 	}
+}
+
+func hasTrailingLabel(raw, endKeyword, rawLabel string) bool {
+	raw = strings.TrimRightFunc(raw, unicode.IsSpace)
+	if len(raw) <= len(rawLabel) || !strings.EqualFold(raw[len(raw)-len(rawLabel):], rawLabel) {
+		return false
+	}
+
+	before := raw[:len(raw)-len(rawLabel)]
+	if lastRune, _ := utf8.DecodeLastRuneInString(before); !unicode.IsSpace(lastRune) {
+		return false
+	}
+
+	before = strings.TrimRightFunc(before, unicode.IsSpace)
+	if len(before) < len(endKeyword) || !strings.EqualFold(before[len(before)-len(endKeyword):], endKeyword) {
+		return false
+	}
+
+	return len(before) == len(endKeyword) || !isAlphanum(before[len(before)-len(endKeyword)-1])
 }
 
 func (p *printer) visitBeginEndBlock(n *googlesql.ASTBeginEndBlock, d printerData) {
@@ -90,7 +113,7 @@ func (p *printer) visitBeginEndBlock(n *googlesql.ASTBeginEndBlock, d printerDat
 	p.println("")
 	p.decDepth()
 	p.print(p.keyword("END"))
-	p.printTrailingLabelIfPresent(n, label, d)
+	p.printTrailingLabelIfPresent(n, label, "END", d)
 	p.println("")
 }
 
@@ -317,28 +340,20 @@ func (p *printer) visitWhileStatement(n *googlesql.ASTWhileStatement, d printerD
 	cond, _ := n.Condition()
 	body, _ := n.Body()
 
-	p.print(p.keyword("WHILE"))
-	p.accept(cond, d)
-	p.println(p.keyword("DO"))
-	p.printIndentedBody(body, false, d)
+	if nodeDefined(cond) {
+		p.print(p.keyword("WHILE"))
+		p.accept(cond, d)
+		p.println(p.keyword("DO"))
+		p.printIndentedBody(body, false, d)
+		p.print(p.keyword("END WHILE"))
+		p.printTrailingLabelIfPresent(n, label, "WHILE", d)
+	} else {
+		p.println(p.keyword("LOOP"))
+		p.printIndentedBody(body, false, d)
+		p.print(p.keyword("END LOOP"))
+		p.printTrailingLabelIfPresent(n, label, "LOOP", d)
+	}
 
-	p.print(p.keyword("END WHILE"))
-	p.printTrailingLabelIfPresent(n, label, d)
-	p.movePast(n)
-}
-
-func (p *printer) visitLoopStatement(n *googlesql.ASTLoopStatement, d printerData) {
-	p.moveBefore(n)
-
-	label, _ := n.Label()
-	p.printLeadingLabel(label, d)
-	p.println(p.keyword("LOOP"))
-
-	body, _ := n.Body()
-	p.printIndentedBody(body, false, d)
-
-	p.print(p.keyword("END LOOP"))
-	p.printTrailingLabelIfPresent(n, label, d)
 	p.movePast(n)
 }
 
@@ -361,7 +376,7 @@ func (p *printer) visitRepeatStatement(n *googlesql.ASTRepeatStatement, d printe
 	}
 
 	p.print(p.keyword("END REPEAT"))
-	p.printTrailingLabelIfPresent(n, label, d)
+	p.printTrailingLabelIfPresent(n, label, "REPEAT", d)
 	p.movePast(n)
 }
 
@@ -386,7 +401,7 @@ func (p *printer) visitForInStatement(n *googlesql.ASTForInStatement, d printerD
 	p.printIndentedBody(body, false, d)
 
 	p.print(p.keyword("END FOR"))
-	p.printTrailingLabelIfPresent(n, label, d)
+	p.printTrailingLabelIfPresent(n, label, "FOR", d)
 	p.movePast(n)
 }
 

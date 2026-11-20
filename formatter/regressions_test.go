@@ -233,4 +233,163 @@ func TestRegressions(t *testing.T) {
 		badOpts.Indentation = -1
 		require.ErrorIs(t, badOpts.Validate(), formatter.ErrInvalidPrintOption)
 	})
+
+	t.Run("HAVING and QUALIFY with AlignLogicalWithClauses false stay valid and idempotent", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.AlignLogicalWithClauses = false
+
+		for _, tc := range []struct {
+			in   string
+			want string
+		}{
+			{
+				in:   "SELECT a FROM t GROUP BY a HAVING a > 1 AND COUNT(*) > 2",
+				want: "SELECT a\n  FROM t\n GROUP BY a\nHAVING     a > 1\n       AND COUNT(*) > 2\n",
+			},
+			{
+				in:   "SELECT a FROM t QUALIFY a > 1 OR b > 2",
+				want: " SELECT a\n   FROM t\nQUALIFY    a > 1\n        OR b > 2\n",
+			},
+		} {
+			got, err := formatter.Format(tc.in, opts)
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, got)
+
+			got2, err := formatter.Format(got, opts)
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		}
+	})
+
+	t.Run("LOOP statements and trailing labels handle empty condition and keyword suffixes", func(t *testing.T) {
+		t.Parallel()
+
+		for _, tc := range []struct {
+			in   string
+			want string
+		}{
+			{
+				in:   "LOOP SELECT 1; BREAK; END LOOP;",
+				want: "LOOP\n  SELECT 1;\n\n  BREAK;\nEND LOOP\n",
+			},
+			{
+				in:   "op: LOOP BREAK op; END LOOP;",
+				want: "op: LOOP\n  BREAK op;\nEND LOOP\n",
+			},
+			{
+				in:   "op: LOOP BREAK op; END LOOP op;",
+				want: "op: LOOP\n  BREAK op;\nEND LOOP op\n",
+			},
+			{
+				in:   "d: BEGIN SELECT 1; END;",
+				want: "d: BEGIN\n  SELECT 1;\nEND\n",
+			},
+			{
+				in:   "le: WHILE true DO BREAK le; END WHILE;",
+				want: "le: WHILE TRUE DO\n  BREAK le;\nEND WHILE\n",
+			},
+		} {
+			got, err := formatter.Format(tc.in, formatter.DefaultPrintOptions())
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, got)
+
+			got2, err := formatter.Format(got, formatter.DefaultPrintOptions())
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		}
+	})
+
+	t.Run("Bitwise shift and unary NOT preserve semantically required parentheses", func(t *testing.T) {
+		t.Parallel()
+
+		for _, tc := range []struct {
+			in   string
+			want string
+		}{
+			{in: "SELECT (a << 1) + 2", want: "SELECT (a << 1) + 2\n"},
+			{in: "SELECT 1 + (a << 2)", want: "SELECT 1 + (a << 2)\n"},
+			{in: "SELECT (a << 1) * 2", want: "SELECT (a << 1) * 2\n"},
+			{in: "SELECT (NOT a) = TRUE", want: "SELECT (NOT a) = TRUE\n"},
+			{in: "SELECT (NOT a) IS TRUE", want: "SELECT (NOT a) IS TRUE\n"},
+			{in: "SELECT NOT (NOT a NOT LIKE b)", want: "SELECT NOT NOT a NOT LIKE b\n"},
+		} {
+			got, err := formatter.Format(tc.in, formatter.DefaultPrintOptions())
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, got)
+
+			got2, err := formatter.Format(got, formatter.DefaultPrintOptions())
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		}
+	})
+
+	t.Run("Template blocks do not falsely match SELECT identifier substrings", func(t *testing.T) {
+		t.Parallel()
+
+		got, err := formatter.Format(
+			"SELECT a FROM t WHERE {% if is_selected %}x = 1{% endif %}",
+			formatter.DefaultPrintOptions(),
+		)
+		require.NoError(t, err)
+		assert.Equal(t, "SELECT a\n  FROM t\n WHERE {% if is_selected %}x = 1{% endif %}\n", got)
+	})
+
+	t.Run("KeywordStyle AsIs is not overridden by IdentifierStyle on keyword identifiers", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.IdentifierStyle = formatter.LowerCase
+		opts.KeywordStyle = formatter.AsIs
+
+		gotCreate, err := formatter.Format("CREATE RESERVATION my_res OPTIONS (slot_capacity = 100)", opts)
+		require.NoError(t, err)
+		assert.Contains(t, gotCreate, "CREATE RESERVATION my_res")
+
+		gotAlter, err := formatter.Format("ALTER RESERVATION my_res SET OPTIONS (slot_capacity = 200)", opts)
+		require.NoError(t, err)
+		assert.Contains(t, gotAlter, "ALTER RESERVATION my_res")
+
+		gotDrop, err := formatter.Format("DROP RESERVATION my_res", opts)
+		require.NoError(t, err)
+		assert.Equal(t, "DROP RESERVATION my_res\n", gotDrop)
+
+		gotSample, err := formatter.Format("SELECT id FROM t TABLESAMPLE SYSTEM (10 PERCENT)", opts)
+		require.NoError(t, err)
+		assert.Contains(t, gotSample, "TABLESAMPLE SYSTEM")
+
+		gotInterval, err := formatter.Format("SELECT INTERVAL 1 DAY TO SECOND", opts)
+		require.NoError(t, err)
+		assert.Equal(t, "SELECT INTERVAL 1 DAY TO SECOND\n", gotInterval)
+	})
+
+	t.Run("TableNameStyle applies to row access policy and index target tables only", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.IdentifierStyle = formatter.LowerCase
+		opts.TableNameStyle = formatter.AsIs
+
+		gotPolicy, err := formatter.Format(
+			"CREATE ROW ACCESS POLICY MyPol ON MyDataset.MyTable GRANT TO ('user:a@b.com') FILTER USING (a = 1)",
+			opts,
+		)
+		require.NoError(t, err)
+		assert.Contains(t, gotPolicy, "POLICY mypol")
+		assert.Contains(t, gotPolicy, "ON MyDataset.MyTable")
+
+		gotIdx, err := formatter.Format("CREATE SEARCH INDEX MyIdx ON MyDataset.MyTable (ALL COLUMNS)", opts)
+		require.NoError(t, err)
+		assert.Contains(t, gotIdx, "INDEX myidx")
+		assert.Contains(t, gotIdx, "ON MyDataset.MyTable")
+
+		gotDropIdx, err := formatter.Format("DROP SEARCH INDEX MyIdx ON MyDataset.MyTable", opts)
+		require.NoError(t, err)
+		assert.Equal(t, "DROP SEARCH INDEX myidx ON MyDataset.MyTable\n", gotDropIdx)
+
+		gotAlterIdx, err := formatter.Format("ALTER SEARCH INDEX MyIdx ON MyDataset.MyTable REBUILD", opts)
+		require.NoError(t, err)
+		assert.Contains(t, gotAlterIdx, "INDEX myidx ON MyDataset.MyTable")
+	})
 }

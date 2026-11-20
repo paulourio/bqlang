@@ -338,7 +338,6 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTLambda]():                                makeVisitor((*printer).visitLambda),
 		reflect.TypeFor[*googlesql.ASTLikeExpression]():                        makeVisitor((*printer).visitLikeExpression),
 		reflect.TypeFor[*googlesql.ASTLimitOffset]():                           makeVisitor((*printer).visitLimitOffset),
-		reflect.TypeFor[*googlesql.ASTLoopStatement]():                         makeVisitor((*printer).visitLoopStatement),
 		reflect.TypeFor[*googlesql.ASTMapColumnSchema]():                       makeVisitor((*printer).visitMapColumnSchema),
 		reflect.TypeFor[*googlesql.ASTMapType]():                               makeVisitor((*printer).visitMapType),
 		reflect.TypeFor[*googlesql.ASTMatchRecognizeClause]():                  makeVisitor((*printer).visitMatchRecognizeClause),
@@ -880,6 +879,12 @@ func (p *printer) keyword(s string) string {
 	return applyPrintCase(s, p.fmt.opts.KeywordStyle)
 }
 
+func (p *printer) rawKeywordIdent(n *googlesql.ASTIdentifier) string {
+	p.moveBefore(n)
+
+	return p.keyword(p.rawIdentifier(n))
+}
+
 func (p *printer) typename(s string) string {
 	if len(s) == 0 || s[0] == '`' {
 		return s
@@ -1010,6 +1015,11 @@ func lowestPrecedenceBelow(n googlesql.ASTNode) int {
 		rhsNode, _ := t.Rhs()
 
 		return min(precedenceNum(n), precedenceNum(lhsNode), precedenceNum(rhsNode))
+	case *googlesql.ASTBitwiseShiftExpression:
+		lhsNode, _ := t.Lhs()
+		rhsNode, _ := t.Rhs()
+
+		return min(precedenceNum(n), precedenceNum(lhsNode), precedenceNum(rhsNode))
 	case *googlesql.ASTConcatExpr:
 		minPrec := precedenceNum(n)
 
@@ -1043,8 +1053,10 @@ func precedenceNum(n googlesql.ASTNode) int {
 		if b, ok := n.(*googlesql.ASTBinaryExpression); ok {
 			return precedenceBinExpr(b)
 		}
+	case googlesql.ASTNodeKindAstBitwiseShiftExpression:
+		return 9
 	case googlesql.ASTNodeKindAstConcatExpr:
-		return 10
+		return 11
 	case googlesql.ASTNodeKindAstBetweenExpression,
 		googlesql.ASTNodeKindAstInExpression,
 		googlesql.ASTNodeKindAstLikeExpression,
@@ -1081,11 +1093,11 @@ func precedenceBinExpr(n *googlesql.ASTBinaryExpression) int {
 	case googlesql.ASTBinaryExpressionEnums_OpBitwiseAnd:
 		return 8
 	case googlesql.ASTBinaryExpressionEnums_OpPlus, googlesql.ASTBinaryExpressionEnums_OpMinus:
-		return 9
-	case googlesql.ASTBinaryExpressionEnums_OpConcatOp:
 		return 10
-	case googlesql.ASTBinaryExpressionEnums_OpMultiply, googlesql.ASTBinaryExpressionEnums_OpDivide:
+	case googlesql.ASTBinaryExpressionEnums_OpConcatOp:
 		return 11
+	case googlesql.ASTBinaryExpressionEnums_OpMultiply, googlesql.ASTBinaryExpressionEnums_OpDivide:
+		return 12
 	default:
 		return 1000
 	}
@@ -1104,7 +1116,7 @@ func precedenceUnaryExpr(n *googlesql.ASTUnaryExpression) int {
 		googlesql.ASTUnaryExpressionEnums_OpPlus,
 		googlesql.ASTUnaryExpressionEnums_OpIsUnknown,
 		googlesql.ASTUnaryExpressionEnums_OpIsNotUnknown:
-		return 12
+		return 13
 	}
 
 	return -1

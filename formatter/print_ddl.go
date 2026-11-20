@@ -209,7 +209,7 @@ func (p *printer) visitAlterEntityStatement(n *googlesql.ASTAlterEntityStatement
 	p.print(p.keyword("ALTER"))
 
 	if typ, _ := n.Type(); nodeDefined(typ) {
-		p.print(p.keyword(p.toString(typ, d)))
+		p.print(p.rawKeywordIdent(typ))
 	} else {
 		p.print(p.keyword("ENTITY"))
 	}
@@ -253,7 +253,7 @@ func (p *printer) visitAlterPrivilegeRestrictionStatement(
 	p.print(p.keyword("ON"))
 
 	if ot, _ := n.ObjectType(); nodeDefined(ot) {
-		p.print(p.keyword(p.toString(ot, d)))
+		p.print(p.rawKeywordIdent(ot))
 	}
 
 	target, _ := n.Path()
@@ -870,7 +870,7 @@ func (p *printer) printPrivilegeDCL(
 	p.print(p.keyword("ON"))
 
 	for _, part := range selectChildrenOfType[*googlesql.ASTIdentifier](n) {
-		p.print(p.keyword(p.toString(part, d)))
+		p.print(p.rawKeywordIdent(part))
 	}
 
 	p.accept(target, d)
@@ -926,7 +926,7 @@ func (p *printer) visitDropEntityStatement(n *googlesql.ASTDropEntityStatement, 
 	obj := "ENTITY"
 
 	if nodeDefined(et) {
-		obj = p.toString(et, d)
+		obj = p.rawIdentifier(et)
 	}
 
 	p.printDropNamedObject(n, obj, ie, target, nil, d)
@@ -967,7 +967,7 @@ func (p *printer) visitDropPrivilegeRestrictionStatement(
 	p.print(p.keyword("ON"))
 
 	if ot, _ := n.ObjectType(); nodeDefined(ot) {
-		p.print(p.keyword(p.toString(ot, d)))
+		p.print(p.rawKeywordIdent(ot))
 	}
 
 	np, _ := n.NamePath()
@@ -1889,7 +1889,7 @@ func (p *printer) visitCreateEntityStatement(n *googlesql.ASTCreateEntityStateme
 
 	obj := "ENTITY"
 	if typ, _ := n.Type(); nodeDefined(typ) {
-		obj = p.toString(typ, d)
+		obj = p.rawIdentifier(typ)
 	}
 
 	p.print(p.keyword(createStatementKeywords(n, false, obj)))
@@ -1930,7 +1930,7 @@ func (p *printer) printSubEntityHeader(
 	p.print(p.keyword(kw))
 
 	if nodeDefined(typ) {
-		p.print(p.keyword(p.toString(typ, d)))
+		p.print(p.rawKeywordIdent(typ))
 	}
 
 	if cond {
