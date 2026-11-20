@@ -31,7 +31,6 @@ func (p *printer) visitElementTypeColumnSchema(
 
 	if simple {
 		pp.print(p.keyword(kw) + "<" + typ + ">")
-		pp.printColumnSchemaTail(n, false, d)
 	} else {
 		p1 := pp.nest()
 		p1.println(p1.keyword(kw) + "<")
@@ -39,9 +38,10 @@ func (p *printer) visitElementTypeColumnSchema(
 		p1.println(typ)
 		p1.decDepth()
 		p1.print(">")
-		p1.printColumnSchemaTail(n, false, d)
 		pp.print(p1.unnestLeft())
 	}
+
+	pp.printColumnSchemaTail(n, false, d)
 
 	p.print(pp.unnestLeft())
 	p.movePast(n)
@@ -218,11 +218,13 @@ func (p *printer) visitStructColumnSchema(n *googlesql.ASTStructColumnSchema, d 
 	}
 
 	if !simple {
-		pp.println(pp.keyword("STRUCT") + "<")
-		pp.incDepth()
-		pp.println(p1.unnestLeft())
-		pp.decDepth()
-		pp.print(">")
+		p2 := pp.nest()
+		p2.println(p2.keyword("STRUCT") + "<")
+		p2.incDepth()
+		p2.println(p1.unnestLeft())
+		p2.decDepth()
+		p2.print(">")
+		pp.print(p2.unnestLeft())
 	} else {
 		pp.print(pp.keyword("STRUCT") + "<" + p1.unnestLeft() + ">")
 	}

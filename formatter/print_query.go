@@ -730,11 +730,18 @@ func (p *printer) visitPartitionBy(n *googlesql.ASTPartitionBy, d printerData) {
 }
 
 func (p *printer) visitPivotClause(n *googlesql.ASTPivotClause, d printerData) {
+	p.printPivotClause(n, true, d)
+}
+
+func (p *printer) printPivotClause(n *googlesql.ASTPivotClause, leadingNewline bool, d printerData) {
 	p.moveBefore(n)
 	el, _ := n.PivotExpressions()
 	oa, _ := n.OutputAlias()
 
-	p.println("")
+	if leadingNewline {
+		p.println("")
+	}
+
 	p.print(p.keyword("PIVOT") + " (")
 	p.println("")
 	p.incDepth()
@@ -1657,8 +1664,15 @@ func (p *printer) visitTVF(n *googlesql.ASTTVF, d printerData) {
 }
 
 func (p *printer) visitUnpivotClause(n *googlesql.ASTUnpivotClause, d printerData) {
+	p.printUnpivotClause(n, true, d)
+}
+
+func (p *printer) printUnpivotClause(n *googlesql.ASTUnpivotClause, leadingNewline bool, d printerData) {
 	p.moveBefore(n)
-	p.println("")
+
+	if leadingNewline {
+		p.println("")
+	}
 
 	nf, _ := n.NullFilter()
 	switch nf {

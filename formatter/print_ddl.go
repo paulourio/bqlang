@@ -302,6 +302,50 @@ func (p *printer) visitAlterPrivilegeRestrictionStatement(
 	p.printAlterActionList(n, al, d)
 }
 
+func (p *printer) visitRestrictToClause(n *googlesql.ASTRestrictToClause, d printerData) {
+	rl, _ := n.RestricteeList()
+	p.printRestricteeClause(n, "RESTRICT TO", rl, d)
+}
+
+func (p *printer) visitAddToRestricteeListClause(
+	n *googlesql.ASTAddToRestricteeListClause,
+	d printerData,
+) {
+	kw := "ADD"
+	if ine, _ := n.IsIfNotExists(); ine {
+		kw = "ADD IF NOT EXISTS"
+	}
+
+	rl, _ := n.RestricteeList()
+	p.printRestricteeClause(n, kw, rl, d)
+}
+
+func (p *printer) visitRemoveFromRestricteeListClause(
+	n *googlesql.ASTRemoveFromRestricteeListClause,
+	d printerData,
+) {
+	kw := "REMOVE"
+	if ie, _ := n.IsIfExists(); ie {
+		kw = "REMOVE IF EXISTS"
+	}
+
+	rl, _ := n.RestricteeList()
+	p.printRestricteeClause(n, kw, rl, d)
+}
+
+func (p *printer) printRestricteeClause(
+	n googlesql.ASTNode,
+	kw string,
+	rl *googlesql.ASTGranteeList,
+	d printerData,
+) {
+	p.moveBefore(n)
+	p.print(p.keyword(kw) + " (")
+	p.accept(rl, d)
+	p.print(")")
+	p.movePast(n)
+}
+
 func (p *printer) visitAlterRowAccessPolicyStatement(n *googlesql.ASTAlterRowAccessPolicyStatement, d printerData) {
 	p.moveBefore(n)
 	p.print(p.keyword("ALTER ROW ACCESS POLICY"))
@@ -1208,6 +1252,7 @@ func (p *printer) visitUndropStatement(n *googlesql.ASTUndropStatement, d printe
 	ine, _ := n.IsIfNotExists()
 	name, _ := n.Name()
 	fst, _ := n.ForSystemTime()
+	opt, _ := n.OptionsList()
 
 	kw := "UNDROP" + schemaObjectKindString(sok)
 	if ine {
@@ -1217,6 +1262,7 @@ func (p *printer) visitUndropStatement(n *googlesql.ASTUndropStatement, d printe
 	p.print(p.keyword(kw))
 	p.accept(name, d)
 	p.accept(fst, d)
+	p.lnacceptAligned(opt, d)
 	p.movePast(n)
 }
 
@@ -1515,6 +1561,12 @@ func (p *printer) visitGranteeList(n *googlesql.ASTGranteeList, d printerData) {
 	p.moveBefore(n)
 
 	exprs := selectChildrenOfType[googlesql.ASTExpressionNode](n)
+	if len(exprs) == 0 {
+		p.movePast(n)
+
+		return
+	}
+
 	simple := len(exprs) == 1
 
 	if simple {
@@ -1895,7 +1947,12 @@ func (p *printer) visitCreateIndexStatement(n *googlesql.ASTCreateIndexStatement
 	onLine.print(onLine.keyword("ON"))
 	onLine.accept(tbl, d)
 	onLine.accept(alias, d)
-	onLine.lnaccept(unnest, d)
+
+	if nodeDefined(unnest) {
+		onLine.lnaccept(unnest, d)
+		onLine.println("")
+	}
+
 	onLine.accept(items, d)
 	p.print(alignNested(onLine.String()))
 

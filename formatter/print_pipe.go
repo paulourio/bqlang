@@ -408,12 +408,16 @@ func (p *printer) visitPipeSetOperation(n *googlesql.ASTPipeSetOperation, d prin
 
 func (p *printer) visitPipePivot(n *googlesql.ASTPipePivot, d printerData) {
 	pv, _ := n.PivotClause()
-	p.accept(pv, d)
+	if nodeDefined(pv) {
+		p.printPivotClause(pv, false, d)
+	}
 }
 
 func (p *printer) visitPipeUnpivot(n *googlesql.ASTPipeUnpivot, d printerData) {
 	up, _ := n.UnpivotClause()
-	p.accept(up, d)
+	if nodeDefined(up) {
+		p.printUnpivotClause(up, false, d)
+	}
 }
 
 func (p *printer) visitPipeAssert(n *googlesql.ASTPipeAssert, d printerData) {

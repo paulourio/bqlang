@@ -1182,6 +1182,16 @@ func isTablePath(path *googlesql.ASTPathExpression) bool {
 		nn, _ := stmt.NewName()
 
 		return sameNodeSpan(path, nn) && isTableRenameClause(stmt)
+	case *googlesql.ASTAlterPrivilegeRestrictionStatement:
+		tbl, _ := stmt.Path()
+		ot, _ := stmt.ObjectType()
+
+		return sameNodeSpan(path, tbl) && isTableObjectType(ot)
+	case *googlesql.ASTDropPrivilegeRestrictionStatement:
+		tbl, _ := stmt.NamePath()
+		ot, _ := stmt.ObjectType()
+
+		return sameNodeSpan(path, tbl) && isTableObjectType(ot)
 	case *googlesql.ASTGrantStatement:
 		tbl, _ := stmt.TargetPath()
 
@@ -1235,6 +1245,20 @@ func isTableRenameClause(n *googlesql.ASTRenameToClause) bool {
 	case googlesql.ASTNodeKindAstAlterTableStatement,
 		googlesql.ASTNodeKindAstAlterViewStatement,
 		googlesql.ASTNodeKindAstAlterMaterializedViewStatement:
+		return true
+	default:
+		return false
+	}
+}
+
+func isTableObjectType(ot *googlesql.ASTIdentifier) bool {
+	if !nodeDefined(ot) {
+		return false
+	}
+
+	s, _ := ot.GetAsString()
+	switch strings.ToUpper(s) {
+	case "TABLE", "VIEW":
 		return true
 	default:
 		return false

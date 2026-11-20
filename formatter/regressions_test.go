@@ -596,6 +596,36 @@ func TestRegressions(t *testing.T) {
 				sql:      "SELECT '!\x1a10', '\x1e\x1f1', '\v' AS vt -- note\v",
 				contains: []string{"'!\x1a10'", "'\x1e\x1f1'", "'\v' AS vt", "-- note\v"},
 			},
+			{
+				name:     "undrop schema preserves options list",
+				sql:      "UNDROP SCHEMA IF NOT EXISTS MyDs OPTIONS (description = 'restored')",
+				contains: []string{"UNDROP SCHEMA IF NOT EXISTS MyDs", "OPTIONS (description='restored')"},
+			},
+			{
+				name:     "pipe pivot and unpivot stay inline with pipe operator",
+				sql:      "FROM t |> PIVOT (SUM(amt) FOR qtr IN ('Q1', 'Q2')) |> UNPIVOT (val FOR q IN (Q1, Q2))",
+				contains: []string{"|> PIVOT (", "|> UNPIVOT ("},
+			},
+			{
+				name:     "create index with unnest puts item list on separate line",
+				sql:      "CREATE INDEX idx ON ds.t a UNNEST(a.tags) AS tag WITH OFFSET off (tag, id DESC)",
+				contains: []string{"UNNEST(a.tags) AS tag WITH OFFSET off\n(tag, id DESC)"},
+			},
+			{
+				name: "alter privilege restriction supports empty and populated restrictee actions",
+				sql: "ALTER PRIVILEGE RESTRICTION ON SELECT ON TABLE ds.t " +
+					"RESTRICT TO (), ADD IF NOT EXISTS ('user:a@b.com'), REMOVE IF EXISTS ('user:b@b.com')",
+				contains: []string{
+					"RESTRICT TO (),",
+					"ADD IF NOT EXISTS ('user:a@b.com'),",
+					"REMOVE IF EXISTS ('user:b@b.com')",
+				},
+			},
+			{
+				name:     "multiline array struct column with NOT NULL and OPTIONS does not over-indent",
+				sql:      "CREATE TABLE t (a ARRAY<STRUCT<x INT64, y STRING>> NOT NULL OPTIONS (description = 'arr'))",
+				contains: []string{"  a ARRAY<\n      STRUCT<\n        x INT64,\n        y STRING\n      >\n    > NOT NULL OPTIONS (description='arr')"},
+			},
 		} {
 			got, err := formatter.Format(tc.sql, formatter.DefaultPrintOptions())
 			require.NoError(t, err, tc.name)
@@ -608,5 +638,21 @@ func TestRegressions(t *testing.T) {
 			require.NoError(t, err, tc.name)
 			assert.Equal(t, got, got2, tc.name)
 		}
+	})
+
+	t.Run("Privilege restriction preserves TableNameStyle on TABLE and VIEW targets", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.KeywordStyle = formatter.LowerCase
+		opts.IdentifierStyle = formatter.LowerCase
+		opts.TableNameStyle = formatter.AsIs
+
+		sql := "ALTER PRIVILEGE RESTRICTION ON SELECT ON TABLE MyDs.SensitiveTbl RESTRICT TO ('user:a@b.com');\n" +
+			"DROP PRIVILEGE RESTRICTION ON SELECT ON VIEW MyDs.SensitiveView;"
+		got, err := formatter.Format(sql, opts)
+		require.NoError(t, err)
+		assert.Contains(t, got, "on table MyDs.SensitiveTbl")
+		assert.Contains(t, got, "on view MyDs.SensitiveView")
 	})
 }
