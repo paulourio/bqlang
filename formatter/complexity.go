@@ -382,6 +382,14 @@ func (p *printer) areSimpleStructConstructorArgs(args []*googlesql.ASTStructCons
 	})
 }
 
+func (p *printer) areSimpleNewConstructorArgs(args []*googlesql.ASTNewConstructorArg) bool {
+	return allMatch(args, func(a *googlesql.ASTNewConstructorArg) bool {
+		expr, _ := a.Expression()
+
+		return p.isSimpleExpr(expr)
+	})
+}
+
 func areSimpleStructFields(fields []*googlesql.ASTStructField) bool {
 	return allMatch(fields, func(f *googlesql.ASTStructField) bool {
 		typ, _ := f.Type()

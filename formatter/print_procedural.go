@@ -570,3 +570,26 @@ func (p *printer) visitSetTransactionStatement(n *googlesql.ASTSetTransactionSta
 
 	p.movePast(n)
 }
+
+func (p *printer) visitStartBatchStatement(n *googlesql.ASTStartBatchStatement, _ printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("START BATCH"))
+
+	if bt, _ := n.BatchType(); nodeDefined(bt) {
+		p.print(p.rawKeywordIdent(bt))
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitAbortBatchStatement(n *googlesql.ASTAbortBatchStatement, _ printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("ABORT BATCH"))
+	p.movePast(n)
+}
+
+func (p *printer) visitRunBatchStatement(n *googlesql.ASTRunBatchStatement, _ printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("RUN BATCH"))
+	p.movePast(n)
+}

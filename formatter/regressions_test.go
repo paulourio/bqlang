@@ -110,7 +110,10 @@ func TestRegressions(t *testing.T) {
 	t.Run("Unsupported AST node inside nested statement list propagates PrinterError", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := formatter.Format("BEGIN SHOW TABLES; END;", formatter.DefaultPrintOptions())
+		_, err := formatter.Format(
+			"BEGIN CREATE PRIVILEGE RESTRICTION ON SELECT ON TABLE t RESTRICT TO ('user:a@b.com'); END;",
+			formatter.DefaultPrintOptions(),
+		)
 		require.Error(t, err)
 
 		var perr *formatter.PrinterError
@@ -654,5 +657,39 @@ func TestRegressions(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, got, "on table MyDs.SensitiveTbl")
 		assert.Contains(t, got, "on view MyDs.SensitiveView")
+	})
+
+	t.Run("Non-BigQuery GoogleSQL statements respect KeywordStyle and TableNameStyle", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.KeywordStyle = formatter.LowerCase
+		opts.IdentifierStyle = formatter.LowerCase
+		opts.TableNameStyle = formatter.AsIs
+
+		sql := "SHOW MATERIALIZED VIEWS FROM MyCatalog.MyDb;\n" +
+			"DESCRIBE INDEX MyIdx;\n" +
+			"RENAME TABLE MyDs.OldTbl TO MyDs.NewTbl;\n" +
+			"CREATE APPROX VIEW MyDs.ApproxV AS SELECT (NEW MyProto(1 AS a, 2 AS (b.c)));\n" +
+			"ALTER APPROX VIEW MyDs.ApproxV SET OPTIONS (o = 1);\n" +
+			"START BATCH DDL;\n" +
+			"RUN BATCH;\n" +
+			"ABORT BATCH;"
+
+		got, err := formatter.Format(sql, opts)
+		require.NoError(t, err)
+		assert.Contains(t, got, "show materialized views from mycatalog.mydb;")
+		assert.Contains(t, got, "describe index myidx;")
+		assert.Contains(t, got, "rename table MyDs.OldTbl to MyDs.NewTbl;")
+		assert.Contains(t, got, "create approx view MyDs.ApproxV")
+		assert.Contains(t, got, "new MYPROTO(1 as a, 2 as (b.c))")
+		assert.Contains(t, got, "alter approx view MyDs.ApproxV")
+		assert.Contains(t, got, "start batch ddl;")
+		assert.Contains(t, got, "run batch;")
+		assert.Contains(t, got, "abort batch;")
+
+		got2, err := formatter.Format(got, opts)
+		require.NoError(t, err)
+		assert.Equal(t, got, got2)
 	})
 }

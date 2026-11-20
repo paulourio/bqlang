@@ -345,12 +345,19 @@ func TestBqfmtFlagsAndStreams(t *testing.T) {
 		first := filepath.Join(dir, "1_first.sql")
 		broken := filepath.Join(dir, "2_broken.sql")
 		missing := filepath.Join(dir, "3_missing.sql")
-		unsupported := filepath.Join(dir, "4_show.sql")
+		unsupported := filepath.Join(dir, "4_unsupported.sql")
 		last := filepath.Join(dir, "5_last.txt") // explicit non-.sql file must be formatted
 
 		require.NoError(t, os.WriteFile(first, []byte("select 1"), 0o600))
 		require.NoError(t, os.WriteFile(broken, []byte("SELECT FROM WHERE"), 0o600))
-		require.NoError(t, os.WriteFile(unsupported, []byte("SHOW TABLES"), 0o600))
+		require.NoError(
+			t,
+			os.WriteFile(
+				unsupported,
+				[]byte("CREATE PRIVILEGE RESTRICTION ON SELECT ON TABLE t RESTRICT TO ('user:a@b.com')"),
+				0o600,
+			),
+		)
 		require.NoError(t, os.WriteFile(last, []byte("select 2"), 0o600))
 
 		var stdout, stderr bytes.Buffer

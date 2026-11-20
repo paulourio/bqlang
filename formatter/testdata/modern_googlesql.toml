@@ -733,3 +733,95 @@ outer_rep: REPEAT
 UNTIL y >= 5
 END REPEAT outer_rep;
 """
+
+[[cases]]
+description = "GoogleSQL modules, imports, constants, databases, and DEFINE TABLE"
+input = """
+module foo.bar options (a=1);
+import module foo.bar as baz options (a=1);
+import proto "foo/bar.proto" into my_proto options (a=1);
+create or replace public constant if not exists a.b = 1 + 2;
+create database a.b.db options (option_1=1, option_2='2');
+define table a.b (x=1, y="two", z=true);
+define table t_simple (a=1);
+"""
+formatted = """
+MODULE foo.bar
+OPTIONS (a=1);
+
+IMPORT MODULE foo.bar AS baz
+OPTIONS (a=1);
+
+IMPORT PROTO 'foo/bar.proto' INTO my_proto
+OPTIONS (a=1);
+
+CREATE OR REPLACE PUBLIC CONSTANT IF NOT EXISTS a.b = 1 + 2;
+
+CREATE DATABASE a.b.db
+OPTIONS (
+  option_1 = 1,
+  option_2 = '2'
+);
+
+DEFINE TABLE a.b
+(
+  x = 1,
+  y = 'two',
+  z = TRUE
+);
+
+DEFINE TABLE t_simple (a=1);
+"""
+
+[[cases]]
+description = "GoogleSQL SHOW, DESCRIBE, ANALYZE, EXPLAIN, RENAME, batch, NEW, and APPROX VIEW"
+input = """
+show materialized views from catalog.adwords like 'KitchenSync%';
+describe column foo from T.suffix;
+analyze options (p1=a1, p2=a2) T(a, b, c), T2(a);
+explain select 1 from t;
+rename table foo.bar to foo.baz;
+start batch ddl;
+run batch;
+abort batch;
+select new a.b(1, x + y as alias1, 2 as (f.g));
+create or replace approx view if not exists v1 (a options (description='x')) sql security invoker options (o=1) as select 1;
+alter approx view if exists v1 set options (o=2);
+"""
+formatted = """
+SHOW MATERIALIZED VIEWS FROM catalog.adwords LIKE 'KitchenSync%';
+
+DESCRIBE COLUMN foo FROM T.suffix;
+
+ANALYZE
+OPTIONS (
+  p1 = a1,
+  p2 = a2
+)
+T(a, b, c), T2(a);
+
+EXPLAIN SELECT 1
+          FROM t;
+
+RENAME TABLE foo.bar TO foo.baz;
+
+START BATCH DDL;
+
+RUN BATCH;
+
+ABORT BATCH;
+
+SELECT NEW A.B(1, x + y AS alias1, 2 AS (f.g));
+
+CREATE OR REPLACE APPROX VIEW IF NOT EXISTS v1
+(
+  a OPTIONS (description='x')
+)
+SQL SECURITY INVOKER
+OPTIONS (o=1)
+AS
+SELECT 1;
+
+ALTER APPROX VIEW IF EXISTS v1
+  SET OPTIONS (o=2);
+"""

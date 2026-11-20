@@ -375,6 +375,10 @@ func (p *printer) visitAlterTableStatement(n *googlesql.ASTAlterTableStatement, 
 	p.visitAlterStatementBase("ALTER TABLE", n, d)
 }
 
+func (p *printer) visitAlterApproxViewStatement(n *googlesql.ASTAlterApproxViewStatement, d printerData) {
+	p.visitAlterStatementBase("ALTER APPROX VIEW", n, d)
+}
+
 func (p *printer) visitAlterViewStatement(n *googlesql.ASTAlterViewStatement, d printerData) {
 	p.visitAlterStatementBase("ALTER VIEW", n, d)
 }
@@ -890,14 +894,26 @@ func (p *printer) visitCreateTableFunctionStatement(n *googlesql.ASTCreateTableF
 	}
 }
 
-func (p *printer) visitCreateViewStatement(n *googlesql.ASTCreateViewStatement, d printerData) {
-	p.moveBefore(n)
+func (p *printer) visitCreateApproxViewStatement(n *googlesql.ASTCreateApproxViewStatement, d printerData) {
+	obj := "APPROX VIEW"
+	if rec, _ := n.Recursive(); rec {
+		obj = "APPROX RECURSIVE VIEW"
+	}
 
+	p.visitCreateViewBase(n, obj, d)
+}
+
+func (p *printer) visitCreateViewStatement(n *googlesql.ASTCreateViewStatement, d printerData) {
 	obj := "VIEW"
 	if rec, _ := n.Recursive(); rec {
 		obj = "RECURSIVE VIEW"
 	}
 
+	p.visitCreateViewBase(n, obj, d)
+}
+
+func (p *printer) visitCreateViewBase(n googlesql.ASTCreateViewStatementBaseNode, obj string, d printerData) {
+	p.moveBefore(n)
 	p.print(p.keyword(createStatementKeywords(n, false, obj)))
 
 	name, _ := n.Name()
@@ -2346,6 +2362,225 @@ func (p *printer) visitSetAsAction(n *googlesql.ASTSetAsAction, d printerData) {
 
 	if tb, _ := n.TextBody(); nodeDefined(tb) {
 		p.accept(tb, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitAnalyzeStatement(n *googlesql.ASTAnalyzeStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("ANALYZE"))
+
+	opt, _ := n.OptionsList()
+	hasOpt := nodeDefined(opt)
+	if hasOpt {
+		p.lnaccept(opt, d)
+	}
+
+	if list, _ := n.TableAndColumnInfoList(); nodeDefined(list) {
+		if hasOpt {
+			p.lnaccept(list, d)
+		} else {
+			p.accept(list, d)
+		}
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitTableAndColumnInfoList(n *googlesql.ASTTableAndColumnInfoList, d printerData) {
+	p.moveBefore(n)
+
+	entries := selectChildrenOfType[*googlesql.ASTTableAndColumnInfo](n)
+	for i, entry := range entries {
+		if i > 0 {
+			p.print(",")
+		}
+
+		p.accept(entry, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitTableAndColumnInfo(n *googlesql.ASTTableAndColumnInfo, d printerData) {
+	p.moveBefore(n)
+
+	tbl, _ := n.TableName()
+	cols, _ := n.ColumnList()
+
+	p.accept(tbl, d)
+
+	if nodeDefined(cols) {
+		p.accept(cols, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitCreateConstantStatement(n *googlesql.ASTCreateConstantStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword(createStatementKeywords(n, false, "CONSTANT")))
+
+	name, _ := n.Name()
+	expr, _ := n.Expr()
+
+	p.accept(name, d)
+	p.print("=")
+	p.accept(expr, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitCreateDatabaseStatement(n *googlesql.ASTCreateDatabaseStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("CREATE DATABASE"))
+
+	name, _ := n.Name()
+	opt, _ := n.OptionsList()
+
+	p.accept(name, d)
+	p.lnaccept(opt, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitDefineTableStatement(n *googlesql.ASTDefineTableStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("DEFINE TABLE"))
+
+	name, _ := n.Name()
+	opt, _ := n.OptionsList()
+
+	p.accept(name, d)
+
+	if nodeDefined(opt) {
+		entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](opt)
+		if len(entries) > 1 || !p.isSimpleOptionsList(opt) {
+			p.println("")
+		}
+
+		p.printOptionsListBody(opt, "", d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitDescribeStatement(n *googlesql.ASTDescribeStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("DESCRIBE"))
+
+	if id, _ := n.OptionalIdentifier(); nodeDefined(id) {
+		p.print(p.rawKeywordIdent(id))
+	}
+
+	name, _ := n.Name()
+	p.accept(name, d)
+
+	if fromName, _ := n.OptionalFromName(); nodeDefined(fromName) {
+		p.print(p.keyword("FROM"))
+		p.accept(fromName, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitExplainStatement(n *googlesql.ASTExplainStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("EXPLAIN"))
+
+	stmt, _ := n.Statement()
+	p.accept(stmt, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitImportStatement(n *googlesql.ASTImportStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("IMPORT"))
+
+	kind, _ := n.ImportKind()
+	switch kind {
+	case googlesql.ASTImportStatementEnums_ImportKindModule:
+		p.print(p.keyword("MODULE"))
+	case googlesql.ASTImportStatementEnums_ImportKindProto:
+		p.print(p.keyword("PROTO"))
+	}
+
+	if name, _ := n.Name(); nodeDefined(name) {
+		p.accept(name, d)
+	}
+
+	if sv, _ := n.StringValue(); nodeDefined(sv) {
+		p.accept(sv, d)
+	}
+
+	if alias, _ := n.Alias(); nodeDefined(alias) {
+		p.accept(alias, d)
+	}
+
+	if intoAlias, _ := n.IntoAlias(); nodeDefined(intoAlias) {
+		p.accept(intoAlias, d)
+	}
+
+	if opt, _ := n.OptionsList(); nodeDefined(opt) {
+		p.lnaccept(opt, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) visitIntoAlias(n *googlesql.ASTIntoAlias, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("INTO"))
+
+	id, _ := n.Identifier()
+	p.accept(id, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitModuleStatement(n *googlesql.ASTModuleStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("MODULE"))
+
+	name, _ := n.Name()
+	opt, _ := n.OptionsList()
+
+	p.accept(name, d)
+	p.lnaccept(opt, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitRenameStatement(n *googlesql.ASTRenameStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("RENAME"))
+
+	if id, _ := n.Identifier(); nodeDefined(id) {
+		p.print(p.rawKeywordIdent(id))
+	}
+
+	oldName, _ := n.OldName()
+	newName, _ := n.NewName()
+
+	p.accept(oldName, d)
+	p.print(p.keyword("TO"))
+	p.accept(newName, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitShowStatement(n *googlesql.ASTShowStatement, d printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("SHOW"))
+
+	if id, _ := n.Identifier(); nodeDefined(id) {
+		p.print(p.rawKeywordIdent(id))
+	}
+
+	if optName, _ := n.OptionalName(); nodeDefined(optName) {
+		p.print(p.keyword("FROM"))
+		p.accept(optName, d)
+	}
+
+	if likeStr, _ := n.OptionalLikeString(); nodeDefined(likeStr) {
+		p.print(p.keyword("LIKE"))
+		p.accept(likeStr, d)
 	}
 
 	p.movePast(n)

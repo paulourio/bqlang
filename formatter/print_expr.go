@@ -1178,6 +1178,15 @@ func isTablePath(path *googlesql.ASTPathExpression) bool {
 		tbl, _ := stmt.Name()
 
 		return sameNodeSpan(path, tbl)
+	case *googlesql.ASTRenameStatement:
+		id, _ := stmt.Identifier()
+		if !nodeDefined(id) {
+			return false
+		}
+
+		s, _ := id.GetAsString()
+
+		return strings.EqualFold(s, "TABLE")
 	case *googlesql.ASTRenameToClause:
 		nn, _ := stmt.NewName()
 
@@ -1210,11 +1219,13 @@ func isTablePath(path *googlesql.ASTPathExpression) bool {
 	case googlesql.ASTNodeKindAstTablePathExpression,
 		googlesql.ASTNodeKindAstCreateTableStatement,
 		googlesql.ASTNodeKindAstCreateViewStatement,
+		googlesql.ASTNodeKindAstCreateApproxViewStatement,
 		googlesql.ASTNodeKindAstCreateMaterializedViewStatement,
 		googlesql.ASTNodeKindAstCreateExternalTableStatement,
 		googlesql.ASTNodeKindAstCreateSnapshotTableStatement,
 		googlesql.ASTNodeKindAstAlterTableStatement,
 		googlesql.ASTNodeKindAstAlterViewStatement,
+		googlesql.ASTNodeKindAstAlterApproxViewStatement,
 		googlesql.ASTNodeKindAstAlterMaterializedViewStatement,
 		googlesql.ASTNodeKindAstAlterAllRowAccessPoliciesStatement,
 		googlesql.ASTNodeKindAstDropMaterializedViewStatement,
@@ -2131,5 +2142,41 @@ func (p *printer) visitSequenceArg(n *googlesql.ASTSequenceArg, d printerData) {
 
 	seqPath, _ := n.SequencePath()
 	p.accept(seqPath, d)
+	p.movePast(n)
+}
+
+func (p *printer) visitNewConstructor(n *googlesql.ASTNewConstructor, d printerData) {
+	p.moveBefore(n)
+	p.printOpenParenIfNeededWithDepth(n)
+	p.print(p.keyword("NEW"))
+
+	typeName, _ := n.TypeName()
+	pp := p.nest()
+	pp.accept(typeName, d)
+	p.print(pp.unnest() + "(")
+
+	args := selectChildrenOfType[*googlesql.ASTNewConstructorArg](n)
+	printParenBody(p, args, p.areSimpleNewConstructorArgs(args), d)
+	p.print(")")
+	p.printCloseParenIfNeededWithDepth(n)
+}
+
+func (p *printer) visitNewConstructorArg(n *googlesql.ASTNewConstructorArg, d printerData) {
+	p.moveBefore(n)
+
+	expr, _ := n.Expression()
+	p.accept(expr, d)
+
+	if id, _ := n.OptionalIdentifier(); nodeDefined(id) {
+		p.print(p.keyword("AS"))
+		p.accept(id, d)
+	}
+
+	if path, _ := n.OptionalPathExpression(); nodeDefined(path) {
+		p.print(p.keyword("AS") + " (")
+		p.accept(path, d)
+		p.print(")")
+	}
+
 	p.movePast(n)
 }
