@@ -54,3 +54,24 @@ jobs:
         run: |
           golangci-lint config verify
           golangci-lint fmt --diff
+
+  fuzz:
+    name: Fuzz Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Fuzz extensions extractor
+        run: go test -run='^$' -fuzz='^FuzzExtractAll$' -fuzztime=5s ./extensions
+
+      - name: Fuzz formatter print options
+        run: go test -run='^$' -fuzz='^FuzzPrintOptions$' -fuzztime=5s ./formatter
+
+      - name: Fuzz arbitrary SQL and Jinja2 inputs
+        run: go test -run='^$' -fuzz='^FuzzFormatInput$' -fuzztime=5s ./formatter
