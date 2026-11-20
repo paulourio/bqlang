@@ -152,7 +152,6 @@ func defaultEnabledFeatures() []googlesql.LanguageFeature {
 		googlesql.LanguageFeatureFeatureV13AllowDashesInTableName,
 		googlesql.LanguageFeatureFeatureV13IsDistinct,
 		googlesql.LanguageFeatureFeatureV13Qualify,
-		googlesql.LanguageFeatureFeatureQualify,
 		googlesql.LanguageFeatureFeatureV13RemoteFunction,
 		googlesql.LanguageFeatureFeatureV13Pivot,
 		googlesql.LanguageFeatureFeatureV13Unpivot,
