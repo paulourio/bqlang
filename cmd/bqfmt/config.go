@@ -13,11 +13,10 @@ import (
 )
 
 type configLoader struct {
-	explicitPath string
-	mu           sync.Mutex
-	explicitCfg  *parsedConfig
-	dirCache     map[string]*parsedConfig
-	fileCache    map[string]*parsedConfig
+	mu          sync.Mutex
+	explicitCfg *parsedConfig
+	dirCache    map[string]*parsedConfig
+	fileCache   map[string]*parsedConfig
 }
 
 type parsedConfig struct {
@@ -51,9 +50,8 @@ const configFileName = ".bqfmt.toml"
 
 func newConfigLoader(explicitPath string) (*configLoader, error) {
 	cl := &configLoader{
-		explicitPath: explicitPath,
-		dirCache:     make(map[string]*parsedConfig),
-		fileCache:    make(map[string]*parsedConfig),
+		dirCache:  make(map[string]*parsedConfig),
+		fileCache: make(map[string]*parsedConfig),
 	}
 
 	if explicitPath != "" {
@@ -230,15 +228,7 @@ func parseConfigFile(path string) (*parsedConfig, error) {
 		return nil, fmt.Errorf("parse config %s: %w", path, err)
 	}
 
-	if undecoded := mdFlat.Undecoded(); len(undecoded) > 0 {
-		return nil, fmt.Errorf("config %s: unknown option %q", path, undecoded[0].String())
-	}
-
-	if err := opts.Validate(); err != nil {
-		return nil, fmt.Errorf("config %s: %w", path, err)
-	}
-
-	return &parsedConfig{fallback: opts}, nil
+	return finalizeSingleStyleConfig(path, mdFlat, opts)
 }
 
 func buildSectionConfig(path string, md toml.MetaData, prim toml.Primitive) (*parsedConfig, error) {
@@ -248,6 +238,14 @@ func buildSectionConfig(path string, md toml.MetaData, prim toml.Primitive) (*pa
 		return nil, fmt.Errorf("parse config %s: %w", path, err)
 	}
 
+	return finalizeSingleStyleConfig(path, md, opts)
+}
+
+func finalizeSingleStyleConfig(
+	path string,
+	md toml.MetaData,
+	opts *formatter.PrintOptions,
+) (*parsedConfig, error) {
 	if undecoded := md.Undecoded(); len(undecoded) > 0 {
 		return nil, fmt.Errorf("config %s: unknown option %q", path, undecoded[0].String())
 	}
