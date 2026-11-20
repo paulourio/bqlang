@@ -10,12 +10,11 @@ type dumper struct {
 	sep          string
 	maxDepth     int
 	currentDepth int
-	sql          string
 	out          strings.Builder
 }
 
-func newDumper(n NodeHandler, sep string, maxDepth int, sql string) *dumper {
-	return &dumper{n, sep, maxDepth, 0, sql, strings.Builder{}}
+func newDumper(n NodeHandler, sep string, maxDepth int) *dumper {
+	return &dumper{node: n, sep: sep, maxDepth: maxDepth}
 }
 
 func (d *dumper) Dump() {

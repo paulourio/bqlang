@@ -48,29 +48,11 @@ func extractTemplatesFromNode(n ast.NodeHandler, input string) ([]*TemplateEleme
 	r := make([]*TemplateElement, 0, len(children))
 
 	for _, child := range children {
-		switch c := child.(type) {
-		case *ast.TemplateBlockNode:
-			a, b := c.StartLoc(), c.EndLoc()
+		switch child.(type) {
+		case *ast.TemplateBlockNode, *ast.TemplateVariableNode, *ast.TemplateCommentNode:
+			a, b := child.StartLoc(), child.EndLoc()
 
-			nc, err := NewTemplateElement(c.Kind(), a, b, input[a:b], input)
-			if err != nil {
-				return r, err
-			}
-
-			r = append(r, nc)
-		case *ast.TemplateVariableNode:
-			a, b := c.StartLoc(), c.EndLoc()
-
-			nc, err := NewTemplateElement(c.Kind(), a, b, input[a:b], input)
-			if err != nil {
-				return r, err
-			}
-
-			r = append(r, nc)
-		case *ast.TemplateCommentNode:
-			a, b := c.StartLoc(), c.EndLoc()
-
-			nc, err := NewTemplateElement(c.Kind(), a, b, input[a:b], input)
+			nc, err := NewTemplateElement(child.Kind(), a, b, input[a:b], input)
 			if err != nil {
 				return r, err
 			}

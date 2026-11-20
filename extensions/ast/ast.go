@@ -56,16 +56,30 @@ type Loc struct {
 	End   int
 }
 
-// CommentNode represents a SQL or Jinja2 comment token in the extension AST.
-type CommentNode struct {
+// Leaf provides the base tree links and raw source text embedded by terminal AST nodes.
+type Leaf struct {
 	Node
 	image string
 }
 
+// Image returns the raw source text of the leaf node.
+func (l *Leaf) Image() string {
+	return l.image
+}
+
+// SetImage sets the raw source text of the leaf node.
+func (l *Leaf) SetImage(i string) {
+	l.image = i
+}
+
+// CommentNode represents a SQL or Jinja2 comment token in the extension AST.
+type CommentNode struct {
+	Leaf
+}
+
 // NewLineNode represents a line break token in the extension AST.
 type NewLineNode struct {
-	Node
-	image string
+	Leaf
 }
 
 // ScriptNode represents the root sequence of comments and template elements.
@@ -75,86 +89,22 @@ type ScriptNode struct {
 
 // TemplateBlockNode represents a Jinja2 block tag sequence ({% ... %}).
 type TemplateBlockNode struct {
-	Node
-	image string
+	Leaf
 }
 
 // TemplateCommentNode represents a Jinja2 comment ({# ... #}).
 type TemplateCommentNode struct {
-	Node
-	image string
+	Leaf
 }
 
 // TemplateVariableNode represents a Jinja2 expression tag ({{ ... }}).
 type TemplateVariableNode struct {
-	Node
-	image string
+	Leaf
 }
 
 // TemplateStatementNode represents a single Jinja2 statement clause inside a block.
 type TemplateStatementNode struct {
-	Node
-	image string
-}
-
-// Image returns the raw source text of the comment node.
-func (n *CommentNode) Image() string {
-	return n.image
-}
-
-// SetImage sets the raw source text of the comment node.
-func (n *CommentNode) SetImage(i string) {
-	n.image = i
-}
-
-// Image returns the raw source text of the newline node.
-func (n *NewLineNode) Image() string {
-	return n.image
-}
-
-// SetImage sets the raw source text of the newline node.
-func (n *NewLineNode) SetImage(i string) {
-	n.image = i
-}
-
-// Image returns the raw source text of the template block node.
-func (n *TemplateBlockNode) Image() string {
-	return n.image
-}
-
-// SetImage sets the raw source text of the template block node.
-func (n *TemplateBlockNode) SetImage(i string) {
-	n.image = i
-}
-
-// Image returns the raw source text of the template comment node.
-func (n *TemplateCommentNode) Image() string {
-	return n.image
-}
-
-// SetImage sets the raw source text of the template comment node.
-func (n *TemplateCommentNode) SetImage(i string) {
-	n.image = i
-}
-
-// Image returns the raw source text of the template variable node.
-func (n *TemplateVariableNode) Image() string {
-	return n.image
-}
-
-// SetImage sets the raw source text of the template variable node.
-func (n *TemplateVariableNode) SetImage(i string) {
-	n.image = i
-}
-
-// Image returns the raw source text of the template statement node.
-func (n *TemplateStatementNode) Image() string {
-	return n.image
-}
-
-// SetImage sets the raw source text of the template statement node.
-func (n *TemplateStatementNode) SetImage(i string) {
-	n.image = i
+	Leaf
 }
 
 // AddChild appends c to n's children and expands n's byte span.
@@ -228,8 +178,8 @@ func (n *Node) SingleNodeDebugString() string {
 }
 
 // DebugString formats the subtree rooted at n as an indented multi-line string.
-func (n *Node) DebugString(sql string) string {
-	d := newDumper(n, "\n", 256, sql)
+func (n *Node) DebugString(_ string) string {
+	d := newDumper(n, "\n", 256)
 	d.Dump()
 
 	return d.String()
