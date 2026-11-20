@@ -74,7 +74,7 @@ func readInput(filename string, stdin io.Reader) (string, error) {
 	return string(data), nil
 }
 
-func dumpScript(input string, stdout, stderr io.Writer) int {
+func parseScript(input string, stderr io.Writer) (*googlesql.ASTScript, int) {
 	out, err := googlesql.ParseScript(
 		input,
 		bqlang.DefaultParserOptions(),
@@ -83,14 +83,23 @@ func dumpScript(input string, stdout, stderr io.Writer) int {
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 
-		return 2
+		return nil, 2
 	}
 
 	script, err := out.Script()
 	if err != nil {
 		fmt.Fprintf(stderr, "bqdump: extract script: %v\n", err)
 
-		return 1
+		return nil, 1
+	}
+
+	return script, 0
+}
+
+func dumpScript(input string, stdout, stderr io.Writer) int {
+	script, code := parseScript(input, stderr)
+	if code != 0 {
+		return code
 	}
 
 	bqd, err := bqlang.MarshalJSON(script)
@@ -106,26 +115,19 @@ func dumpScript(input string, stdout, stderr io.Writer) int {
 }
 
 func dumpStatements(input string, stdout, stderr io.Writer) int {
-	out, err := googlesql.ParseScript(
-		input,
-		bqlang.DefaultParserOptions(),
-		bqlang.DefaultErrorMessageOptions(),
-	)
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-
-		return 2
+	script, code := parseScript(input, stderr)
+	if code != 0 {
+		return code
 	}
 
-	script, err := out.Script()
+	stmtList, err := script.StatementListNode()
 	if err != nil {
-		fmt.Fprintf(stderr, "bqdump: extract script: %v\n", err)
+		fmt.Fprintf(stderr, "bqdump: statement list: %v\n", err)
 
 		return 1
 	}
 
-	stmtList, err := script.StatementListNode()
-	if err != nil || stmtList == nil {
+	if stmtList == nil {
 		return 0
 	}
 
