@@ -492,9 +492,8 @@ func (p *printer) joinKeyword(n *googlesql.ASTJoin) string {
 	}
 
 	end, _ := nodeByteRange(rhs)
-	str := strings.ToUpper(p.viewErasedInput(searchStart, end))
 
-	if strings.Contains(str, "OUTER") {
+	if containsKeywordToken(p.viewErasedInput(searchStart, end), "OUTER") {
 		kw.WriteString("OUTER ")
 	}
 

@@ -388,9 +388,9 @@ MERGE T AS X
 USING S
    ON X.t1 = S.s1
  WHEN NOT MATCHED AND
-            S.C1 >                 100
-        AND s.c2 >                 IFNULL(a, b)
-        AND s.c2 IS DISTINCT FROM  2
+            S.C1 >                100
+        AND s.c2 >                IFNULL(a, b)
+        AND s.c2 IS DISTINCT FROM 2
       THEN
       INSERT
         (t1)

@@ -167,6 +167,27 @@ func (p *PrintOptions) Validate() error {
 			p.FunctionCatalog, ErrInvalidPrintOption)
 	}
 
+	return p.validateCounts()
+}
+
+func (p *PrintOptions) validateCounts() error {
+	intFields := []struct {
+		name string
+		val  int
+	}{
+		{"soft_max_cols", p.SoftMaxColumns},
+		{"indentation", p.Indentation},
+		{"min_joins_to_separate_in_blocks", p.MinJoinsToSeparateInBlocks},
+		{"max_cols_for_single_line_select", p.MaxColumnsForSingleLineSelect},
+		{"max_params_for_single_line_function", p.MaxParamsForSingleLineFunction},
+	}
+
+	for _, f := range intFields {
+		if f.val < 0 {
+			return fmt.Errorf("Validate %s=%d: %w", f.name, f.val, ErrInvalidPrintOption)
+		}
+	}
+
 	return nil
 }
 

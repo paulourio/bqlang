@@ -387,11 +387,7 @@ func (p *printer) printBinaryOp(n *googlesql.ASTBinaryExpression, lhsAlign, rhsA
 	case googlesql.ASTBinaryExpressionEnums_OpConcatOp:
 		p.print(lhsAlign + "||" + rhsAlign)
 	case googlesql.ASTBinaryExpressionEnums_OpDistinct:
-		if isNot {
-			p.print(lhsAlign + p.keyword("IS NOT DISTINCT FROM") + " " + rhsAlign)
-		} else {
-			p.print(lhsAlign + p.keyword("IS DISTINCT FROM") + " " + rhsAlign)
-		}
+		p.printNotKeywordOp(isNot, "IS DISTINCT FROM", "IS NOT DISTINCT FROM", lhsAlign, rhsAlign)
 	case googlesql.ASTBinaryExpressionEnums_OpIsSourceNode:
 		p.printNotKeywordOp(isNot, "IS SOURCE OF", "IS NOT SOURCE OF", lhsAlign, rhsAlign)
 	case googlesql.ASTBinaryExpressionEnums_OpIsDestNode:
@@ -1080,8 +1076,8 @@ func (p *printer) visitIdentifier(n *googlesql.ASTIdentifier, _ printerData) {
 func (p *printer) rawIdentifier(n *googlesql.ASTIdentifier) string {
 	start, end := nodeByteRange(n)
 
-	if 0 < start && start < end && end <= len(p.input) &&
-		p.input[start] != '`' && p.input[start-1] == '`' {
+	if 0 < start && start < end && end < len(p.input) &&
+		p.input[start] != '`' && p.input[start-1] == '`' && p.input[end] == '`' {
 		start--
 		end++
 	}
@@ -1090,6 +1086,17 @@ func (p *printer) rawIdentifier(n *googlesql.ASTIdentifier) string {
 }
 
 func isTablePathParent(n googlesql.ASTNode) bool {
+	switch stmt := n.(type) {
+	case *googlesql.ASTDropStatement:
+		sok, _ := stmt.SchemaObjectKind()
+
+		return isTableSchemaObjectKind(sok)
+	case *googlesql.ASTUndropStatement:
+		sok, _ := stmt.SchemaObjectKind()
+
+		return isTableSchemaObjectKind(sok)
+	}
+
 	switch nodeKind(n) {
 	case googlesql.ASTNodeKindAstTablePathExpression,
 		googlesql.ASTNodeKindAstCreateTableStatement,
@@ -1100,11 +1107,31 @@ func isTablePathParent(n googlesql.ASTNode) bool {
 		googlesql.ASTNodeKindAstAlterTableStatement,
 		googlesql.ASTNodeKindAstAlterViewStatement,
 		googlesql.ASTNodeKindAstAlterMaterializedViewStatement,
+		googlesql.ASTNodeKindAstAlterAllRowAccessPoliciesStatement,
+		googlesql.ASTNodeKindAstDropMaterializedViewStatement,
+		googlesql.ASTNodeKindAstDropSnapshotTableStatement,
+		googlesql.ASTNodeKindAstDropAllRowAccessPoliciesStatement,
+		googlesql.ASTNodeKindAstAuxLoadDataStatement,
+		googlesql.ASTNodeKindAstCloneDataSource,
+		googlesql.ASTNodeKindAstCopyDataSource,
 		googlesql.ASTNodeKindAstInsertStatement,
 		googlesql.ASTNodeKindAstDeleteStatement,
 		googlesql.ASTNodeKindAstUpdateStatement,
 		googlesql.ASTNodeKindAstMergeStatement,
 		googlesql.ASTNodeKindAstTruncateStatement:
+		return true
+	default:
+		return false
+	}
+}
+
+func isTableSchemaObjectKind(sok googlesql.SchemaObjectKind) bool {
+	switch sok {
+	case googlesql.SchemaObjectKindKTable,
+		googlesql.SchemaObjectKindKExternalTable,
+		googlesql.SchemaObjectKindKSnapshotTable,
+		googlesql.SchemaObjectKindKView,
+		googlesql.SchemaObjectKindKMaterializedView:
 		return true
 	default:
 		return false

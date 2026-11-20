@@ -914,7 +914,7 @@ func (p *printer) visitDropAllRowAccessPoliciesStatement(
 	tbl, _ := n.TableName()
 
 	p.print(p.keyword("DROP ALL ROW ACCESS POLICIES ON"))
-	p.print(p.identifier(p.toString(tbl, d)))
+	p.accept(tbl, d)
 	p.movePast(n)
 }
 
@@ -937,7 +937,7 @@ func (p *printer) visitDropEntityStatement(n *googlesql.ASTDropEntityStatement, 
 	obj := "ENTITY"
 
 	if nodeDefined(et) {
-		obj = strings.ToUpper(p.toString(et, d))
+		obj = p.toString(et, d)
 	}
 
 	p.printDropNamedObject(n, obj, ie, target, nil, d)
@@ -1017,7 +1017,7 @@ func (p *printer) visitDropStatement(n *googlesql.ASTDropStatement, d printerDat
 	p.print(p.keyword(dropStatementKeyword(n)))
 
 	target, _ := n.Name()
-	p.print(p.identifier(p.toString(target, d)))
+	p.accept(target, d)
 
 	dm, _ := n.DropMode()
 	switch dm {
@@ -1347,19 +1347,26 @@ func (p *printer) visitPrimaryKey(n *googlesql.ASTPrimaryKey, d printerData) {
 
 	el, _ := n.ElementList()
 	enf, _ := n.Enforced()
+	ol, _ := n.OptionsList()
 
 	p.print(p.keyword("PRIMARY KEY") + " ")
 	p.accept(el, d)
 
 	if enf {
-		if strings.Contains(strings.ToUpper(p.nodeErasedInput(n)), "ENFORCED") {
+		_, scanStart := nodeByteRange(el)
+		_, scanEnd := nodeByteRange(n)
+		if nodeDefined(ol) {
+			scanEnd, _ = nodeByteRange(ol)
+		}
+
+		if containsKeywordToken(p.viewErasedInput(scanStart, scanEnd), "ENFORCED") {
 			p.print(p.keyword("ENFORCED"))
 		}
 	} else {
 		p.print(p.keyword("NOT ENFORCED"))
 	}
 
-	if ol, _ := n.OptionsList(); nodeDefined(ol) {
+	if nodeDefined(ol) {
 		p.accept(ol, d)
 	}
 }
@@ -1389,7 +1396,7 @@ func (p *printer) visitPrimaryKeyColumnAttribute(n *googlesql.ASTPrimaryKeyColum
 	enf, _ := n.Enforced()
 	if !enf {
 		p.print(p.keyword("NOT ENFORCED"))
-	} else if strings.Contains(strings.ToUpper(p.nodeErasedInput(n)), "ENFORCED") {
+	} else if containsKeywordToken(p.nodeErasedInput(n), "ENFORCED") {
 		p.print(p.keyword("ENFORCED"))
 	}
 
@@ -1790,7 +1797,7 @@ func (p *printer) printDropNamedObject(
 ) {
 	p.moveBefore(n)
 	p.print(p.keyword(dropKeyword(ifExists, kind)))
-	p.print(p.identifier(p.toString(name, d)))
+	p.accept(name, d)
 
 	if nodeDefined(tbl) {
 		p.print(p.keyword("ON"))
@@ -1905,7 +1912,7 @@ func (p *printer) visitCreateEntityStatement(n *googlesql.ASTCreateEntityStateme
 
 	obj := "ENTITY"
 	if typ, _ := n.Type(); nodeDefined(typ) {
-		obj = strings.ToUpper(p.toString(typ, d))
+		obj = p.toString(typ, d)
 	}
 
 	p.print(p.keyword(createStatementKeywords(n, false, obj)))
@@ -1938,7 +1945,7 @@ func (p *printer) visitAddSubEntityAction(n *googlesql.ASTAddSubEntityAction, d 
 	p.print(p.keyword("ADD"))
 
 	if typ, _ := n.Type(); nodeDefined(typ) {
-		p.print(p.keyword(strings.ToUpper(p.toString(typ, d))))
+		p.print(p.keyword(p.toString(typ, d)))
 	}
 
 	if ine, _ := n.IsIfNotExists(); ine {
@@ -1958,7 +1965,7 @@ func (p *printer) visitDropSubEntityAction(n *googlesql.ASTDropSubEntityAction, 
 	p.print(p.keyword("DROP"))
 
 	if typ, _ := n.Type(); nodeDefined(typ) {
-		p.print(p.keyword(strings.ToUpper(p.toString(typ, d))))
+		p.print(p.keyword(p.toString(typ, d)))
 	}
 
 	if ie, _ := n.IsIfExists(); ie {
@@ -1975,7 +1982,7 @@ func (p *printer) visitAlterSubEntityAction(n *googlesql.ASTAlterSubEntityAction
 	p.print(p.keyword("ALTER"))
 
 	if typ, _ := n.Type(); nodeDefined(typ) {
-		p.print(p.keyword(strings.ToUpper(p.toString(typ, d))))
+		p.print(p.keyword(p.toString(typ, d)))
 	}
 
 	if ie, _ := n.IsIfExists(); ie {

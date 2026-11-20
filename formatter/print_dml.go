@@ -1,10 +1,6 @@
 package formatter
 
-import (
-	"strings"
-
-	"github.com/goccy/go-googlesql"
-)
+import "github.com/goccy/go-googlesql"
 
 func (p *printer) visitColumnList(n *googlesql.ASTColumnList, d printerData) {
 	p.moveBefore(n)
@@ -51,12 +47,11 @@ func (p *printer) visitDeleteStatement(n *googlesql.ASTDeleteStatement, d printe
 	target, _ := n.TargetPath()
 	begin, _ := nodeByteRange(n)
 	targetBegin, _ := nodeByteRange(target)
-	prefix := strings.ToUpper(p.viewErasedInput(begin, targetBegin))
 
 	pp.print(pp.keyword("DELETE"))
 
 	pTarget := pp.nest()
-	if strings.Contains(prefix, "FROM") {
+	if containsKeywordToken(p.viewErasedInput(begin, targetBegin), "FROM") {
 		pTarget.print(pTarget.keyword("FROM"))
 	}
 
@@ -155,9 +150,8 @@ func (p *printer) visitInsertStatement(n *googlesql.ASTInsertStatement, d printe
 
 	begin, _ := nodeByteRange(n)
 	end, _ := nodeByteRange(target)
-	input := strings.ToUpper(p.viewErasedInput(begin, end))
 
-	if strings.Contains(input, "INTO") {
+	if containsKeywordToken(p.viewErasedInput(begin, end), "INTO") {
 		p.print(p.keyword("INSERT INTO"))
 	} else {
 		p.print(p.keyword("INSERT"))
@@ -240,7 +234,7 @@ func (p *printer) visitMergeStatement(n *googlesql.ASTMergeStatement, d printerD
 	pp.println("")
 	pp.print(pp.keyword("ON") + " ")
 	pp.acceptNested(cond, d)
-	p.println("")
+	pp.println("")
 	pp.accept(whens, d)
 	pp.movePast(n)
 
@@ -321,6 +315,7 @@ func (p *printer) visitMergeWhenClause(n *googlesql.ASTMergeWhenClause, d printe
 	p.moveBefore(n)
 
 	mt, _ := n.MatchType()
+	cond, _ := n.SearchCondition()
 	action, _ := n.Action()
 
 	switch mt {
@@ -332,17 +327,19 @@ func (p *printer) visitMergeWhenClause(n *googlesql.ASTMergeWhenClause, d printe
 		p.print(p.keyword("NOT MATCHED BY SOURCE"))
 	case googlesql.ASTMergeWhenClauseEnums_MatchTypeNotMatchedByTarget:
 		start, _ := nodeByteRange(n)
-		next, _ := nodeByteRange(action)
-		input := strings.ToUpper(p.viewErasedInput(start, next))
+		scanEnd, _ := nodeByteRange(action)
+		if nodeDefined(cond) {
+			scanEnd, _ = nodeByteRange(cond)
+		}
 
-		if strings.Contains(input, "TARGET") {
+		if containsKeywordToken(p.viewErasedInput(start, scanEnd), "TARGET") {
 			p.print(p.keyword("NOT MATCHED BY TARGET"))
 		} else {
 			p.print(p.keyword("NOT MATCHED"))
 		}
 	}
 
-	if cond, _ := n.SearchCondition(); nodeDefined(cond) {
+	if nodeDefined(cond) {
 		if p.isSimpleExpr(cond) {
 			p.print(p.keyword("AND"))
 			p.accept(cond, d)

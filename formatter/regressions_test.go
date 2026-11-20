@@ -170,4 +170,67 @@ func TestRegressions(t *testing.T) {
 		assert.Contains(t, got, "-- first")
 		assert.Contains(t, got, "-- fifth")
 	})
+
+	t.Run("DROP statements preserve backticked case and honor TableNameStyle", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.IdentifierStyle = formatter.LowerCase
+		opts.TableNameStyle = formatter.AsIs
+
+		gotBacktick, err := formatter.Format("DROP TABLE my_dataset.`MyCaseSensitiveTable`", opts)
+		require.NoError(t, err)
+		assert.Equal(t, "DROP TABLE my_dataset.`MyCaseSensitiveTable`\n", gotBacktick)
+
+		gotTableStyle, err := formatter.Format("DROP TABLE MyDataset.MyTable", opts)
+		require.NoError(t, err)
+		assert.Equal(t, "DROP TABLE MyDataset.MyTable\n", gotTableStyle)
+
+		gotPolicies, err := formatter.Format("DROP ALL ROW ACCESS POLICIES ON MyDataset.`MyTable`", opts)
+		require.NoError(t, err)
+		assert.Equal(t, "DROP ALL ROW ACCESS POLICIES ON MyDataset.`MyTable`\n", gotPolicies)
+	})
+
+	t.Run("PRIMARY KEY and MERGE keyword scans do not match identifier substrings", func(t *testing.T) {
+		t.Parallel()
+
+		pkSQL := "CREATE TABLE t (enforced_id INT64, PRIMARY KEY (enforced_id) OPTIONS (description = 'not enforced'))"
+		gotPK, err := formatter.Format(pkSQL, formatter.DefaultPrintOptions())
+		require.NoError(t, err)
+		assert.NotContains(t, gotPK, ") ENFORCED")
+
+		mergeSQL := "MERGE dst t USING src s ON t.id = s.id WHEN NOT MATCHED AND target_flag = 1 THEN INSERT ROW"
+		gotMerge, err := formatter.Format(mergeSQL, formatter.DefaultPrintOptions())
+		require.NoError(t, err)
+		assert.NotContains(t, gotMerge, "BY TARGET")
+		assert.Contains(t, gotMerge, "WHEN NOT MATCHED AND target_flag = 1 THEN")
+	})
+
+	t.Run("IS DISTINCT FROM aligns with single space before RHS", func(t *testing.T) {
+		t.Parallel()
+
+		sql := "SELECT id FROM t WHERE a IS DISTINCT FROM b AND long_col = 1"
+		got, err := formatter.Format(sql, formatter.DefaultPrintOptions())
+		require.NoError(t, err)
+		assert.Equal(
+			t,
+			"SELECT id\n  FROM t\n WHERE a        IS DISTINCT FROM b\n   AND long_col =                1\n",
+			got,
+		)
+	})
+
+	t.Run("Entity DDL honors KeywordStyle AsIs and Validate rejects negative counts", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.KeywordStyle = formatter.AsIs
+
+		got, err := formatter.Format("CREATE reservation my_res OPTIONS (slot_capacity = 100)", opts)
+		require.NoError(t, err)
+		assert.Contains(t, got, "CREATE reservation my_res")
+
+		badOpts := formatter.DefaultPrintOptions()
+		badOpts.Indentation = -1
+		require.ErrorIs(t, badOpts.Validate(), formatter.ErrInvalidPrintOption)
+	})
 }
