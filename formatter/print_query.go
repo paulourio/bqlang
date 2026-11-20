@@ -2,7 +2,6 @@ package formatter
 
 import (
 	"fmt"
-	"maps"
 	"strings"
 
 	"github.com/goccy/go-googlesql"
@@ -115,12 +114,8 @@ func (p *printer) visitFromClause(n *googlesql.ASTFromClause, d printerData) {
 	expr, _ := n.TableExpression()
 
 	if nodeKind(expr) == googlesql.ASTNodeKindAstJoin {
-		if d == nil {
-			d = make(printerData, 3)
-		}
-
 		count = countJoins(expr)
-		d[keyJoinCount] = count
+		d.joinCount = count
 	}
 
 	p.accept(expr, d)
@@ -391,7 +386,7 @@ func (p *printer) visitHaving(n *googlesql.ASTHaving, d printerData) {
 }
 
 func (p *printer) visitJoin(n *googlesql.ASTJoin, d printerData) {
-	count := d[keyJoinCount]
+	count := d.joinCount
 
 	lhs, _ := n.Lhs()
 	rhs, _ := n.Rhs()
@@ -599,7 +594,7 @@ func (p *printer) printOptionsListBody(n *googlesql.ASTOptionsList, kwPrefix str
 
 	entries := selectChildrenOfType[*googlesql.ASTOptionsEntry](n)
 	simple := len(entries) <= 1 && p.isSimpleOptionsList(n)
-	d.SetBool(keyOptionsSimple, simple)
+	d.optionsSimple = simple
 
 	pp := p.nest()
 	if kwPrefix != "" {
@@ -646,7 +641,7 @@ func (p *printer) visitOptionsEntry(n *googlesql.ASTOptionsEntry, d printerData)
 		keys = knownOptionKeys(ol)
 	}
 
-	simple := d.IsEnabled(keyOptionsSimple)
+	simple := d.optionsSimple
 	name, _ := n.Name()
 	val, _ := n.Value()
 
@@ -769,8 +764,8 @@ func (p *printer) visitPivotForExpression(n *googlesql.ASTPivotClause, d printer
 
 	simpleLHS := p.isSimpleExpr(forExpr)
 	simpleValues := simpleLHS && p.isSimplePivotValueList(pvl)
-	ctx := maps.Clone(d)
-	ctx.SetBool(keyPivotForValuesSimple, simpleValues)
+	ctx := d
+	ctx.pivotForValuesSimple = simpleValues
 
 	p.print(p.keyword("FOR"))
 
@@ -836,7 +831,7 @@ func (p *printer) visitPivotValue(n *googlesql.ASTPivotValue, d printerData) {
 func (p *printer) visitPivotValueList(n *googlesql.ASTPivotValueList, d printerData) {
 	p.moveBefore(n)
 
-	simple := d.IsEnabled(keyPivotForValuesSimple)
+	simple := d.pivotForValuesSimple
 
 	for i, v := range selectChildrenOfType[*googlesql.ASTPivotValue](n) {
 		if i > 0 {
@@ -1095,7 +1090,7 @@ func (p *printer) visitSelect(n *googlesql.ASTSelect, d printerData) {
 	pp3.accept(wm, d)
 
 	singleLine := p.maybeSingleLineColumns(n)
-	d.SetBool(keySingleLineCols, singleLine)
+	d.singleLineCols = singleLine
 
 	if distinct {
 		pp3.print(pp3.keyword("DISTINCT"))
@@ -1210,7 +1205,7 @@ func (p *printer) visitSelectColumn(n *googlesql.ASTSelectColumn, d printerData)
 
 func (p *printer) visitSelectList(n *googlesql.ASTSelectList, d printerData) {
 	pp := p.nest()
-	singleLine := d.IsEnabled(keySingleLineCols)
+	singleLine := d.singleLineCols
 	cols := selectChildrenOfType[*googlesql.ASTSelectColumn](n)
 
 	var prev googlesql.ASTNode
@@ -1568,8 +1563,8 @@ func (p *printer) visitUnpivotClause(n *googlesql.ASTUnpivotClause, d printerDat
 	nameCol, _ := n.UnpivotOutputNameColumn()
 	oa, _ := n.OutputAlias()
 
-	simple := p.isSimpleUnpivotInItemList(inItems)
-	d.SetBool(keyUnpivotInItemSimple, simple)
+	simple := isSimpleUnpivotInItemList(inItems)
+	d.unpivotInItemSimple = simple
 
 	p.incDepth()
 	p.accept(valCols, d)
@@ -1621,7 +1616,7 @@ func (p *printer) visitUnpivotInItemLabel(n *googlesql.ASTUnpivotInItemLabel, d 
 func (p *printer) visitUnpivotInItemList(n *googlesql.ASTUnpivotInItemList, d printerData) {
 	p.moveBefore(n)
 
-	simple := d.IsEnabled(keyUnpivotInItemSimple)
+	simple := d.unpivotInItemSimple
 
 	for i, item := range selectChildrenOfType[*googlesql.ASTUnpivotInItem](n) {
 		if i > 0 {
@@ -1664,7 +1659,7 @@ func (p *printer) visitWhereClause(n *googlesql.ASTWhereClause, d printerData) {
 func (p *printer) visitWhereExprBody(e googlesql.ASTExpressionNode, d printerData) {
 	switch nodeKind(e) {
 	case googlesql.ASTNodeKindAstAndExpr, googlesql.ASTNodeKindAstOrExpr:
-		d[keyAlignBinaryOpBudget] = 1
+		d.alignBinaryOpBudget = 1
 		p.accept(e, d)
 	default:
 		p.acceptNested(e, d)

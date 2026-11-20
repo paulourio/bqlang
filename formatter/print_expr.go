@@ -1,7 +1,6 @@
 package formatter
 
 import (
-	"maps"
 	"strings"
 	"unicode"
 
@@ -57,14 +56,9 @@ func (p *printer) visitAndExpr(n *googlesql.ASTAndExpr, d printerData) {
 	alignWithClause := p.fmt.opts.AlignLogicalWithClauses && inClause
 	inMerge := isInsideOfMergeStatement(n)
 	simple := p.isSimpleAndExpr(n)
-	ctx := maps.Clone(d)
 
-	budget := d[keyAlignBinaryOpBudget]
+	budget := d.alignBinaryOpBudget
 	alignAnd := budget > 0
-
-	if simple && alignAnd {
-		d[keyAlignBinaryOpBudget]--
-	}
 
 	if alignAnd || inMerge || (!simple && p.areAlignable(conjuncts)) {
 		budget = 1
@@ -83,7 +77,7 @@ func (p *printer) visitAndExpr(n *googlesql.ASTAndExpr, d printerData) {
 	}
 
 	p1 := pp.nest()
-	andLines := pp.formatAndConjuncts(p1, conjuncts, simple, alignWithClause, budget, ctx)
+	andLines := pp.formatAndConjuncts(p1, conjuncts, simple, alignWithClause, budget, d)
 	s := p1.unnestLeft()
 
 	if alignWithClause {
@@ -129,7 +123,7 @@ func (p *printer) formatAndConjuncts(
 			p1.print("\v")
 		}
 
-		ctx[keyAlignBinaryOpBudget] = budget
+		ctx.alignBinaryOpBudget = budget
 
 		if !simple {
 			p1.accept(conjunct, ctx)
@@ -307,8 +301,8 @@ func (p *printer) visitBinaryExpression(n *googlesql.ASTBinaryExpression, d prin
 
 	var lhsAlign, rhsAlign string
 
-	if capacity := d[keyAlignBinaryOpBudget]; capacity > 0 {
-		d[keyAlignBinaryOpBudget]--
+	if d.alignBinaryOpBudget > 0 {
+		d.alignBinaryOpBudget--
 		lhsAlign = "\v"
 		rhsAlign = " \v"
 	}
@@ -341,6 +335,12 @@ func (p *printer) printBinaryOp(n *googlesql.ASTBinaryExpression, lhsAlign, rhsA
 	op, _ := n.Op()
 	isNot, _ := n.IsNot()
 
+	if sym := binaryOpSymbol(op); sym != "" {
+		p.print(lhsAlign + sym + rhsAlign)
+
+		return
+	}
+
 	switch op {
 	case googlesql.ASTBinaryExpressionEnums_OpNotSet:
 		p.print("<UNKNOWN OPERATOR>")
@@ -356,36 +356,6 @@ func (p *printer) printBinaryOp(n *googlesql.ASTBinaryExpression, lhsAlign, rhsA
 		} else {
 			p.print(lhsAlign + p.keyword("IS") + rhsAlign)
 		}
-	case googlesql.ASTBinaryExpressionEnums_OpEq:
-		p.print(lhsAlign + "=" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpNe:
-		p.print(lhsAlign + "!=" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpNe2:
-		p.print(lhsAlign + "<>" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpGt:
-		p.print(lhsAlign + ">" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpLt:
-		p.print(lhsAlign + "<" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpGe:
-		p.print(lhsAlign + ">=" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpLe:
-		p.print(lhsAlign + "<=" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpBitwiseOr:
-		p.print(lhsAlign + "|" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpBitwiseXor:
-		p.print(lhsAlign + "^" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpBitwiseAnd:
-		p.print(lhsAlign + "&" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpPlus:
-		p.print(lhsAlign + "+" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpMinus:
-		p.print(lhsAlign + "-" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpMultiply:
-		p.print(lhsAlign + "*" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpDivide:
-		p.print(lhsAlign + "/" + rhsAlign)
-	case googlesql.ASTBinaryExpressionEnums_OpConcatOp:
-		p.print(lhsAlign + "||" + rhsAlign)
 	case googlesql.ASTBinaryExpressionEnums_OpDistinct:
 		p.printNotKeywordOp(isNot, "IS DISTINCT FROM", "IS NOT DISTINCT FROM", lhsAlign, rhsAlign)
 	case googlesql.ASTBinaryExpressionEnums_OpIsSourceNode:
@@ -395,6 +365,43 @@ func (p *printer) printBinaryOp(n *googlesql.ASTBinaryExpression, lhsAlign, rhsA
 	default:
 		sqlOp, _ := n.GetSQLForOperator()
 		p.print(lhsAlign + p.keyword(sqlOp) + rhsAlign)
+	}
+}
+
+func binaryOpSymbol(op googlesql.ASTBinaryExpressionEnums_Op) string {
+	switch op {
+	case googlesql.ASTBinaryExpressionEnums_OpEq:
+		return "="
+	case googlesql.ASTBinaryExpressionEnums_OpNe:
+		return "!="
+	case googlesql.ASTBinaryExpressionEnums_OpNe2:
+		return "<>"
+	case googlesql.ASTBinaryExpressionEnums_OpGt:
+		return ">"
+	case googlesql.ASTBinaryExpressionEnums_OpLt:
+		return "<"
+	case googlesql.ASTBinaryExpressionEnums_OpGe:
+		return ">="
+	case googlesql.ASTBinaryExpressionEnums_OpLe:
+		return "<="
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseOr:
+		return "|"
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseXor:
+		return "^"
+	case googlesql.ASTBinaryExpressionEnums_OpBitwiseAnd:
+		return "&"
+	case googlesql.ASTBinaryExpressionEnums_OpPlus:
+		return "+"
+	case googlesql.ASTBinaryExpressionEnums_OpMinus:
+		return "-"
+	case googlesql.ASTBinaryExpressionEnums_OpMultiply:
+		return "*"
+	case googlesql.ASTBinaryExpressionEnums_OpDivide:
+		return "/"
+	case googlesql.ASTBinaryExpressionEnums_OpConcatOp:
+		return "||"
+	default:
+		return ""
 	}
 }
 
@@ -420,8 +427,8 @@ func (p *printer) visitConcatExpr(n *googlesql.ASTConcatExpr, d printerData) {
 
 	var lhsAlign, rhsAlign string
 
-	if capacity := d[keyAlignBinaryOpBudget]; capacity > 0 {
-		d[keyAlignBinaryOpBudget]--
+	if d.alignBinaryOpBudget > 0 {
+		d.alignBinaryOpBudget--
 		lhsAlign = "\v"
 		rhsAlign = " \v"
 	}
@@ -484,7 +491,7 @@ func (p *printer) visitCaseNoValueExpression(n *googlesql.ASTCaseNoValueExpressi
 
 	args := selectChildrenOfType[googlesql.ASTExpressionNode](n)
 	simple := p.areSimpleExprs(args)
-	d.SetBool(keySimpleCase, simple)
+	d.simpleCase = simple
 
 	pp := p.nest()
 	p.visitCaseArgs(pp, args, d)
@@ -511,7 +518,7 @@ func (p *printer) visitCaseValueExpression(n *googlesql.ASTCaseValueExpression, 
 	simple := valueSimple && p.areSimpleExprs(args[1:])
 	indentWhen := p.fmt.opts.IndentCaseWhen
 
-	d.SetBool(keySimpleCase, simple)
+	d.simpleCase = simple
 
 	if !simple || !valueSimple {
 		p.println("")
@@ -558,7 +565,7 @@ func (p *printer) visitCaseValueExpression(n *googlesql.ASTCaseValueExpression, 
 
 func (p *printer) visitCaseArgs(target *printer, args []googlesql.ASTExpressionNode, d printerData) {
 	pp := target.nest()
-	simple := d.IsEnabled(keySimpleCase)
+	simple := d.simpleCase
 	initAlignBinOpBudget := 0
 
 	if simple && p.onlyBinaryExprOnCaseLHS(args) {
@@ -592,9 +599,9 @@ func (p *printer) visitCaseWhenPair(
 	hasMorePairs bool,
 	d printerData,
 ) {
-	lhsData := maps.Clone(d)
+	lhsData := d
 	if simple {
-		lhsData[keyAlignBinaryOpBudget] = alignBudget
+		lhsData.alignBinaryOpBudget = alignBudget
 	}
 
 	pp.print(pp.keyword("WHEN"))
@@ -852,8 +859,8 @@ func (p *printer) visitFunctionCall(n *googlesql.ASTFunctionCall, d printerData)
 	pp := p.nest()
 	pp.acceptNestedString(fn, d)
 
-	signature := p.getFunctionSignature(n)
 	expr := strings.TrimPrefix(pp.unnest(), "\v")
+	signature := lookupFunctionSignature(expr)
 
 	pp = p.nest()
 	pp.printOpenParenIfNeeded(n)
@@ -1286,15 +1293,9 @@ func (p *printer) visitPathExpressionList(n *googlesql.ASTPathExpressionList, d 
 		p.print("(")
 	}
 
-	simple := p.isSimplePathExpressionList(n)
-
 	for i, name := range exprs {
 		if i > 0 {
 			p.print(",")
-
-			if !simple {
-				p.println("")
-			}
 		}
 
 		p.accept(name, d)

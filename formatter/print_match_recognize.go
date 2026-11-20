@@ -1,7 +1,6 @@
 package formatter
 
 import (
-	"maps"
 	"strings"
 
 	"github.com/goccy/go-googlesql"
@@ -43,8 +42,8 @@ func (p *printer) printMatchRecognizeBody(
 	}
 
 	if meas, _ := n.Measures(); nodeDefined(meas) {
-		ctx := maps.Clone(d)
-		ctx.SetBool(keySingleLineCols, false)
+		ctx := d
+		ctx.singleLineCols = false
 
 		p.println(p.keyword("MEASURES"))
 		p.incDepth()
@@ -101,10 +100,10 @@ func (p *printer) printMatchRecognizeDefines(defs *googlesql.ASTSelectList, d pr
 		var varName string
 		if nodeDefined(al) {
 			id, _ := al.Identifier()
-			varName = strings.TrimSpace(pp.toString(id, d))
+			varName = pp.toTrimmedString(id, d)
 		}
 
-		exprStr := strings.TrimSpace(alignNested(pp.toString(expr, d)))
+		exprStr := pp.toAlignedString(expr, d)
 		pp.print(varName + " \v" + pp.keyword("AS") + " " + strings.ReplaceAll(exprStr, "\n", "\n\v"))
 	}
 
@@ -184,7 +183,7 @@ func (p *printer) formatRowPattern(n googlesql.ASTRowPatternExpressionNode, d pr
 		body = ""
 	case *googlesql.ASTRowPatternVariable:
 		name, _ := pat.Name()
-		body = strings.TrimSpace(p.toString(name, d))
+		body = p.toTrimmedString(name, d)
 	case *googlesql.ASTRowPatternAnchor:
 		anc, _ := pat.Anchor()
 		switch anc {
@@ -259,7 +258,7 @@ func (p *printer) formatQuantifier(n googlesql.ASTQuantifierNode, d printerData)
 		}
 	case *googlesql.ASTFixedQuantifier:
 		b, _ := q.Bound()
-		s = "{" + strings.TrimSpace(p.toString(b, d)) + "}"
+		s = "{" + p.toTrimmedString(b, d) + "}"
 	case *googlesql.ASTBoundedQuantifier:
 		lb, _ := q.LowerBound()
 		ub, _ := q.UpperBound()
@@ -293,5 +292,5 @@ func (p *printer) formatQuantifierBound(n *googlesql.ASTQuantifierBound, d print
 		return ""
 	}
 
-	return strings.TrimSpace(p.toString(b, d))
+	return p.toTrimmedString(b, d)
 }

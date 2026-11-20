@@ -21,7 +21,17 @@ type printer struct {
 	errs        *errorQueue
 }
 
-type printerData map[string]int
+type printerData struct {
+	alignBinaryOpBudget  int
+	joinCount            int
+	functionParamsSimple bool
+	optionsSimple        bool
+	pivotForValuesSimple bool
+	procedureParams      bool
+	simpleCase           bool
+	singleLineCols       bool
+	unpivotInItemSimple  bool
+}
 
 type nodeVisitorFunc func(*printer, googlesql.ASTNode, printerData)
 
@@ -34,18 +44,9 @@ const (
 	lineBreakPlaceholder        = "\x21\x1a10"
 	literalLineBreakPlaceholder = "\x21\x1a11"
 	trailingCommentPlaceholder  = "\x21\x1a12"
-
-	keyAlignBinaryOpBudget  = "align_binary_op_budget"
-	keyFunctionParamsSimple = "function_params_simple"
-	keyJoinCount            = "join_count"
-	keyOptionsSimple        = "options_simple"
-	keyPivotForValuesSimple = "pivot_for_expr_values_simple"
-	keyProcedureParams      = "procedure_params"
-	keySimpleCase           = "simple_case"
-	keySingleLineCols       = "single_line_cols"
-	keyUnpivotInItemSimple  = "unpivot_in_item_simple"
 )
 
+// Initialized via sync.Once to break the visitor -> visit -> newVisitorMap cycle.
 var (
 	nodeVisitorsOnce sync.Once
 	nodeVisitors     map[reflect.Type]nodeVisitorFunc
@@ -59,18 +60,6 @@ func lookupVisitor(t reflect.Type) (nodeVisitorFunc, bool) {
 	fn, ok := nodeVisitors[t]
 
 	return fn, ok
-}
-
-func (d printerData) SetBool(key string, value bool) {
-	if value {
-		d[key] = 1
-	} else {
-		d[key] = 0
-	}
-}
-
-func (d printerData) IsEnabled(key string) bool {
-	return d[key] > 0
 }
 
 func (p *printer) acceptClause(n googlesql.ASTNode, d printerData) {
@@ -725,6 +714,14 @@ func (p *printer) toString(n googlesql.ASTNode, d printerData) string {
 	pp.accept(n, d)
 
 	return pp.String()
+}
+
+func (p *printer) toTrimmedString(n googlesql.ASTNode, d printerData) string {
+	return strings.TrimSpace(p.toString(n, d))
+}
+
+func (p *printer) toAlignedString(n googlesql.ASTNode, d printerData) string {
+	return strings.TrimSpace(alignNested(p.toString(n, d)))
 }
 
 func (p *printer) toUnnestedString(n googlesql.ASTNode, d printerData) string {

@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 
 	"github.com/goccy/go-googlesql"
 
 	"github.com/paulourio/bqlang"
 )
+
+var defaultParserOptions = sync.OnceValue(bqlang.DefaultParserOptions)
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
@@ -77,7 +80,7 @@ func readInput(filename string, stdin io.Reader) (string, error) {
 func parseScript(input string, stderr io.Writer) (*googlesql.ASTScript, int) {
 	out, err := googlesql.ParseScript(
 		input,
-		bqlang.DefaultParserOptions(),
+		defaultParserOptions(),
 		bqlang.DefaultErrorMessageOptions(),
 	)
 	if err != nil {

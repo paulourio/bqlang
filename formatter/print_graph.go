@@ -1,7 +1,6 @@
 package formatter
 
 import (
-	"maps"
 	"strings"
 
 	"github.com/goccy/go-googlesql"
@@ -89,7 +88,7 @@ func (p *printer) visitGraphElementTable(n *googlesql.ASTGraphElementTable, d pr
 func (p *printer) printGraphElementTableBody(n *googlesql.ASTGraphElementTable, d printerData) {
 	if kl, _ := n.KeyList(); nodeDefined(kl) {
 		p.println("")
-		p.print(p.keyword("KEY") + " " + strings.TrimSpace(alignNested(p.toString(kl, d))))
+		p.print(p.keyword("KEY") + " " + p.toAlignedString(kl, d))
 	}
 
 	if src, _ := n.SourceNodeReference(); nodeDefined(src) {
@@ -104,7 +103,7 @@ func (p *printer) printGraphElementTableBody(n *googlesql.ASTGraphElementTable, 
 
 	if defOpt, _ := n.DefaultLabelOptionsList(); nodeDefined(defOpt) {
 		p.println("")
-		p.print(strings.TrimSpace(alignNested(p.toString(defOpt, d))))
+		p.print(p.toAlignedString(defOpt, d))
 	}
 
 	if lpl, _ := n.LabelPropertiesList(); hasExplicitSourceSpan(lpl) {
@@ -135,23 +134,21 @@ func hasExplicitSourceSpan(n googlesql.ASTNode) bool {
 
 func (p *printer) visitGraphDynamicLabel(n *googlesql.ASTGraphDynamicLabel, d printerData) {
 	lbl, _ := n.Label()
-	if !nodeDefined(lbl) {
-		return
-	}
-
-	p.moveBefore(n)
-	p.print(p.keyword("DYNAMIC LABEL") + " (" + strings.TrimSpace(alignNested(p.toString(lbl, d))) + ")")
-	p.movePast(n)
+	p.printGraphDynamicClause(n, "DYNAMIC LABEL", lbl, d)
 }
 
 func (p *printer) visitGraphDynamicProperties(n *googlesql.ASTGraphDynamicProperties, d printerData) {
 	props, _ := n.Properties()
-	if !nodeDefined(props) {
+	p.printGraphDynamicClause(n, "DYNAMIC PROPERTIES", props, d)
+}
+
+func (p *printer) printGraphDynamicClause(n googlesql.ASTNode, kw string, expr googlesql.ASTNode, d printerData) {
+	if !nodeDefined(expr) {
 		return
 	}
 
 	p.moveBefore(n)
-	p.print(p.keyword("DYNAMIC PROPERTIES") + " (" + strings.TrimSpace(alignNested(p.toString(props, d))) + ")")
+	p.print(p.keyword(kw) + " (" + p.toAlignedString(expr, d) + ")")
 	p.movePast(n)
 }
 
@@ -172,12 +169,12 @@ func (p *printer) visitGraphNodeTableReference(n *googlesql.ASTGraphNodeTableRef
 	nti, _ := n.NodeTableIdentifier()
 	ntc, _ := n.NodeTableColumns()
 
-	p.print(strings.TrimSpace(alignNested(p.toString(etc, d))))
+	p.print(p.toAlignedString(etc, d))
 	p.print(p.keyword("REFERENCES"))
 
-	ntiStr := strings.TrimSpace(p.toString(nti, d))
+	ntiStr := p.toTrimmedString(nti, d)
 	if nodeDefined(ntc) {
-		ntiStr += " " + strings.TrimSpace(alignNested(p.toString(ntc, d)))
+		ntiStr += " " + p.toAlignedString(ntc, d)
 	}
 
 	p.print(ntiStr)
@@ -230,7 +227,7 @@ func (p *printer) visitGraphElementLabelAndProperties(
 	}
 
 	if nodeDefined(lo) {
-		p.print(strings.TrimSpace(alignNested(p.toString(lo, d))))
+		p.print(p.toAlignedString(lo, d))
 	}
 
 	if hasExplicitSourceSpan(props) {
@@ -266,7 +263,7 @@ func (p *printer) visitGraphProperties(n *googlesql.ASTGraphProperties, d printe
 		p.print(p.keyword("PROPERTIES ALL COLUMNS"))
 
 		if exc, _ := n.AllExceptColumns(); nodeDefined(exc) {
-			p.print(p.keyword("EXCEPT") + " " + strings.TrimSpace(alignNested(p.toString(exc, d))))
+			p.print(p.keyword("EXCEPT") + " " + p.toAlignedString(exc, d))
 		}
 
 		return
@@ -281,7 +278,7 @@ func (p *printer) visitGraphDerivedPropertyList(n *googlesql.ASTGraphDerivedProp
 	singleLine := len(props) <= 6
 
 	for _, prop := range props {
-		rendered := strings.TrimSpace(alignNested(p.toString(prop, d)))
+		rendered := p.toAlignedString(prop, d)
 		if strings.Contains(rendered, "\n") {
 			singleLine = false
 		}
@@ -323,7 +320,7 @@ func (p *printer) visitGraphDerivedProperty(n *googlesql.ASTGraphDerivedProperty
 	}
 
 	if opt, _ := n.OptionsList(); nodeDefined(opt) {
-		p.print(strings.TrimSpace(alignNested(p.toString(opt, d))))
+		p.print(p.toAlignedString(opt, d))
 	}
 
 	p.movePast(n)
@@ -335,7 +332,7 @@ func (p *printer) visitGraphTableQuery(n *googlesql.ASTGraphTableQuery, d printe
 	p.incDepth()
 
 	if ref, _ := n.GraphReference(); nodeDefined(ref) {
-		p.println(strings.TrimSpace(p.toString(ref, d)))
+		p.println(p.toTrimmedString(ref, d))
 	}
 
 	if op, _ := n.GraphOp(); nodeDefined(op) {
@@ -343,8 +340,8 @@ func (p *printer) visitGraphTableQuery(n *googlesql.ASTGraphTableQuery, d printe
 	}
 
 	if shape, _ := n.GraphTableShape(); nodeDefined(shape) {
-		ctx := maps.Clone(d)
-		ctx.SetBool(keySingleLineCols, false)
+		ctx := d
+		ctx.singleLineCols = false
 		p.println(p.keyword("COLUMNS") + " (")
 		p.incDepth()
 		p.printlnBlock(strings.TrimSpace(leftAlignNested(p.toString(shape, ctx))))
@@ -400,7 +397,7 @@ func (p *printer) visitGqlLinearOpsQuery(n *googlesql.ASTGqlLinearOpsQuery, d pr
 
 func (p *printer) printGqlGraphHeader(ref *googlesql.ASTPathExpression, d printerData) {
 	if nodeDefined(ref) {
-		p.println(p.keyword("GRAPH") + " " + strings.TrimSpace(p.toString(ref, d)))
+		p.println(p.keyword("GRAPH") + " " + p.toTrimmedString(ref, d))
 	}
 }
 
@@ -468,7 +465,7 @@ func (p *printer) visitGqlMatch(n *googlesql.ASTGqlMatch, d printerData) {
 
 	header := p.keyword(kw)
 	if nodeDefined(hint) {
-		header += " " + strings.TrimSpace(p.toString(hint, d))
+		header += " " + p.toTrimmedString(hint, d)
 	}
 
 	if !nodeDefined(gp) {
@@ -540,7 +537,7 @@ func (p *printer) printGqlProjection(kw string, sel *googlesql.ASTSelect, d prin
 	header := kw
 
 	if hint, _ := sel.Hint(); nodeDefined(hint) {
-		header += " " + strings.TrimSpace(p.toString(hint, d))
+		header += " " + p.toTrimmedString(hint, d)
 	}
 
 	if distinct, _ := sel.Distinct(); distinct {
@@ -549,8 +546,8 @@ func (p *printer) printGqlProjection(kw string, sel *googlesql.ASTSelect, d prin
 
 	if sl, _ := sel.SelectList(); nodeDefined(sl) {
 		cols := selectChildrenOfType[*googlesql.ASTSelectColumn](sl)
-		ctx := maps.Clone(d)
-		ctx.SetBool(keySingleLineCols, len(cols) <= 1)
+		ctx := d
+		ctx.singleLineCols = len(cols) <= 1
 
 		slStr := strings.TrimSpace(leftAlignNested(p.toString(sl, ctx)))
 		p.printPrefixedBlock(header+" ", slStr)
@@ -598,8 +595,7 @@ func (p *printer) visitGqlLetVariableDefinitionList(
 
 	prefix := p.keyword("LET") + " "
 	if len(defs) == 1 {
-		defStr := strings.TrimSpace(alignNested(p.toString(defs[0], d)))
-		p.printlnBlock(prefix + defStr)
+		p.printlnBlock(prefix + p.toAlignedString(defs[0], d))
 
 		return
 	}
@@ -613,8 +609,8 @@ func (p *printer) visitGqlLetVariableDefinitionList(
 
 		id, _ := def.Identifier()
 		expr, _ := def.Expression()
-		idStr := strings.TrimSpace(pp.toString(id, d))
-		exprStr := strings.TrimSpace(alignNested(pp.toString(expr, d)))
+		idStr := pp.toTrimmedString(id, d)
+		exprStr := pp.toAlignedString(expr, d)
 		pp.print(idStr + " \v= " + strings.ReplaceAll(exprStr, "\n", "\n\v"))
 	}
 
@@ -624,9 +620,7 @@ func (p *printer) visitGqlLetVariableDefinitionList(
 func (p *printer) visitGqlLetVariableDefinition(n *googlesql.ASTGqlLetVariableDefinition, d printerData) {
 	id, _ := n.Identifier()
 	expr, _ := n.Expression()
-	idStr := strings.TrimSpace(p.toString(id, d))
-	exprStr := strings.TrimSpace(alignNested(p.toString(expr, d)))
-	p.print(idStr + " = " + exprStr)
+	p.print(p.toTrimmedString(id, d) + " = " + p.toAlignedString(expr, d))
 }
 
 func (p *printer) visitGqlFilter(n *googlesql.ASTGqlFilter, d printerData) {
@@ -636,15 +630,13 @@ func (p *printer) visitGqlFilter(n *googlesql.ASTGqlFilter, d printerData) {
 	}
 
 	if startsBeforeNode(n, cond) {
-		wcStr := strings.TrimSpace(alignNested(p.toString(cond, d)))
-		p.printPrefixedBlock(p.keyword("FILTER")+" ", wcStr)
+		p.printPrefixedBlock(p.keyword("FILTER")+" ", p.toAlignedString(cond, d))
 
 		return
 	}
 
 	expr, _ := cond.Expression()
-	exprStr := strings.TrimSpace(alignNested(p.toString(expr, d)))
-	p.printPrefixedBlock(p.keyword("FILTER")+" ", exprStr)
+	p.printPrefixedBlock(p.keyword("FILTER")+" ", p.toAlignedString(expr, d))
 }
 
 func (p *printer) visitGqlFor(n *googlesql.ASTGqlFor, d printerData) {
@@ -653,15 +645,15 @@ func (p *printer) visitGqlFor(n *googlesql.ASTGqlFor, d printerData) {
 	wo, _ := n.WithOffset()
 
 	line := p.keyword("FOR") + " " +
-		strings.TrimSpace(p.toString(id, d)) + " " +
+		p.toTrimmedString(id, d) + " " +
 		p.keyword("IN") + " " +
-		strings.TrimSpace(alignNested(p.toString(expr, d)))
+		p.toAlignedString(expr, d)
 
 	if nodeDefined(wo) {
 		line += " " + p.keyword("WITH OFFSET")
 		if al, _ := wo.Alias(); nodeDefined(al) {
 			alID, _ := al.Identifier()
-			line += " " + p.keyword("AS") + " " + strings.TrimSpace(p.toString(alID, d))
+			line += " " + p.keyword("AS") + " " + p.toTrimmedString(alID, d)
 		}
 	}
 
@@ -685,11 +677,11 @@ func (p *printer) visitGqlNamedCall(n *googlesql.ASTGqlNamedCall, d printerData)
 	line := p.formatGqlCallPrefix(n.ASTGqlCallBase, d)
 
 	if tvf, _ := n.TvfCall(); nodeDefined(tvf) {
-		line += " " + strings.TrimSpace(alignNested(p.toString(tvf, d)))
+		line += " " + p.toAlignedString(tvf, d)
 	}
 
 	if yc, _ := n.YieldClause(); nodeDefined(yc) {
-		line += " " + strings.TrimSpace(alignNested(p.toString(yc, d)))
+		line += " " + p.toAlignedString(yc, d)
 	}
 
 	p.printlnBlock(line)
@@ -709,7 +701,7 @@ func (p *printer) formatGqlCallPrefix(base *googlesql.ASTGqlCallBase, d printerD
 	}
 
 	if nc, _ := base.NameCaptureList(); nodeDefined(nc) {
-		parts = append(parts, "("+strings.TrimSpace(alignNested(p.toString(nc, d)))+")")
+		parts = append(parts, "("+p.toAlignedString(nc, d)+")")
 	}
 
 	return strings.Join(parts, " ")
@@ -720,7 +712,7 @@ func (p *printer) visitYieldItemList(n *googlesql.ASTYieldItemList, d printerDat
 	parts := make([]string, 0, len(items))
 
 	for _, item := range items {
-		parts = append(parts, strings.TrimSpace(alignNested(p.toString(item, d))))
+		parts = append(parts, p.toAlignedString(item, d))
 	}
 
 	p.print(p.keyword("YIELD") + " " + strings.Join(parts, ", "))
@@ -742,7 +734,7 @@ func (p *printer) visitExpressionWithOptAlias(n *googlesql.ASTExpressionWithOptA
 
 func (p *printer) visitGqlOrderByAndPage(n *googlesql.ASTGqlOrderByAndPage, d printerData) {
 	if ob, _ := n.OrderBy(); nodeDefined(ob) {
-		p.printlnBlock(strings.TrimSpace(alignNested(p.toString(ob, d))))
+		p.printlnBlock(p.toAlignedString(ob, d))
 	}
 
 	if pg, _ := n.Page(); nodeDefined(pg) {
@@ -762,17 +754,17 @@ func (p *printer) visitGqlPage(n *googlesql.ASTGqlPage, d printerData) {
 
 func (p *printer) visitGqlPageLimit(n *googlesql.ASTGqlPageLimit, d printerData) {
 	lim, _ := n.Limit()
-	p.println(p.keyword("LIMIT") + " " + strings.TrimSpace(alignNested(p.toString(lim, d))))
+	p.println(p.keyword("LIMIT") + " " + p.toAlignedString(lim, d))
 }
 
 func (p *printer) visitGqlPageOffset(n *googlesql.ASTGqlPageOffset, d printerData) {
 	off, _ := n.Offset()
-	p.println(p.keyword("OFFSET") + " " + strings.TrimSpace(alignNested(p.toString(off, d))))
+	p.println(p.keyword("OFFSET") + " " + p.toAlignedString(off, d))
 }
 
 func (p *printer) visitGqlSample(n *googlesql.ASTGqlSample, d printerData) {
 	if sc, _ := n.Sample(); nodeDefined(sc) {
-		p.printlnBlock(strings.TrimSpace(alignNested(p.toString(sc, d))))
+		p.printlnBlock(p.toAlignedString(sc, d))
 	}
 }
 
@@ -784,7 +776,7 @@ func (p *printer) formatGraphPathPattern(n *googlesql.ASTGraphPathPattern, d pri
 	var b strings.Builder
 
 	if hint, _ := n.Hint(); nodeDefined(hint) {
-		b.WriteString(strings.TrimSpace(p.toString(hint, d)))
+		b.WriteString(p.toTrimmedString(hint, d))
 		b.WriteByte(' ')
 	}
 
@@ -800,7 +792,7 @@ func (p *printer) formatGraphPathPattern(n *googlesql.ASTGraphPathPattern, d pri
 			b.WriteByte(' ')
 			b.WriteString(p.keyword("WHERE"))
 			b.WriteByte(' ')
-			b.WriteString(strings.TrimSpace(alignNested(p.toString(expr, d))))
+			b.WriteString(p.toAlignedString(expr, d))
 		}
 
 		b.WriteByte(')')
@@ -853,7 +845,7 @@ func (p *printer) formatGraphPathCore(n *googlesql.ASTGraphPathPattern, d printe
 	var b strings.Builder
 
 	if pn, _ := n.PathName(); nodeDefined(pn) {
-		b.WriteString(strings.TrimSpace(p.toString(pn, d)))
+		b.WriteString(p.toTrimmedString(pn, d))
 		b.WriteString(" = ")
 	}
 
@@ -890,7 +882,7 @@ func (p *printer) formatGraphPathSearchPrefix(n *googlesql.ASTGraphPathSearchPre
 
 	if nodeDefined(cnt) {
 		expr, _ := cnt.PathCount()
-		cntStr = strings.TrimSpace(alignNested(p.toString(expr, d)))
+		cntStr = p.toAlignedString(expr, d)
 	}
 
 	switch t {
@@ -978,7 +970,7 @@ func (p *printer) formatGraphEdgePattern(n *googlesql.ASTGraphEdgePattern, d pri
 
 	if lh, _ := n.LhsHint(); nodeDefined(lh) {
 		if h, _ := lh.Hint(); nodeDefined(h) {
-			b.WriteString(strings.TrimSpace(p.toString(h, d)))
+			b.WriteString(p.toTrimmedString(h, d))
 		}
 	}
 
@@ -993,7 +985,7 @@ func (p *printer) formatGraphEdgePattern(n *googlesql.ASTGraphEdgePattern, d pri
 
 	if rh, _ := n.RhsHint(); nodeDefined(rh) {
 		if h, _ := rh.Hint(); nodeDefined(h) {
-			b.WriteString(strings.TrimSpace(p.toString(h, d)))
+			b.WriteString(p.toTrimmedString(h, d))
 		}
 	}
 
@@ -1046,12 +1038,12 @@ func (p *printer) formatGraphElementFiller(
 	var parts []string
 
 	if h, _ := n.Hint(); nodeDefined(h) {
-		parts = append(parts, strings.TrimSpace(p.toString(h, d)))
+		parts = append(parts, p.toTrimmedString(h, d))
 	}
 
 	var head string
 	if vn, _ := n.VariableName(); nodeDefined(vn) {
-		head = strings.TrimSpace(p.toString(vn, d))
+		head = p.toTrimmedString(vn, d)
 	}
 
 	if lf, _ := n.LabelFilter(); nodeDefined(lf) {
@@ -1069,11 +1061,11 @@ func (p *printer) formatGraphElementFiller(
 
 	if wc, _ := n.WhereClause(); nodeDefined(wc) {
 		expr, _ := wc.Expression()
-		parts = append(parts, p.keyword("WHERE")+" "+strings.TrimSpace(alignNested(p.toString(expr, d))))
+		parts = append(parts, p.keyword("WHERE")+" "+p.toAlignedString(expr, d))
 	}
 
 	if cost, _ := n.EdgeCost(); nodeDefined(cost) {
-		parts = append(parts, p.keyword("COST")+" "+strings.TrimSpace(alignNested(p.toString(cost, d))))
+		parts = append(parts, p.keyword("COST")+" "+p.toAlignedString(cost, d))
 	}
 
 	return strings.Join(parts, " ")
@@ -1096,7 +1088,7 @@ func (p *printer) formatGraphPropertySpec(
 	for _, kv := range kvs {
 		pn, _ := kv.PropertyName()
 		val, _ := kv.Value()
-		parts = append(parts, strings.TrimSpace(p.toString(pn, d))+": "+strings.TrimSpace(alignNested(p.toString(val, d))))
+		parts = append(parts, p.toTrimmedString(pn, d)+": "+p.toAlignedString(val, d))
 	}
 
 	return "{" + strings.Join(parts, ", ") + "}"
@@ -1108,7 +1100,7 @@ func (p *printer) visitGraphPropertyNameAndValue(
 ) {
 	pn, _ := n.PropertyName()
 	val, _ := n.Value()
-	p.print(strings.TrimSpace(p.toString(pn, d)) + ": " + strings.TrimSpace(alignNested(p.toString(val, d))))
+	p.print(p.toTrimmedString(pn, d) + ": " + p.toAlignedString(val, d))
 }
 
 func (p *printer) visitGraphLabelFilter(n *googlesql.ASTGraphLabelFilter, d printerData) {
@@ -1138,7 +1130,7 @@ func (p *printer) formatGraphLabelExpr(n googlesql.ASTGraphLabelExpressionNode, 
 	switch le := n.(type) {
 	case *googlesql.ASTGraphElementLabel:
 		name, _ := le.Name()
-		body = strings.TrimSpace(p.toString(name, d))
+		body = p.toTrimmedString(name, d)
 	case *googlesql.ASTGraphWildcardLabel:
 		body = "%"
 	case *googlesql.ASTGraphLabelOperation:

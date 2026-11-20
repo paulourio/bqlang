@@ -52,25 +52,37 @@ func DefaultLanguageOptions() *googlesql.LanguageOptions {
 		panic(fmt.Errorf("DefaultLanguageOptions: %w", err))
 	}
 
-	for _, feat := range defaultEnabledFeatures() {
+	for _, feat := range defaultLanguageFeatures {
 		if err := lang.EnableLanguageFeature(feat); err != nil {
 			panic(fmt.Errorf("DefaultLanguageOptions: enable feature %d: %w", feat, err))
 		}
 	}
 
-	if err := lang.EnableReservableKeyword("QUALIFY", true); err != nil {
-		panic(fmt.Errorf("DefaultLanguageOptions: enable QUALIFY: %w", err))
+	for _, kw := range defaultReservableKeywords {
+		if err := lang.EnableReservableKeyword(kw, true); err != nil {
+			panic(fmt.Errorf("DefaultLanguageOptions: enable %s: %w", kw, err))
+		}
 	}
 
-	if err := lang.EnableReservableKeyword("GRAPH_TABLE", true); err != nil {
-		panic(fmt.Errorf("DefaultLanguageOptions: enable GRAPH_TABLE: %w", err))
+	if err := lang.SetSupportedGenericEntityTypes(defaultEntityTypes); err != nil {
+		panic(fmt.Errorf("DefaultLanguageOptions: set generic entity types: %w", err))
 	}
 
-	if err := lang.EnableReservableKeyword("MATCH_RECOGNIZE", true); err != nil {
-		panic(fmt.Errorf("DefaultLanguageOptions: enable MATCH_RECOGNIZE: %w", err))
+	if err := lang.SetSupportedGenericSubEntityTypes(defaultSubEntityTypes); err != nil {
+		panic(fmt.Errorf("DefaultLanguageOptions: set generic sub-entity types: %w", err))
 	}
 
-	entityTypes := []string{
+	return lang
+}
+
+var (
+	defaultReservableKeywords = []string{
+		"QUALIFY",
+		"GRAPH_TABLE",
+		"MATCH_RECOGNIZE",
+	}
+
+	defaultEntityTypes = []string{
 		"ASSIGNMENT",
 		"BI_CAPACITY",
 		"CAPACITY",
@@ -79,19 +91,10 @@ func DefaultLanguageOptions() *googlesql.LanguageOptions {
 		"PROJECT",
 		"RESERVATION",
 	}
-	if err := lang.SetSupportedGenericEntityTypes(entityTypes); err != nil {
-		panic(fmt.Errorf("DefaultLanguageOptions: set generic entity types: %w", err))
-	}
 
-	if err := lang.SetSupportedGenericSubEntityTypes([]string{"REPLICA"}); err != nil {
-		panic(fmt.Errorf("DefaultLanguageOptions: set generic sub-entity types: %w", err))
-	}
+	defaultSubEntityTypes = []string{"REPLICA"}
 
-	return lang
-}
-
-func defaultEnabledFeatures() []googlesql.LanguageFeature {
-	return []googlesql.LanguageFeature{
+	defaultLanguageFeatures = []googlesql.LanguageFeature{
 		googlesql.LanguageFeatureFeatureAnalyticFunctions,
 		googlesql.LanguageFeatureFeatureTablesample,
 		googlesql.LanguageFeatureFeatureTableValuedFunctions,
@@ -216,7 +219,7 @@ func defaultEnabledFeatures() []googlesql.LanguageFeature {
 		googlesql.LanguageFeatureFeatureSqlGraphDefaultLabelAndPropertyDefinitionOptions,
 		googlesql.LanguageFeatureFeatureSqlGraphMeasureDdl,
 	}
-}
+)
 
 // DefaultErrorMessageOptions returns standard multi-line caret error options
 // with a valid stability mode for go-googlesql.

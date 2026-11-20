@@ -176,6 +176,15 @@ func (p *printer) visitAlterConstraintSetOptionsAction(
 	p.movePast(n)
 }
 
+func (p *printer) printAlterActionList(n googlesql.ASTNode, al *googlesql.ASTAlterActionList, d printerData) {
+	p.println("")
+	p.incDepth()
+	p.accept(al, d)
+	p.println("")
+	p.decDepth()
+	p.movePast(n)
+}
+
 func (p *printer) visitAlterStatementBase(kw string, n googlesql.ASTAlterStatementBaseNode, d printerData) {
 	p.moveBefore(n)
 	p.print(p.keyword(kw))
@@ -188,12 +197,7 @@ func (p *printer) visitAlterStatementBase(kw string, n googlesql.ASTAlterStateme
 	al, _ := n.ActionList()
 
 	p.accept(target, d)
-	p.println("")
-	p.incDepth()
-	p.accept(al, d)
-	p.println("")
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterActionList(n, al, d)
 }
 
 func (p *printer) visitAlterDatabaseStatement(n *googlesql.ASTAlterDatabaseStatement, d printerData) {
@@ -218,12 +222,7 @@ func (p *printer) visitAlterEntityStatement(n *googlesql.ASTAlterEntityStatement
 	al, _ := n.ActionList()
 
 	p.accept(target, d)
-	p.println("")
-	p.incDepth()
-	p.accept(al, d)
-	p.println("")
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterActionList(n, al, d)
 }
 
 func (p *printer) visitAlterMaterializedViewStatement(n *googlesql.ASTAlterMaterializedViewStatement, d printerData) {
@@ -261,12 +260,7 @@ func (p *printer) visitAlterPrivilegeRestrictionStatement(
 	al, _ := n.ActionList()
 
 	p.accept(target, d)
-	p.println("")
-	p.incDepth()
-	p.accept(al, d)
-	p.println("")
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterActionList(n, al, d)
 }
 
 func (p *printer) visitAlterRowAccessPolicyStatement(n *googlesql.ASTAlterRowAccessPolicyStatement, d printerData) {
@@ -287,12 +281,7 @@ func (p *printer) visitAlterRowAccessPolicyStatement(n *googlesql.ASTAlterRowAcc
 	al, _ := n.ActionList()
 
 	p.accept(target, d)
-	p.println("")
-	p.incDepth()
-	p.accept(al, d)
-	p.println("")
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterActionList(n, al, d)
 }
 
 func (p *printer) visitAlterSchemaStatement(n *googlesql.ASTAlterSchemaStatement, d printerData) {
@@ -1194,7 +1183,7 @@ func (p *printer) visitFunctionDeclaration(n *googlesql.ASTFunctionDeclaration, 
 	name := p.function(p.toString(fnName, d))
 	params := p.toString(fnParams, d)
 
-	if d.IsEnabled(keyFunctionParamsSimple) {
+	if isSimpleFunctionParameters(fnParams, p.fmt.opts.MaxParamsForSingleLineFunction) {
 		p.print(name + params)
 	} else {
 		p.println(name)
@@ -1221,7 +1210,7 @@ func (p *printer) visitFunctionParameter(n *googlesql.ASTFunctionParameter, d pr
 
 	name, _ := n.Name()
 	if nodeDefined(name) {
-		if !d.IsEnabled(keyFunctionParamsSimple) && d.IsEnabled(keyProcedureParams) {
+		if !d.functionParamsSimple && d.procedureParams {
 			p.acceptNested(name, d)
 		} else {
 			p.accept(name, d)
@@ -1250,18 +1239,11 @@ func (p *printer) visitFunctionParameter(n *googlesql.ASTFunctionParameter, d pr
 
 func (p *printer) visitFunctionParameters(n *googlesql.ASTFunctionParameters, d printerData) {
 	entries := selectChildrenOfType[*googlesql.ASTFunctionParameter](n)
-	maxParams := p.fmt.opts.MaxParamsForSingleLineFunction
+	simple := isSimpleFunctionParameters(n, p.fmt.opts.MaxParamsForSingleLineFunction)
+	d.functionParamsSimple = simple
 
-	if maxParams <= 0 {
-		maxParams = 2
-	}
-
-	simple := len(entries) <= maxParams && areSimpleFunctionParameters(entries)
-	d.SetBool(keyFunctionParamsSimple, simple)
-
-	parent := nodeParent(n)
-	if nodeDefined(parent) {
-		d.SetBool(keyProcedureParams, nodeKind(parent) == googlesql.ASTNodeKindAstCreateProcedureStatement)
+	if parent := nodeParent(n); nodeDefined(parent) {
+		d.procedureParams = nodeKind(parent) == googlesql.ASTNodeKindAstCreateProcedureStatement
 	}
 
 	pp := p.nest()
@@ -1765,12 +1747,7 @@ func (p *printer) visitAlterIndexStatement(n *googlesql.ASTAlterIndexStatement, 
 		p.accept(tbl, d)
 	}
 
-	p.println("")
-	p.incDepth()
-	p.accept(al, d)
-	p.println("")
-	p.decDepth()
-	p.movePast(n)
+	p.printAlterActionList(n, al, d)
 }
 
 func (p *printer) visitDropIndexStatement(n *googlesql.ASTDropIndexStatement, d printerData) {
@@ -1940,59 +1917,56 @@ func (p *printer) visitCreateEntityStatement(n *googlesql.ASTCreateEntityStateme
 	p.movePast(n)
 }
 
-func (p *printer) visitAddSubEntityAction(n *googlesql.ASTAddSubEntityAction, d printerData) {
+func (p *printer) printSubEntityHeader(
+	n googlesql.ASTNode,
+	kw string,
+	typ *googlesql.ASTIdentifier,
+	condKw string,
+	cond bool,
+	name *googlesql.ASTIdentifier,
+	d printerData,
+) {
 	p.moveBefore(n)
-	p.print(p.keyword("ADD"))
+	p.print(p.keyword(kw))
 
-	if typ, _ := n.Type(); nodeDefined(typ) {
+	if nodeDefined(typ) {
 		p.print(p.keyword(p.toString(typ, d)))
 	}
 
-	if ine, _ := n.IsIfNotExists(); ine {
-		p.print(p.keyword("IF NOT EXISTS"))
+	if cond {
+		p.print(p.keyword(condKw))
 	}
 
+	p.accept(name, d)
+}
+
+func (p *printer) visitAddSubEntityAction(n *googlesql.ASTAddSubEntityAction, d printerData) {
+	typ, _ := n.Type()
+	ine, _ := n.IsIfNotExists()
 	name, _ := n.Name()
 	opt, _ := n.OptionsList()
 
-	p.accept(name, d)
+	p.printSubEntityHeader(n, "ADD", typ, "IF NOT EXISTS", ine, name, d)
 	p.accept(opt, d)
 	p.movePast(n)
 }
 
 func (p *printer) visitDropSubEntityAction(n *googlesql.ASTDropSubEntityAction, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("DROP"))
-
-	if typ, _ := n.Type(); nodeDefined(typ) {
-		p.print(p.keyword(p.toString(typ, d)))
-	}
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	typ, _ := n.Type()
+	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
-	p.accept(name, d)
+
+	p.printSubEntityHeader(n, "DROP", typ, "IF EXISTS", ie, name, d)
 	p.movePast(n)
 }
 
 func (p *printer) visitAlterSubEntityAction(n *googlesql.ASTAlterSubEntityAction, d printerData) {
-	p.moveBefore(n)
-	p.print(p.keyword("ALTER"))
-
-	if typ, _ := n.Type(); nodeDefined(typ) {
-		p.print(p.keyword(p.toString(typ, d)))
-	}
-
-	if ie, _ := n.IsIfExists(); ie {
-		p.print(p.keyword("IF EXISTS"))
-	}
-
+	typ, _ := n.Type()
+	ie, _ := n.IsIfExists()
 	name, _ := n.Name()
 	act, _ := n.Action()
 
-	p.accept(name, d)
+	p.printSubEntityHeader(n, "ALTER", typ, "IF EXISTS", ie, name, d)
 	p.accept(act, d)
 	p.movePast(n)
 }

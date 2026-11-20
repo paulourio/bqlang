@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/goccy/go-googlesql"
-	"github.com/hashicorp/go-multierror"
 )
 
 // PrinterError describes an AST formatting failure along with its source node and location.
@@ -26,7 +25,7 @@ func (q *errorQueue) append(err error) {
 		return
 	}
 
-	q.err = multierror.Append(q.err, err)
+	q.err = errors.Join(q.err, err)
 }
 
 // Sentinel errors returned when formatting malformed string or bytes literals.

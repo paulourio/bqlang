@@ -1,10 +1,6 @@
 package formatter
 
-import (
-	"strings"
-
-	"github.com/goccy/go-googlesql"
-)
+import "strings"
 
 type functionSignature struct {
 	paramStyles []PrintCase
@@ -24,18 +20,8 @@ func (f *functionSignature) PrintCaseAt(pos int) PrintCase {
 	return f.paramStyles[pos]
 }
 
-func (p *printer) getFunctionSignature(n *googlesql.ASTFunctionCall) *functionSignature {
-	fn, err := n.Function()
-	if err != nil || !nodeDefined(fn) {
-		return nil
-	}
-
-	d := make(printerData)
-	pp := p.nest()
-	pp.accept(fn, d)
-	name := strings.ToUpper(pp.String())
-
-	switch name {
+func lookupFunctionSignature(name string) *functionSignature {
+	switch strings.ToUpper(name) {
 	case "DATE_TRUNC",
 		"DATETIME_TRUNC",
 		"TIME_TRUNC",

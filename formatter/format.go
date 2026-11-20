@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/goccy/go-googlesql"
 
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/extensions"
 )
+
+var defaultParserOptions = sync.OnceValue(bqlang.DefaultParserOptions)
 
 // SQLFormatter formats GoogleSQL and BigQuery scripts using configurable parser and print options.
 type SQLFormatter struct {
@@ -90,7 +93,7 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 
 	parserOpts := f.ParserOptions
 	if parserOpts == nil {
-		parserOpts = bqlang.DefaultParserOptions()
+		parserOpts = defaultParserOptions()
 	}
 
 	parsed, err := googlesql.ParseScript(
@@ -134,8 +137,7 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 		errs:        errs,
 	}
 
-	d := make(printerData, 10)
-	p.accept(root, d)
+	p.accept(root, printerData{})
 	p.fmt.FlushLine()
 
 	if len(p.fmt.comments.comments) > 0 {
@@ -238,11 +240,10 @@ func Format(script string, opts *PrintOptions) (string, error) {
 
 func rowsTrimRight(s string) string {
 	rows := strings.Split(s, "\n")
-	r := make([]string, 0, len(rows))
 
-	for _, row := range rows {
-		r = append(r, strings.TrimRight(row, " "))
+	for i, row := range rows {
+		rows[i] = strings.TrimRight(row, " ")
 	}
 
-	return strings.Join(r, "\n")
+	return strings.Join(rows, "\n")
 }

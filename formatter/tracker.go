@@ -16,9 +16,10 @@ type locationTracker struct {
 
 // newStartLocationTracker returns a location tracker for an input and its AST.
 func newStartLocationTracker(s string, root googlesql.ASTNode) *locationTracker {
-	t := &locationTracker{}
+	t := &locationTracker{
+		Lines: NewLineTracker(s),
+	}
 	t.initNodePos(root)
-	t.initLines(s)
 
 	return t
 }
@@ -39,20 +40,6 @@ func (t *locationTracker) initNodePos(root googlesql.ASTNode) {
 
 	slices.Sort(t.Pos)
 	t.Pos = slices.Compact(t.Pos)
-}
-
-func (t *locationTracker) initLines(s string) {
-	t.Lines = NewLineTracker(s)
-}
-
-// NextPos returns the next start position after pos, or pos itself if none.
-func (t *locationTracker) NextPos(pos int) int {
-	j := t.MaybeNextPos(pos)
-	if j < 0 {
-		return pos
-	}
-
-	return j
 }
 
 // MaybeNextPos returns the start position of the next node after pos, or -1.
