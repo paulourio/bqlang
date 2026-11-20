@@ -1,0 +1,177 @@
+# Multi-option golden suite: dbt / lowercase analytics style
+# Exercises 4-space indentation, lowercase keywords/identifiers/types/builtins/literals,
+# contrasting uppercase pseudo-columns, AS_IS table names & query parameters,
+# unindented WITH/CASE, indented CTE bodies, trailing commas ALWAYS, and unaligned logical operators.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 100
+newline_before_clause = true
+align_logical_with_clauses = false
+align_trailing_comments = true
+column_list_trailing_comma = "ALWAYS"
+indentation = 4
+indent_case_when = false
+indent_with_clause = false
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 1
+max_cols_for_single_line_select = 1
+max_params_for_single_line_function = 1
+function_catalog = "BIGQUERY"
+builtin_function_name_style = "LOWER_CASE"
+function_name_style = "LOWER_CASE"
+identifier_style = "LOWER_CASE"
+keyword_style = "LOWER_CASE"
+type_style = "LOWER_CASE"
+bool_style = "LOWER_CASE"
+hex_style = "LOWER_CASE"
+numeric_style = "LOWER_CASE"
+null_style = "LOWER_CASE"
+pseudo_column_style = "UPPER_CASE"
+table_name_style = "AS_IS"
+query_parameter_style = "AS_IS"
+system_variable_style = "LOWER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "Multi-CTE analytics query with joins, CASE, pseudo-columns, params, and comments"
+input = """
+WITH RawOrders AS (
+SELECT OrderId, CustomerId, _partitiondate AS PartDt, SAFE.DIVIDE(TotalAmt, ItemQty) AS UnitPrice,
+MyAnalytics.NormalizeTier(TierName) AS Tier,
+CASE WHEN Status = "PAID" THEN TRUE WHEN Status = "VOID" THEN FALSE ELSE NULL END AS IsPaid -- status flag
+FROM Analytics.DailyOrders
+WHERE _partitiondate = @RunDate AND @@PROJECT_ID = "prod-dw" AND (Region = "US" OR Region = "EU")
+),
+CustomerAgg AS (
+SELECT o.CustomerId, COUNT(*) AS OrderCnt, SUM(o.UnitPrice) AS AvgSum -- totals
+FROM RawOrders AS o
+LEFT JOIN Analytics.Customers AS c ON o.CustomerId = c.CustomerId
+GROUP BY o.CustomerId
+HAVING COUNT(*) > 1 AND SUM(o.UnitPrice) > 10.5E2
+QUALIFY ROW_NUMBER() OVER (ORDER BY SUM(o.UnitPrice) DESC) <= 10
+)
+SELECT CustomerId, OrderCnt, AvgSum, 0xAB12 AS MagicHex FROM CustomerAgg ORDER BY AvgSum DESC;
+"""
+formatted = """
+with
+raworders as (
+    select orderid,
+           customerid,
+           _PARTITIONDATE                      as partdt,
+           safe.divide(totalamt, itemqty)      as unitprice,
+           myanalytics.normalizetier(tiername) as tier,
+           case
+           when status = 'PAID' then true
+           when status = 'VOID' then false
+                                else null
+           end as ispaid,  -- status flag
+      from Analytics.DailyOrders
+     where     _PARTITIONDATE = @RunDate
+           and @@project_id   = 'prod-dw'
+           and (region = 'US' or region = 'EU')
+),
+customeragg as (
+    select o.customerid,
+           count(*)         as ordercnt,
+           sum(o.unitprice) as avgsum,  -- totals
+      from RawOrders as o
+
+           left join
+           Analytics.Customers as c
+           on o.customerid = c.customerid
+     group by o.customerid
+    having     count(*) > 1
+           and sum(o.unitprice) > 10.5e2
+   qualify row_number() over (order by sum(o.unitprice) desc) <= 10
+)
+select customerid,
+       ordercnt,
+       avgsum,
+       0xab12 as magichex,
+  from CustomerAgg
+ order by avgsum desc
+"""
+
+[[cases]]
+description = "Jinja2 dbt model with set, ref, comments, and trailing commas"
+input = """
+{% set cutoff = '2026-01-01' -%}
+{# Daily order mart #}
+WITH Base AS (
+SELECT OrderId, TotalAmt -- raw amount
+FROM {{ source_table }}
+WHERE OrderDt >= @CutoffDt
+)
+SELECT OrderId, {{ metric_expr }} AS MetricVal
+FROM Base
+WHERE {% if only_active %}IsActive = TRUE{% endif %};
+"""
+formatted = """
+{% set cutoff = '2026-01-01' -%}
+
+{# Daily order mart #}
+with
+base as (
+    select orderid,
+           totalamt,  -- raw amount
+      from {{ source_table }}
+     where orderdt >= @CutoffDt
+)
+select orderid,
+       {{ metric_expr }} as metricval,
+  from Base
+ where {% if only_active %}IsActive = TRUE{% endif %};
+"""
+
+[[cases]]
+description = "DDL function with multi-line params, table with FK, and MERGE"
+input = """
+CREATE OR REPLACE FUNCTION Analytics.ScoreOrder(OrderAmt NUMERIC, TaxRate FLOAT64) RETURNS FLOAT64 AS (CAST(OrderAmt AS FLOAT64) * (1 + TaxRate));
+
+CREATE TABLE Analytics.OrderFact (
+OrderId INT64 NOT NULL,
+CustomerId INT64,
+PRIMARY KEY (OrderId) NOT ENFORCED,
+FOREIGN KEY (CustomerId) REFERENCES Analytics.Customers (CustomerId) NOT ENFORCED
+);
+
+MERGE Analytics.OrderFact AS T
+USING Analytics.DailyOrders AS S
+ON T.OrderId = S.OrderId
+WHEN MATCHED AND T.CustomerId != S.CustomerId THEN UPDATE SET CustomerId = S.CustomerId
+WHEN NOT MATCHED THEN INSERT (OrderId, CustomerId) VALUES (S.OrderId, S.CustomerId);
+"""
+formatted = """
+create or replace function analytics.scoreorder
+(
+    orderamt numeric,
+    taxrate  float64
+)
+returns float64
+as (
+    cast(orderamt as float64) * (1 + taxrate)
+);
+
+create table Analytics.OrderFact
+(
+    orderid    int64 not null,
+    customerid int64,
+    primary key (orderid) not enforced,
+    foreign key (customerid)
+    references Analytics.Customers(customerid) not enforced
+);
+
+merge Analytics.OrderFact as t
+using Analytics.DailyOrders as s
+   on t.orderid = s.orderid
+ when matched and t.customerid != s.customerid then
+      update set
+          customerid = s.customerid
+ when not matched then
+      insert
+          (orderid, customerid)
+      values
+          (s.orderid, s.customerid);
+"""

@@ -1,0 +1,100 @@
+# Multi-option golden suite: AS_IS preservation with 4-space indentation
+# Exercises AS_IS across all 13 PrintCase options and both quote styles,
+# unindented WITH clause/entries and CASE WHEN, and unaligned trailing comments.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+align_trailing_comments = false
+column_list_trailing_comma = "AUTO"
+indentation = 4
+indent_case_when = false
+indent_with_clause = false
+indent_with_entries = false
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+max_params_for_single_line_function = 2
+function_catalog = "BIGQUERY"
+builtin_function_name_style = "AS_IS"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "AS_IS"
+type_style = "AS_IS"
+bool_style = "AS_IS"
+hex_style = "AS_IS"
+numeric_style = "AS_IS"
+null_style = "AS_IS"
+pseudo_column_style = "AS_IS"
+table_name_style = "AS_IS"
+query_parameter_style = "AS_IS"
+system_variable_style = "AS_IS"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = "Mixed-case functions, identifiers, literals, pseudo-columns, params, and unindented CTE/CASE"
+input = """
+with BaseCte as (
+select Coalesce(UserId, 0) as UserId, _PartitionDate, @RunDate as RunDt, @@Project_Id as Proj,
+Case When IsActive = True Then "Yes" Else 'No' End as Flag,
+0xAbCd as HexVal, 1.5E10 as FloatVal, b'RawBytes' as BVal, Null as EmptyVal
+from MyDs.MyUsers
+where UserId > 0 and IsActive = True
+)
+select UserId, _PartitionDate, Flag, HexVal, FloatVal, BVal, EmptyVal from BaseCte;
+"""
+formatted = """
+WITH
+BaseCte AS (
+SELECT Coalesce(UserId, 0) AS UserId,
+       _PartitionDate,
+       @RunDate     AS RunDt,
+       @@Project_Id AS Proj,
+       CASE
+       WHEN IsActive = True THEN "Yes"
+                            ELSE 'No'
+       END         AS Flag,
+       0xAbCd      AS HexVal,
+       1.5E10      AS FloatVal,
+       b'RawBytes' AS BVal,
+       Null        AS EmptyVal
+  FROM MyDs.MyUsers
+ WHERE UserId   > 0
+   AND IsActive = True
+)
+SELECT UserId,
+       _PartitionDate,
+       Flag,
+       HexVal,
+       FloatVal,
+       BVal,
+       EmptyVal
+  FROM BaseCte
+"""
+
+[[cases]]
+description = "Entity DDL, TABLESAMPLE, and INTERVAL preserve source keyword-identifier casing"
+input = """
+CREATE reservation MyRes OPTIONS (slot_capacity = 100);
+ALTER reservation MyRes SET AS JSON r'{"autoscale": true}';
+DROP reservation MyRes;
+SELECT id FROM MyDs.SampleTbl TABLESAMPLE system (10 PERCENT);
+SELECT INTERVAL 1 day TO second;
+"""
+formatted = """
+CREATE reservation MyRes
+OPTIONS (slot_capacity=100);
+
+ALTER reservation MyRes
+    SET AS JSON r'{"autoscale": true}';
+
+DROP reservation MyRes;
+
+SELECT id
+  FROM MyDs.SampleTbl
+       TABLESAMPLE system (10 PERCENT);
+
+SELECT INTERVAL 1 day TO second;
+"""

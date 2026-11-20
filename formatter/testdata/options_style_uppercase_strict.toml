@@ -1,0 +1,187 @@
+# Multi-option golden suite: strict uppercase style with contrasting lowercase tables
+# Exercises soft_max_cols=120, indented WITH clause & entries, aligned logical operators,
+# trailing comma ALWAYS across SQL/pipes/THEN RETURN (and excluded from GQL/MATCH_RECOGNIZE),
+# uppercase identifiers with backtick preservation, and lowercase table_name_style.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 120
+newline_before_clause = true
+align_logical_with_clauses = true
+align_trailing_comments = true
+column_list_trailing_comma = "ALWAYS"
+indentation = 2
+indent_case_when = true
+indent_with_clause = true
+indent_with_entries = true
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 3
+max_params_for_single_line_function = 2
+function_catalog = "BIGQUERY"
+builtin_function_name_style = "UPPER_CASE"
+function_name_style = "AS_IS"
+identifier_style = "UPPER_CASE"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+hex_style = "UPPER_CASE"
+numeric_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+pseudo_column_style = "UPPER_CASE"
+table_name_style = "LOWER_CASE"
+query_parameter_style = "UPPER_CASE"
+system_variable_style = "UPPER_CASE"
+bytes_style = "AS_IS"
+string_style = "AS_IS"
+
+[[cases]]
+description = "Indented CTEs, 2-join block separation, CASE, backtick preservation, and table-name contrast"
+input = """
+WITH base_cte AS (SELECT u.user_id, u.`MixedCaseCol`, _partitiondate, CASE WHEN u.tier = 'gold' THEN 1 ELSE 0 END AS is_gold FROM ProdDs.Users AS u WHERE u.active = true AND u.country = @target_country), enriched AS (SELECT b.user_id, b.`MixedCaseCol`, o.order_cnt, p.plan_name FROM base_cte AS b JOIN ProdDs.Orders AS o ON b.user_id = o.user_id LEFT JOIN ProdDs.Plans AS p ON b.user_id = p.user_id WHERE o.order_cnt > 0 AND p.plan_name IS NOT null) SELECT user_id, `MixedCaseCol`, order_cnt, plan_name FROM enriched ORDER BY order_cnt DESC;
+"""
+formatted = """
+WITH
+  BASE_CTE AS (
+    SELECT U.USER_ID,
+           U.`MixedCaseCol`,
+           _PARTITIONDATE,
+           CASE
+             WHEN U.TIER = 'gold' THEN 1
+                                  ELSE 0
+           END AS IS_GOLD,
+      FROM prodds.users AS U
+     WHERE U.ACTIVE  = TRUE
+       AND U.COUNTRY = @TARGET_COUNTRY
+  ),
+  ENRICHED AS (
+    SELECT B.USER_ID,
+           B.`MixedCaseCol`,
+           O.ORDER_CNT,
+           P.PLAN_NAME,
+      FROM base_cte AS B
+
+           JOIN
+           prodds.orders AS O
+           ON B.USER_ID = O.USER_ID
+
+           LEFT JOIN
+           prodds.plans AS P
+           ON B.USER_ID = P.USER_ID
+
+     WHERE O.ORDER_CNT >      0
+       AND P.PLAN_NAME IS NOT NULL
+  )
+SELECT USER_ID,
+       `MixedCaseCol`,
+       ORDER_CNT,
+       PLAN_NAME,
+  FROM enriched
+ ORDER BY ORDER_CNT DESC
+"""
+
+[[cases]]
+description = "Pipe query, GRAPH_TABLE, and MATCH_RECOGNIZE with trailing comma Always"
+input = """
+FROM ProdDs.Events
+|> WHERE status = 'OK' AND amount > 0
+|> EXTEND ROUND(amount * 1.1, 2) AS gross_amt, LOWER(region) AS region_cd
+|> AGGREGATE COUNT(*) AS evt_cnt, SUM(gross_amt) AS total_amt GROUP BY region_cd
+|> ORDER BY total_amt DESC;
+
+GRAPH ProdDs.FinGraph
+MATCH (p:Person)-[:Owns]->(a:Account)
+RETURN p.name AS owner_nm, a.account_id AS acct_id;
+
+SELECT * FROM ProdDs.Ticks
+MATCH_RECOGNIZE (
+  PARTITION BY symbol
+  ORDER BY tick_ts
+  MEASURES FIRST(a.price) AS start_px, LAST(b.price) AS end_px
+  AFTER MATCH SKIP PAST LAST ROW
+  PATTERN (a b+)
+  DEFINE a AS a.price > 100, b AS b.price > a.price
+);
+"""
+formatted = """
+FROM prodds.events
+|> WHERE     STATUS = 'OK'
+         AND AMOUNT > 0
+|> EXTEND ROUND(AMOUNT * 1.1, 2) AS GROSS_AMT,
+          LOWER(REGION)          AS REGION_CD,
+|> AGGREGATE COUNT(*)       AS EVT_CNT,
+             SUM(GROSS_AMT) AS TOTAL_AMT, GROUP BY REGION_CD
+|> ORDER BY TOTAL_AMT DESC;
+
+GRAPH PRODDS.FINGRAPH
+MATCH (P:PERSON)-[:OWNS]->(A:ACCOUNT)
+RETURN P.NAME       AS OWNER_NM,
+       A.ACCOUNT_ID AS ACCT_ID;
+
+SELECT *
+  FROM prodds.ticks
+       MATCH_RECOGNIZE (
+         PARTITION BY SYMBOL
+         ORDER BY TICK_TS
+         MEASURES
+           FIRST(A.PRICE) AS START_PX,
+           LAST(B.PRICE)  AS END_PX
+         AFTER MATCH SKIP PAST LAST ROW
+         PATTERN (A B+)
+         DEFINE
+           A AS A.PRICE > 100,
+           B AS B.PRICE > A.PRICE
+       );
+"""
+
+[[cases]]
+description = "Procedural script with CASE statement, LOOP, exception handler, and THEN RETURN"
+input = """
+DECLARE counter INT64 DEFAULT 0;
+SET @@time_zone = 'UTC';
+BEGIN
+  CASE counter
+    WHEN 0 THEN SET counter = 1;
+    ELSE SET counter = 2;
+  END CASE;
+  main_loop: LOOP
+    IF counter >= 3 THEN
+      BREAK main_loop;
+    END IF;
+    SET counter = counter + 1;
+  END LOOP main_loop;
+  INSERT INTO ProdDs.AuditLog (event_id, note) VALUES (1, 'done') THEN RETURN event_id, note;
+EXCEPTION WHEN ERROR THEN
+  RAISE USING MESSAGE = @@error.message;
+END;
+"""
+formatted = """
+DECLARE COUNTER INT64 DEFAULT 0;
+
+SET @@TIME_ZONE = 'UTC';
+
+BEGIN
+  CASE COUNTER
+    WHEN 0 THEN
+      SET COUNTER = 1;
+    ELSE
+      SET COUNTER = 2;
+  END CASE;
+
+  MAIN_LOOP: LOOP
+    IF COUNTER >= 3 THEN
+      BREAK MAIN_LOOP;
+    END IF;
+
+    SET COUNTER = COUNTER + 1;
+  END LOOP MAIN_LOOP;
+
+  INSERT INTO prodds.auditlog
+    (EVENT_ID, NOTE)
+  VALUES
+    (1, 'done')
+  THEN RETURN EVENT_ID,
+              NOTE,;
+EXCEPTION WHEN ERROR THEN
+  RAISE USING MESSAGE = @@ERROR.MESSAGE;
+END;
+"""

@@ -1,0 +1,125 @@
+# Multi-option golden suite: compact inline-clause style
+# Exercises newline_before_clause=false, align_trailing_comments=false, soft_max_cols=40,
+# empty function catalog, double-quote normalization, uppercase table/sysvar styles,
+# lowercase pseudo-column/query-parameter styles, and 4-param single-line function threshold.
+[setup]
+
+[setup.print_options]
+soft_max_cols = 40
+newline_before_clause = false
+align_logical_with_clauses = false
+align_trailing_comments = false
+column_list_trailing_comma = "NEVER"
+indentation = 2
+indent_case_when = true
+indent_with_clause = true
+indent_with_entries = false
+min_joins_to_separate_in_blocks = 3
+max_cols_for_single_line_select = 2
+max_params_for_single_line_function = 4
+function_catalog = ""
+builtin_function_name_style = "UPPER_CASE"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+hex_style = "UPPER_CASE"
+numeric_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+pseudo_column_style = "LOWER_CASE"
+table_name_style = "UPPER_CASE"
+query_parameter_style = "LOWER_CASE"
+system_variable_style = "UPPER_CASE"
+bytes_style = "PREFER_DOUBLE_QUOTE"
+string_style = "PREFER_DOUBLE_QUOTE"
+
+[[cases]]
+description = "Inline clauses with trailing comments, joins, and unaligned comments"
+input = """
+SELECT a.Id, -- short
+a.Name, -- longer column comment
+b.Score
+FROM MyDs.Users AS a
+INNER JOIN MyDs.Scores AS b ON a.Id = b.UserId
+LEFT JOIN MyDs.Profiles AS c ON a.Id = c.UserId
+WHERE a._PARTITIONDATE = @RunDate AND @@project_id = 'prod' -- filter
+GROUP BY a.Id, a.Name, b.Score
+HAVING b.Score > 10 AND COUNT(*) >= 1
+QUALIFY ROW_NUMBER() OVER (ORDER BY b.Score DESC) = 1
+ORDER BY b.Score DESC
+LIMIT 5;
+"""
+formatted = """
+SELECT a.Id,  -- short
+       a.Name,  -- longer column comment
+       b.Score FROM MYDS.USERS AS a
+       INNER JOIN
+       MYDS.SCORES AS b
+       ON a.Id = b.UserId
+       LEFT JOIN
+       MYDS.PROFILES AS c
+       ON a.Id = c.UserId
+ WHERE     a._partitiondate = @rundate
+       AND @@PROJECT_ID     = "prod"  -- filter
+ GROUP BY a.Id, a.Name, b.Score HAVING b.Score > 10 AND COUNT(*) >= 1 QUALIFY ROW_NUMBER() OVER (ORDER BY b.Score DESC) =
+       1
+ ORDER BY b.Score DESC
+ LIMIT 5
+"""
+
+[[cases]]
+description = "Double-quoted literals, raw/bytes, scientific/hex/bool/null, and empty catalog"
+input = """
+SELECT 'hello', 'has "double"', r'raw\\d+', b'bytes', RB'rawbytes', 1.25e-4, NUMERIC '2.5e3', 0xdeadbeef, true, null, coalesce(a, b), myUdf(c) FROM MyDs.SampleTbl;
+"""
+formatted = """
+SELECT "hello",
+       'has "double"',
+       r"raw\\d+",
+       b"bytes",
+       rb"rawbytes",
+       1.25E-4,
+       NUMERIC "2.5E3",
+       0xDEADBEEF,
+       TRUE,
+       NULL,
+       coalesce(a, b),
+       myUdf(c) FROM MYDS.SAMPLETBL
+"""
+
+[[cases]]
+description = "Function parameter threshold (4 inline vs 5 wrapped) and narrow 40-col wrapping"
+input = """
+CREATE FUNCTION MyDs.FourParams(a INT64, b INT64, c INT64, d INT64) RETURNS INT64 AS (a + b + c + d);
+
+CREATE FUNCTION MyDs.FiveParams(a INT64, b INT64, c INT64, d INT64, e INT64) RETURNS INT64 AS (a + b + c + d + e);
+
+SELECT alpha_column + beta_column + gamma_column + delta_column FROM MyDs.WideTbl WHERE first_flag = TRUE AND second_flag = FALSE AND third_flag = TRUE;
+"""
+formatted = """
+CREATE FUNCTION MyDs.FourParams(a INT64, b INT64, c INT64, d INT64)
+RETURNS INT64
+AS (
+  a + b + c + d
+);
+
+CREATE FUNCTION MyDs.FiveParams
+(
+  a INT64,
+  b INT64,
+  c INT64,
+  d INT64,
+  e INT64
+)
+RETURNS INT64
+AS (
+  a + b + c + d + e
+);
+
+SELECT alpha_column + beta_column + gamma_column +
+       delta_column FROM MYDS.WIDETBL
+ WHERE     first_flag  = TRUE
+       AND second_flag = FALSE
+       AND third_flag  = TRUE;
+"""
