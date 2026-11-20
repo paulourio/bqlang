@@ -1,13 +1,10 @@
 package formatter
 
 import (
-	"regexp"
 	"strings"
 
 	"github.com/paulourio/bqlang/extensions"
 )
-
-var trailingCommentPattern = regexp.MustCompile(`^(.*)((--|//|#)[^\n]+)$`)
 
 // commentsQueue is a shared queue of comments consumed across all nested
 // printers during formatting.
@@ -16,32 +13,33 @@ type commentsQueue struct {
 }
 
 // alignTrailingComments performs a post-pass on the formatted output to align
-// trailing line comments.
+// trailing line comments marked during comment flushing.
 func alignTrailingComments(input string) string {
-	if !strings.Contains(input, "--") &&
-		!strings.Contains(input, "//") &&
-		!strings.Contains(input, "#") {
+	if !strings.Contains(input, trailingCommentPlaceholder) {
 		return input
 	}
 
-	inputLines := strings.Split(input, "\n")
-	lines := make([]string, len(inputLines))
+	lines := strings.Split(input, "\n")
 	match := false
 
-	for i, line := range inputLines {
-		m := trailingCommentPattern.FindStringSubmatchIndex(line)
-		if m != nil && strings.TrimSpace(line[m[2]:m[3]]) != "" {
+	for i, line := range lines {
+		before, after, ok := strings.Cut(line, trailingCommentPlaceholder)
+		if !ok {
+			continue
+		}
+
+		if strings.TrimSpace(before) != "" {
 			match = true
-			pos := m[4]
-			lines[i] = line[:pos] + "\v" + line[pos:]
+			lines[i] = before + "\v" + after
 		} else {
-			lines[i] = line
+			lines[i] = before + after
 		}
 	}
 
+	joined := strings.Join(lines, "\n")
 	if !match {
-		return input
+		return joined
 	}
 
-	return leftAlignNested(strings.Join(lines, "\n"))
+	return leftAlignNested(joined)
 }

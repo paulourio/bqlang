@@ -20,7 +20,6 @@ type formatterState struct {
 	lastWasSingleCharUnary bool
 	// noFlushInNextFormat disables line flushing in the next call to Format().
 	noFlushInNextFormat bool
-	lastWasNewLine      bool
 }
 
 // Format formats token s into the line buffer, inserting spaces between tokens
@@ -32,7 +31,6 @@ func (p *formatterState) Format(s string) {
 
 	defer func() {
 		noFlush := p.noFlushInNextFormat
-		p.lastWasNewLine = false
 		p.lastWasSingleCharUnary = false
 		p.noFlushInNextFormat = false
 
@@ -78,13 +76,6 @@ func (p *formatterState) formatAfterToken(s string) {
 		return
 	}
 
-	if curr == ';' && p.lastWasNewLine {
-		p.buffer.WriteByte('\n')
-		p.writeToken(s)
-
-		return
-	}
-
 	if curr == ')' ||
 		curr == '[' ||
 		curr == ']' ||
@@ -119,7 +110,6 @@ func (p *formatterState) FlushLine() {
 	p.formatted.WriteString(p.buffer.String())
 	p.formatted.WriteByte('\n')
 	p.buffer.Reset()
-	p.lastWasNewLine = true
 	p.last = '\n'
 }
 
@@ -132,43 +122,46 @@ func (p *formatterState) flushCommentsUpTo(pos int) {
 			p.FlushLine()
 		}
 
-		image := c.Image
-		if c.IsMultiline() {
-			image = strings.ReplaceAll(c.Image, "\n", lineBreakPlaceholder)
-		}
-
-		trimmed := strings.TrimRight(image, "\n")
-
-		switch {
-		case c.AtLineBegin() && p.buffer.Len() > 0:
-			p.FlushLine()
-			p.Format(trimmed)
-		case !c.AtLineBegin() && (p.formatted.Len()+p.buffer.Len()) > 0:
-			if p.buffer.Len() == 0 || p.bufferEndsWithWhitespace() {
-				p.Format(trimmed)
-			} else {
-				p.Format(" " + trimmed)
-			}
-		default:
-			p.Format(trimmed)
-		}
-
-		if c.MustEndLine() || c.AtLineEnd() {
-			p.FlushLine()
-		}
+		p.emitComment(c)
 	}
 }
 
-func (p *formatterState) bufferEndsWithWhitespace() bool {
-	n := p.buffer.Len()
-	if n == 0 {
-		return false
+func (p *formatterState) emitComment(c *extensions.Comment) {
+	image := c.Image
+	if c.IsMultiline() {
+		image = strings.ReplaceAll(c.Image, "\n", lineBreakPlaceholder)
 	}
 
-	s := p.buffer.String()
-	last := s[n-1]
+	trimmed := strings.TrimRight(image, "\n")
+	if p.opts != nil && p.opts.AlignTrailingComments && isLineCommentKind(c.Kind) {
+		trimmed = trailingCommentPlaceholder + trimmed
+	}
 
-	return last == '\n' || unicode.IsSpace(rune(last))
+	switch {
+	case c.AtLineBegin() && p.buffer.Len() > 0:
+		p.FlushLine()
+		p.Format(trimmed)
+	case !c.AtLineBegin() && (p.formatted.Len()+p.buffer.Len()) > 0:
+		if p.buffer.Len() == 0 || p.bufferEndsWithWhitespace() {
+			p.Format(trimmed)
+		} else {
+			p.Format(" " + trimmed)
+		}
+	default:
+		p.Format(trimmed)
+	}
+
+	if c.MustEndLine() || c.AtLineEnd() {
+		p.FlushLine()
+	}
+}
+
+func isLineCommentKind(k extensions.CommentKind) bool {
+	return k == extensions.DoubleDash || k == extensions.DoubleSlash || k == extensions.Pound
+}
+
+func (p *formatterState) bufferEndsWithWhitespace() bool {
+	return p.buffer.Len() > 0 && unicode.IsSpace(p.last)
 }
 
 func (p *formatterState) lastIsSeparator() bool {

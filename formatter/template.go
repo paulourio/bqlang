@@ -35,10 +35,9 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 
 	switch e.Kind {
 	case ast.TemplateComment:
-		t.counter++
 		r = &placeholderInfo{
 			Element:     e,
-			Placeholder: strings.Repeat(" ", e.End-e.Start),
+			Placeholder: eraseNonNewlines(e.Image),
 			Recoverable: false,
 		}
 	case ast.TemplateForBlock, ast.TemplateIfBlock:
@@ -53,12 +52,7 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 				revertRe:    regexp.MustCompile(`(?i)SELECT\s+` + regexp.QuoteMeta(tok)),
 			}
 		} else {
-			r = &placeholderInfo{
-				Element:     e,
-				Placeholder: tok,
-				Recoverable: true,
-				revertRe:    regexp.MustCompile(`(?i)` + regexp.QuoteMeta(tok)),
-			}
+			r = newInlinePlaceholder(e, tok)
 		}
 	case ast.TemplateVariable:
 		t.counter++
@@ -72,12 +66,7 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 				revertRe:    regexp.MustCompile(`(?i)SELECT\s+` + regexp.QuoteMeta(tok) + `\s*;?`),
 			}
 		} else {
-			r = &placeholderInfo{
-				Element:     e,
-				Placeholder: tok,
-				Recoverable: true,
-				revertRe:    regexp.MustCompile(`(?i)` + regexp.QuoteMeta(tok)),
-			}
+			r = newInlinePlaceholder(e, tok)
 		}
 	case ast.TemplateSetBlock:
 		t.counter++
@@ -91,12 +80,7 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 				revertRe:    regexp.MustCompile(`(?i)SET\s+` + regexp.QuoteMeta(tok) + `\s*=\s*1\s*;?`),
 			}
 		} else {
-			r = &placeholderInfo{
-				Element:     e,
-				Placeholder: tok,
-				Recoverable: true,
-				revertRe:    regexp.MustCompile(`(?i)` + regexp.QuoteMeta(tok)),
-			}
+			r = newInlinePlaceholder(e, tok)
 		}
 	default:
 		panic(fmt.Sprintf("templatePlaceholders.New: unexpected kind %v (%v)",
@@ -106,6 +90,26 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 	t.Placeholders = append(t.Placeholders, r)
 
 	return r
+}
+
+func newInlinePlaceholder(e *extensions.TemplateElement, tok string) *placeholderInfo {
+	return &placeholderInfo{
+		Element:     e,
+		Placeholder: tok,
+		Recoverable: true,
+		revertRe:    regexp.MustCompile(`(?i)` + regexp.QuoteMeta(tok)),
+	}
+}
+
+func eraseNonNewlines(s string) string {
+	buf := []byte(s)
+	for i, b := range buf {
+		if b != '\n' {
+			buf[i] = ' '
+		}
+	}
+
+	return string(buf)
 }
 
 // ApplyAll replaces all template elements in input with valid SQL placeholders,
@@ -118,10 +122,6 @@ func (t *templatePlaceholders) ApplyAll(
 ) string {
 	for i, e := range elems {
 		ph := t.New(e)
-		if ph == nil {
-			continue
-		}
-
 		oldEnd := e.End
 
 		var delta int

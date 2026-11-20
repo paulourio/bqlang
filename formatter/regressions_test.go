@@ -149,4 +149,25 @@ func TestRegressions(t *testing.T) {
 		assert.Contains(t, buf.String(), "# BigQuery Format")
 		assert.Contains(t, buf.String(), "## Input AST")
 	})
+
+	t.Run("Trailing comment alignment ignores URLs and comment tokens inside literals and backticks", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+		opts.MaxColumnsForSingleLineSelect = 1
+
+		sql := "SELECT 'https://example.com' AS a, -- first\n" +
+			"'http://short.io' AS b,\n" +
+			"'foo--bar' AS c,\n" +
+			"'tag#1' AS d,\n" +
+			"`x--2` AS e -- fifth\nFROM t"
+		got, err := formatter.Format(sql, opts)
+		require.NoError(t, err)
+		assert.Contains(t, got, "'http://short.io'")
+		assert.Contains(t, got, "'foo--bar'")
+		assert.Contains(t, got, "'tag#1'")
+		assert.Contains(t, got, "`x--2`")
+		assert.Contains(t, got, "-- first")
+		assert.Contains(t, got, "-- fifth")
+	})
 }

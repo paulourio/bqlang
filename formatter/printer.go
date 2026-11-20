@@ -33,6 +33,7 @@ type parenthesizableNode interface {
 const (
 	lineBreakPlaceholder        = "\x21\x1a10"
 	literalLineBreakPlaceholder = "\x21\x1a11"
+	trailingCommentPlaceholder  = "\x21\x1a12"
 
 	keyAlignBinaryOpBudget  = "align_binary_op_budget"
 	keyFunctionParamsSimple = "function_params_simple"

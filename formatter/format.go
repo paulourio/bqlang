@@ -148,6 +148,7 @@ func (f *SQLFormatter) Format(input string) (string, error) {
 		result = alignTrailingComments(result)
 	}
 
+	result = strings.ReplaceAll(result, trailingCommentPlaceholder, "")
 	result = strings.ReplaceAll(result, "\v", "") + "\n"
 	result = strings.ReplaceAll(result, lineBreakPlaceholder, "\n")
 	result = rowsTrimRight(result)
