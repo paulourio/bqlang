@@ -74,8 +74,7 @@ func (p *printer) visitParameterizedContainerType(
 	pp2.accept(et, d)
 
 	if simple {
-		elemType := strings.Trim(pp2.String(), "\n")
-		pp.print(pp.keyword(kw) + "<" + elemType + ">")
+		pp.print(pp.keyword(kw) + "<" + pp2.String() + ">")
 	} else {
 		pp.println(pp.keyword(kw) + "<")
 		pp.incDepth()
@@ -97,8 +96,8 @@ func (p *printer) visitMapType(n *googlesql.ASTMapType, d printerData) {
 	vt, _ := n.ValueType()
 	collate, _ := n.Collate()
 
-	keyStr := strings.Trim(pp.toString(kt, d), "\n")
-	valStr := strings.Trim(pp.toString(vt, d), "\n")
+	keyStr := pp.toString(kt, d)
+	valStr := pp.toString(vt, d)
 	pp.print(pp.keyword("MAP") + "<" + keyStr + ", " + valStr + ">")
 	pp.accept(collate, d)
 	p.print(pp.String())
@@ -158,8 +157,8 @@ func (p *printer) visitMapColumnSchema(n *googlesql.ASTMapColumnSchema, d printe
 	vs, _ := n.ValueSchema()
 
 	pp := p.nest()
-	keyStr := strings.Trim(pp.toString(ks, d), "\n")
-	valStr := strings.Trim(pp.toString(vs, d), "\n")
+	keyStr := pp.toString(ks, d)
+	valStr := pp.toString(vs, d)
 
 	pp.print(pp.keyword("MAP") + "<" + keyStr + ", " + valStr + ">")
 	pp.printColumnSchemaTail(n, false, d)

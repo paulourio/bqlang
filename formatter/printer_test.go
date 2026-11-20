@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sync"
 	"sync/atomic"
 	"testing"
 
@@ -14,6 +15,8 @@ import (
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/formatter"
 )
+
+var defaultTestParserOptions = sync.OnceValue(bqlang.DefaultParserOptions)
 
 func TestPrinter(t *testing.T) {
 	t.Parallel()
@@ -100,11 +103,11 @@ func testCase(t *testing.T, f *TestDataFile, c *Case) bool {
 }
 
 func getParserOpts(f *TestDataFile) *googlesql.ParserOptions {
-	parser := bqlang.DefaultParserOptions()
-
 	if f.Setup == nil || f.Setup.LanguageOptions == nil {
-		return parser
+		return defaultTestParserOptions()
 	}
+
+	parser := bqlang.DefaultParserOptions()
 
 	lang, err := parser.LanguageOptions()
 	if err != nil {

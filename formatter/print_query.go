@@ -137,7 +137,7 @@ func (p *printer) visitFromClause(n *googlesql.ASTFromClause, d printerData) {
 		p.println("")
 
 		if nodeDefined(w) {
-			p.println(" ")
+			p.printBlankLine()
 		}
 	}
 
@@ -1340,7 +1340,7 @@ func (p *printer) visitStatementList(n *googlesql.ASTStatementList, d printerDat
 			p.println("")
 
 			if !canGroupStatements(nodeKind(prev), curr) {
-				p.println(" ")
+				p.printBlankLine()
 			}
 		}
 

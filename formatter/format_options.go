@@ -118,7 +118,8 @@ const (
 	PreferDoubleQuote StringStyle = "PREFER_DOUBLE_QUOTE"
 )
 
-// Validate checks that all enum-typed PrintOptions fields hold recognized values.
+// Validate checks that all enum-typed PrintOptions fields hold recognized
+// values and that numeric size/count fields are non-negative.
 func (p *PrintOptions) Validate() error {
 	if p == nil {
 		return nil

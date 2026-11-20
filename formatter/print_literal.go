@@ -19,18 +19,9 @@ func (p *printer) visitBoolLiteral(n *googlesql.ASTBooleanLiteral, _ printerData
 }
 
 func (p *printer) visitBytesLiteral(n *googlesql.ASTBytesLiteral, _ printerData) {
-	p.moveBefore(n)
-
-	raw := p.nodeInput(n)
-
-	s, err := FormatBytes(raw, p.fmt.opts.BytesStyle)
-	if err != nil {
-		p.addError(&PrinterError{Msg: "invalid bytes literal", Err: err, Node: n, Input: &p.input})
-
-		s = raw
-	}
-
-	p.print(strings.ReplaceAll(s, "\n", literalLineBreakPlaceholder))
+	p.printFormattedLiteral(n, p.nodeInput(n), "invalid bytes literal", func(raw string) (string, error) {
+		return FormatBytes(raw, p.fmt.opts.BytesStyle)
+	})
 }
 
 func (p *printer) visitDateOrTimeLiteral(n *googlesql.ASTDateOrTimeLiteral, d printerData) {
@@ -113,18 +104,10 @@ func (p *printer) printScaledNumericLiteral(
 }
 
 func (p *printer) printNumericStringLiteral(sl *googlesql.ASTStringLiteral) {
-	p.moveBefore(sl)
-
 	raw := applyNumericCase(p.nodeInput(sl), p.fmt.opts.NumericStyle)
-
-	s, err := FormatString(raw, p.fmt.opts.StringStyle)
-	if err != nil {
-		p.addError(&PrinterError{Msg: "invalid string literal", Err: err, Node: sl, Input: &p.input})
-
-		s = raw
-	}
-
-	p.print(strings.ReplaceAll(s, "\n", literalLineBreakPlaceholder))
+	p.printFormattedLiteral(sl, raw, "invalid string literal", func(s string) (string, error) {
+		return FormatString(s, p.fmt.opts.StringStyle)
+	})
 }
 
 func (p *printer) visitRangeLiteral(n *googlesql.ASTRangeLiteral, d printerData) {
@@ -140,13 +123,21 @@ func (p *printer) visitRangeLiteral(n *googlesql.ASTRangeLiteral, d printerData)
 }
 
 func (p *printer) visitStringLiteral(n *googlesql.ASTStringLiteral, _ printerData) {
+	p.printFormattedLiteral(n, p.nodeInput(n), "invalid string literal", func(raw string) (string, error) {
+		return FormatString(raw, p.fmt.opts.StringStyle)
+	})
+}
+
+func (p *printer) printFormattedLiteral(
+	n googlesql.ASTNode,
+	raw, errMsg string,
+	formatFn func(string) (string, error),
+) {
 	p.moveBefore(n)
 
-	raw := p.nodeInput(n)
-
-	s, err := FormatString(raw, p.fmt.opts.StringStyle)
+	s, err := formatFn(raw)
 	if err != nil {
-		p.addError(&PrinterError{Msg: "invalid string literal", Err: err, Node: n, Input: &p.input})
+		p.addError(&PrinterError{Msg: errMsg, Err: err, Node: n, Input: &p.input})
 
 		s = raw
 	}
@@ -180,17 +171,15 @@ func FormatBytes(s string, style StringStyle) (string, error) {
 		return s, nil
 	}
 
-	offset := 1
 	prefix := "b"
 	noPrefix := s[1:]
 
 	if isRaw {
 		prefix = "rb"
 		noPrefix = s[2:]
-		offset = 2
 	}
 
-	return formatQuotedBody(s, prefix, noPrefix, offset, style)
+	return formatQuotedBody(prefix, noPrefix, style)
 }
 
 // FormatString normalizes the quote delimiters and prefix casing of a GoogleSQL string literal.
@@ -206,20 +195,18 @@ func FormatString(s string, style StringStyle) (string, error) {
 		return s, nil
 	}
 
-	offset := 0
 	prefix := ""
 	noPrefix := s
 
 	if isRaw {
 		prefix = "r"
 		noPrefix = s[1:]
-		offset = 1
 	}
 
-	return formatQuotedBody(s, prefix, noPrefix, offset, style)
+	return formatQuotedBody(prefix, noPrefix, style)
 }
 
-func formatQuotedBody(s, prefix, noPrefix string, offset int, style StringStyle) (string, error) {
+func formatQuotedBody(prefix, noPrefix string, style StringStyle) (string, error) {
 	quotesLen := 1
 	isTripleQuoted := maybeTripleQuotedStringLiteral(noPrefix)
 	singleQuoted := isSingleQuote(noPrefix)
@@ -228,32 +215,31 @@ func formatQuotedBody(s, prefix, noPrefix string, offset int, style StringStyle)
 		quotesLen = 3
 	}
 
-	offset += quotesLen
-	content := s[offset : len(s)-quotesLen]
+	content := noPrefix[quotesLen : len(noPrefix)-quotesLen]
 
 	switch style {
 	case PreferSingleQuote:
 		if singleQuoted || strings.Contains(content, "'") {
-			return prefix + s[len(prefix):], nil
+			return prefix + noPrefix, nil
 		}
 
 		if isTripleQuoted {
-			return fmt.Sprintf("%s'''%s'''", prefix, content), nil
+			return prefix + "'''" + content + "'''", nil
 		}
 
-		return fmt.Sprintf("%s'%s'", prefix, content), nil
+		return prefix + "'" + content + "'", nil
 	case PreferDoubleQuote:
 		if !singleQuoted || strings.Contains(content, `"`) {
-			return prefix + s[len(prefix):], nil
+			return prefix + noPrefix, nil
 		}
 
 		if isTripleQuoted {
-			return fmt.Sprintf(`%s"""%s"""`, prefix, content), nil
+			return prefix + `"""` + content + `"""`, nil
 		}
 
-		return fmt.Sprintf(`%s"%s"`, prefix, content), nil
+		return prefix + `"` + content + `"`, nil
 	case UnspecifiedStringStyle, AsIsStringStyle:
-		return s, nil
+		return prefix + noPrefix, nil
 	}
 
 	return "", ErrInvalidStringStyle
@@ -288,13 +274,8 @@ func maybeBytesLiteral(s string) bool {
 }
 
 func maybeRawBytesLiteral(s string) bool {
-	if len(s) < 4 {
-		return false
-	}
-
-	low := strings.ToLower(s[:2])
-
-	return (low == "rb" || low == "br") &&
+	return len(s) >= 4 &&
+		(strings.EqualFold(s[:2], "rb") || strings.EqualFold(s[:2], "br")) &&
 		s[2] == s[len(s)-1] &&
 		(s[2] == '\'' || s[2] == '"')
 }

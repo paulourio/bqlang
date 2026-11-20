@@ -1,8 +1,8 @@
 package formatter
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"reflect"
 	"strings"
@@ -105,6 +105,10 @@ func (p *printer) visit(n googlesql.ASTNode, newline bool, d printerData) {
 }
 
 func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
+	rowPatternVisitor := makeVisitor((*printer).visitRowPattern)
+	quantifierVisitor := makeVisitor((*printer).visitQuantifier)
+	graphLabelVisitor := makeVisitor((*printer).visitGraphLabelExpr)
+
 	return map[reflect.Type]nodeVisitorFunc{
 		reflect.TypeFor[*googlesql.ASTAddColumnAction]():                       makeVisitor((*printer).visitAddColumnAction),
 		reflect.TypeFor[*googlesql.ASTAddConstraintAction]():                   makeVisitor((*printer).visitAddConstraintAction),
@@ -153,7 +157,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTBinaryExpression]():                      makeVisitor((*printer).visitBinaryExpression),
 		reflect.TypeFor[*googlesql.ASTBitwiseShiftExpression]():                makeVisitor((*printer).visitBitwiseShiftExpression),
 		reflect.TypeFor[*googlesql.ASTBooleanLiteral]():                        makeVisitor((*printer).visitBoolLiteral),
-		reflect.TypeFor[*googlesql.ASTBoundedQuantifier]():                     makeVisitor((*printer).visitBoundedQuantifier),
+		reflect.TypeFor[*googlesql.ASTBoundedQuantifier]():                     quantifierVisitor,
 		reflect.TypeFor[*googlesql.ASTBreakStatement]():                        makeVisitor((*printer).visitBreakStatement),
 		reflect.TypeFor[*googlesql.ASTBytesLiteral]():                          makeVisitor((*printer).visitBytesLiteral),
 		reflect.TypeFor[*googlesql.ASTCallStatement]():                         makeVisitor((*printer).visitCallStatement),
@@ -221,7 +225,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTDropSubEntityAction]():                   makeVisitor((*printer).visitDropSubEntityAction),
 		reflect.TypeFor[*googlesql.ASTDropTableFunctionStatement]():            makeVisitor((*printer).visitDropTableFunctionStatement),
 		reflect.TypeFor[*googlesql.ASTDropVectorIndexStatement]():              makeVisitor((*printer).visitDropVectorIndexStatement),
-		reflect.TypeFor[*googlesql.ASTEmptyRowPattern]():                       makeVisitor((*printer).visitEmptyRowPattern),
+		reflect.TypeFor[*googlesql.ASTEmptyRowPattern]():                       rowPatternVisitor,
 		reflect.TypeFor[*googlesql.ASTExceptionHandler]():                      makeVisitor((*printer).visitExceptionHandler),
 		reflect.TypeFor[*googlesql.ASTExceptionHandlerList]():                  makeVisitor((*printer).visitExceptionHandlerList),
 		reflect.TypeFor[*googlesql.ASTExecuteImmediateStatement]():             makeVisitor((*printer).visitExecuteImmediateStatement),
@@ -235,7 +239,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTExtendedPathExpression]():                makeVisitor((*printer).visitExtendedPathExpression),
 		reflect.TypeFor[*googlesql.ASTExtractExpression]():                     makeVisitor((*printer).visitExtractExpression),
 		reflect.TypeFor[*googlesql.ASTFilterUsingClause]():                     makeVisitor((*printer).visitFilterUsingClause),
-		reflect.TypeFor[*googlesql.ASTFixedQuantifier]():                       makeVisitor((*printer).visitFixedQuantifier),
+		reflect.TypeFor[*googlesql.ASTFixedQuantifier]():                       quantifierVisitor,
 		reflect.TypeFor[*googlesql.ASTFloatLiteral]():                          makeVisitor((*printer).visitFloatLiteral),
 		reflect.TypeFor[*googlesql.ASTForInStatement]():                        makeVisitor((*printer).visitForInStatement),
 		reflect.TypeFor[*googlesql.ASTForSystemTime]():                         makeVisitor((*printer).visitForSystemTime),
@@ -278,7 +282,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTGraphDynamicLabel]():                     makeVisitor((*printer).visitGraphDynamicLabel),
 		reflect.TypeFor[*googlesql.ASTGraphDynamicProperties]():                makeVisitor((*printer).visitGraphDynamicProperties),
 		reflect.TypeFor[*googlesql.ASTGraphEdgePattern]():                      makeVisitor((*printer).visitGraphEdgePattern),
-		reflect.TypeFor[*googlesql.ASTGraphElementLabel]():                     makeVisitor((*printer).visitGraphElementLabel),
+		reflect.TypeFor[*googlesql.ASTGraphElementLabel]():                     graphLabelVisitor,
 		reflect.TypeFor[*googlesql.ASTGraphElementLabelAndProperties]():        makeVisitor((*printer).visitGraphElementLabelAndProperties),
 		reflect.TypeFor[*googlesql.ASTGraphElementLabelAndPropertiesList]():    makeVisitor((*printer).visitGraphElementLabelAndPropertiesList),
 		reflect.TypeFor[*googlesql.ASTGraphElementPatternFiller]():             makeVisitor((*printer).visitGraphElementPatternFiller),
@@ -286,7 +290,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTGraphElementTableList]():                 makeVisitor((*printer).visitGraphElementTableList),
 		reflect.TypeFor[*googlesql.ASTGraphIsLabeledPredicate]():               makeVisitor((*printer).visitGraphIsLabeledPredicate),
 		reflect.TypeFor[*googlesql.ASTGraphLabelFilter]():                      makeVisitor((*printer).visitGraphLabelFilter),
-		reflect.TypeFor[*googlesql.ASTGraphLabelOperation]():                   makeVisitor((*printer).visitGraphLabelOperation),
+		reflect.TypeFor[*googlesql.ASTGraphLabelOperation]():                   graphLabelVisitor,
 		reflect.TypeFor[*googlesql.ASTGraphLhsHint]():                          makeVisitor((*printer).visitGraphLHSHint),
 		reflect.TypeFor[*googlesql.ASTGraphNodePattern]():                      makeVisitor((*printer).visitGraphNodePattern),
 		reflect.TypeFor[*googlesql.ASTGraphNodeTableReference]():               makeVisitor((*printer).visitGraphNodeTableReference),
@@ -300,7 +304,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTGraphPropertySpecification]():            makeVisitor((*printer).visitGraphPropertySpecification),
 		reflect.TypeFor[*googlesql.ASTGraphRhsHint]():                          makeVisitor((*printer).visitGraphRHSHint),
 		reflect.TypeFor[*googlesql.ASTGraphTableQuery]():                       makeVisitor((*printer).visitGraphTableQuery),
-		reflect.TypeFor[*googlesql.ASTGraphWildcardLabel]():                    makeVisitor((*printer).visitGraphWildcardLabel),
+		reflect.TypeFor[*googlesql.ASTGraphWildcardLabel]():                    graphLabelVisitor,
 		reflect.TypeFor[*googlesql.ASTGroupBy]():                               makeVisitor((*printer).visitGroupBy),
 		reflect.TypeFor[*googlesql.ASTGroupingItem]():                          makeVisitor((*printer).visitGroupingItem),
 		reflect.TypeFor[*googlesql.ASTGroupingItemOrder]():                     makeVisitor((*printer).visitGroupingItemOrder),
@@ -422,10 +426,10 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTRevokeStatement]():                       makeVisitor((*printer).visitRevokeStatement),
 		reflect.TypeFor[*googlesql.ASTRollbackStatement]():                     makeVisitor((*printer).visitRollbackStatement),
 		reflect.TypeFor[*googlesql.ASTRollup]():                                makeVisitor((*printer).visitRollup),
-		reflect.TypeFor[*googlesql.ASTRowPatternAnchor]():                      makeVisitor((*printer).visitRowPatternAnchor),
-		reflect.TypeFor[*googlesql.ASTRowPatternOperation]():                   makeVisitor((*printer).visitRowPatternOperation),
-		reflect.TypeFor[*googlesql.ASTRowPatternQuantification]():              makeVisitor((*printer).visitRowPatternQuantification),
-		reflect.TypeFor[*googlesql.ASTRowPatternVariable]():                    makeVisitor((*printer).visitRowPatternVariable),
+		reflect.TypeFor[*googlesql.ASTRowPatternAnchor]():                      rowPatternVisitor,
+		reflect.TypeFor[*googlesql.ASTRowPatternOperation]():                   rowPatternVisitor,
+		reflect.TypeFor[*googlesql.ASTRowPatternQuantification]():              rowPatternVisitor,
+		reflect.TypeFor[*googlesql.ASTRowPatternVariable]():                    rowPatternVisitor,
 		reflect.TypeFor[*googlesql.ASTSampleClause]():                          makeVisitor((*printer).visitSampleClause),
 		reflect.TypeFor[*googlesql.ASTSampleSize]():                            makeVisitor((*printer).visitSampleSize),
 		reflect.TypeFor[*googlesql.ASTSampleSuffix]():                          makeVisitor((*printer).visitSampleSuffix),
@@ -457,7 +461,7 @@ func newVisitorMap() map[reflect.Type]nodeVisitorFunc {
 		reflect.TypeFor[*googlesql.ASTStructType]():                            makeVisitor((*printer).visitStructType),
 		reflect.TypeFor[*googlesql.ASTSubpipeline]():                           makeVisitor((*printer).visitSubpipeline),
 		reflect.TypeFor[*googlesql.ASTSubpipelineStatement]():                  makeVisitor((*printer).visitSubpipelineStatement),
-		reflect.TypeFor[*googlesql.ASTSymbolQuantifier]():                      makeVisitor((*printer).visitSymbolQuantifier),
+		reflect.TypeFor[*googlesql.ASTSymbolQuantifier]():                      quantifierVisitor,
 		reflect.TypeFor[*googlesql.ASTSystemVariableAssignment]():              makeVisitor((*printer).visitSystemVariableAssignment),
 		reflect.TypeFor[*googlesql.ASTSystemVariableExpr]():                    makeVisitor((*printer).visitSystemVariableExpr),
 		reflect.TypeFor[*googlesql.ASTTVF]():                                   makeVisitor((*printer).visitTVF),
@@ -600,6 +604,12 @@ func (p *printer) println(s string) {
 	p.fmt.FormatLine(s)
 }
 
+// printBlankLine emits a forced blank line. FlushLine skips empty buffers, so a
+// single space is flushed and stripped later by rowsTrimRight.
+func (p *printer) printBlankLine() {
+	p.println(" ")
+}
+
 func (p *printer) incDepth() {
 	p.fmt.depth++
 }
@@ -610,15 +620,7 @@ func (p *printer) decDepth() {
 
 // nest returns a child printer sharing comment and error queues with p.
 func (p *printer) nest() *printer {
-	buf := p.fmt.buffer.String()
-	idx := strings.LastIndex(buf, "\n")
-	currSize := len(buf)
-
-	if idx >= 0 {
-		currSize = len(buf) - idx - 1
-	}
-
-	capacity := max(p.fmt.opts.SoftMaxColumns-currSize, 40)
+	capacity := max(p.fmt.opts.SoftMaxColumns-p.fmt.currentLineLen(), 40)
 
 	return &printer{
 		fmt: &formatterState{
@@ -636,11 +638,7 @@ func (p *printer) nest() *printer {
 }
 
 func (p *printer) unnest() string {
-	trimmed := p.String()
-	aligned := alignNested(trimmed)
-	aligned = "\v" + aligned
-
-	return strings.ReplaceAll(aligned, "\n", "\n\v")
+	return p.unnestWithDepth(1)
 }
 
 func (p *printer) unnestWithDepth(d int) string {
@@ -697,15 +695,11 @@ func printParenBody[T googlesql.ASTNode](p *printer, items []T, simple bool, d p
 }
 
 func (p *printer) acceptNested(n googlesql.ASTNode, d printerData) {
-	pp := p.nest()
-	pp.accept(n, d)
-	p.print(pp.unnest())
+	p.print(p.toUnnestedString(n, d))
 }
 
 func (p *printer) acceptNestedString(n googlesql.ASTNode, d printerData) {
-	pp := p.nest()
-	pp.accept(n, d)
-	p.print(pp.String())
+	p.print(p.toString(n, d))
 }
 
 func (p *printer) toString(n googlesql.ASTNode, d printerData) string {
@@ -721,6 +715,10 @@ func (p *printer) toTrimmedString(n googlesql.ASTNode, d printerData) string {
 
 func (p *printer) toAlignedString(n googlesql.ASTNode, d printerData) string {
 	return strings.TrimSpace(alignNested(p.toString(n, d)))
+}
+
+func (p *printer) toLeftAlignedString(n googlesql.ASTNode, d printerData) string {
+	return strings.TrimSpace(leftAlignNested(p.toString(n, d)))
 }
 
 func (p *printer) toUnnestedString(n googlesql.ASTNode, d printerData) string {
@@ -944,10 +942,14 @@ func leftAlignNested(s string) string {
 }
 
 func alignTabwriter(s string, flags uint) string {
-	var buf bytes.Buffer
+	if !strings.ContainsAny(s, "\t\v") {
+		return strings.Trim(s, "\n")
+	}
+
+	var buf strings.Builder
 
 	w := tabwriter.NewWriter(&buf, 0, 0, 0, ' ', flags)
-	_, _ = fmt.Fprint(w, s)
+	_, _ = io.WriteString(w, s)
 	_ = w.Flush()
 
 	return strings.Trim(buf.String(), "\n")

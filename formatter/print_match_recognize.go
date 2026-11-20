@@ -133,35 +133,11 @@ func (p *printer) visitAfterMatchSkipClause(n *googlesql.ASTAfterMatchSkipClause
 	p.movePast(n)
 }
 
-func (p *printer) visitEmptyRowPattern(n *googlesql.ASTEmptyRowPattern, d printerData) {
+func (p *printer) visitRowPattern(n googlesql.ASTRowPatternExpressionNode, d printerData) {
 	p.print(p.formatRowPattern(n, d))
 }
 
-func (p *printer) visitRowPatternVariable(n *googlesql.ASTRowPatternVariable, d printerData) {
-	p.print(p.formatRowPattern(n, d))
-}
-
-func (p *printer) visitRowPatternAnchor(n *googlesql.ASTRowPatternAnchor, d printerData) {
-	p.print(p.formatRowPattern(n, d))
-}
-
-func (p *printer) visitRowPatternOperation(n *googlesql.ASTRowPatternOperation, d printerData) {
-	p.print(p.formatRowPattern(n, d))
-}
-
-func (p *printer) visitRowPatternQuantification(n *googlesql.ASTRowPatternQuantification, d printerData) {
-	p.print(p.formatRowPattern(n, d))
-}
-
-func (p *printer) visitSymbolQuantifier(n *googlesql.ASTSymbolQuantifier, d printerData) {
-	p.print(p.formatQuantifier(n, d))
-}
-
-func (p *printer) visitFixedQuantifier(n *googlesql.ASTFixedQuantifier, d printerData) {
-	p.print(p.formatQuantifier(n, d))
-}
-
-func (p *printer) visitBoundedQuantifier(n *googlesql.ASTBoundedQuantifier, d printerData) {
+func (p *printer) visitQuantifier(n googlesql.ASTQuantifierNode, d printerData) {
 	p.print(p.formatQuantifier(n, d))
 }
 

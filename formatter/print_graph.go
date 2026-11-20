@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"github.com/goccy/go-googlesql"
 )
@@ -22,28 +23,8 @@ func (p *printer) visitCreatePropertyGraphStatement(
 	p.println("")
 	p.incDepth()
 
-	if nodeDefined(nt) {
-		p.println(p.keyword("NODE TABLES") + " (")
-		p.incDepth()
-		p.accept(nt, d)
-		p.println("")
-		p.decDepth()
-
-		if nodeDefined(et) {
-			p.println(")")
-		} else {
-			p.print(")")
-		}
-	}
-
-	if nodeDefined(et) {
-		p.println(p.keyword("EDGE TABLES") + " (")
-		p.incDepth()
-		p.accept(et, d)
-		p.println("")
-		p.decDepth()
-		p.print(")")
-	}
+	p.printGraphElementTablesClause("NODE TABLES", nt, nodeDefined(et), d)
+	p.printGraphElementTablesClause("EDGE TABLES", et, false, d)
 
 	p.decDepth()
 
@@ -53,6 +34,29 @@ func (p *printer) visitCreatePropertyGraphStatement(
 	}
 
 	p.movePast(n)
+}
+
+func (p *printer) printGraphElementTablesClause(
+	kw string,
+	tables *googlesql.ASTGraphElementTableList,
+	trailingNewline bool,
+	d printerData,
+) {
+	if !nodeDefined(tables) {
+		return
+	}
+
+	p.println(p.keyword(kw) + " (")
+	p.incDepth()
+	p.accept(tables, d)
+	p.println("")
+	p.decDepth()
+
+	if trailingNewline {
+		p.println(")")
+	} else {
+		p.print(")")
+	}
 }
 
 func (p *printer) visitGraphElementTableList(n *googlesql.ASTGraphElementTableList, d printerData) {
@@ -344,7 +348,7 @@ func (p *printer) visitGraphTableQuery(n *googlesql.ASTGraphTableQuery, d printe
 		ctx.singleLineCols = false
 		p.println(p.keyword("COLUMNS") + " (")
 		p.incDepth()
-		p.printlnBlock(strings.TrimSpace(leftAlignNested(p.toString(shape, ctx))))
+		p.printlnBlock(p.toLeftAlignedString(shape, ctx))
 		p.decDepth()
 		p.println(")")
 	}
@@ -549,20 +553,20 @@ func (p *printer) printGqlProjection(kw string, sel *googlesql.ASTSelect, d prin
 		ctx := d
 		ctx.singleLineCols = len(cols) <= 1
 
-		slStr := strings.TrimSpace(leftAlignNested(p.toString(sl, ctx)))
+		slStr := p.toLeftAlignedString(sl, ctx)
 		p.printPrefixedBlock(header+" ", slStr)
 	} else {
 		p.println(header)
 	}
 
 	if gb, _ := sel.GroupBy(); nodeDefined(gb) {
-		gbStr := strings.TrimSpace(leftAlignNested(p.toString(gb, d)))
+		gbStr := p.toLeftAlignedString(gb, d)
 		p.printlnBlock(p.keyword("GROUP") + " " + gbStr)
 	}
 }
 
 func (p *printer) printPrefixedBlock(prefix, block string) {
-	pad := strings.Repeat(" ", len(prefix))
+	pad := strings.Repeat(" ", utf8.RuneCountInString(prefix))
 	first := true
 
 	for line := range strings.SplitSeq(block, "\n") {
@@ -969,9 +973,7 @@ func (p *printer) formatGraphEdgePattern(n *googlesql.ASTGraphEdgePattern, d pri
 	var b strings.Builder
 
 	if lh, _ := n.LhsHint(); nodeDefined(lh) {
-		if h, _ := lh.Hint(); nodeDefined(h) {
-			b.WriteString(p.toTrimmedString(h, d))
-		}
+		b.WriteString(p.toTrimmedString(lh, d))
 	}
 
 	left, right, abbr := edgePatternDelimiters(n)
@@ -984,9 +986,7 @@ func (p *printer) formatGraphEdgePattern(n *googlesql.ASTGraphEdgePattern, d pri
 	}
 
 	if rh, _ := n.RhsHint(); nodeDefined(rh) {
-		if h, _ := rh.Hint(); nodeDefined(h) {
-			b.WriteString(p.toTrimmedString(h, d))
-		}
+		b.WriteString(p.toTrimmedString(rh, d))
 	}
 
 	if q, _ := n.Quantifier(); nodeDefined(q) {
@@ -1086,9 +1086,7 @@ func (p *printer) formatGraphPropertySpec(
 	parts := make([]string, 0, len(kvs))
 
 	for _, kv := range kvs {
-		pn, _ := kv.PropertyName()
-		val, _ := kv.Value()
-		parts = append(parts, p.toTrimmedString(pn, d)+": "+p.toAlignedString(val, d))
+		parts = append(parts, p.formatGraphPropertyNameAndValue(kv, d))
 	}
 
 	return "{" + strings.Join(parts, ", ") + "}"
@@ -1098,9 +1096,17 @@ func (p *printer) visitGraphPropertyNameAndValue(
 	n *googlesql.ASTGraphPropertyNameAndValue,
 	d printerData,
 ) {
+	p.print(p.formatGraphPropertyNameAndValue(n, d))
+}
+
+func (p *printer) formatGraphPropertyNameAndValue(
+	n *googlesql.ASTGraphPropertyNameAndValue,
+	d printerData,
+) string {
 	pn, _ := n.PropertyName()
 	val, _ := n.Value()
-	p.print(p.toTrimmedString(pn, d) + ": " + p.toAlignedString(val, d))
+
+	return p.toTrimmedString(pn, d) + ": " + p.toAlignedString(val, d)
 }
 
 func (p *printer) visitGraphLabelFilter(n *googlesql.ASTGraphLabelFilter, d printerData) {
@@ -1108,15 +1114,7 @@ func (p *printer) visitGraphLabelFilter(n *googlesql.ASTGraphLabelFilter, d prin
 	p.print(":" + p.formatGraphLabelExpr(le, d))
 }
 
-func (p *printer) visitGraphElementLabel(n *googlesql.ASTGraphElementLabel, d printerData) {
-	p.print(p.formatGraphLabelExpr(n, d))
-}
-
-func (p *printer) visitGraphWildcardLabel(n *googlesql.ASTGraphWildcardLabel, d printerData) {
-	p.print(p.formatGraphLabelExpr(n, d))
-}
-
-func (p *printer) visitGraphLabelOperation(n *googlesql.ASTGraphLabelOperation, d printerData) {
+func (p *printer) visitGraphLabelExpr(n googlesql.ASTGraphLabelExpressionNode, d printerData) {
 	p.print(p.formatGraphLabelExpr(n, d))
 }
 

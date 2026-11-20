@@ -219,8 +219,7 @@ func (p *printer) visitArrayConstructor(n *googlesql.ASTArrayConstructor, d prin
 	pp := p.nest()
 
 	if t, _ := n.Type(); nodeDefined(t) {
-		typ := strings.Trim(p.toString(t, d), "\n")
-		pp.print(typ)
+		pp.print(p.toString(t, d))
 	} else {
 		s := pp.nodeInput(n)
 		if strings.HasPrefix(strings.ToUpper(s), "ARRAY") {
@@ -312,16 +311,7 @@ func (p *printer) visitBinaryExpression(n *googlesql.ASTBinaryExpression, d prin
 
 	p.accept(lhs, d)
 	p.movePast(lhs)
-
-	_, b := nodeByteRange(lhs)
-	e, _ := nodeByteRange(rhs)
-	view := p.viewErasedInput(b, e)
-	binPos := strings.IndexFunc(view, isNonSpace)
-
-	if binPos >= 0 {
-		p.fmt.flushCommentsUpTo(b + binPos)
-	}
-
+	p.flushCommentsBeforeOperator(lhs, rhs)
 	p.printBinaryOp(n, lhsAlign, rhsAlign)
 
 	p.moveBefore(rhs)
@@ -418,6 +408,15 @@ func (p *printer) printNotKeywordOp(isNot bool, posKw, negKw, lhsAlign, rhsAlign
 	}
 }
 
+func (p *printer) flushCommentsBeforeOperator(prev, next googlesql.ASTNode) {
+	_, b := nodeByteRange(prev)
+	e, _ := nodeByteRange(next)
+
+	if opPos := strings.IndexFunc(p.viewErasedInput(b, e), isNonSpace); opPos >= 0 {
+		p.fmt.flushCommentsUpTo(b + opPos)
+	}
+}
+
 func isNonSpace(r rune) bool {
 	return !unicode.IsSpace(r)
 }
@@ -437,15 +436,7 @@ func (p *printer) visitConcatExpr(n *googlesql.ASTConcatExpr, d printerData) {
 
 	for i, operand := range operands {
 		if i > 0 {
-			prev := operands[i-1]
-			_, b := nodeByteRange(prev)
-			e, _ := nodeByteRange(operand)
-			view := p.viewErasedInput(b, e)
-			binPos := strings.IndexFunc(view, isNonSpace)
-
-			if binPos >= 0 {
-				p.fmt.flushCommentsUpTo(b + binPos)
-			}
+			p.flushCommentsBeforeOperator(operands[i-1], operand)
 
 			if i == 1 {
 				p.print(lhsAlign + "||" + rhsAlign)
@@ -522,7 +513,7 @@ func (p *printer) visitCaseValueExpression(n *googlesql.ASTCaseValueExpression, 
 
 	d.simpleCase = simple
 
-	if !simple || !valueSimple {
+	if !simple {
 		p.println("")
 
 		if indentWhen {
@@ -542,13 +533,11 @@ func (p *printer) visitCaseValueExpression(n *googlesql.ASTCaseValueExpression, 
 	p.println("")
 
 	if simple {
-		p.println("")
-
 		if indentWhen {
 			p.incDepth()
 		}
 	} else {
-		p.println(" ")
+		p.printBlankLine()
 	}
 
 	pp := p.nest()
@@ -581,7 +570,7 @@ func (p *printer) visitCaseArgs(target *printer, args []googlesql.ASTExpressionN
 	}
 
 	if !simple {
-		pp.println(" ")
+		pp.printBlankLine()
 	}
 
 	if len(args) == 1 {
@@ -645,7 +634,7 @@ func (p *printer) visitCaseWhenPair(
 
 	if !simple {
 		pp.decDepth()
-		pp.println(" ")
+		pp.printBlankLine()
 	}
 }
 
@@ -679,7 +668,7 @@ func visitCaseElseArg(
 	if !simple {
 		pp.println("")
 		pp.decDepth()
-		pp.println(" ")
+		pp.printBlankLine()
 	}
 }
 
@@ -786,8 +775,11 @@ func (p *printer) visitExpressionSubquery(n *googlesql.ASTExpressionSubquery, d 
 
 	hint, _ := n.Hint()
 	q, _ := n.Query()
-	openTok, closeTok := subqueryDelimiters(q)
+	p.printDelimitedQuery(q, hint, d)
+}
 
+func (p *printer) printDelimitedQuery(q *googlesql.ASTQuery, hint *googlesql.ASTHint, d printerData) {
+	openTok, closeTok := subqueryDelimiters(q)
 	p.println(openTok)
 	p.incDepth()
 	p.accept(hint, d)
@@ -949,7 +941,7 @@ func (p *printer) printFunctionCallArgs(
 			}
 		}
 
-		printedArg := strings.Trim(p.toString(arg, d), "\n")
+		printedArg := p.toString(arg, d)
 		if strings.Contains(printedArg, "\n") {
 			p.println("")
 		}
@@ -1205,13 +1197,7 @@ func (p *printer) visitInExpression(n *googlesql.ASTInExpression, d printerData)
 	p.accept(unnest, d)
 
 	if nodeDefined(q) {
-		openTok, closeTok := subqueryDelimiters(q)
-		p.println(openTok)
-		p.incDepth()
-		p.accept(q, d)
-		p.decDepth()
-		p.println("")
-		p.print(closeTok)
+		p.printDelimitedQuery(q, nil, d)
 	}
 
 	p.printCloseParenIfNeeded(n)
@@ -1546,17 +1532,12 @@ func (p *printer) visitUnnestExpression(n *googlesql.ASTUnnestExpression, d prin
 	if expr, _ := n.Expression(); nodeDefined(expr) {
 		p.accept(expr, d)
 	} else {
-		exprs := selectChildrenOfType[*googlesql.ASTExpressionWithOptAlias](n)
-		for i, e := range exprs {
+		for i, e := range selectChildrenOfType[*googlesql.ASTExpressionWithOptAlias](n) {
 			if i > 0 {
 				p.print(",")
 			}
 
-			ex, _ := e.Expression()
-			al, _ := e.OptionalAlias()
-
-			p.accept(ex, d)
-			p.accept(al, d)
+			p.accept(e, d)
 		}
 
 		if zm, _ := n.ArrayZipMode(); nodeDefined(zm) {
@@ -1751,8 +1732,7 @@ func (p *printer) printQuantifiedRHS(
 		p.accept(hint, d)
 
 		if needParenSpace {
-			p.fmt.buffer.WriteByte(' ')
-			p.fmt.last = ' '
+			p.fmt.writeSpace()
 		}
 	}
 
@@ -1760,13 +1740,7 @@ func (p *printer) printQuantifiedRHS(
 	p.accept(unnest, d)
 
 	if nodeDefined(q) {
-		openTok, closeTok := subqueryDelimiters(q)
-		p.println(openTok)
-		p.incDepth()
-		p.accept(q, d)
-		p.decDepth()
-		p.println("")
-		p.print(closeTok)
+		p.printDelimitedQuery(q, nil, d)
 	}
 }
 

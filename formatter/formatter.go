@@ -34,8 +34,7 @@ func (p *formatterState) Format(s string) {
 		p.lastWasSingleCharUnary = false
 		p.noFlushInNextFormat = false
 
-		l := p.buffer.Len() - strings.LastIndex(p.buffer.String(), "\n")
-		if l >= p.maxLength && p.lastIsSeparator() && !noFlush {
+		if p.currentLineLen() >= p.maxLength && p.lastIsSeparator() && !noFlush {
 			p.FlushLine()
 		}
 	}()
@@ -100,10 +99,7 @@ func (p *formatterState) FormatLine(s string) {
 // FlushLine flushes buffer to formatted with a trailing newline, skipping
 // duplicate empty lines when buffer is empty.
 func (p *formatterState) FlushLine() {
-	sfmt := p.formatted.String()
-	sz := len(sfmt)
-
-	if (sz == 0 || sfmt[sz-1] == '\n') && p.buffer.Len() == 0 {
+	if p.buffer.Len() == 0 {
 		return
 	}
 
@@ -208,17 +204,27 @@ func (p *formatterState) writeIndent() {
 	}
 }
 
+func (p *formatterState) currentLineLen() int {
+	buf := p.buffer.String()
+	if idx := strings.LastIndexByte(buf, '\n'); idx >= 0 {
+		return len(buf) - idx - 1
+	}
+
+	return len(buf)
+}
+
+func (p *formatterState) writeSpace() {
+	p.buffer.WriteByte(' ')
+	p.last = ' '
+}
+
 func (p *formatterState) writeToken(s string) {
 	p.buffer.WriteString(s)
 	p.last, _ = utf8.DecodeLastRuneInString(s)
 }
 
-func isLetter(c byte) bool {
-	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
-}
-
 func isAlphanum(c byte) bool {
-	return isLetter(c) || ('0' <= c && c <= '9') || (c == '_')
+	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') || c == '_'
 }
 
 func isWordSeparator(tok string) bool {
