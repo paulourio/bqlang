@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -231,5 +232,404 @@ function_name_style = "AS_IS"
 			assert.Equal(t, 2, code)
 			assert.Contains(t, stderr.String(), tc.wantErr)
 		}
+	})
+}
+
+type failingWriter struct {
+	err error
+}
+
+func (f failingWriter) Write([]byte) (int, error) {
+	return 0, f.err
+}
+
+func TestBqfmtFlagsAndStreams(t *testing.T) {
+	t.Parallel()
+
+	t.Run("-help exits 0 and writes usage to stderr", func(t *testing.T) {
+		t.Parallel()
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-help"}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 0, code)
+		assert.Empty(t, stdout.String())
+		assert.Contains(t, stderr.String(), "usage: bqfmt [flags] [path ...]")
+	})
+
+	t.Run("unknown flag exits 2 and writes error to stderr", func(t *testing.T) {
+		t.Parallel()
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-no-such-flag"}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Empty(t, stdout.String())
+		assert.Contains(t, stderr.String(), "flag provided but not defined")
+	})
+
+	t.Run("-l on stdin reports diff only when formatting changes", func(t *testing.T) {
+		t.Parallel()
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-l"}, strings.NewReader("select 1"), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Equal(t, "<standard input>\n", stdout.String())
+		assert.Empty(t, stderr.String())
+
+		stdout.Reset()
+		stderr.Reset()
+
+		code = run([]string{"-l"}, strings.NewReader("SELECT 1\n"), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Empty(t, stdout.String())
+		assert.Empty(t, stderr.String())
+	})
+
+	t.Run("-debug emits trace to stderr without polluting stdout", func(t *testing.T) {
+		t.Parallel()
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-debug"}, strings.NewReader("select 1"), &stdout, &stderr)
+		require.Equal(t, 0, code)
+		assert.Equal(t, "SELECT 1\n", stdout.String())
+		assert.Contains(t, stderr.String(), "[bqfmt] ")
+	})
+
+	t.Run("empty, whitespace-only, comment-only, and CRLF inputs", func(t *testing.T) {
+		t.Parallel()
+
+		cases := []struct {
+			name  string
+			input string
+			want  string
+		}{
+			{"empty", "", ""},
+			{"whitespace", "   \n\t\n", ""},
+			{"comment_with_nl", "-- note\n", "-- note\n"},
+			{"comment_no_nl", "-- note", "-- note\n"},
+			{"crlf", "select a, b from t;\r\n", "SELECT a, b\n  FROM t\n"},
+		}
+
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				t.Parallel()
+
+				var stdout, stderr bytes.Buffer
+
+				code := run(nil, strings.NewReader(tc.input), &stdout, &stderr)
+				require.Equal(t, 0, code, stderr.String())
+				assert.Empty(t, stderr.String())
+				assert.Equal(t, tc.want, stdout.String())
+			})
+		}
+	})
+
+	t.Run("stdout write failure returns exit code 2", func(t *testing.T) {
+		t.Parallel()
+
+		var stderr bytes.Buffer
+
+		code := run(nil, strings.NewReader("select 1"), failingWriter{err: errors.New("broken pipe")}, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Contains(t, stderr.String(), "write stdout")
+		assert.Contains(t, stderr.String(), "broken pipe")
+	})
+
+	t.Run("multiple files preserve argument order and isolate errors", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		first := filepath.Join(dir, "1_first.sql")
+		broken := filepath.Join(dir, "2_broken.sql")
+		missing := filepath.Join(dir, "3_missing.sql")
+		unsupported := filepath.Join(dir, "4_show.sql")
+		last := filepath.Join(dir, "5_last.txt") // explicit non-.sql file must be formatted
+
+		require.NoError(t, os.WriteFile(first, []byte("select 1"), 0o600))
+		require.NoError(t, os.WriteFile(broken, []byte("SELECT FROM WHERE"), 0o600))
+		require.NoError(t, os.WriteFile(unsupported, []byte("SHOW TABLES"), 0o600))
+		require.NoError(t, os.WriteFile(last, []byte("select 2"), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{first, broken, missing, unsupported, last}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Equal(t, "SELECT 1\nSELECT 2\n", stdout.String())
+		assert.Contains(t, stderr.String(), broken)
+		assert.Contains(t, stderr.String(), missing)
+		assert.Contains(t, stderr.String(), unsupported)
+	})
+}
+
+func TestBqfmtWalkSymlinksAndWriteSafety(t *testing.T) {
+	t.Parallel()
+
+	t.Run("-l -w combined lists and rewrites only changed files across all supported suffixes", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		bql := filepath.Join(dir, "a.bql")
+		bqlJ2 := filepath.Join(dir, "b.bql.j2")
+		clean := filepath.Join(dir, "c.sql")
+		hidden := filepath.Join(dir, ".hidden.sql")
+
+		require.NoError(t, os.WriteFile(bql, []byte("select 1"), 0o640))
+		require.NoError(t, os.WriteFile(bqlJ2, []byte("select {{ x }}"), 0o600))
+		require.NoError(t, os.WriteFile(clean, []byte("SELECT 3\n"), 0o600))
+		require.NoError(t, os.WriteFile(hidden, []byte("select 4"), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-l", "-w", dir}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Equal(t, bql+"\n"+bqlJ2+"\n", stdout.String())
+
+		// Verify permissions preserved and no leftover backup files.
+		info, err := os.Stat(bql)
+		require.NoError(t, err)
+		assert.Equal(t, os.FileMode(0o640), info.Mode().Perm())
+
+		hiddenAfter, err := os.ReadFile(hidden)
+		require.NoError(t, err)
+		assert.Equal(t, "select 4", string(hiddenAfter))
+
+		entries, err := os.ReadDir(dir)
+		require.NoError(t, err)
+		assert.Len(t, entries, 4)
+	})
+
+	t.Run("symlinked .sql file under -w truncates target cleanly without stale bytes", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		realPath := filepath.Join(dir, "real.data")
+		linkPath := filepath.Join(dir, "link.sql")
+
+		orig := "SELECT    1,    2,    3,    4    FROM    my_very_long_table_name_here\n"
+		require.NoError(t, os.WriteFile(realPath, []byte(orig), 0o640))
+		require.NoError(t, os.Symlink("real.data", linkPath))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-w", dir}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Empty(t, stdout.String())
+
+		got, err := os.ReadFile(realPath)
+		require.NoError(t, err)
+		assert.Equal(t, "SELECT 1, 2, 3, 4\n  FROM my_very_long_table_name_here\n", string(got))
+
+		// Symlink itself must remain a symlink and no leftover backups should exist.
+		linkInfo, err := os.Lstat(linkPath)
+		require.NoError(t, err)
+		assert.Equal(t, os.ModeSymlink, linkInfo.Mode().Type())
+
+		entries, err := os.ReadDir(dir)
+		require.NoError(t, err)
+		assert.Len(t, entries, 2)
+	})
+
+	t.Run("symlink to directory ending in .sql is skipped during directory walk", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		sub := filepath.Join(dir, "actual_dir")
+		require.NoError(t, os.Mkdir(sub, 0o750))
+		require.NoError(t, os.Symlink(sub, filepath.Join(dir, "dirlink.sql")))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "ok.sql"), []byte("select 1"), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{dir}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Equal(t, "SELECT 1\n", stdout.String())
+	})
+
+	t.Run("broken symlink reports error without aborting sibling files", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		require.NoError(t, os.Symlink("nonexistent.sql", filepath.Join(dir, "a_broken.sql")))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "z_ok.sql"), []byte("select 1"), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{dir}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Equal(t, "SELECT 1\n", stdout.String())
+		assert.Contains(t, stderr.String(), "a_broken.sql")
+	})
+
+	t.Run("unreadable subdirectory reports error without aborting sibling directories", func(t *testing.T) {
+		t.Parallel()
+
+		if os.Geteuid() == 0 {
+			t.Skip("permission checks do not apply when running as root")
+		}
+
+		dir := t.TempDir()
+		blocked := filepath.Join(dir, "a_blocked")
+		okDir := filepath.Join(dir, "z_ok")
+		require.NoError(t, os.Mkdir(blocked, 0o750))
+		require.NoError(t, os.Mkdir(okDir, 0o750))
+		require.NoError(t, os.WriteFile(filepath.Join(okDir, "good.sql"), []byte("select 1"), 0o600))
+		require.NoError(t, os.Chmod(blocked, 0o000))
+		t.Cleanup(func() { _ = os.Chmod(blocked, 0o750) })
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-l", dir}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Contains(t, stdout.String(), filepath.Join(okDir, "good.sql"))
+		assert.Contains(t, stderr.String(), "a_blocked")
+	})
+
+	t.Run("read-only file under -w fails cleanly with no leftover backup and skips clean files", func(t *testing.T) {
+		t.Parallel()
+
+		if os.Geteuid() == 0 {
+			t.Skip("permission checks do not apply when running as root")
+		}
+
+		dir := t.TempDir()
+		dirtyRO := filepath.Join(dir, "dirty.sql")
+		cleanRO := filepath.Join(dir, "clean.sql")
+
+		require.NoError(t, os.WriteFile(dirtyRO, []byte("select 1"), 0o400))
+		require.NoError(t, os.WriteFile(cleanRO, []byte("SELECT 1\n"), 0o400))
+		t.Cleanup(func() {
+			_ = os.Chmod(dirtyRO, 0o600)
+			_ = os.Chmod(cleanRO, 0o600)
+		})
+
+		// Already-formatted read-only file succeeds without attempting a write.
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-w", cleanRO}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+
+		// Unformatted read-only file fails and cleans up its temporary backup.
+		stdout.Reset()
+		stderr.Reset()
+
+		code = run([]string{"-w", dirtyRO}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Contains(t, stderr.String(), dirtyRO)
+
+		got, err := os.ReadFile(dirtyRO)
+		require.NoError(t, err)
+		assert.Equal(t, "select 1", string(got))
+
+		entries, err := os.ReadDir(dir)
+		require.NoError(t, err)
+		assert.Len(t, entries, 2)
+	})
+}
+
+func TestBackupFileUsesSiblingDirForBareFilename(t *testing.T) {
+	// Uses t.Chdir, so this test intentionally runs sequentially.
+	dir := t.TempDir()
+	t.Chdir(dir)
+
+	runner := &cliRunner{fdSem: make(chan struct{}, 2)}
+
+	bakname, err := runner.backupFile("query.sql", []byte("SELECT 1\n"), 0o600)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = os.Remove(bakname) })
+
+	assert.Equal(t, ".", filepath.Dir(bakname))
+
+	info, err := os.Stat(bakname)
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
+
+	data, err := os.ReadFile(bakname)
+	require.NoError(t, err)
+	assert.Equal(t, "SELECT 1\n", string(data))
+}
+
+func TestRestoreOriginalAndReadSizeMismatch(t *testing.T) {
+	t.Parallel()
+
+	t.Run("restoreOriginal restores shorter original bytes and removes backup", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		target := filepath.Join(dir, "query.sql")
+		bak := filepath.Join(dir, "query.sql.bak")
+		orig := []byte("SELECT 1\n")
+		longer := []byte("SELECT 1, 2, 3, 4, 5\n")
+
+		require.NoError(t, os.WriteFile(target, longer, 0o600))
+		require.NoError(t, os.WriteFile(bak, orig, 0o600))
+
+		fout, err := os.OpenFile(target, os.O_WRONLY, 0o600)
+		require.NoError(t, err)
+
+		var restoreErr error
+
+		restoreOriginal(fout, orig, len(longer), bak, func(rerr error) {
+			restoreErr = rerr
+		})
+
+		require.NoError(t, restoreErr)
+
+		got, err := os.ReadFile(target)
+		require.NoError(t, err)
+		assert.Equal(t, string(orig), string(got))
+
+		_, statErr := os.Stat(bak)
+		assert.True(t, os.IsNotExist(statErr), "backup should be removed after successful restore")
+	})
+
+	t.Run("restoreOriginal preserves backup and invokes callback on write failure", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		target := filepath.Join(dir, "query.sql")
+		bak := filepath.Join(dir, "query.sql.bak")
+		orig := []byte("SELECT 1\n")
+
+		require.NoError(t, os.WriteFile(target, orig, 0o600))
+		require.NoError(t, os.WriteFile(bak, orig, 0o600))
+
+		fout, err := os.OpenFile(target, os.O_WRONLY, 0o600)
+		require.NoError(t, err)
+		require.NoError(t, fout.Close()) // force WriteAt failure
+
+		var restoreErr error
+
+		restoreOriginal(fout, orig, len(orig), bak, func(rerr error) {
+			restoreErr = rerr
+		})
+
+		require.Error(t, restoreErr)
+
+		_, statErr := os.Stat(bak)
+		require.NoError(t, statErr, "backup must be preserved when restore fails")
+	})
+
+	t.Run("readFile detects shrinking and growing files during read", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		f := filepath.Join(dir, "sample.sql")
+		require.NoError(t, os.WriteFile(f, []byte("SELECT 123"), 0o600)) // 10 bytes
+
+		info, err := os.Stat(f)
+		require.NoError(t, err)
+
+		runner := &cliRunner{fdSem: make(chan struct{}, 2)}
+
+		_, err = runner.readFile(f, info, strings.NewReader("SELECT"))
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "changed during reading")
+
+		_, err = runner.readFile(f, info, strings.NewReader("SELECT 1234567890"))
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "changed during reading")
 	})
 }

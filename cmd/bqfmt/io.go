@@ -68,7 +68,6 @@ func (c *cliRunner) writeFile(
 	filename string,
 	orig, formatted []byte,
 	perm fs.FileMode,
-	size int64,
 	r *reporter,
 ) error {
 	bakname, err := c.backupFile(filename, orig, perm)
@@ -92,7 +91,7 @@ func (c *cliRunner) writeFile(
 	}
 
 	n, err := fout.Write(formatted)
-	if err == nil && int64(n) < size {
+	if err == nil {
 		err = fout.Truncate(int64(n))
 	}
 
@@ -155,7 +154,8 @@ func (c *cliRunner) backupFile(filename string, data []byte, perm fs.FileMode) (
 	c.fdSem <- struct{}{}
 	defer func() { <-c.fdSem }()
 
-	dir, base := filepath.Split(filename)
+	dir := filepath.Dir(filename)
+	base := filepath.Base(filename)
 
 	f, err := os.CreateTemp(dir, base+".*")
 	if err != nil {

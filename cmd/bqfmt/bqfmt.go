@@ -114,28 +114,64 @@ func (c *cliRunner) execute(s *sequencer, paths []string) {
 			continue
 		}
 
-		walkErr := filepath.WalkDir(target, func(path string, entry fs.DirEntry, werr error) error {
-			if werr != nil || !isBQLFile(entry) {
-				return werr
-			}
+		c.walkDirectory(s, target)
+	}
+}
 
-			entryInfo, ierr := entry.Info()
-			if ierr != nil {
-				s.AddReport(ierr)
-
-				return nil
-			}
-
-			s.Add(fileWeight(path, entryInfo), func(r *reporter) error {
-				return c.processFile(path, entryInfo, nil, r)
-			})
+func (c *cliRunner) walkDirectory(s *sequencer, target string) {
+	walkErr := filepath.WalkDir(target, func(path string, entry fs.DirEntry, werr error) error {
+		if werr != nil {
+			s.AddReport(werr)
 
 			return nil
-		})
-		if walkErr != nil {
-			s.AddReport(walkErr)
 		}
+
+		if !isBQLFile(entry) {
+			return nil
+		}
+
+		entryInfo, ok, ierr := resolveWalkEntry(path, entry)
+		if ierr != nil {
+			s.AddReport(ierr)
+
+			return nil
+		}
+
+		if !ok {
+			return nil
+		}
+
+		s.Add(fileWeight(path, entryInfo), func(r *reporter) error {
+			return c.processFile(path, entryInfo, nil, r)
+		})
+
+		return nil
+	})
+	if walkErr != nil {
+		s.AddReport(walkErr)
 	}
+}
+
+func resolveWalkEntry(path string, entry fs.DirEntry) (fs.FileInfo, bool, error) {
+	if entry.Type() == fs.ModeSymlink {
+		info, err := os.Stat(path)
+		if err != nil {
+			return nil, false, err
+		}
+
+		if info.IsDir() {
+			return nil, false, nil
+		}
+
+		return info, true, nil
+	}
+
+	info, err := entry.Info()
+	if err != nil {
+		return nil, false, err
+	}
+
+	return info, true, nil
 }
 
 func isBQLFile(f fs.DirEntry) bool {
@@ -228,7 +264,7 @@ func (c *cliRunner) emitResult(
 		}
 
 		perm := info.Mode().Perm()
-		if werr := c.writeFile(filename, src, []byte(result), perm, info.Size(), r); werr != nil {
+		if werr := c.writeFile(filename, src, []byte(result), perm, r); werr != nil {
 			return werr
 		}
 	}
