@@ -64,6 +64,10 @@ func (p *printer) visitDeleteStatement(n *googlesql.ASTDeleteStatement, d printe
 
 	p.print(alignNested(pp.String()))
 
+	if arm, _ := n.AssertRowsModified(); nodeDefined(arm) {
+		p.printAssertRowsModified(arm, d)
+	}
+
 	if ret, _ := n.Returning(); nodeDefined(ret) {
 		p.lnaccept(ret, d)
 	}
@@ -115,6 +119,10 @@ func (p *printer) visitUpdateStatement(n *googlesql.ASTUpdateStatement, d printe
 
 	p.print(alignNested(pp.String()))
 
+	if arm, _ := n.AssertRowsModified(); nodeDefined(arm) {
+		p.printAssertRowsModified(arm, d)
+	}
+
 	if ret, _ := n.Returning(); nodeDefined(ret) {
 		p.lnaccept(ret, d)
 	}
@@ -141,19 +149,23 @@ func (p *printer) visitReturningClause(n *googlesql.ASTReturningClause, d printe
 func (p *printer) visitInsertStatement(n *googlesql.ASTInsertStatement, d printerData) {
 	cl, _ := n.ColumnList()
 	target, _ := n.TargetPath()
+	hint, _ := n.Hint()
+	oc, _ := n.OnConflict()
 
 	p.moveBefore(n)
 
 	begin, _ := nodeByteRange(n)
 	end, _ := nodeByteRange(target)
 
+	p.print(p.keyword("INSERT"))
+	p.printInsertMode(n)
+
 	if containsKeywordToken(p.viewErasedInput(begin, end), "INTO") {
-		p.print(p.keyword("INSERT INTO"))
-	} else {
-		p.print(p.keyword("INSERT"))
+		p.print(p.keyword("INTO"))
 	}
 
 	p.accept(target, d)
+	p.accept(hint, d)
 
 	if nodeDefined(cl) {
 		p.println("")
@@ -165,7 +177,17 @@ func (p *printer) visitInsertStatement(n *googlesql.ASTInsertStatement, d printe
 
 	if q, _ := n.Query(); nodeDefined(q) {
 		p.println("")
-		p.acceptNested(q, d)
+
+		if nodeDefined(oc) && p.queryParenCount(q) == 0 {
+			p.println("(")
+			p.incDepth()
+			p.acceptNested(q, d)
+			p.println("")
+			p.decDepth()
+			p.print(")")
+		} else {
+			p.acceptNested(q, d)
+		}
 	} else if rows, _ := n.Rows(); nodeDefined(rows) {
 		p.println("")
 		p.println(p.keyword("VALUES"))
@@ -175,8 +197,82 @@ func (p *printer) visitInsertStatement(n *googlesql.ASTInsertStatement, d printe
 		p.decDepth()
 	}
 
+	if nodeDefined(oc) {
+		p.printOnConflictClause(oc, d)
+	}
+
+	if arm, _ := n.AssertRowsModified(); nodeDefined(arm) {
+		p.printAssertRowsModified(arm, d)
+	}
+
 	if ret, _ := n.Returning(); nodeDefined(ret) {
 		p.lnaccept(ret, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printInsertMode(n *googlesql.ASTInsertStatement) {
+	mode, _ := n.InsertMode()
+
+	switch mode {
+	case googlesql.ASTInsertStatementEnums_InsertModeIgnore:
+		p.print(p.keyword("OR IGNORE"))
+	case googlesql.ASTInsertStatementEnums_InsertModeReplace:
+		p.print(p.keyword("OR REPLACE"))
+	case googlesql.ASTInsertStatementEnums_InsertModeUpdate:
+		p.print(p.keyword("OR UPDATE"))
+	case googlesql.ASTInsertStatementEnums_InsertModeDefaultMode:
+		// Nothing.
+	}
+}
+
+func (p *printer) printAssertRowsModified(n *googlesql.ASTAssertRowsModified, d printerData) {
+	p.println("")
+	p.moveBefore(n)
+	p.print(p.keyword("ASSERT_ROWS_MODIFIED"))
+
+	if numRows, _ := n.NumRows(); nodeDefined(numRows) {
+		p.accept(numRows, d)
+	}
+
+	p.movePast(n)
+}
+
+func (p *printer) printOnConflictClause(n *googlesql.ASTOnConflictClause, d printerData) {
+	p.println("")
+	p.moveBefore(n)
+	p.print(p.keyword("ON CONFLICT"))
+
+	if ct, _ := n.ConflictTarget(); nodeDefined(ct) {
+		p.accept(ct, d)
+	} else if ucn, _ := n.UniqueConstraintName(); nodeDefined(ucn) {
+		p.print(p.keyword("ON UNIQUE CONSTRAINT"))
+		p.accept(ucn, d)
+	}
+
+	action, _ := n.ConflictAction()
+	switch action {
+	case googlesql.ASTOnConflictClauseEnums_ConflictActionNothing:
+		p.print(p.keyword("DO NOTHING"))
+	case googlesql.ASTOnConflictClauseEnums_ConflictActionUpdate:
+		p.print(p.keyword("DO UPDATE"))
+
+		pp := p.nest()
+		if items, _ := n.UpdateItemList(); nodeDefined(items) {
+			pp.print(pp.keyword("SET"))
+			pp.acceptNested(items, d)
+		}
+
+		if where, _ := n.UpdateWhereClause(); nodeDefined(where) {
+			pp.printClause(pp.keyword("WHERE"))
+			pp.visitWhereExprBody(where, d)
+		}
+
+		p.println("")
+		p.print(alignNested(pp.String()))
+	case googlesql.ASTOnConflictClauseEnums_ConflictActionNotSet:
+		// Nothing.
 	}
 
 	p.movePast(n)
@@ -275,12 +371,18 @@ func (p *printer) visitMergeActionInsert(n *googlesql.ASTMergeAction, d printerD
 	}
 
 	if nodeDefined(ir) {
-		p.println("")
-		p.println(p.keyword("VALUES"))
-		p.incDepth()
-		p.accept(ir, d)
-		p.println("")
-		p.decDepth()
+		if nodeNumChildren(ir) == 0 {
+			p.moveBefore(ir)
+			p.println(p.keyword("ROW"))
+			p.movePast(ir)
+		} else {
+			p.println("")
+			p.println(p.keyword("VALUES"))
+			p.incDepth()
+			p.accept(ir, d)
+			p.println("")
+			p.decDepth()
+		}
 	}
 }
 
@@ -392,16 +494,42 @@ func (p *printer) visitUpdateItemList(n *googlesql.ASTUpdateItemList, d printerD
 func (p *printer) visitUpdateItem(n *googlesql.ASTUpdateItem, d printerData) {
 	p.moveBefore(n)
 
-	sv, _ := n.SetValue()
-	ins, _ := n.InsertStatement()
-	del, _ := n.DeleteStatement()
-	upd, _ := n.UpdateStatement()
+	if sv, _ := n.SetValue(); nodeDefined(sv) {
+		p.accept(sv, d)
+		p.movePast(n)
 
-	p.accept(sv, d)
-	p.accept(ins, d)
-	p.accept(del, d)
-	p.accept(upd, d)
+		return
+	}
+
+	stmt := nestedDMLStatement(n)
+	if nodeDefined(stmt) {
+		pp := p.nest()
+		pp.println("(")
+		pp.incDepth()
+		pp.acceptNested(stmt, d)
+		pp.println("")
+		pp.decDepth()
+		pp.print(")")
+		p.print(alignNested(pp.String()))
+	}
+
 	p.movePast(n)
+}
+
+func nestedDMLStatement(n *googlesql.ASTUpdateItem) googlesql.ASTNode {
+	if ins, _ := n.InsertStatement(); nodeDefined(ins) {
+		return ins
+	}
+
+	if del, _ := n.DeleteStatement(); nodeDefined(del) {
+		return del
+	}
+
+	if upd, _ := n.UpdateStatement(); nodeDefined(upd) {
+		return upd
+	}
+
+	return nil
 }
 
 func (p *printer) visitUpdateSetValue(n *googlesql.ASTUpdateSetValue, d printerData) {
