@@ -98,7 +98,10 @@ func isSimpleAtomKind(k googlesql.ASTNodeKind) bool {
 		googlesql.ASTNodeKindAstNumericLiteral,
 		googlesql.ASTNodeKindAstParameterExpr,
 		googlesql.ASTNodeKindAstSystemVariableExpr,
-		googlesql.ASTNodeKindAstIdentifier:
+		googlesql.ASTNodeKindAstIdentifier,
+		googlesql.ASTNodeKindAstDefaultLiteral,
+		googlesql.ASTNodeKindAstMaxLiteral,
+		googlesql.ASTNodeKindAstInputTableArgument:
 		return true
 	default:
 		return false
@@ -126,7 +129,10 @@ func (p *printer) isSimpleExpr2(n googlesql.ASTExpressionNode) bool {
 		googlesql.ASTNodeKindAstParameterExpr,
 		googlesql.ASTNodeKindAstStringLiteral,
 		googlesql.ASTNodeKindAstSystemVariableExpr,
-		googlesql.ASTNodeKindAstIdentifier:
+		googlesql.ASTNodeKindAstIdentifier,
+		googlesql.ASTNodeKindAstDefaultLiteral,
+		googlesql.ASTNodeKindAstMaxLiteral,
+		googlesql.ASTNodeKindAstInputTableArgument:
 		return true
 	case googlesql.ASTNodeKindAstBinaryExpression, googlesql.ASTNodeKindAstConcatExpr:
 		parent := nodeParent(n)

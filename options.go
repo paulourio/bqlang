@@ -200,11 +200,22 @@ func defaultEnabledFeatures() []googlesql.LanguageFeature {
 		googlesql.LanguageFeatureFeatureV14LoadDataTempTable,
 		googlesql.LanguageFeatureFeatureV14MatchRecognize,
 		googlesql.LanguageFeatureFeatureV14RemoteModel,
+		googlesql.LanguageFeatureFeatureV14EnableMeasures,
 		googlesql.LanguageFeatureFeatureV14SqlGraph,
 		googlesql.LanguageFeatureFeatureV14SqlGraphAdvancedQuery,
 		googlesql.LanguageFeatureFeatureV14SqlGraphBoundedPathQuantification,
+		googlesql.LanguageFeatureFeatureSqlGraphUnboundedPathQuantification,
 		googlesql.LanguageFeatureFeatureV14SqlGraphPathMode,
+		googlesql.LanguageFeatureFeatureV14SqlGraphPathType,
+		googlesql.LanguageFeatureFeatureGroupByGraphPath,
 		googlesql.LanguageFeatureFeatureV14SqlGraphPathSearchPrefixPathCount,
+		googlesql.LanguageFeatureFeatureV14SqlGraphCheapestPath,
+		googlesql.LanguageFeatureFeatureV14SqlGraphExposeGraphElement,
+		googlesql.LanguageFeatureFeatureV14SqlGraphDynamicElementType,
+		googlesql.LanguageFeatureFeatureSqlGraphReturnExtensions,
+		googlesql.LanguageFeatureFeatureSqlGraphCall,
+		googlesql.LanguageFeatureFeatureSqlGraphDefaultLabelAndPropertyDefinitionOptions,
+		googlesql.LanguageFeatureFeatureSqlGraphMeasureDdl,
 	}
 }
 

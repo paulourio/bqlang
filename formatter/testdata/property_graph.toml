@@ -1,0 +1,276 @@
+[setup]
+
+[setup.print_options]
+soft_max_cols = 80
+newline_before_clause = true
+align_logical_with_clauses = true
+column_list_trailing_comma = "NEVER"
+indentation = 2
+min_joins_to_separate_in_blocks = 2
+max_cols_for_single_line_select = 4
+function_catalog = "BIGQUERY"
+function_name_style = "AS_IS"
+identifier_style = "AS_IS"
+keyword_style = "UPPER_CASE"
+type_style = "UPPER_CASE"
+bool_style = "UPPER_CASE"
+null_style = "UPPER_CASE"
+bytes_style = "PREFER_SINGLE_QUOTE"
+string_style = "PREFER_SINGLE_QUOTE"
+
+[[cases]]
+description = "CREATE PROPERTY GRAPH and DROP PROPERTY GRAPH DDL"
+input = """
+create or replace property graph if not exists `fin_network_04_anl.fin_network_graph`
+  node tables (
+    `fin_network_04_anl.customer_dim`
+      key (customer_id)
+      label Customer
+      properties (customer_id, customer_nm, city_nm),
+    `fin_network_04_anl.account_dim`
+      key (account_id)
+      label Account
+      properties all columns except (internal_secret_txt),
+    `fin_network_04_anl.location_dim` as loc
+      default label options (description='Location vertex')
+      properties (location_id, population_qty, measure(sum(population_qty)) as total_pop_qty),
+    `fin_network_04_anl.raw_device_dim`
+  )
+  edge tables (
+    `fin_network_04_anl.account_ownership_brdg`
+      key (ownership_id)
+      source key (customer_id) references `fin_network_04_anl.customer_dim` (customer_id)
+      destination key (account_id) references `fin_network_04_anl.account_dim` (account_id)
+      label Owns
+      no properties,
+    `fin_network_04_anl.transfer_fact`
+      key (transfer_id)
+      source key (src_account_id) references `fin_network_04_anl.account_dim` (account_id)
+      destination key (dst_account_id) references `fin_network_04_anl.account_dim`
+      label Transfers
+      properties (transfer_id, transfer_amt, transfer_ts)
+  );
+
+drop property graph if exists `fin_network_04_anl.fin_network_graph`;
+"""
+formatted = """
+CREATE OR REPLACE PROPERTY GRAPH IF NOT EXISTS `fin_network_04_anl.fin_network_graph`
+  NODE TABLES (
+    `fin_network_04_anl.customer_dim`
+      KEY (customer_id)
+      LABEL Customer
+      PROPERTIES (customer_id, customer_nm, city_nm),
+    `fin_network_04_anl.account_dim`
+      KEY (account_id)
+      LABEL Account
+      PROPERTIES ALL COLUMNS EXCEPT (internal_secret_txt),
+    `fin_network_04_anl.location_dim` AS loc
+      DEFAULT LABEL OPTIONS (description='Location vertex')
+      PROPERTIES (
+        location_id,
+        population_qty,
+        MEASURE(SUM(population_qty)) AS total_pop_qty
+      ),
+    `fin_network_04_anl.raw_device_dim`
+  )
+  EDGE TABLES (
+    `fin_network_04_anl.account_ownership_brdg`
+      KEY (ownership_id)
+      SOURCE KEY (customer_id) REFERENCES `fin_network_04_anl.customer_dim` (customer_id)
+      DESTINATION KEY (account_id) REFERENCES `fin_network_04_anl.account_dim` (account_id)
+      LABEL Owns
+      NO PROPERTIES,
+    `fin_network_04_anl.transfer_fact`
+      KEY (transfer_id)
+      SOURCE KEY (src_account_id) REFERENCES `fin_network_04_anl.account_dim` (account_id)
+      DESTINATION KEY (dst_account_id) REFERENCES `fin_network_04_anl.account_dim`
+      LABEL Transfers
+      PROPERTIES (transfer_id, transfer_amt, transfer_ts)
+  );
+
+DROP PROPERTY GRAPH IF EXISTS `fin_network_04_anl.fin_network_graph`;
+"""
+
+[[cases]]
+description = "GRAPH_TABLE with GPML patterns, quantifiers, search prefixes, and GQL functions"
+input = """
+select initial_account_id,
+       terminal_account_id,
+       hop_qty,
+       is_cycle_free_ind,
+       first_vertex_id,
+       edge_endpoints_id
+  from graph_table (
+    `fin_network_04_anl.fin_network_graph`
+    match p = any cheapest trail (a:Account & !Blocked {currency_cd: 'USD'})-[t:Transfers where t.transfer_amt > 0 cost t.transfer_amt]->{1, 4}(b:Account | Corporate)-[last_hop:Transfers]->(c:Account)
+    where a.account_id != b.account_id
+      and is_acyclic(p)
+      and b is source of last_hop
+      and c is not destination of last_hop
+      and a is labeled Account
+      and all_different(a, b, c)
+      and not same(a, b)
+    let total_fee_amt = sum(t.transfer_amt),
+        edge_cnt = array_length(edges(p))
+    return a.account_id as initial_account_id,
+           c.account_id as terminal_account_id,
+           path_length(p) as hop_qty,
+           is_simple(p) and is_trail(p) as is_cycle_free_ind,
+           element_id(path_first(p)) || element_id(path_last(p)) as first_vertex_id,
+           source_node_id(last_hop) || destination_node_id(last_hop) as edge_endpoints_id
+  ) as gt
+ order by hop_qty, initial_account_id;
+"""
+formatted = """
+SELECT initial_account_id,
+       terminal_account_id,
+       hop_qty,
+       is_cycle_free_ind,
+       first_vertex_id,
+       edge_endpoints_id
+  FROM GRAPH_TABLE (
+         `fin_network_04_anl.fin_network_graph`
+         MATCH p = ANY CHEAPEST TRAIL (a:Account & !Blocked {currency_cd: 'USD'})-[t:Transfers WHERE t.transfer_amt > 0 COST t.transfer_amt]->{1, 4}(b:Account | Corporate)-[last_hop:Transfers]->(c:Account)
+         WHERE a.account_id != b.account_id
+           AND              IS_ACYCLIC(p)
+           AND b            IS SOURCE OF          last_hop
+           AND c            IS NOT DESTINATION OF last_hop
+           AND a IS LABELED Account
+           AND     ALL_DIFFERENT(a, b, c)
+           AND NOT SAME(a, b)
+         LET total_fee_amt = SUM(t.transfer_amt),
+             edge_cnt      = ARRAY_LENGTH(EDGES(p))
+         RETURN a.account_id                                              AS initial_account_id,
+                c.account_id                                              AS terminal_account_id,
+                PATH_LENGTH(p)                                            AS hop_qty,
+                IS_SIMPLE(p) AND IS_TRAIL(p)                              AS is_cycle_free_ind,
+                ELEMENT_ID(PATH_FIRST(p)) || ELEMENT_ID(PATH_LAST(p))     AS first_vertex_id,
+                SOURCE_NODE_ID(last_hop) || DESTINATION_NODE_ID(last_hop) AS edge_endpoints_id
+       ) AS gt
+ ORDER BY hop_qty, initial_account_id
+"""
+
+[[cases]]
+description = "Chained GQL linear queries with NEXT, WITH, FILTER, FOR, CALL, and Set Operations"
+input = """
+graph graph_db.FinGraph
+match (p:Person)
+optional match (p)-[:Owns]->(a:Account)
+call graph_db.enrich_tvf(p.name) yield col as enriched_nm
+call (p) {
+  match (p)-[:Owns]->(sub_a:Account)
+  return sub_a.id as sub_acct_id
+}
+for tag in ['vip', 'retail'] with offset as tag_idx
+with distinct p, a, enriched_nm, tag
+group by p, a, enriched_nm, tag
+filter where enriched_nm is not null
+order by enriched_nm asc
+offset 1
+limit 10
+return p.name as owner_nm, labels(p) as lbls, typeof(p) as tp
+next
+filter owner_nm != 'test'
+call per () graph_db.batch_tvf(input table, 'arg') yield out_nm as owner_nm
+return owner_nm
+union all
+match (c:%)-[]->()
+return c.name as owner_nm;
+"""
+formatted = """
+GRAPH graph_db.FinGraph
+MATCH (p:Person)
+OPTIONAL MATCH (p)-[:Owns]->(a:Account)
+CALL graph_db.enrich_tvf(p.name) YIELD col AS enriched_nm
+CALL (p) {
+  MATCH (p)-[:Owns]->(sub_a:Account)
+  RETURN sub_a.id AS sub_acct_id
+}
+FOR tag IN ['vip', 'retail'] WITH OFFSET AS tag_idx
+WITH DISTINCT p,
+              a,
+              enriched_nm,
+              tag
+GROUP BY p, a, enriched_nm, tag
+FILTER WHERE enriched_nm IS NOT NULL
+ORDER BY enriched_nm ASC
+OFFSET 1
+LIMIT 10
+RETURN p.name    AS owner_nm,
+       LABELS(p) AS lbls,
+       TYPEOF(p) AS tp
+NEXT
+FILTER owner_nm != 'test'
+CALL PER () graph_db.batch_tvf(INPUT TABLE, 'arg') YIELD out_nm AS owner_nm
+RETURN owner_nm
+UNION ALL
+MATCH (c:%)-[]->()
+RETURN c.name AS owner_nm
+"""
+
+[[cases]]
+description = "GQL braced subqueries (ARRAY, EXISTS, VALUE, IN) and Pipe |> integration"
+input = """
+graph graph_db.FinGraph
+match (p:Person)-[:Owns]->(account:Account)
+where exists {
+  match (account)-[:Transfers]->(:Account)
+}
+  and p.name in {
+    graph graph_db.FinGraph
+    match (q:Person)
+    return q.name
+  }
+return p.name as person_nm,
+       array {
+         graph graph_db.FinGraph
+         match (a:Account)-[transfer:Transfers]->(:Account)
+         where a = account
+         return transfer.amount as transfers
+       } as transfers,
+       value {
+         graph graph_db.FinGraph
+         match (a:Account)
+         where a = account
+         return a.nick_name
+       } as nick_nm;
+
+from graph_table (
+  `fin_network_04_anl.fin_network_graph`
+  match ((cust:Customer)-[:Owns]->(acct:Account) where acct.balance_amt > 0){1, 2}
+  return cust[0].customer_id as customer_id
+)
+|> aggregate count(*) as cnt group by customer_id;
+"""
+formatted = """
+GRAPH graph_db.FinGraph
+MATCH (p:Person)-[:Owns]->(account:Account)
+WHERE EXISTS {
+        MATCH (account)-[:Transfers]->(:Account)
+      }
+  AND p.name IN {
+        GRAPH graph_db.FinGraph
+        MATCH (q:Person)
+        RETURN q.name
+      }
+RETURN p.name AS person_nm,
+       ARRAY {
+         GRAPH graph_db.FinGraph
+         MATCH (a:Account)-[transfer:Transfers]->(:Account)
+         WHERE a = account
+         RETURN transfer.amount AS transfers
+       } AS transfers,
+       VALUE {
+         GRAPH graph_db.FinGraph
+         MATCH (a:Account)
+         WHERE a = account
+         RETURN a.nick_name
+       } AS nick_nm;
+
+FROM GRAPH_TABLE (
+       `fin_network_04_anl.fin_network_graph`
+       MATCH ((cust:Customer)-[:Owns]->(acct:Account) WHERE acct.balance_amt > 0){1, 2}
+       RETURN cust[0].customer_id AS customer_id
+     )
+|> AGGREGATE COUNT(*) AS cnt GROUP BY customer_id;
+"""

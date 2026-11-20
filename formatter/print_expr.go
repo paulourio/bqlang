@@ -392,9 +392,26 @@ func (p *printer) printBinaryOp(n *googlesql.ASTBinaryExpression, lhsAlign, rhsA
 		} else {
 			p.print(lhsAlign + p.keyword("IS DISTINCT FROM") + " " + rhsAlign)
 		}
+	case googlesql.ASTBinaryExpressionEnums_OpIsSourceNode:
+		p.printNotKeywordOp(isNot, "IS SOURCE OF", "IS NOT SOURCE OF", lhsAlign, rhsAlign)
+	case googlesql.ASTBinaryExpressionEnums_OpIsDestNode:
+		p.printNotKeywordOp(isNot, "IS DESTINATION OF", "IS NOT DESTINATION OF", lhsAlign, rhsAlign)
 	default:
 		sqlOp, _ := n.GetSQLForOperator()
 		p.print(lhsAlign + p.keyword(sqlOp) + rhsAlign)
+	}
+}
+
+func (p *printer) printNotKeywordOp(isNot bool, posKw, negKw, lhsAlign, rhsAlign string) {
+	kw := posKw
+	if isNot {
+		kw = negKw
+	}
+
+	if rhsAlign == "" {
+		p.print(lhsAlign + p.keyword(kw) + " ")
+	} else {
+		p.print(lhsAlign + p.keyword(kw) + rhsAlign)
 	}
 }
 
@@ -762,14 +779,29 @@ func (p *printer) visitExpressionSubquery(n *googlesql.ASTExpressionSubquery, d 
 
 	hint, _ := n.Hint()
 	q, _ := n.Query()
+	openTok, closeTok := subqueryDelimiters(q)
 
-	p.println("(")
+	p.println(openTok)
 	p.incDepth()
 	p.accept(hint, d)
 	p.accept(q, d)
 	p.decDepth()
 	p.println("")
-	p.print(")")
+	p.print(closeTok)
+}
+
+func subqueryDelimiters(q *googlesql.ASTQuery) (string, string) {
+	if nodeDefined(q) {
+		qe, _ := q.QueryExpr()
+		switch qe.(type) {
+		case *googlesql.ASTGqlQuery,
+			*googlesql.ASTGqlGraphPatternQuery,
+			*googlesql.ASTGqlLinearOpsQuery:
+			return "{", "}"
+		}
+	}
+
+	return "(", ")"
 }
 
 func (p *printer) visitExtractExpression(n *googlesql.ASTExtractExpression, d printerData) {
@@ -1106,12 +1138,13 @@ func (p *printer) visitInExpression(n *googlesql.ASTInExpression, d printerData)
 	p.accept(unnest, d)
 
 	if nodeDefined(q) {
-		p.println("(")
+		openTok, closeTok := subqueryDelimiters(q)
+		p.println(openTok)
 		p.incDepth()
 		p.accept(q, d)
 		p.decDepth()
 		p.println("")
-		p.print(")")
+		p.print(closeTok)
 	}
 
 	p.printCloseParenIfNeeded(n)
@@ -1707,12 +1740,13 @@ func (p *printer) printQuantifiedRHS(
 	p.accept(unnest, d)
 
 	if nodeDefined(q) {
-		p.println("(")
+		openTok, closeTok := subqueryDelimiters(q)
+		p.println(openTok)
 		p.incDepth()
 		p.accept(q, d)
 		p.decDepth()
 		p.println("")
-		p.print(")")
+		p.print(closeTok)
 	}
 }
 
@@ -1734,4 +1768,22 @@ func anySomeAllKeyword(n *googlesql.ASTAnySomeAllOp) string {
 	}
 
 	return ""
+}
+
+func (p *printer) visitDefaultLiteral(n *googlesql.ASTDefaultLiteral, _ printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("DEFAULT"))
+	p.movePast(n)
+}
+
+func (p *printer) visitMaxLiteral(n *googlesql.ASTMaxLiteral, _ printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("MAX"))
+	p.movePast(n)
+}
+
+func (p *printer) visitInputTableArgument(n *googlesql.ASTInputTableArgument, _ printerData) {
+	p.moveBefore(n)
+	p.print(p.keyword("INPUT TABLE"))
+	p.movePast(n)
 }

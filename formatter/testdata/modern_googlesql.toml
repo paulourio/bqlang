@@ -357,6 +357,8 @@ options(uri='gs://bucket/model');
 load data overwrite mydataset.part_tbl
 overwrite partitions (_partitiondate = '2026-01-01')
 from files (format='PARQUET', uris=['gs://bucket/p/*.parquet']);
+
+insert into mydataset.part_tbl values (1, default);
 """
 formatted = """
 CREATE EXTERNAL SCHEMA IF NOT EXISTS ext_ds
@@ -385,6 +387,10 @@ FROM FILES (
   format = 'PARQUET',
   uris   = ['gs://bucket/p/*.parquet']
 );
+
+INSERT INTO mydataset.part_tbl
+VALUES
+  (1, DEFAULT);
 """
 
 [[cases]]
