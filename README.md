@@ -133,24 +133,24 @@ func main() {
 
 ## Supported SQL and Template Surface
 
-### Query Syntax and Expressions
+### Query Syntax, Pipe Operators, and Graph Queries
 
-- Standard `SELECT` projections, `WITH` / `WITH RECURSIVE` CTEs, set operations (`UNION`, `INTERSECT`, `EXCEPT` with `CORRESPONDING` / `BY NAME`), `GROUP BY` (`ROLLUP`, `CUBE`, `GROUPING SETS`, `GROUP BY ALL`), `HAVING`, `QUALIFY`, `WINDOW`, `PIVOT`, `UNPIVOT`, and `TABLESAMPLE`.
-- GoogleSQL Pipe syntax (`FROM ... |> WHERE ... |> EXTEND ... |> AGGREGATE ... |> SET ... |> RENAME ... |> DROP ... |> JOIN ... |> CALL ...`).
-- Dot-chained function calls (`(col).TRIM().LOWER()`) and inline `WITH(var AS expr, result)` scoped expressions.
-- Scalar, aggregate, analytic/window, lambda (`x -> expr`), `SAFE.`-prefixed, and templated (`ANY TYPE`, `ANY TABLE`) function calls.
-- All BigQuery data types and literals: scalar types, parameterized types, `ARRAY`, `STRUCT`, `JSON`, `GEOGRAPHY`, `INTERVAL`, and `RANGE`.
+- **Relational Queries**: `SELECT` projections, `WITH` / `WITH RECURSIVE` CTEs, set operations (`UNION`, `INTERSECT`, `EXCEPT` with `CORRESPONDING` / `BY NAME`), `GROUP BY` (`ROLLUP`, `CUBE`, `GROUPING SETS`, `()`, `GROUP BY ALL`, `GROUP AND ORDER BY`), `HAVING`, `QUALIFY`, `WINDOW`, `PIVOT`, `UNPIVOT`, `MATCH_RECOGNIZE` row pattern matching, `FOR SYSTEM_TIME AS OF`, and `TABLESAMPLE`.
+- **Pipe Syntax (`|>`)**: Linear pipelines starting from `SELECT` or `FROM`, including `WHERE`, `EXTEND`, `SET`, `RENAME`, `DROP`, `AS`, `DISTINCT`, `AGGREGATE`, `JOIN`, `CALL`, `WINDOW`, `ORDER BY`, `LIMIT`, `TABLESAMPLE`, `PIVOT`, `UNPIVOT`, `MATCH_RECOGNIZE`, `WITH`, `UNION` / `INTERSECT` / `EXCEPT`, `ASSERT`, `CREATE TABLE`, `INSERT`, and `EXPORT DATA`.
+- **Property Graphs and GQL**: `GRAPH_TABLE(...)` and standalone or `NEXT`-chained `GRAPH` queries (`MATCH`, `OPTIONAL MATCH`, `LET`, `FILTER`, `FOR`, `CALL`, `WITH`, `RETURN`, set operations, GPML path/element patterns, search prefixes, path modes, label expressions, `IS [NOT] SOURCE/DESTINATION OF`, `IS [NOT] LABELED`, and braced `{ ... }` GQL subqueries).
+- **Expressions and Functions**: Dot-chained calls (`(col).TRIM().LOWER()`, `(-1).(SAFE.SQRT)()`), inline `WITH(var AS expr, result)` expressions, quantified comparisons and `LIKE` (`= ANY`, `LIKE ALL`), scalar, multi-level aggregate (`MAX(x WHERE p GROUP BY y)` with `HAVING` and `WITH REPORT`), analytic/window, lambda (`x -> expr`), and templated (`ANY TYPE`, `ANY TABLE`) function calls.
+- **Data Types**: All BigQuery scalar, parameterized (`STRING(MAX)`, `NUMERIC(p, s)`), `ARRAY`, `STRUCT`, `JSON`, `GEOGRAPHY`, `INTERVAL`, and `RANGE` types and literals.
 
 ### DDL, DML, DCL, and Data Movement
 
-- **DDL**: `CREATE`, `ALTER`, and `DROP` statements for schemas, databases, tables (`LIKE`, `CLONE`, `COPY`, `SNAPSHOT`, `EXTERNAL`), views (including column lists with `OPTIONS`), materialized views, functions, table functions, procedures, BigQuery ML models (`CREATE MODEL` with `TRANSFORM`), row access policies, search indexes, and `UNDROP`, plus `PRIMARY KEY`, `FOREIGN KEY`, and `CHECK` constraints (`ENFORCED` / `NOT ENFORCED`).
-- **DML**: `INSERT`, `DELETE`, `UPDATE`, `MERGE`, and `TRUNCATE TABLE`, including `THEN RETURN` (`WITH ACTION`) clauses.
-- **DCL**: `GRANT` and `REVOKE` privilege statements.
-- **Data Movement**: `EXPORT DATA` and `LOAD DATA INTO` / `LOAD DATA OVERWRITE` (`FROM FILES`).
+- **Schema and Table DDL**: `CREATE`, `ALTER`, and `DROP` statements for schemas (`EXTERNAL SCHEMA`, `ADD/DROP REPLICA`), tables (`LIKE`, `CLONE`, `COPY`, `SNAPSHOT`, `EXTERNAL`, `UNDROP`), views, materialized views (`AS REPLICA OF`), functions, table functions, procedures, property graphs (`CREATE/DROP PROPERTY GRAPH`), connections, row access policies, and BigQuery capacity/reservation entities.
+- **Columns, Constraints, Indexes, and ML**: Column `DEFAULT`, `GENERATED ALWAYS` / `BY DEFAULT`, `IDENTITY`, `HIDDEN`, `OPTIONS`, and `COLLATE` attributes; `PRIMARY KEY`, `FOREIGN KEY` / inline `REFERENCES`, and `CHECK` constraints (`ENFORCED` / `NOT ENFORCED`); `SEARCH INDEX` and `VECTOR INDEX` (`CREATE`, `ALTER ... REBUILD`, `DROP`); and `CREATE MODEL` (`TRANSFORM`, `INPUT` / `OUTPUT`).
+- **DML, DCL, and Data Movement**: `INSERT` (including `DEFAULT` values), `DELETE`, `UPDATE`, `MERGE`, `TRUNCATE TABLE`, `THEN RETURN` (`WITH ACTION`), `GRANT` / `REVOKE`, `EXPORT DATA`, `EXPORT MODEL`, and `LOAD DATA INTO` / `OVERWRITE` (`PARTITIONS`, `FROM FILES`).
 
 ### Procedural Scripting
 
-- Variable and system declarations (`DECLARE`, `SET`), block scopes (`BEGIN ... EXCEPTION WHEN ERROR THEN ... END`), conditionals (`IF ... ELSEIF ... ELSE ... END IF`, `CASE ... WHEN ... END CASE`), loops and labels (`LOOP`, `WHILE`, `REPEAT ... UNTIL`, `FOR ... IN`, `BREAK`, `LEAVE`, `CONTINUE`, `ITERATE`), control transfers (`CALL`, `RETURN`, `RAISE`, `EXECUTE IMMEDIATE`, `ASSERT`), and multi-statement transactions (`BEGIN`, `COMMIT`, `ROLLBACK`).
+- **Declarations and Scopes**: `DECLARE`, `SET`, and nested `BEGIN ... EXCEPTION WHEN ERROR THEN ... END` blocks.
+- **Control Flow and Transactions**: `IF ... ELSEIF ... ELSE ... END IF`, `CASE ... WHEN ... END CASE`, labeled loops (`LOOP`, `WHILE`, `REPEAT ... UNTIL`, `FOR ... IN`, `BREAK`, `LEAVE`, `CONTINUE`, `ITERATE`), `CALL`, `RETURN`, `RAISE`, `EXECUTE IMMEDIATE` (`INTO`, `USING`), `ASSERT`, and multi-statement transactions (`BEGIN`, `COMMIT`, `ROLLBACK`).
 
 ### Comments and Jinja2 Templates
 
