@@ -141,8 +141,8 @@ func dumpStatements(input string, stdout, stderr io.Writer) int {
 		return 1
 	}
 
-	for i := range int(num) {
-		stmt, cerr := stmtList.Child(int32(i))
+	for i := range num {
+		stmt, cerr := stmtList.Child(i)
 		if cerr != nil {
 			fmt.Fprintf(stderr, "bqdump: statement %d: %v\n", i, cerr)
 
