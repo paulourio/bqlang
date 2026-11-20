@@ -20,9 +20,8 @@ type configLoader struct {
 }
 
 type parsedConfig struct {
-	defaultStyle string
-	styles       []compiledStyle
-	fallback     *formatter.PrintOptions
+	styles   []compiledStyle
+	fallback *formatter.PrintOptions
 }
 
 type compiledStyle struct {
@@ -105,27 +104,33 @@ func (c *configLoader) discoverFromDir(startDir string) (*parsedConfig, bool, er
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	if cfg, ok := c.dirCache[startDir]; ok {
-		return cfg, cfg != nil, nil
-	}
+	var visited []string
 
 	dir := startDir
 	for {
+		if cfg, ok := c.dirCache[dir]; ok {
+			c.cacheDirs(visited, cfg)
+
+			return cfg, cfg != nil, nil
+		}
+
+		visited = append(visited, dir)
+
 		candidate := filepath.Join(dir, configFileName)
 		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
-			if cached, ok := c.fileCache[candidate]; ok {
-				c.dirCache[startDir] = cached
+			parsed, ok := c.fileCache[candidate]
+			if !ok {
+				var perr error
 
-				return cached, true, nil
+				parsed, perr = parseConfigFile(candidate)
+				if perr != nil {
+					return nil, false, perr
+				}
+
+				c.fileCache[candidate] = parsed
 			}
 
-			parsed, perr := parseConfigFile(candidate)
-			if perr != nil {
-				return nil, false, perr
-			}
-
-			c.fileCache[candidate] = parsed
-			c.dirCache[startDir] = parsed
+			c.cacheDirs(visited, parsed)
 
 			return parsed, true, nil
 		}
@@ -138,17 +143,19 @@ func (c *configLoader) discoverFromDir(startDir string) (*parsedConfig, bool, er
 		dir = parent
 	}
 
-	c.dirCache[startDir] = nil
+	c.cacheDirs(visited, nil)
 
 	return nil, false, nil
 }
 
-func (p *parsedConfig) selectOptions(filename string, isStdin bool) *formatter.PrintOptions {
-	if len(p.styles) == 0 {
-		return clonePrintOptions(p.fallback)
+func (c *configLoader) cacheDirs(dirs []string, cfg *parsedConfig) {
+	for _, d := range dirs {
+		c.dirCache[d] = cfg
 	}
+}
 
-	if !isStdin {
+func (p *parsedConfig) selectOptions(filename string, isStdin bool) *formatter.PrintOptions {
+	if !isStdin && len(p.styles) > 0 {
 		slashPath := filepath.ToSlash(filename)
 		baseName := filepath.Base(filename)
 
@@ -159,15 +166,7 @@ func (p *parsedConfig) selectOptions(filename string, isStdin bool) *formatter.P
 		}
 	}
 
-	if p.defaultStyle != "" {
-		for _, s := range p.styles {
-			if s.name == p.defaultStyle {
-				return clonePrintOptions(s.options)
-			}
-		}
-	}
-
-	return clonePrintOptions(p.styles[0].options)
+	return clonePrintOptions(p.fallback)
 }
 
 func (s compiledStyle) matches(slashPath, baseName string) bool {
@@ -297,13 +296,19 @@ func buildMultiStyleConfig(path string, md toml.MetaData, raw *rawConfigFile) (*
 		return nil, fmt.Errorf("config %s: unknown option %q", path, undecoded[0].String())
 	}
 
-	if raw.DefaultStyle != "" && !hasNamedStyle(styles, raw.DefaultStyle) {
-		return nil, fmt.Errorf("config %s: default_style %q not found in styles", path, raw.DefaultStyle)
+	fallback := styles[0].options
+	if raw.DefaultStyle != "" {
+		opt, ok := findNamedStyleOptions(styles, raw.DefaultStyle)
+		if !ok {
+			return nil, fmt.Errorf("config %s: default_style %q not found in styles", path, raw.DefaultStyle)
+		}
+
+		fallback = opt
 	}
 
 	return &parsedConfig{
-		defaultStyle: raw.DefaultStyle,
-		styles:       styles,
+		styles:   styles,
+		fallback: fallback,
 	}, nil
 }
 
@@ -345,12 +350,12 @@ func compileStyleEntry(path string, md toml.MetaData, entry rawStyleEntry) (comp
 	}, nil
 }
 
-func hasNamedStyle(styles []compiledStyle, name string) bool {
+func findNamedStyleOptions(styles []compiledStyle, name string) (*formatter.PrintOptions, bool) {
 	for _, s := range styles {
 		if s.name == name {
-			return true
+			return s.options, true
 		}
 	}
 
-	return false
+	return nil, false
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"go/scanner"
 	"io"
 	"io/fs"
 	"os"
@@ -145,7 +144,7 @@ func (r *reporter) Report(err error) {
 	}
 
 	st := r.getState()
-	scanner.PrintError(st.errOut, err)
+	fmt.Fprintln(st.errOut, err)
 	st.exitCode = 2
 }
 
