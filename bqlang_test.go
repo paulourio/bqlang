@@ -19,9 +19,16 @@ func TestDefaultOptionsAndMarshalJSON(t *testing.T) {
 	opts := bqlang.DefaultParserOptions()
 	require.NotNil(t, opts)
 
+	errOpts := bqlang.DefaultErrorMessageOptions()
+	require.NotNil(t, errOpts)
+
 	sql := "SELECT a, SUM(b).ROUND(2) AS total FROM project-id.ds.tbl QUALIFY ROW_NUMBER() OVER (PARTITION BY a) = 1"
 	out, err := googlesql.ParseStatement(sql, opts)
 	require.NoError(t, err)
+
+	scriptOut, err := googlesql.ParseScript(sql, opts, errOpts)
+	require.NoError(t, err)
+	require.NotNil(t, scriptOut)
 
 	stmt, err := out.Statement()
 	require.NoError(t, err)
