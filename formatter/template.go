@@ -45,7 +45,7 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 		t.counter++
 		tok := t.makeName()
 		r = newControlBlockPlaceholder(e, tok)
-	case ast.TemplateVariable:
+	case ast.TemplateVariable, ast.TemplateRawBlock:
 		t.counter++
 		tok := t.makeName()
 
@@ -59,7 +59,7 @@ func (t *templatePlaceholders) New(e *extensions.TemplateElement) *placeholderIn
 		} else {
 			r = newInlinePlaceholder(e, tok)
 		}
-	case ast.TemplateSetBlock:
+	case ast.TemplateSetBlock, ast.TemplateMacroBlock, ast.TemplateCallBlock, ast.TemplateDoBlock:
 		t.counter++
 		tok := t.makeName()
 

@@ -159,4 +159,4 @@ func main() {
 ### Comments and Jinja2 Templates
 
 - Preserves SQL line comments (`--`, `#`), block comments (`/* ... */`), and Jinja2 comments (`{# ... #}`).
-- Preserves Jinja2 variable expressions (`{{ expr }}`) and control blocks (`{% if %} ... {% elif %} ... {% else %} ... {% endif %}`, `{% for %} ... {% endfor %}`) when each template expression occupies a valid identifier or statement position.
+- Preserves Jinja2 variable expressions (`{{ expr }}`), control blocks (`{% if %} ... {% elif %} ... {% else %} ... {% endif %}`, `{% for %} ... {% endfor %}`), including mid-clause predicates, commas, and conditional clauses, and statement-level directives (`{% set %}`, `{% set %} ... {% endset %}`, `{% macro %} ... {% endmacro %}`, `{% call %} ... {% endcall %}`, `{% do %}`, and `{% raw %} ... {% endraw %}`).

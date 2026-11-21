@@ -14,6 +14,10 @@ const (
 	TemplateForBlock
 	TemplateIfBlock
 	TemplateSetBlock
+	TemplateMacroBlock
+	TemplateCallBlock
+	TemplateDoBlock
+	TemplateRawBlock
 	TemplateVariable
 )
 
@@ -33,6 +37,14 @@ func (k Kind) String() string {
 		return "TemplateIfBlock"
 	case TemplateSetBlock:
 		return "TemplateSetBlock"
+	case TemplateMacroBlock:
+		return "TemplateMacroBlock"
+	case TemplateCallBlock:
+		return "TemplateCallBlock"
+	case TemplateDoBlock:
+		return "TemplateDoBlock"
+	case TemplateRawBlock:
+		return "TemplateRawBlock"
 	case TemplateVariable:
 		return "TemplateVariable"
 	}

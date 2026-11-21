@@ -123,6 +123,10 @@ Element:
       TemplateForBlock
     | TemplateIfBlock
     | TemplateSetBlock
+    | TemplateMacroBlock
+    | TemplateCallBlock
+    | TemplateDoBlock
+    | TemplateRawBlock
     | TemplateComment
     | TemplateVariable
     | Element2
@@ -141,7 +145,8 @@ Element2:
     | "|" | "|>" | "^" | "&" | "<<" | ">>" | "=>" | "->" | "/"
     | "+" | "-" | "||" | "<>" | "!=" | "=" | "<" | "<=" | ">" | ">="
     | ";" | "@" | "{" | "}" | "~" | "?"
-    | "else" | "if" | "for" | "endfor" | "elif" | "endif" | "set"
+    | "else" | "if" | "for" | "endfor" | "elif" | "endif" | "set" | "endset"
+    | "macro" | "endmacro" | "call" | "endcall" | "do" | "raw" | "endraw"
     ;
 
 Comment:
@@ -150,15 +155,146 @@ Comment:
     ;
 
 TemplateSetBlock:
-      TemplateSetBlockPrefix template_block_end
+      TemplateSetInlinePrefix template_block_end
+      << UpdateLoc($0, $1) >>
+    | TemplateSetBodyPrefix TemplateSetEnd
       << UpdateLoc($0, $1) >>
     ;
 
-TemplateSetBlockPrefix:
+TemplateSetHeader:
       template_block_start "set"
       << NewTemplateSetBlock($0) >>
-    | TemplateSetBlockPrefix Element
+    | TemplateSetHeader TemplateSetHeaderElem
       << WithExtraChild($0, $1) >>
+    ;
+
+TemplateSetHeaderElem:
+      Comment
+    | identifier
+    | bytes_literal
+    | string_literal
+    | integer_literal
+    | floating_point_literal
+    | newline
+    | dollar
+    | "*" | "[" | "]" | "(" | ")" | "," | "." | ":" | "%" | "!"
+    | "|" | "|>" | "^" | "&" | "<<" | ">>" | "=>" | "->" | "/"
+    | "+" | "-" | "||" | "<>" | "!=" | "<" | "<=" | ">" | ">="
+    | ";" | "@" | "{" | "}" | "~" | "?"
+    | "else" | "if" | "for" | "endfor" | "elif" | "endif" | "set" | "endset"
+    | "macro" | "endmacro" | "call" | "endcall" | "do" | "raw" | "endraw"
+    ;
+
+TemplateSetInlinePrefix:
+      TemplateSetHeader "="
+      << UpdateLoc($0, $1) >>
+    | TemplateSetInlinePrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateSetBodyBegin:
+      TemplateSetHeader template_block_end
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateSetBodyPrefix:
+      TemplateSetBodyBegin
+    | TemplateSetBodyPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateSetEnd:
+      template_block_start "endset" template_block_end
+      << $2, nil >>
+    ;
+
+TemplateMacroBlock:
+      TemplateMacroBlockPrefix TemplateMacroEnd
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateMacroBlockPrefix:
+      TemplateMacroBegin
+    | TemplateMacroBlockPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateMacroBegin:
+      TemplateMacroBeginPrefix template_block_end
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateMacroBeginPrefix:
+      template_block_start "macro"
+      << NewTemplateMacroBlock($0) >>
+    | TemplateMacroBeginPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateMacroEnd:
+      template_block_start "endmacro" template_block_end
+      << $2, nil >>
+    ;
+
+TemplateCallBlock:
+      TemplateCallBlockPrefix TemplateCallEnd
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateCallBlockPrefix:
+      TemplateCallBegin
+    | TemplateCallBlockPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateCallBegin:
+      TemplateCallBeginPrefix template_block_end
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateCallBeginPrefix:
+      template_block_start "call"
+      << NewTemplateCallBlock($0) >>
+    | TemplateCallBeginPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateCallEnd:
+      template_block_start "endcall" template_block_end
+      << $2, nil >>
+    ;
+
+TemplateDoBlock:
+      TemplateDoBlockPrefix template_block_end
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateDoBlockPrefix:
+      template_block_start "do"
+      << NewTemplateDoBlock($0) >>
+    | TemplateDoBlockPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateRawBlock:
+      TemplateRawBlockPrefix TemplateRawEnd
+      << UpdateLoc($0, $1) >>
+    ;
+
+TemplateRawBlockPrefix:
+      TemplateRawBegin
+    | TemplateRawBlockPrefix Element
+      << WithExtraChild($0, $1) >>
+    ;
+
+TemplateRawBegin:
+      template_block_start "raw" template_block_end
+      << NewTemplateRawBlock($0) >>
+    ;
+
+TemplateRawEnd:
+      template_block_start "endraw" template_block_end
+      << $2, nil >>
     ;
 
 TemplateIfBlock:

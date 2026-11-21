@@ -44,6 +44,26 @@ func NewTemplateSetBlock(a Attrib) (Attrib, error) {
 	return newTemplateBlock(a, ast.TemplateSetBlock, "template set block")
 }
 
+// NewTemplateMacroBlock constructs an ast.TemplateBlockNode of kind TemplateMacroBlock.
+func NewTemplateMacroBlock(a Attrib) (Attrib, error) {
+	return newTemplateBlock(a, ast.TemplateMacroBlock, "template macro block")
+}
+
+// NewTemplateCallBlock constructs an ast.TemplateBlockNode of kind TemplateCallBlock.
+func NewTemplateCallBlock(a Attrib) (Attrib, error) {
+	return newTemplateBlock(a, ast.TemplateCallBlock, "template call block")
+}
+
+// NewTemplateDoBlock constructs an ast.TemplateBlockNode of kind TemplateDoBlock.
+func NewTemplateDoBlock(a Attrib) (Attrib, error) {
+	return newTemplateBlock(a, ast.TemplateDoBlock, "template do block")
+}
+
+// NewTemplateRawBlock constructs an ast.TemplateBlockNode of kind TemplateRawBlock.
+func NewTemplateRawBlock(a Attrib) (Attrib, error) {
+	return newTemplateBlock(a, ast.TemplateRawBlock, "template raw block")
+}
+
 func newTemplateBlock(a Attrib, kind ast.Kind, label string) (Attrib, error) {
 	if a == nil {
 		return nil, fmt.Errorf("%w: nil %s attribute", errors.ErrMalformedParser, label)

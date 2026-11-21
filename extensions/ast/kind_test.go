@@ -18,5 +18,9 @@ func TestKindConstantsAreTyped(t *testing.T) {
 	assert.Equal(t, "TemplateForBlock", ast.TemplateForBlock.String())
 	assert.Equal(t, "TemplateIfBlock", ast.TemplateIfBlock.String())
 	assert.Equal(t, "TemplateSetBlock", ast.TemplateSetBlock.String())
+	assert.Equal(t, "TemplateMacroBlock", ast.TemplateMacroBlock.String())
+	assert.Equal(t, "TemplateCallBlock", ast.TemplateCallBlock.String())
+	assert.Equal(t, "TemplateDoBlock", ast.TemplateDoBlock.String())
+	assert.Equal(t, "TemplateRawBlock", ast.TemplateRawBlock.String())
 	assert.Equal(t, "TemplateVariable", ast.TemplateVariable.String())
 }

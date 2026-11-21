@@ -184,3 +184,44 @@ formatted = """
 {% if qual %} QUALIFY ROW_NUMBER() OVER () = 1 {% endif %}
   {% if more %} UNION ALL SELECT 'z' FROM t2 {% endif %}
 """
+
+[[cases]]
+description = "Block set/endset, macro/endmacro, call/endcall, do, and raw blocks"
+input = """
+{% set query %}
+  SELECT 1
+{% endset %}
+{% macro cents_to_dollars(col) %}
+  {% set scale = 100 %}
+  ({{ col }} / {{ scale }})
+{% endmacro %}
+{% call statement('my_stmt', fetch_result=True) %}
+  SELECT 1
+{% endcall %}
+{% do log('building', info=True) %}
+{% raw %}{{ not_jinja }}{% endraw %}
+
+select {% raw %}{{ literal_tag }}{% endraw %} as tag, macro, do, raw
+from {{ ref('orders') }}
+"""
+formatted = """
+{% set query %}
+  SELECT 1
+{% endset %}
+{% macro cents_to_dollars(col) %}
+  {% set scale = 100 %}
+  ({{ col }} / {{ scale }})
+{% endmacro %}
+{% call statement('my_stmt', fetch_result=True) %}
+  SELECT 1
+{% endcall %}
+{% do log('building', info=True) %}
+
+{% raw %}{{ not_jinja }}{% endraw %}
+
+SELECT {% raw %}{{ literal_tag }}{% endraw %} AS tag,
+       macro,
+       do,
+       raw
+  FROM {{ ref('orders') }};
+"""
