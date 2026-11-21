@@ -99,3 +99,88 @@ SELECT id,
        {% if mode == 1 %} a % 2 {% elif mode == 2 %} b != 0 {% else %} c + 1 {% endif %} AS val
   FROM {{ source('raw', 'events') }}
 """
+
+[[cases]]
+description = "Mid-clause WHERE AND/OR blocks including dbt incremental subquery"
+input = """
+select {{- col -}}
+from {{ ref('raw_events') }}
+where 1 = 1
+{% if is_incremental() %}
+  AND updated_at > (SELECT MAX(updated_at) FROM {{ this }})
+{% endif %}
+{%- if include_deleted %} OR deleted_at IS NOT NULL {%- endif %}
+"""
+formatted = """
+SELECT {{- col -}}
+  FROM {{ ref('raw_events') }}
+ WHERE     1 = 1
+       {% if is_incremental() %}
+  AND updated_at > (SELECT MAX(updated_at) FROM {{ this }})
+{% endif %}
+    {%- if include_deleted %} OR deleted_at IS NOT NULL {%- endif %}
+"""
+
+[[cases]]
+description = "Mid-clause leading-comma and trailing-comma column blocks"
+input = """
+select {% if include_a %}a, {% endif %}id, name, email, status
+       {% for col in extra_cols %}, {{ col }}{% endfor %}
+  from {{ ref('users') }}
+"""
+formatted = """
+SELECT {% if include_a %}a, {% endif %}
+       id,
+       name,
+       email,
+       status
+       {% for col in extra_cols %}, {{ col }}{% endfor %}
+  FROM {{ ref('users') }}
+"""
+
+[[cases]]
+description = "Mid-clause conditional JOIN, WHERE, GROUP BY, HAVING, ORDER BY, and LIMIT"
+input = """
+select t.a, count(*) as cnt
+from {{ ref('base') }} as t
+{% if join_dim %} LEFT JOIN dim ON t.id = dim.id {% endif %}
+{% if filter %} WHERE t.active = TRUE {% endif %}
+{% if grp %} GROUP BY t.a {% endif %}
+{% if hav %} HAVING count(*) > 1 {% endif %}
+{% if ord %} ORDER BY cnt DESC {% endif %}
+{% if dev %} LIMIT 100 {% endif %}
+"""
+formatted = """
+SELECT t.a,
+       COUNT(*) AS cnt
+  FROM {{ ref('base') }} AS t
+       {% if join_dim %} LEFT JOIN dim ON t.id = dim.id {% endif %}
+ {% if filter %} WHERE t.active = TRUE {% endif %}
+ {% if grp %} GROUP BY t.a {% endif %}
+{% if hav %} HAVING count(*) > 1 {% endif %}
+ {% if ord %} ORDER BY cnt DESC {% endif %}
+ {% if dev %} LIMIT 100 {% endif %}
+"""
+
+[[cases]]
+description = "Mid-clause conditional CASE WHEN, QUALIFY, UNION, and commented/empty-then branches"
+input = """
+select case {% if flag %} WHEN a = 1 THEN 'x' {% endif %} else 'y' end as label
+from t1
+where x=1{%- if extra %} {# keep active #} AND y = 2 {%- endif %}
+{% if a %}{% else %} AND z = 3 {% endif %}
+{% if qual %} QUALIFY ROW_NUMBER() OVER () = 1 {% endif %}
+{% if more %} UNION ALL SELECT 'z' FROM t2 {% endif %}
+"""
+formatted = """
+ SELECT CASE
+          {% if flag %} WHEN a = 1 THEN 'x' {% endif %}
+                                ELSE 'y'
+        END AS label
+   FROM t1
+  WHERE x = 1
+    {%- if extra %} {# keep active #} AND y = 2 {%- endif %}
+    {% if a %}{% else %} AND z = 3 {% endif %}
+{% if qual %} QUALIFY ROW_NUMBER() OVER () = 1 {% endif %}
+  {% if more %} UNION ALL SELECT 'z' FROM t2 {% endif %}
+"""
