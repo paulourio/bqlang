@@ -137,6 +137,15 @@ func (r *reporter) Write(p []byte) (int, error) {
 	return n, nil
 }
 
+// MarkDiff records a formatting difference, setting exit code 1 unless a
+// higher-severity error has already been recorded.
+func (r *reporter) MarkDiff() {
+	st := r.getState()
+	if st.exitCode < 1 {
+		st.exitCode = 1
+	}
+}
+
 // Report emits a non-nil error and sets exit code 2.
 func (r *reporter) Report(err error) {
 	if err == nil {

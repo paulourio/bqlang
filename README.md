@@ -39,14 +39,18 @@ bqfmt -w queries/
 bqfmt -config .bqfmt.toml -w queries/
 ```
 
-When given a directory path, `bqfmt` walks the directory tree and processes files ending in `.sql`, `.bql`, `.sql.j2`, and `.bql.j2`.
+When given a directory path, `bqfmt` walks the directory tree (skipping hidden subdirectories and `node_modules`) and processes files ending in `.sql`, `.bql`, `.sql.j2`, and `.bql.j2`.
 
 | Flag | Description |
 | :--- | :--- |
 | `-l` | Print paths of files whose formatting differs from `bqfmt` output. |
 | `-w` | Write formatted output back to source files instead of `stdout`. |
+| `-d` | Print unified diffs for files whose formatting differs from `bqfmt` output. |
+| `-check` | Exit with code `1` if any file's formatting differs from `bqfmt` output (`0` when clean, `2` on error). |
 | `-config <path>` | Read print options from the specified TOML file. |
+| `-stdin-filename <path>` | Filename used for `.bqfmt.toml` discovery, style matching, and diagnostics when reading `stdin`. |
 | `-debug` | Write formatter trace diagnostics to `stderr`. |
+| `-version` | Print the `bqfmt` version and exit. |
 
 #### Configuration (`.bqfmt.toml`)
 

@@ -11,19 +11,25 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/formatter"
 )
 
+var version = "dev"
+
 type cliRunner struct {
-	list  bool
-	write bool
-	debug bool
-	cfg   *configLoader
-	fdSem chan struct{}
-	stdin io.Reader
+	list          bool
+	write         bool
+	diff          bool
+	check         bool
+	debug         bool
+	stdinFilename string
+	cfg           *configLoader
+	fdSem         chan struct{}
+	stdin         io.Reader
 }
 
 const maxOpenFiles = 200
@@ -33,19 +39,21 @@ func main() {
 }
 
 func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
-	if err := bqlang.Init(); err != nil {
-		fmt.Fprintf(stderr, "bqfmt: %v\n", err)
-
-		return 2
-	}
-
 	flagSet := flag.NewFlagSet("bqfmt", flag.ContinueOnError)
 	flagSet.SetOutput(stderr)
 
 	listFlag := flagSet.Bool("l", false, "list files whose formatting differs from bqfmt's")
 	writeFlag := flagSet.Bool("w", false, "write result to (source) file instead of stdout")
+	diffFlag := flagSet.Bool("d", false, "display diffs instead of rewriting files")
+	checkFlag := flagSet.Bool("check", false, "exit with code 1 if any file's formatting differs from bqfmt's")
 	configFlag := flagSet.String("config", "", "path to .bqfmt.toml configuration file")
+	stdinFilenameFlag := flagSet.String(
+		"stdin-filename",
+		"",
+		"filename for config discovery, style matching, and diagnostics when reading standard input",
+	)
 	debugFlag := flagSet.Bool("debug", false, "emit formatter debug trace to stderr")
+	versionFlag := flagSet.Bool("version", false, "print bqfmt version and exit")
 
 	flagSet.Usage = func() {
 		fmt.Fprintf(stderr, "usage: bqfmt [flags] [path ...]\n")
@@ -60,6 +68,30 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return 2
 	}
 
+	if *versionFlag {
+		fmt.Fprintf(stdout, "bqfmt %s\n", versionString())
+
+		return 0
+	}
+
+	if *checkFlag && *writeFlag {
+		fmt.Fprintln(stderr, "bqfmt: cannot use -check with -w")
+
+		return 2
+	}
+
+	if *stdinFilenameFlag != "" && flagSet.NArg() > 0 {
+		fmt.Fprintln(stderr, "bqfmt: cannot use -stdin-filename with file arguments")
+
+		return 2
+	}
+
+	if err := bqlang.Init(); err != nil {
+		fmt.Fprintf(stderr, "bqfmt: %v\n", err)
+
+		return 2
+	}
+
 	cfgLoader, err := newConfigLoader(*configFlag)
 	if err != nil {
 		fmt.Fprintf(stderr, "bqfmt: %v\n", err)
@@ -68,12 +100,15 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	}
 
 	runner := &cliRunner{
-		list:  *listFlag,
-		write: *writeFlag,
-		debug: *debugFlag,
-		cfg:   cfgLoader,
-		fdSem: make(chan struct{}, maxOpenFiles),
-		stdin: stdin,
+		list:          *listFlag,
+		write:         *writeFlag,
+		diff:          *diffFlag,
+		check:         *checkFlag,
+		debug:         *debugFlag,
+		stdinFilename: *stdinFilenameFlag,
+		cfg:           cfgLoader,
+		fdSem:         make(chan struct{}, maxOpenFiles),
+		stdin:         stdin,
 	}
 
 	maxWeight := (2 << 20) * int64(runtime.GOMAXPROCS(0))
@@ -81,6 +116,49 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	runner.execute(seq, flagSet.Args())
 
 	return seq.GetExitCode()
+}
+
+func versionString() string {
+	if version != "" && version != "dev" {
+		return version
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "dev"
+	}
+
+	if info.Main.Version != "" && info.Main.Version != "(devel)" {
+		return info.Main.Version
+	}
+
+	var (
+		rev      string
+		modified bool
+	)
+
+	for _, s := range info.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			rev = s.Value
+		case "vcs.modified":
+			modified = s.Value == "true"
+		}
+	}
+
+	if rev == "" {
+		return "dev"
+	}
+
+	if len(rev) > 12 {
+		rev = rev[:12]
+	}
+
+	if modified {
+		return "dev+" + rev + "-dirty"
+	}
+
+	return "dev+" + rev
 }
 
 func (c *cliRunner) execute(s *sequencer, paths []string) {
@@ -91,8 +169,13 @@ func (c *cliRunner) execute(s *sequencer, paths []string) {
 			return
 		}
 
+		name := "<standard input>"
+		if c.stdinFilename != "" {
+			name = c.stdinFilename
+		}
+
 		s.Add(0, func(r *reporter) error {
-			return c.processFile("<standard input>", nil, c.stdin, r)
+			return c.processFile(name, nil, c.stdin, r)
 		})
 
 		return
@@ -122,6 +205,14 @@ func (c *cliRunner) walkDirectory(s *sequencer, target string) {
 	walkErr := filepath.WalkDir(target, func(path string, entry fs.DirEntry, werr error) error {
 		if werr != nil {
 			s.AddReport(werr)
+
+			return nil
+		}
+
+		if entry.IsDir() {
+			if path != target && isSkippedDir(entry.Name()) {
+				return filepath.SkipDir
+			}
 
 			return nil
 		}
@@ -174,6 +265,10 @@ func resolveWalkEntry(path string, entry fs.DirEntry) (fs.FileInfo, bool, error)
 	return info, true, nil
 }
 
+func isSkippedDir(name string) bool {
+	return strings.HasPrefix(name, ".") || name == "node_modules"
+}
+
 func isBQLFile(f fs.DirEntry) bool {
 	name := f.Name()
 	validSuffix := strings.HasSuffix(name, ".bql") ||
@@ -191,7 +286,9 @@ func (c *cliRunner) processFile(filename string, info fs.FileInfo, in io.Reader,
 		return err
 	}
 
-	printOpts, err := c.cfg.optionsFor(filename, info == nil)
+	useStdinDiscovery := info == nil && c.stdinFilename == ""
+
+	printOpts, err := c.cfg.optionsFor(filename, useStdinDiscovery)
 	if err != nil {
 		return err
 	}
@@ -242,7 +339,7 @@ func (c *cliRunner) emitResult(
 	result string,
 	r *reporter,
 ) error {
-	if !c.list && !c.write {
+	if !c.list && !c.write && !c.diff && !c.check {
 		if _, werr := r.Write([]byte(result)); werr != nil {
 			return fmt.Errorf("%s: write stdout: %w", filename, werr)
 		}
@@ -254,8 +351,18 @@ func (c *cliRunner) emitResult(
 		return nil
 	}
 
+	if c.check {
+		r.MarkDiff()
+	}
+
 	if c.list {
 		fmt.Fprintln(r, filename)
+	}
+
+	if c.diff {
+		if _, werr := r.Write([]byte(unifiedDiff(filename, input, result))); werr != nil {
+			return fmt.Errorf("%s: write diff: %w", filename, werr)
+		}
 	}
 
 	if c.write {

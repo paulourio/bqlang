@@ -639,4 +639,213 @@ func TestRestoreOriginalAndReadSizeMismatch(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "changed during reading")
 	})
+
+	t.Run("directory walk skips hidden directories and node_modules", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		good := filepath.Join(dir, "models", "good.sql")
+		gitSQL := filepath.Join(dir, ".git", "hooks", "broken.sql")
+		venvSQL := filepath.Join(dir, ".venv", "pkg", "broken.sql")
+		nestedHidden := filepath.Join(dir, "models", ".cache", "broken.sql")
+		nodeModSQL := filepath.Join(dir, "node_modules", "pkg", "broken.sql")
+
+		for _, p := range []string{good, gitSQL, venvSQL, nestedHidden, nodeModSQL} {
+			require.NoError(t, os.MkdirAll(filepath.Dir(p), 0o750))
+		}
+
+		require.NoError(t, os.WriteFile(good, []byte("select 1"), 0o600))
+		// Invalid SQL inside skipped directories would fail the run if visited.
+		for _, p := range []string{gitSQL, venvSQL, nestedHidden, nodeModSQL} {
+			require.NoError(t, os.WriteFile(p, []byte("SELECT FROM WHERE"), 0o600))
+		}
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-l", dir}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Equal(t, good+"\n", stdout.String())
+		assert.Empty(t, stderr.String())
+	})
+
+	t.Run("explicitly targeted hidden directory is walked while its hidden children are skipped", func(t *testing.T) {
+		t.Parallel()
+
+		parent := t.TempDir()
+		hiddenRoot := filepath.Join(parent, ".queries")
+		target := filepath.Join(hiddenRoot, "report.sql")
+		nestedGit := filepath.Join(hiddenRoot, ".git", "ignored.sql")
+
+		require.NoError(t, os.MkdirAll(filepath.Dir(nestedGit), 0o750))
+		require.NoError(t, os.WriteFile(target, []byte("select 2"), 0o600))
+		require.NoError(t, os.WriteFile(nestedGit, []byte("SELECT FROM WHERE"), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-l", hiddenRoot}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Equal(t, target+"\n", stdout.String())
+		assert.Empty(t, stderr.String())
+	})
+}
+
+func TestBqfmtDiffCheckStdinFilenameAndVersion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("-version prints version and exits 0", func(t *testing.T) {
+		t.Parallel()
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-version"}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.True(t, strings.HasPrefix(stdout.String(), "bqfmt "), "got %q", stdout.String())
+		assert.Empty(t, stderr.String())
+	})
+
+	t.Run("-d emits unified diff on changes and empty output when already formatted", func(t *testing.T) {
+		t.Parallel()
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-d"}, strings.NewReader("select a, b from t"), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Empty(t, stderr.String())
+		assert.Contains(t, stdout.String(), "--- <standard input>.orig\n+++ <standard input>\n")
+		assert.Contains(t, stdout.String(), "-select a, b from t\n\\ No newline at end of file\n")
+		assert.Contains(t, stdout.String(), "+SELECT a, b\n+  FROM t\n")
+
+		stdout.Reset()
+		stderr.Reset()
+
+		code = run([]string{"-d"}, strings.NewReader("SELECT a, b\n  FROM t\n"), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Empty(t, stdout.String())
+		assert.Empty(t, stderr.String())
+	})
+
+	t.Run("-check exits 0 when clean, 1 on diff, 2 on error, and rejects -w", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		clean := filepath.Join(dir, "clean.sql")
+		dirty := filepath.Join(dir, "dirty.sql")
+		broken := filepath.Join(dir, "broken.sql")
+
+		require.NoError(t, os.WriteFile(clean, []byte("SELECT 1\n"), 0o600))
+		require.NoError(t, os.WriteFile(dirty, []byte("select 1"), 0o600))
+		require.NoError(t, os.WriteFile(broken, []byte("SELECT FROM WHERE"), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		// Clean file -> exit 0
+		code := run([]string{"-check", clean}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 0, code)
+		assert.Empty(t, stdout.String())
+		assert.Empty(t, stderr.String())
+
+		// Dirty file with -check alone -> exit 1, quiet stdout
+		code = run([]string{"-check", dirty}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 1, code)
+		assert.Empty(t, stdout.String())
+		assert.Empty(t, stderr.String())
+
+		// Dirty file with -check -l -> exit 1 + listed filename
+		code = run([]string{"-check", "-l", dirty}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 1, code)
+		assert.Equal(t, dirty+"\n", stdout.String())
+		assert.Empty(t, stderr.String())
+
+		// Dirty + broken -> error exit 2 takes precedence over diff exit 1
+		stdout.Reset()
+		stderr.Reset()
+		code = run([]string{"-check", "-d", dirty, broken}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Contains(t, stdout.String(), "--- "+dirty+".orig")
+		assert.Contains(t, stderr.String(), broken)
+
+		// -check with -w -> rejected with exit 2
+		stdout.Reset()
+		stderr.Reset()
+		code = run([]string{"-check", "-w", clean}, strings.NewReader(""), &stdout, &stderr)
+		assert.Equal(t, 2, code)
+		assert.Contains(t, stderr.String(), "cannot use -check with -w")
+	})
+
+	t.Run("-stdin-filename discovers config, matches styles, and labels output", func(t *testing.T) {
+		t.Parallel()
+
+		rootDir := t.TempDir()
+		martDir := filepath.Join(rootDir, "models", "mart")
+		require.NoError(t, os.MkdirAll(martDir, 0o750))
+
+		cfgContent := `
+default_style = "upper"
+
+[[styles]]
+name = "lower_mart"
+include = "models/mart/*.sql"
+
+[styles.options]
+keyword_style = "LOWER_CASE"
+
+[[styles]]
+name = "upper"
+
+[styles.options]
+keyword_style = "UPPER_CASE"
+`
+		require.NoError(t, os.WriteFile(filepath.Join(rootDir, ".bqfmt.toml"), []byte(cfgContent), 0o600))
+
+		virtualPath := filepath.Join(martDir, "orders.sql")
+
+		var stdout, stderr bytes.Buffer
+
+		code := run(
+			[]string{"-stdin-filename", virtualPath},
+			strings.NewReader("SELECT 1 AS x"),
+			&stdout,
+			&stderr,
+		)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Equal(t, "select 1 as x\n", stdout.String())
+
+		// Also verify -l and -d use virtualPath as the label.
+		stdout.Reset()
+		stderr.Reset()
+		code = run(
+			[]string{"-check", "-l", "-d", "-stdin-filename", virtualPath},
+			strings.NewReader("SELECT 1 AS x"),
+			&stdout,
+			&stderr,
+		)
+		assert.Equal(t, 1, code)
+		assert.Contains(t, stdout.String(), virtualPath+"\n")
+		assert.Contains(t, stdout.String(), "--- "+virtualPath+".orig\n+++ "+virtualPath+"\n")
+
+		// Reject -stdin-filename with positional file arguments.
+		stdout.Reset()
+		stderr.Reset()
+		code = run(
+			[]string{"-stdin-filename", virtualPath, virtualPath},
+			strings.NewReader(""),
+			&stdout,
+			&stderr,
+		)
+		assert.Equal(t, 2, code)
+		assert.Contains(t, stderr.String(), "cannot use -stdin-filename with file arguments")
+	})
+
+	t.Run("unifiedDiff emits multiple hunks when changes are separated", func(t *testing.T) {
+		t.Parallel()
+
+		oldText := "l1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\nl9\nl10\n"
+		newText := "L1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\nl9\nL10\n"
+
+		diff := unifiedDiff("q.sql", oldText, newText)
+		assert.Equal(t, 2, strings.Count(diff, "@@ "))
+		assert.Contains(t, diff, "@@ -1,4 +1,4 @@\n-l1\n+L1\n")
+		assert.Contains(t, diff, "@@ -7,4 +7,4 @@\n l7\n l8\n l9\n-l10\n+L10\n")
+		assert.Empty(t, unifiedDiff("q.sql", oldText, oldText))
+	})
 }
