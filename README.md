@@ -251,6 +251,68 @@ func main() {
 }
 ```
 
+### Library Usage: Embedding `bqpls`
+
+Applications written in Go can embed the `bqpls` language server in-process over `io.Pipe` and share a single concurrency-safe `*catalog.Store` between the SQL editor and UI components such as a dataset browser:
+
+```go
+package main
+
+import (
+	"context"
+	"io"
+	"log/slog"
+
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
+	"github.com/paulourio/bqlang/lsp"
+)
+
+func startEmbeddedLSP(ctx context.Context, logger *slog.Logger) (*lsp.Server, *catalog.Store, io.ReadCloser, io.WriteCloser, error) {
+	opts := bqconfig.DefaultLSPOptions()
+	opts.DefaultProject = "my-gcp-project"
+	opts.DefaultDataset = "analytics"
+	opts.BigQueryAPIEnabled = true
+	if err := opts.Validate(); err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	tp := catalog.NewDefaultTokenProvider(
+		"https://www.googleapis.com/auth/bigquery",
+		"https://www.googleapis.com/auth/cloud-platform",
+	)
+	shared, err := catalog.NewStore(opts, catalog.WithRestOptions(catalog.WithTokenProvider(tp)))
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	cr, sw := io.Pipe() // client reads what the server writes
+	sr, cw := io.Pipe() // server reads what the client writes
+
+	srv, err := lsp.NewServer(lsp.ServerOptions{
+		Store:             shared,
+		TokenProvider:     tp,
+		DefaultLSPOptions: opts,
+		Logger:            logger,
+	})
+	if err != nil {
+		_ = shared.Close()
+		return nil, nil, nil, nil, err
+	}
+
+	go func() {
+		defer func() { _ = sw.Close() }()
+		_ = srv.Serve(ctx, sr, sw)
+	}()
+
+	// Speak Content-Length framed JSON-RPC 2.0 over (cr, cw).
+	// Calling srv.Close() unsubscribes from shared without closing it.
+	return srv, shared, cr, cw, nil
+}
+```
+
+See [lsp/PROTOCOL.md](lsp/PROTOCOL.md) for the custom LSP extensions (`bqpls/statements`, `bqpls/queryCost`, `bqpls/refreshCost`), client settings schema, and semantic token legend.
+
 ## Supported SQL and Template Surface
 
 ### Query Syntax, Pipe Operators, and Graph Queries
