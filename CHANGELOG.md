@@ -11,13 +11,16 @@ All notable changes to `bqlang` are documented in this file.
 - Added custom LSP request `bqpls/statements` (advertised under `capabilities.experimental.bqplsStatements`), returning LSP UTF-16 statement ranges, coarse kinds (`QUERY`, `DML`, `DDL`, `SCRIPT`, `CALL`, `EXPORT`, `LOAD`, `OTHER`), and exact source slices with resilient fallback for unparseable documents and verbatim Jinja2/dbt templates.
 - Documented custom LSP extensions (`bqpls/statements`, `bqpls/queryCost`, `bqpls/refreshCost`), client configuration payloads, and the semantic token legend in `lsp/PROTOCOL.md`, and added an embedding example to `README.md`.
 - Added `(*catalog.Store).Subscribe` and `(*catalog.Store).SubscribeDryRun` for multi-subscriber async update notifications on shared stores, plus `catalog.WithRestOptions`.
-- Added `catalog.NewDefaultTokenProvider(scopes ...string)` and `catalog.DescribeCredentials(ctx)` exposing the cached ADC-to-`gcloud` authentication chain for arbitrary OAuth scopes.
+- Added `catalog.NewDefaultTokenProvider(scopes ...string)`, `catalog.NewDefaultTokenProviderWithGcloudPath(gcloudPath, scopes...)`, and `catalog.DescribeCredentials(ctx)` exposing the cached ADC-to-`gcloud` authentication chain for arbitrary OAuth scopes.
 - Added `bqconfig.MergeLSPOptionsOver` for layering file and client settings over caller-supplied default options.
-- Added the `bqpls` language server (`cmd/bqpls`), semantic analyzer, BigQuery metadata catalog with SQLite WAL disk cache, dry-run query cost estimation, view partition discovery, embedded VS Code/Kiro/Neovim extension bundles, and in-process `io.Pipe` e2e tests.
+- Added the `bqpls` language server (`cmd/bqpls`), semantic analyzer, BigQuery metadata catalog with SQLite WAL disk cache, dry-run query cost estimation, view partition discovery (`docs/view-partition-discovery.md`), embedded VS Code/Kiro/Neovim extension bundles, and in-process `io.Pipe` e2e tests.
 
 ### Fixed
 
-- Eliminated immortal Go/WASM reference cycles in `catalog.Catalog` (`CatalogCallback` adapter, `AnalyzeType` for `DECLARE` variables, and `ScriptOverlay.AddTempTable`), shared the immutable BigQuery built-ins catalog and `AnalyzerOptions` across analyses, and pruned stale keystroke entries from per-document statement caches to prevent unbounded WASM memory growth during editing.
+- Removed all `internal/syntax` and `internal/analysis` field types from exported `lsp` protocol structs (`Position`, `Range`, `Diagnostic`, `DiagnosticSeverity`, `SemanticTokensLegend`, `SemanticTokensEdit`) so external callers depend only on public `lsp` types.
+- Eliminated immortal Go/WASM reference cycles in `catalog.Catalog` (`CatalogCallback` adapter, `AnalyzeType` for `DECLARE` variables, and `ScriptOverlay.AddTempTable`), shared the immutable BigQuery built-ins catalog and `AnalyzerOptions` across analyses, pruned stale keystroke entries from per-document statement caches, and added periodic debounced GC nudging during fresh analysis bursts to bound WASM linear memory growth.
+- Keyed injected `ServerOptions.Store` instances under `DefaultLSPOptions` so a `.bqfmt.toml` in the working directory never bypasses a shared store, and evicted unused server-owned stores when document configurations change or documents close.
+- Classified pipe DML, DDL, `EXPORT DATA`, `ASSERT`, and `DESCRIBE` sinks accurately in `bqpls/statements`.
 - Unblocked `(*lsp.Server).Serve` immediately on context cancellation and `Close()` even when reading from a blocking `io.Pipe`, while keeping `Close()` idempotent and leaving injected `*catalog.Store` instances open.
 - Isolated nested `text/tabwriter` columns in `WHERE` `AND` conjuncts and binary/concat operands in `formatter`.
 
