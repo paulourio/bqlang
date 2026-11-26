@@ -1,6 +1,16 @@
 package formatter
 
-import "strings"
+import (
+	"maps"
+	"slices"
+	"strings"
+)
+
+// BigQueryBuiltinFunctions returns a sorted copy of all canonical BigQuery
+// built-in function names recognized by the formatter catalog.
+func BigQueryBuiltinFunctions() []string {
+	return slices.Sorted(maps.Values(bigQueryFunctionCatalog))
+}
 
 type functionSignature struct {
 	paramStyles []PrintCase

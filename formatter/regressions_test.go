@@ -692,4 +692,60 @@ func TestRegressions(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, got, got2)
 	})
+
+	t.Run("WHERE AND conjuncts with function calls do not leak tabwriter columns", func(t *testing.T) {
+		t.Parallel()
+
+		opts := formatter.DefaultPrintOptions()
+
+		t.Run("BETWEEN with function calls followed by equality", func(t *testing.T) {
+			t.Parallel()
+
+			input := "SELECT\n" +
+				"  DATE(timestamp) AS day,\n" +
+				"  COUNT(*) AS downloads\n" +
+				"FROM `bigquery-public-data.pypi.file_downloads`\n" +
+				"WHERE DATE(timestamp) BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)\n" +
+				"                          AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n" +
+				"  AND project = 'pandas'\n" +
+				"GROUP BY day\n" +
+				"ORDER BY day;\n"
+
+			want := "SELECT DATE(timestamp) AS day,\n" +
+				"       COUNT(*)        AS downloads\n" +
+				"  FROM `bigquery-public-data.pypi.file_downloads`\n" +
+				" WHERE DATE(timestamp) BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n" +
+				"   AND project = 'pandas'\n" +
+				" GROUP BY day\n" +
+				" ORDER BY day\n"
+
+			got, err := formatter.Format(input, opts)
+			require.NoError(t, err)
+			assert.Equal(t, want, got)
+
+			got2, err := formatter.Format(got, opts)
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		})
+
+		t.Run("Binary conjuncts with function call LHS and RHS align cleanly", func(t *testing.T) {
+			t.Parallel()
+
+			input := "SELECT id FROM t WHERE a = 1 AND bb = 2 AND DATE(x) = '2020-01-01' AND c = IFNULL(d, 'e')"
+			want := "SELECT id\n" +
+				"  FROM t\n" +
+				" WHERE a       = 1\n" +
+				"   AND bb      = 2\n" +
+				"   AND DATE(x) = '2020-01-01'\n" +
+				"   AND c       = IFNULL(d, 'e')\n"
+
+			got, err := formatter.Format(input, opts)
+			require.NoError(t, err)
+			assert.Equal(t, want, got)
+
+			got2, err := formatter.Format(got, opts)
+			require.NoError(t, err)
+			assert.Equal(t, got, got2)
+		})
+	})
 }

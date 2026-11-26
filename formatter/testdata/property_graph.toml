@@ -132,11 +132,11 @@ SELECT initial_account_id,
          `fin_network_04_anl.fin_network_graph`
          MATCH p = ANY CHEAPEST TRAIL (a:Account & !Blocked {currency_cd: 'USD'})-[t:Transfers WHERE t.transfer_amt > 0 COST t.transfer_amt]->{1, 4}(b:Account | Corporate)-[last_hop:Transfers]->(c:Account)
          WHERE a.account_id != b.account_id
-           AND              IS_ACYCLIC(p)
-           AND b            IS SOURCE OF          last_hop
-           AND c            IS NOT DESTINATION OF last_hop
+           AND IS_ACYCLIC(p)
+           AND b IS SOURCE OF          last_hop
+           AND c IS NOT DESTINATION OF last_hop
            AND a IS LABELED Account
-           AND     ALL_DIFFERENT(a, b, c)
+           AND ALL_DIFFERENT(a, b, c)
            AND NOT SAME(a, b)
          LET total_fee_amt = SUM(t.transfer_amt),
              edge_cnt      = ARRAY_LENGTH(EDGES(p))

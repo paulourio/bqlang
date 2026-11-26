@@ -790,6 +790,16 @@ func (p *printer) unnestLeft() string {
 	return "\v" + strings.ReplaceAll(aligned, "\n", "\n\v")
 }
 
+func (p *printer) acceptLeftAligned(n googlesql.ASTNode, d printerData) {
+	if !nodeDefined(n) {
+		return
+	}
+
+	pp := p.nest()
+	pp.accept(n, d)
+	p.print(leftAlignNested(pp.String()))
+}
+
 func (p *printer) printOpenParenIfNeeded(n parenthesizableNode) {
 	if p.isParenNeeded(n) {
 		p.print("(")

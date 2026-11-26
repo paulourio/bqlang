@@ -128,16 +128,28 @@ func (p *printer) formatAndConjuncts(
 
 		ctx.alignBinaryOpBudget = budget
 
-		if !simple {
-			p1.accept(conjunct, ctx)
-		} else {
+		switch {
+		case simple:
 			p1.acceptNested(conjunct, ctx)
+		case budget > 0 && isAlignableBinaryConjunct(conjunct):
+			p1.accept(conjunct, ctx)
+		default:
+			p1.acceptLeftAligned(conjunct, ctx)
 		}
 
 		p1.movePastLine(conjunct)
 	}
 
 	return andLines
+}
+
+func isAlignableBinaryConjunct(n googlesql.ASTExpressionNode) bool {
+	switch nodeKind(n) {
+	case googlesql.ASTNodeKindAstBinaryExpression, googlesql.ASTNodeKindAstConcatExpr:
+		return true
+	default:
+		return false
+	}
 }
 
 func (p *printer) closeAndParen(n *googlesql.ASTAndExpr, simple bool) {
@@ -338,13 +350,23 @@ func (p *printer) visitBinaryExpression(n *googlesql.ASTBinaryExpression, d prin
 	lhs, _ := n.Lhs()
 	rhs, _ := n.Rhs()
 
-	p.accept(lhs, d)
+	if lhsAlign != "" {
+		p.acceptLeftAligned(lhs, d)
+	} else {
+		p.accept(lhs, d)
+	}
+
 	p.movePast(lhs)
 	p.flushCommentsBeforeOperator(lhs, rhs)
 	p.printBinaryOp(n, lhsAlign, rhsAlign)
 
 	p.moveBefore(rhs)
-	p.accept(rhs, d)
+
+	if rhsAlign != "" {
+		p.acceptLeftAligned(rhs, d)
+	} else {
+		p.accept(rhs, d)
+	}
 	p.movePast(rhs)
 	p.movePast(n)
 	p.printCloseParenIfNeeded(n)
@@ -475,7 +497,13 @@ func (p *printer) visitConcatExpr(n *googlesql.ASTConcatExpr, d printerData) {
 		}
 
 		p.moveBefore(operand)
-		p.accept(operand, d)
+
+		if lhsAlign != "" {
+			p.acceptLeftAligned(operand, d)
+		} else {
+			p.accept(operand, d)
+		}
+
 		p.movePast(operand)
 	}
 
