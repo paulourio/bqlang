@@ -17,6 +17,7 @@ All notable changes to `bqlang` are documented in this file.
 
 ### Fixed
 
+- Eliminated immortal Go/WASM reference cycles in `catalog.Catalog` (`CatalogCallback` adapter, `AnalyzeType` for `DECLARE` variables, and `ScriptOverlay.AddTempTable`), shared the immutable BigQuery built-ins catalog and `AnalyzerOptions` across analyses, and pruned stale keystroke entries from per-document statement caches to prevent unbounded WASM memory growth during editing.
 - Unblocked `(*lsp.Server).Serve` immediately on context cancellation and `Close()` even when reading from a blocking `io.Pipe`, while keeping `Close()` idempotent and leaving injected `*catalog.Store` instances open.
 - Isolated nested `text/tabwriter` columns in `WHERE` `AND` conjuncts and binary/concat operands in `formatter`.
 

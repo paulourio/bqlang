@@ -159,7 +159,7 @@ func (e *Engine) buildBranchHoverStmtWASM(
 		return brSt
 	}
 
-	if ss, err := newScriptState(snap.Store); err == nil {
+	if ss, err := newScriptState(snap.Store, e.analyzerOpts); err == nil {
 		replayScriptOverlay(ss, snap.DeclaredVars, snap.TempTables)
 		res := &cachedResolved{}
 		e.processParsedStatementWASM(brSt.SQL, brProj.OffsetMap, sp.Start, astStmt, ss, res)
@@ -374,7 +374,7 @@ func catalogForHover(snap *DocumentSnapshot) (*catalog.Catalog, error) {
 		}
 	}
 
-	return catalog.NewCatalogForAnalysis(snap.Store, catalog.DefaultLSPLanguageOptions(), overlay)
+	return catalog.NewCatalogForAnalysis(snap.Store, nil, overlay)
 }
 
 func candidateSpecificityRank(n googlesql.ResolvedNode) int {

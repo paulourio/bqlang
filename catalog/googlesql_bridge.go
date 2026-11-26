@@ -128,6 +128,19 @@ func RegisterBigQuerySystemVariables(opts *googlesql.AnalyzerOptions, tf *google
 	return nil
 }
 
+// AnalyzeType resolves a GoogleSQL type expression against the shared read-only
+// BigQuery built-ins catalog. Using the built-ins catalog instead of a per-script
+// MultiCatalog ensures the returned TypeNode never pins a script Catalog or
+// ScriptOverlay in a reference cycle.
+func AnalyzeType(typeSQL string, opts *googlesql.AnalyzerOptions, tf *googlesql.TypeFactory) (googlesql.Googlesql_TypeNode, error) {
+	builtinsCat, err := getDefaultBuiltinsCatalog()
+	if err != nil {
+		return nil, err
+	}
+
+	return googlesql.AnalyzeType(typeSQL, opts, builtinsCat, tf)
+}
+
 // OverlayColumn defines a column for a script-scoped temporary table.
 type OverlayColumn struct {
 	Name string
@@ -137,7 +150,6 @@ type OverlayColumn struct {
 type overlayTableEntry struct {
 	ref  TableRef
 	meta *TableMeta
-	cols []OverlayColumn
 }
 
 // ScriptOverlay holds script-scoped DECLARE variables and CREATE [TEMP] TABLE
@@ -204,7 +216,6 @@ func (o *ScriptOverlay) AddTempTable(ref TableRef, cols []OverlayColumn) error {
 	o.tables[strings.ToLower(ref.FullName())] = overlayTableEntry{
 		ref:  ref,
 		meta: meta,
-		cols: append([]OverlayColumn(nil), cols...),
 	}
 
 	return nil
@@ -341,6 +352,36 @@ func (o *ScriptOverlay) lookup(parts []string, defaultProj, defaultDS string) (o
 	return overlayTableEntry{}, false
 }
 
+var (
+	defaultBuiltinsMu  sync.Mutex
+	defaultBuiltinsCat *googlesql.SimpleCatalog
+	sharedBQFuncSet    = sync.OnceValue(buildBigQueryFuncSet)
+)
+
+func getDefaultBuiltinsCatalog() (*googlesql.SimpleCatalog, error) {
+	defaultBuiltinsMu.Lock()
+	defer defaultBuiltinsMu.Unlock()
+
+	if defaultBuiltinsCat != nil {
+		return defaultBuiltinsCat, nil
+	}
+
+	cat, err := googlesql.NewSimpleCatalog("bigquery_builtins", nil)
+	if err != nil {
+		return nil, fmt.Errorf("NewCatalogForAnalysis builtins catalog: %w", err)
+	}
+
+	if addErr := cat.AddBuiltinFunctionsAndTypes(&googlesql.BuiltinFunctionOptions{
+		LanguageOptions: DefaultLSPLanguageOptions(),
+	}); addErr != nil {
+		return nil, fmt.Errorf("NewCatalogForAnalysis AddBuiltinFunctionsAndTypes: %w", addErr)
+	}
+
+	defaultBuiltinsCat = cat
+
+	return defaultBuiltinsCat, nil
+}
+
 // Catalog wraps a GoogleSQL MultiCatalog backed by Store, built-in BigQuery
 // functions, script overlays, and CatalogCallback table/function resolution.
 //
@@ -352,11 +393,19 @@ func (o *ScriptOverlay) lookup(parts []string, defaultProj, defaultDS string) (o
 // analysis worker. Additionally, Store.OnUpdate / WithOnUpdate callbacks run on
 // Store worker goroutines and MUST NOT call Store.Close synchronously.
 type Catalog struct {
+	state    *catalogState
+	multi    *googlesql.MultiCatalog
+	keepCats []googlesql.CatalogNode
+}
+
+// catalogState holds callback-accessible state separately from Catalog.multi and
+// Catalog.keepCats so go-googlesql's global callback table (which pins
+// catalogCallbackAdapter until cbCat's finalizer runs UnregisterCallback) never
+// forms a strong reference cycle back to cbCat or multi.
+type catalogState struct {
 	store   *Store
-	lang    *googlesql.LanguageOptions
 	tf      *googlesql.TypeFactory
 	overlay *ScriptOverlay
-	multi   *googlesql.MultiCatalog
 
 	nextID atomic.Int64
 
@@ -370,7 +419,6 @@ type Catalog struct {
 	keepFuncs        []*googlesql.Function
 	keepTVFs         []*googlesql.TableValuedFunction
 	keepModels       []*googlesql.SimpleModel
-	keepCats         []googlesql.CatalogNode
 	unresolved       map[string]TableRef
 	pending          map[string]TableRef
 	bqFuncs          map[string]struct{}
@@ -378,13 +426,13 @@ type Catalog struct {
 
 // NewCatalogForAnalysis builds a GoogleSQL catalog layer combining optional
 // ScriptOverlay, BigQuery built-ins, and Store-backed CatalogCallback.
+//
+// When lang is nil, a shared read-only built-ins catalog configured with
+// DefaultLSPLanguageOptions is reused to avoid re-allocating BigQuery built-ins
+// in WASM memory on every analysis pass.
 func NewCatalogForAnalysis(store *Store, lang *googlesql.LanguageOptions, overlay *ScriptOverlay) (*Catalog, error) {
 	if store == nil {
 		return nil, errors.New("NewCatalogForAnalysis: nil store")
-	}
-
-	if lang == nil {
-		lang = DefaultLSPLanguageOptions()
 	}
 
 	var tf *googlesql.TypeFactory
@@ -398,9 +446,8 @@ func NewCatalogForAnalysis(store *Store, lang *googlesql.LanguageOptions, overla
 		}
 	}
 
-	c := &Catalog{
+	state := &catalogState{
 		store:            store,
-		lang:             lang,
 		tf:               tf,
 		overlay:          overlay,
 		tablesByFullName: make(map[string]*TableMeta),
@@ -409,8 +456,10 @@ func NewCatalogForAnalysis(store *Store, lang *googlesql.LanguageOptions, overla
 		builtTables:      make(map[string]*googlesql.SimpleTable),
 		unresolved:       make(map[string]TableRef),
 		pending:          make(map[string]TableRef),
-		bqFuncs:          buildBigQueryFuncSet(),
+		bqFuncs:          sharedBQFuncSet(),
 	}
+
+	c := &Catalog{state: state}
 
 	var layers []googlesql.CatalogNode
 
@@ -421,21 +470,15 @@ func NewCatalogForAnalysis(store *Store, lang *googlesql.LanguageOptions, overla
 		c.keepCats = append(c.keepCats, overlayCat)
 	}
 
-	builtinsCat, err := googlesql.NewSimpleCatalog("bigquery_builtins", tf)
+	builtinsCat, err := resolveBuiltinsCatalog(lang, tf)
 	if err != nil {
-		return nil, fmt.Errorf("NewCatalogForAnalysis builtins catalog: %w", err)
-	}
-
-	if addErr := builtinsCat.AddBuiltinFunctionsAndTypes(&googlesql.BuiltinFunctionOptions{
-		LanguageOptions: lang,
-	}); addErr != nil {
-		return nil, fmt.Errorf("NewCatalogForAnalysis AddBuiltinFunctionsAndTypes: %w", addErr)
+		return nil, err
 	}
 
 	layers = append(layers, builtinsCat)
 	c.keepCats = append(c.keepCats, builtinsCat)
 
-	cbCat, err := googlesql.NewCatalogFromImpl(&catalogCallbackAdapter{owner: c})
+	cbCat, err := googlesql.NewCatalogFromImpl(&catalogCallbackAdapter{state: state})
 	if err != nil {
 		return nil, fmt.Errorf("NewCatalogForAnalysis callback catalog: %w", err)
 	}
@@ -453,6 +496,25 @@ func NewCatalogForAnalysis(store *Store, lang *googlesql.LanguageOptions, overla
 	return c, nil
 }
 
+func resolveBuiltinsCatalog(lang *googlesql.LanguageOptions, tf *googlesql.TypeFactory) (*googlesql.SimpleCatalog, error) {
+	if lang == nil {
+		return getDefaultBuiltinsCatalog()
+	}
+
+	builtinsCat, err := googlesql.NewSimpleCatalog("bigquery_builtins", tf)
+	if err != nil {
+		return nil, fmt.Errorf("NewCatalogForAnalysis builtins catalog: %w", err)
+	}
+
+	if addErr := builtinsCat.AddBuiltinFunctionsAndTypes(&googlesql.BuiltinFunctionOptions{
+		LanguageOptions: lang,
+	}); addErr != nil {
+		return nil, fmt.Errorf("NewCatalogForAnalysis AddBuiltinFunctionsAndTypes: %w", addErr)
+	}
+
+	return builtinsCat, nil
+}
+
 // GoogleSQLCatalog returns the root CatalogNode for AnalyzerOptions / AnalyzeStatement.
 func (c *Catalog) GoogleSQLCatalog() googlesql.CatalogNode {
 	return c.multi
@@ -460,31 +522,32 @@ func (c *Catalog) GoogleSQLCatalog() googlesql.CatalogNode {
 
 // TypeFactory returns the Catalog's TypeFactory.
 func (c *Catalog) TypeFactory() *googlesql.TypeFactory {
-	return c.tf
+	return c.state.tf
 }
 
 // LookupTable resolves a GoogleSQL TableNode (including fresh wrappers from
 // ResolvedTableScan.Table()) back to its canonical *TableMeta.
 func (c *Catalog) LookupTable(node googlesql.TableNode) (*TableMeta, bool) {
-	if c == nil || isTypedNil(node) {
+	if c == nil || c.state == nil || isTypedNil(node) {
 		return nil, false
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	st := c.state
+	st.mu.Lock()
+	defer st.mu.Unlock()
 
 	if id, err := node.GetSerializationId(); err == nil && id > 0 {
-		if meta, ok := c.tablesByID[id]; ok {
+		if meta, ok := st.tablesByID[id]; ok {
 			return meta, true
 		}
 	}
 
 	if fullName, err := node.FullName(); err == nil && fullName != "" {
-		if meta, ok := c.tablesByFullName[fullName]; ok {
+		if meta, ok := st.tablesByFullName[fullName]; ok {
 			return meta, true
 		}
 
-		if meta, ok := c.tablesByLower[strings.ToLower(fullName)]; ok {
+		if meta, ok := st.tablesByLower[strings.ToLower(fullName)]; ok {
 			return meta, true
 		}
 	}
@@ -494,22 +557,22 @@ func (c *Catalog) LookupTable(node googlesql.TableNode) (*TableMeta, bool) {
 
 // UnresolvedRefs returns a sorted slice of TableRefs that missed during FindTable.
 func (c *Catalog) UnresolvedRefs() []TableRef {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.state.mu.Lock()
+	defer c.state.mu.Unlock()
 
-	return sortedRefsFromMap(c.unresolved)
+	return sortedRefsFromMap(c.state.unresolved)
 }
 
 // PendingRefs returns a sorted slice of TableRefs that missed during FindTable
 // and are currently being fetched asynchronously by Store.
 func (c *Catalog) PendingRefs() []TableRef {
-	c.mu.Lock()
-	refs := sortedRefsFromMap(c.pending)
-	c.mu.Unlock()
+	c.state.mu.Lock()
+	refs := sortedRefsFromMap(c.state.pending)
+	c.state.mu.Unlock()
 
 	out := make([]TableRef, 0, len(refs))
 	for _, ref := range refs {
-		if c.store.IsPending(ref) {
+		if c.state.store.IsPending(ref) {
 			out = append(out, ref)
 		}
 	}
@@ -520,11 +583,11 @@ func (c *Catalog) PendingRefs() []TableRef {
 // HasPendingTables reports whether any missed table from analysis is currently
 // pending an asynchronous fetch.
 func (c *Catalog) HasPendingTables() bool {
-	c.mu.Lock()
-	refs := sortedRefsFromMap(c.pending)
-	c.mu.Unlock()
+	c.state.mu.Lock()
+	refs := sortedRefsFromMap(c.state.pending)
+	c.state.mu.Unlock()
 
-	return slices.ContainsFunc(refs, c.store.IsPending)
+	return slices.ContainsFunc(refs, c.state.store.IsPending)
 }
 
 func sortedRefsFromMap(m map[string]TableRef) []TableRef {
@@ -554,7 +617,7 @@ func sortedRefsFromMap(m map[string]TableRef) []TableRef {
 
 type catalogCallbackAdapter struct {
 	googlesql.CatalogCallbackDefaults
-	owner *Catalog
+	state *catalogState
 }
 
 func (a *catalogCallbackAdapter) FullName() (string, error) {
@@ -562,28 +625,28 @@ func (a *catalogCallbackAdapter) FullName() (string, error) {
 }
 
 func (a *catalogCallbackAdapter) FindTable(path []string, _ *googlesql.FindOptions) (googlesql.TableNode, error) {
-	return a.owner.findTable(path)
+	return a.state.findTable(path)
 }
 
 func (a *catalogCallbackAdapter) SuggestTable(mistypedPath []string) (string, error) {
 	parts := normalizePathParts(mistypedPath)
 
-	return a.owner.store.SuggestTableName(parts), nil
+	return a.state.store.SuggestTableName(parts), nil
 }
 
 func (a *catalogCallbackAdapter) FindFunction(path []string, _ *googlesql.FindOptions) (*googlesql.Function, error) {
-	return a.owner.findFunction(path)
+	return a.state.findFunction(path)
 }
 
 func (a *catalogCallbackAdapter) FindTableValuedFunction(
 	path []string,
 	_ *googlesql.FindOptions,
 ) (*googlesql.TableValuedFunction, error) {
-	return a.owner.findTVF(path)
+	return a.state.findTVF(path)
 }
 
 func (a *catalogCallbackAdapter) FindModel(path []string, _ *googlesql.FindOptions) (googlesql.ModelNode, error) {
-	return a.owner.findModel(path)
+	return a.state.findModel(path)
 }
 
 func (a *catalogCallbackAdapter) FindType(
@@ -621,7 +684,7 @@ func (a *catalogCallbackAdapter) FindSequence(
 	return nil, fmt.Errorf("sequence not found: %s", strings.Join(path, "."))
 }
 
-func (c *Catalog) findTable(path []string) (googlesql.TableNode, error) {
+func (c *catalogState) findTable(path []string) (googlesql.TableNode, error) {
 	parts := normalizePathParts(path)
 	if len(parts) == 0 || len(parts) > 3 {
 		return nil, fmt.Errorf("table not found: %s", strings.Join(path, "."))
@@ -656,7 +719,7 @@ func (c *Catalog) findTable(path []string) (googlesql.TableNode, error) {
 	return c.buildAndCacheSimpleTable(meta, key, false)
 }
 
-func (c *Catalog) findWildcardTable(ref TableRef, parts []string) (googlesql.TableNode, error) {
+func (c *catalogState) findWildcardTable(ref TableRef, parts []string) (googlesql.TableNode, error) {
 	prefix := strings.TrimSuffix(ref.Table, "*")
 	cacheKey := "wildcard:" + ref.FullName()
 
@@ -681,7 +744,7 @@ func (c *Catalog) findWildcardTable(ref TableRef, parts []string) (googlesql.Tab
 	return c.buildAndCacheSimpleTable(cp, cacheKey, true)
 }
 
-func (c *Catalog) tableNotFoundError(parts []string) error {
+func (c *catalogState) tableNotFoundError(parts []string) error {
 	name := strings.Join(parts, ".")
 	if suggestion := c.store.SuggestTableName(parts); suggestion != "" {
 		return fmt.Errorf("table not found: %s; did you mean %s?", name, suggestion)
@@ -690,7 +753,7 @@ func (c *Catalog) tableNotFoundError(parts []string) error {
 	return fmt.Errorf("table not found: %s", name)
 }
 
-func (c *Catalog) recordMiss(ref TableRef) {
+func (c *catalogState) recordMiss(ref TableRef) {
 	key := ref.FullName()
 	isPending := c.store.IsPending(ref)
 
@@ -702,7 +765,7 @@ func (c *Catalog) recordMiss(ref TableRef) {
 	c.mu.Unlock()
 }
 
-func (c *Catalog) materializeOverlayTable(entry overlayTableEntry) (googlesql.TableNode, error) {
+func (c *catalogState) materializeOverlayTable(entry overlayTableEntry) (googlesql.TableNode, error) {
 	key := "overlay:" + strings.ToLower(entry.ref.FullName())
 
 	c.mu.Lock()
@@ -713,46 +776,10 @@ func (c *Catalog) materializeOverlayTable(entry overlayTableEntry) (googlesql.Ta
 	}
 	c.mu.Unlock()
 
-	if len(entry.cols) > 0 {
-		return c.buildOverlayColsTable(entry, key)
-	}
-
 	return c.buildAndCacheSimpleTable(entry.meta, key, false)
 }
 
-func (c *Catalog) buildOverlayColsTable(entry overlayTableEntry, cacheKey string) (*googlesql.SimpleTable, error) {
-	id := c.nextID.Add(1)
-	fullName := entry.ref.FullName()
-
-	tbl, err := googlesql.NewSimpleTable(entry.ref.Table, id)
-	if err != nil {
-		return nil, fmt.Errorf("NewSimpleTable %q: %w", fullName, err)
-	}
-
-	if nameErr := tbl.SetFullName(fullName); nameErr != nil {
-		return nil, fmt.Errorf("SetFullName %q: %w", fullName, nameErr)
-	}
-
-	var cols []*googlesql.SimpleColumn
-	for _, oc := range entry.cols {
-		sc, err := googlesql.NewSimpleColumn(fullName, oc.Name, oc.Type, false, true)
-		if err != nil {
-			return nil, fmt.Errorf("NewSimpleColumn %s.%s: %w", fullName, oc.Name, err)
-		}
-
-		if err := tbl.AddColumn2(sc, false); err != nil {
-			return nil, fmt.Errorf("AddColumn2 %s.%s: %w", fullName, oc.Name, err)
-		}
-
-		cols = append(cols, sc)
-	}
-
-	c.registerBuiltTable(cacheKey, id, fullName, entry.meta, tbl, cols)
-
-	return tbl, nil
-}
-
-func (c *Catalog) buildAndCacheSimpleTable(
+func (c *catalogState) buildAndCacheSimpleTable(
 	meta *TableMeta,
 	cacheKey string,
 	isWildcard bool,
@@ -783,7 +810,7 @@ func (c *Catalog) buildAndCacheSimpleTable(
 	return tbl, nil
 }
 
-func (c *Catalog) populateTableColumns(
+func (c *catalogState) populateTableColumns(
 	tbl *googlesql.SimpleTable,
 	fullName string,
 	meta *TableMeta,
@@ -820,7 +847,7 @@ func (c *Catalog) populateTableColumns(
 	return cols, nil
 }
 
-func (c *Catalog) buildPseudoColumns(
+func (c *catalogState) buildPseudoColumns(
 	tbl *googlesql.SimpleTable,
 	fullName string,
 	meta *TableMeta,
@@ -851,7 +878,7 @@ func (c *Catalog) buildPseudoColumns(
 	return cols, nil
 }
 
-func (c *Catalog) addIngestionPseudoCols(
+func (c *catalogState) addIngestionPseudoCols(
 	tbl *googlesql.SimpleTable,
 	fullName string,
 	meta *TableMeta,
@@ -889,7 +916,7 @@ func (c *Catalog) addIngestionPseudoCols(
 	return cols, nil
 }
 
-func (c *Catalog) addWildcardPseudoCol(
+func (c *catalogState) addWildcardPseudoCol(
 	tbl *googlesql.SimpleTable,
 	fullName string,
 	meta *TableMeta,
@@ -923,7 +950,7 @@ func addPseudoCol(
 	return sc, nil
 }
 
-func (c *Catalog) registerBuiltTable(
+func (c *catalogState) registerBuiltTable(
 	cacheKey string,
 	id int64,
 	fullName string,
@@ -945,7 +972,7 @@ func (c *Catalog) registerBuiltTable(
 	}
 }
 
-func (c *Catalog) columnTypeToGoogleSQL(col ColumnMeta) (googlesql.Googlesql_TypeNode, error) {
+func (c *catalogState) columnTypeToGoogleSQL(col ColumnMeta) (googlesql.Googlesql_TypeNode, error) {
 	base, err := c.baseColumnTypeToGoogleSQL(col)
 	if err != nil {
 		return nil, err
@@ -963,7 +990,7 @@ func (c *Catalog) columnTypeToGoogleSQL(col ColumnMeta) (googlesql.Googlesql_Typ
 	return base, nil
 }
 
-func (c *Catalog) baseColumnTypeToGoogleSQL(col ColumnMeta) (googlesql.Googlesql_TypeNode, error) {
+func (c *catalogState) baseColumnTypeToGoogleSQL(col ColumnMeta) (googlesql.Googlesql_TypeNode, error) {
 	typ := normalizeTypeName(col.Type)
 
 	switch typ {
@@ -999,7 +1026,7 @@ func (c *Catalog) baseColumnTypeToGoogleSQL(col ColumnMeta) (googlesql.Googlesql
 	}
 }
 
-func (c *Catalog) scalarTypeToGoogleSQL(typ string) (googlesql.Googlesql_TypeNode, error) {
+func (c *catalogState) scalarTypeToGoogleSQL(typ string) (googlesql.Googlesql_TypeNode, error) {
 	switch typ {
 	case "INT64":
 		return c.tf.GetInt64()
@@ -1036,7 +1063,7 @@ func (c *Catalog) scalarTypeToGoogleSQL(typ string) (googlesql.Googlesql_TypeNod
 	}
 }
 
-func (c *Catalog) findFunction(path []string) (*googlesql.Function, error) {
+func (c *catalogState) findFunction(path []string) (*googlesql.Function, error) {
 	if len(path) == 0 {
 		return nil, errors.New("function not found: empty name")
 	}
@@ -1219,7 +1246,7 @@ func buildVariadicAny1Signatures(maxArgs int) ([]*googlesql.FunctionSignature, e
 	return sigs, nil
 }
 
-func (c *Catalog) stubFunctionReturnType(upperName string) (googlesql.Googlesql_TypeNode, error) {
+func (c *catalogState) stubFunctionReturnType(upperName string) (googlesql.Googlesql_TypeNode, error) {
 	switch upperName {
 	case "AI.GENERATE_BOOL", "SEARCH":
 		return c.tf.GetBool()
@@ -1248,7 +1275,7 @@ func (c *Catalog) stubFunctionReturnType(upperName string) (googlesql.Googlesql_
 	}
 }
 
-func (c *Catalog) findTVF(path []string) (*googlesql.TableValuedFunction, error) {
+func (c *catalogState) findTVF(path []string) (*googlesql.TableValuedFunction, error) {
 	if len(path) == 0 {
 		return nil, errors.New("table-valued function not found: empty name")
 	}
@@ -1296,7 +1323,7 @@ func (c *Catalog) findTVF(path []string) (*googlesql.TableValuedFunction, error)
 	return base, nil
 }
 
-func (c *Catalog) findModel(path []string) (googlesql.ModelNode, error) {
+func (c *catalogState) findModel(path []string) (googlesql.ModelNode, error) {
 	if len(path) == 0 {
 		return nil, errors.New("model not found: empty name")
 	}

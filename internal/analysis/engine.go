@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	maxStmtCacheEntries = 256
-	maxDeltaHistory     = 4
+	maxStmtCacheEntries     = 256
+	maxIdleStmtCacheEntries = 8
+	maxDeltaHistory         = 4
 )
 
 // wasmMu serializes all calls into go-googlesql's shared WASM runtime and AST/ResolvedAST wrappers.
@@ -35,6 +36,8 @@ type Engine struct {
 	defaultStore *catalog.Store
 	defaultOpts  *bqconfig.LSPOptions
 	parserOpts   *googlesql.ParserOptions
+	analyzerOpts *googlesql.AnalyzerOptions
+	sysVarTF     *googlesql.TypeFactory
 
 	catalogGen atomic.Uint64
 	costGen    atomic.Uint64
@@ -235,17 +238,65 @@ func NewEngine(defaultStore *catalog.Store, defaultOpts *bqconfig.LSPOptions) (*
 	if err == nil {
 		err = parserOpts.SetLanguageOptions(catalog.DefaultLSPLanguageOptions())
 	}
+
+	var (
+		analyzerOpts *googlesql.AnalyzerOptions
+		sysVarTF     *googlesql.TypeFactory
+	)
+	if err == nil {
+		analyzerOpts, sysVarTF, err = newSharedAnalyzerOptions()
+	}
 	wasmMu.Unlock()
 	if err != nil {
-		return nil, fmt.Errorf("NewEngine parser options: %w", err)
+		return nil, fmt.Errorf("NewEngine parser/analyzer options: %w", err)
 	}
 
 	return &Engine{
 		defaultStore: defaultStore,
 		defaultOpts:  opts,
 		parserOpts:   parserOpts,
+		analyzerOpts: analyzerOpts,
+		sysVarTF:     sysVarTF,
 		docs:         make(map[string]*docEntry),
 	}, nil
+}
+
+func newSharedAnalyzerOptions() (*googlesql.AnalyzerOptions, *googlesql.TypeFactory, error) {
+	tf, err := googlesql.NewTypeFactory()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	analyzerOpts, err := googlesql.NewAnalyzerOptions(catalog.DefaultLSPLanguageOptions())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if err = analyzerOpts.SetRecordParseLocations(true); err != nil {
+		return nil, nil, err
+	}
+
+	if err = analyzerOpts.SetCreateNewColumnForEachProjectedOutput(true); err != nil {
+		return nil, nil, err
+	}
+
+	if err = analyzerOpts.SetErrorMessageMode(googlesql.ErrorMessageModeErrorMessageMultiLineWithCaret); err != nil {
+		return nil, nil, err
+	}
+
+	if err = analyzerOpts.SetAllowUndeclaredParameters(true); err != nil {
+		return nil, nil, err
+	}
+
+	if err = analyzerOpts.SetParameterMode(googlesql.ParameterModeParameterNamed); err != nil {
+		return nil, nil, err
+	}
+
+	if err = catalog.RegisterBigQuerySystemVariables(analyzerOpts, tf); err != nil {
+		return nil, nil, err
+	}
+
+	return analyzerOpts, tf, nil
 }
 
 func cloneLSPOptions(opts *bqconfig.LSPOptions) *bqconfig.LSPOptions {
@@ -507,7 +558,7 @@ type scriptState struct {
 	overlayHash  [32]byte
 }
 
-func newScriptState(store *catalog.Store) (*scriptState, error) {
+func newScriptState(store *catalog.Store, analyzerOpts *googlesql.AnalyzerOptions) (*scriptState, error) {
 	tf, err := googlesql.NewTypeFactory()
 	if err != nil {
 		return nil, err
@@ -518,36 +569,7 @@ func newScriptState(store *catalog.Store) (*scriptState, error) {
 		return nil, err
 	}
 
-	analyzerOpts, err := googlesql.NewAnalyzerOptions(catalog.DefaultLSPLanguageOptions())
-	if err != nil {
-		return nil, err
-	}
-
-	if err = analyzerOpts.SetRecordParseLocations(true); err != nil {
-		return nil, err
-	}
-
-	if err = analyzerOpts.SetCreateNewColumnForEachProjectedOutput(true); err != nil {
-		return nil, err
-	}
-
-	if err = analyzerOpts.SetErrorMessageMode(googlesql.ErrorMessageModeErrorMessageMultiLineWithCaret); err != nil {
-		return nil, err
-	}
-
-	if err = analyzerOpts.SetAllowUndeclaredParameters(true); err != nil {
-		return nil, err
-	}
-
-	if err = analyzerOpts.SetParameterMode(googlesql.ParameterModeParameterNamed); err != nil {
-		return nil, err
-	}
-
-	if err = catalog.RegisterBigQuerySystemVariables(analyzerOpts, tf); err != nil {
-		return nil, err
-	}
-
-	cat, err := catalog.NewCatalogForAnalysis(store, catalog.DefaultLSPLanguageOptions(), overlay)
+	cat, err := catalog.NewCatalogForAnalysis(store, nil, overlay)
 	if err != nil {
 		return nil, err
 	}
@@ -563,7 +585,7 @@ func newScriptState(store *catalog.Store) (*scriptState, error) {
 }
 
 func (s *scriptState) rebuildCatalog() error {
-	cat, err := catalog.NewCatalogForAnalysis(s.store, catalog.DefaultLSPLanguageOptions(), s.overlay)
+	cat, err := catalog.NewCatalogForAnalysis(s.store, nil, s.overlay)
 	if err != nil {
 		return err
 	}
@@ -609,7 +631,7 @@ func (e *Engine) analyzeEntryLocked(entry *docEntry) {
 	spans := syntax.SplitStatements(proj.SQL, nil)
 
 	wasmMu.Lock()
-	ss, err := newScriptState(entry.cfg.Store)
+	ss, err := newScriptState(entry.cfg.Store, e.analyzerOpts)
 	stmts := make([]*AnalyzedStatement, 0, len(spans))
 	if err == nil {
 		stmts = e.analyzeStatementsLocked(entry, proj, spans, gen, ss)
@@ -714,6 +736,9 @@ func (e *Engine) analyzeStatementsLocked(
 	ss *scriptState,
 ) []*AnalyzedStatement {
 	stmts := make([]*AnalyzedStatement, 0, len(spans))
+	activeAST := make(map[[32]byte]struct{}, len(spans))
+	activeResolved := make(map[resolvedCacheKey]struct{}, len(spans))
+
 	for _, sp := range spans {
 		stmtSQL := proj.SQL[sp.Start:sp.End]
 		if strings.TrimSpace(stmtSQL) == "" {
@@ -721,6 +746,7 @@ func (e *Engine) analyzeStatementsLocked(
 		}
 
 		stmtHash := sha256.Sum256([]byte(stmtSQL))
+		activeAST[stmtHash] = struct{}{}
 		cachedAST := e.getOrParseASTLocked(entry, stmtSQL, stmtHash)
 		origStart, origEnd := shadowSpanToBestOrig(proj.OffsetMap, sp.Start, sp.End)
 
@@ -741,13 +767,54 @@ func (e *Engine) analyzeStatementsLocked(
 		}
 
 		if cachedAST.parseErr == nil && !isNilNode(cachedAST.astStmt) {
-			e.analyzeCachedStatementLocked(entry, proj.OffsetMap, sp.Start, st, gen, ss)
+			if rKey, cached := e.analyzeCachedStatementLocked(entry, proj.OffsetMap, sp.Start, st, gen, ss); cached {
+				activeResolved[rKey] = struct{}{}
+			}
 		}
 
 		stmts = append(stmts, st)
 	}
 
+	entry.astOrder = pruneStmtCacheLocked(entry.astCache, entry.astOrder, activeAST, maxIdleStmtCacheEntries)
+	entry.resolvedOrder = pruneStmtCacheLocked(entry.resolvedCache, entry.resolvedOrder, activeResolved, maxIdleStmtCacheEntries)
+
 	return stmts
+}
+
+func pruneStmtCacheLocked[K comparable, V any](
+	cache map[K]V,
+	order []K,
+	active map[K]struct{},
+	maxIdle int,
+) []K {
+	if len(order) == 0 {
+		return order
+	}
+
+	idleCount := 0
+	for _, k := range order {
+		if _, isActive := active[k]; !isActive {
+			idleCount++
+		}
+	}
+
+	if idleCount <= maxIdle {
+		return order
+	}
+
+	toDrop := idleCount - maxIdle
+	kept := make([]K, 0, len(order)-toDrop)
+	for _, k := range order {
+		if _, isActive := active[k]; !isActive && toDrop > 0 {
+			delete(cache, k)
+			toDrop--
+			continue
+		}
+
+		kept = append(kept, k)
+	}
+
+	return kept
 }
 
 func shadowSpanToBestOrig(om *syntax.OffsetMap, sStart, sEnd int) (int, int) {
@@ -853,7 +920,7 @@ func (e *Engine) analyzeCachedStatementLocked(
 	st *AnalyzedStatement,
 	gen uint64,
 	ss *scriptState,
-) {
+) (resolvedCacheKey, bool) {
 	key := resolvedCacheKey{
 		stmtHash:       st.Hash,
 		catalogGen:     gen,
@@ -866,19 +933,21 @@ func (e *Engine) analyzeCachedStatementLocked(
 		applyCachedResolvedToStmt(st, cached)
 		replayOverlayFromCache(ss, cached)
 
-		return
+		return key, true
 	}
 
 	if strings.Contains(st.SQL, "__bqpls_expr_") {
 		st.HasExprPlaceholder = true
 
-		return
+		return resolvedCacheKey{}, false
 	}
 
 	res := &cachedResolved{}
 	e.processParsedStatementWASM(st.SQL, om, shadowStart, st.ASTStmt, ss, res)
 	putResolvedCacheLocked(entry, key, res)
 	applyCachedResolvedToStmt(st, res)
+
+	return key, true
 }
 
 func anyUnresolvedNowCached(store *catalog.Store, refs []catalog.TableRef) bool {
@@ -921,7 +990,7 @@ func replayOverlayFromCache(ss *scriptState, res *cachedResolved) {
 func replayScriptOverlay(ss *scriptState, vars []DeclaredVarInfo, tables []TempTableInfo) {
 	changedVar := false
 	for _, dv := range vars {
-		typNode, err := googlesql.AnalyzeType(dv.TypeSQL, ss.analyzerOpts, ss.cat.GoogleSQLCatalog(), ss.tf)
+		typNode, err := catalog.AnalyzeType(dv.TypeSQL, ss.analyzerOpts, ss.tf)
 		if err == nil && !isNilNode(typNode) {
 			if addErr := ss.overlay.AddVariable(dv.Name, typNode); addErr == nil {
 				ss.declaredVars[strings.ToLower(dv.Name)] = dv
@@ -1170,7 +1239,7 @@ func resolveDeclaredVarType(
 	}
 
 	if typeSQL != "" {
-		rt, rtErr := googlesql.AnalyzeType(typeSQL, ss.analyzerOpts, ss.cat.GoogleSQLCatalog(), ss.tf)
+		rt, rtErr := catalog.AnalyzeType(typeSQL, ss.analyzerOpts, ss.tf)
 		if rtErr == nil && !isNilNode(rt) {
 			resolvedType = rt
 			typeName = formatGoogleSQLType(rt)

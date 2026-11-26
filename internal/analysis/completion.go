@@ -452,7 +452,7 @@ func (e *Engine) analyzePipePrefixColumnsWASM(snap *DocumentSnapshot, prefixSQL 
 	}
 	_ = out
 
-	ss, err := newScriptState(snap.Store)
+	ss, err := newScriptState(snap.Store, e.analyzerOpts)
 	if err != nil {
 		return nil
 	}
