@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"maps"
 	"regexp"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -24,6 +25,7 @@ const (
 	maxStmtCacheEntries     = 256
 	maxIdleStmtCacheEntries = 8
 	maxDeltaHistory         = 4
+	wasmGCOpsInterval       = 64
 )
 
 // wasmMu serializes all calls into go-googlesql's shared WASM runtime and AST/ResolvedAST wrappers.
@@ -42,6 +44,8 @@ type Engine struct {
 	catalogGen atomic.Uint64
 	costGen    atomic.Uint64
 	resultSeq  atomic.Uint64
+	wasmOps    atomic.Uint64
+	gcPending  atomic.Bool
 
 	docsMu sync.RWMutex
 	docs   map[string]*docEntry
@@ -670,6 +674,26 @@ func (e *Engine) analyzeEntryLocked(entry *docEntry) {
 	entry.analyzedGen = gen
 	entry.analyzedCostGen = e.costGen.Load()
 	entry.snapshot = snap
+
+	e.maybeNudgeWASMGC()
+}
+
+// maybeNudgeWASMGC periodically triggers a non-blocking GC cycle after batches
+// of fresh WASM parses/analyses so go-googlesql finalizers reclaim C++ arenas
+// before linear WASM memory needs to double.
+func (e *Engine) maybeNudgeWASMGC() {
+	if e.wasmOps.Add(1)%wasmGCOpsInterval != 0 {
+		return
+	}
+
+	if !e.gcPending.CompareAndSwap(false, true) {
+		return
+	}
+
+	go func() {
+		defer e.gcPending.Store(false)
+		runtime.GC()
+	}()
 }
 
 func ssVars(ss *scriptState) []DeclaredVarInfo {

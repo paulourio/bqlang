@@ -67,12 +67,12 @@ func TestLSPLintDiagnosticsAndSettingsIntegration(t *testing.T) {
 
 	d1 := c.waitDiagnostics(uri, cur)
 	require.Len(t, d1.Diagnostics, 2)
-	byCode := make(map[string]analysis.Diagnostic)
+	byCode := make(map[string]lsp.Diagnostic)
 	for _, d := range d1.Diagnostics {
 		byCode[d.Code] = d
 	}
-	assert.Equal(t, analysis.SeverityError, byCode[analysis.DiagCodeMissingPartitionFilter].Severity)
-	assert.Equal(t, analysis.SeverityInformation, byCode[analysis.DiagCodeClusteringFilter].Severity)
+	assert.Equal(t, lsp.SeverityError, byCode[analysis.DiagCodeMissingPartitionFilter].Severity)
+	assert.Equal(t, lsp.SeverityInformation, byCode[analysis.DiagCodeClusteringFilter].Severity)
 
 	// Filtering on order_dt and joining/filtering on customer_id clears both warnings.
 	cur = c.diagCount(uri)
@@ -102,7 +102,7 @@ func TestLSPLintDiagnosticsAndSettingsIntegration(t *testing.T) {
 	d3 := c.waitDiagnostics(uri, cur)
 	require.Len(t, d3.Diagnostics, 1)
 	assert.Equal(t, analysis.DiagCodeClusteringFilter, d3.Diagnostics[0].Code)
-	assert.Equal(t, analysis.SeverityInformation, d3.Diagnostics[0].Severity)
+	assert.Equal(t, lsp.SeverityInformation, d3.Diagnostics[0].Severity)
 	assert.Contains(t, d3.Diagnostics[0].Message, "without leading cluster column customer_id")
 
 	// Live didChangeConfiguration turning clusteringFilterSeverity = "off" clears it.

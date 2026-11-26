@@ -331,6 +331,12 @@ func TestNewDefaultTokenProviderGcloudFallback(t *testing.T) {
 	callsRaw, err := os.ReadFile(counterFile)
 	require.NoError(t, err)
 	assert.Len(t, strings.Split(strings.TrimSpace(string(callsRaw)), "\n"), 1)
+
+	// Explicit gcloudPath override works even without relying on PATH.
+	explicitTP := catalog.NewDefaultTokenProviderWithGcloudPath(fakeGcloud, "https://www.googleapis.com/auth/cloud-platform")
+	explicitTok, err := explicitTP(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, "fake-gcloud-token", explicitTok)
 }
 
 func TestDescribeCredentials(t *testing.T) {

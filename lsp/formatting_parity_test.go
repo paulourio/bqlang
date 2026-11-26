@@ -188,8 +188,8 @@ func applyLSPTextEdits(t *testing.T, src string, edits []lsp.TextEdit) string {
 
 	cursor := 0
 	for _, ed := range sorted {
-		startOff := li.ByteOffset(ed.Range.Start)
-		endOff := li.ByteOffset(ed.Range.End)
+		startOff := li.ByteOffset(syntax.Position{Line: ed.Range.Start.Line, Character: ed.Range.Start.Character})
+		endOff := li.ByteOffset(syntax.Position{Line: ed.Range.End.Line, Character: ed.Range.End.Character})
 		require.GreaterOrEqual(t, startOff, cursor, "overlapping LSP text edits")
 		require.GreaterOrEqual(t, endOff, startOff, "invalid LSP text edit range")
 		require.LessOrEqual(t, endOff, len(src), "LSP text edit out of bounds")

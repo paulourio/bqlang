@@ -55,9 +55,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/syntax"
 )
 
 // Standard JSON-RPC 2.0 and LSP 3.17 error codes.
@@ -379,11 +376,44 @@ type SemanticTokensFullOptions struct {
 	Delta bool `json:"delta"`
 }
 
+// SemanticTokensLegend describes the token types and modifiers emitted by the server.
+type SemanticTokensLegend struct {
+	TokenTypes     []string `json:"tokenTypes"`
+	TokenModifiers []string `json:"tokenModifiers"`
+}
+
+// SemanticTokensEdit describes a single splice into a previous semantic token slice.
+type SemanticTokensEdit struct {
+	Start       uint32   `json:"start"`
+	DeleteCount uint32   `json:"deleteCount"`
+	Data        []uint32 `json:"data,omitempty"`
+}
+
+// DiagnosticSeverity matches LSP 3.17 DiagnosticSeverity values.
+type DiagnosticSeverity int
+
+// LSP 3.17 diagnostic severity constants.
+const (
+	SeverityError       DiagnosticSeverity = 1
+	SeverityWarning     DiagnosticSeverity = 2
+	SeverityInformation DiagnosticSeverity = 3
+	SeverityHint        DiagnosticSeverity = 4
+)
+
+// Diagnostic represents an LSP 3.17 diagnostic published by the server.
+type Diagnostic struct {
+	Range    Range              `json:"range"`
+	Severity DiagnosticSeverity `json:"severity,omitempty"`
+	Code     string             `json:"code,omitempty"`
+	Source   string             `json:"source,omitempty"`
+	Message  string             `json:"message"`
+}
+
 // SemanticTokensOptions configures semantic token provider capabilities.
 type SemanticTokensOptions struct {
-	Legend analysis.SemanticTokensLegend `json:"legend"`
-	Range  bool                          `json:"range,omitempty"`
-	Full   *SemanticTokensFullOptions    `json:"full,omitempty"`
+	Legend SemanticTokensLegend       `json:"legend"`
+	Range  bool                       `json:"range,omitempty"`
+	Full   *SemanticTokensFullOptions `json:"full,omitempty"`
 }
 
 // CodeLensOptions configures server code lens capabilities.
@@ -442,9 +472,9 @@ type DidOpenTextDocumentParams struct {
 
 // TextDocumentContentChangeEvent describes an incremental or full document change.
 type TextDocumentContentChangeEvent struct {
-	Range       *syntax.Range `json:"range,omitempty"`
-	RangeLength *int          `json:"rangeLength,omitempty"`
-	Text        string        `json:"text"`
+	Range       *Range `json:"range,omitempty"`
+	RangeLength *int   `json:"rangeLength,omitempty"`
+	Text        string `json:"text"`
 }
 
 // DidChangeTextDocumentParams carries parameters for textDocument/didChange.
@@ -467,7 +497,7 @@ type DidCloseTextDocumentParams struct {
 // HoverParams carries parameters for textDocument/hover.
 type HoverParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
-	Position     syntax.Position        `json:"position"`
+	Position     Position               `json:"position"`
 }
 
 // SignatureHelpContext carries optional trigger context for textDocument/signatureHelp.
@@ -480,7 +510,7 @@ type SignatureHelpContext struct {
 // SignatureHelpParams carries parameters for textDocument/signatureHelp.
 type SignatureHelpParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
-	Position     syntax.Position        `json:"position"`
+	Position     Position               `json:"position"`
 	Context      *SignatureHelpContext  `json:"context,omitempty"`
 }
 
@@ -493,14 +523,14 @@ type CompletionContext struct {
 // CompletionParams carries parameters for textDocument/completion.
 type CompletionParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
-	Position     syntax.Position        `json:"position"`
+	Position     Position               `json:"position"`
 	Context      *CompletionContext     `json:"context,omitempty"`
 }
 
 // DefinitionParams carries parameters for textDocument/definition.
 type DefinitionParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
-	Position     syntax.Position        `json:"position"`
+	Position     Position               `json:"position"`
 }
 
 // DocumentSymbolParams carries parameters for textDocument/documentSymbol.
@@ -579,8 +609,8 @@ type DocumentFormattingParams struct {
 
 // TextEdit represents a textual edit returned by formatting.
 type TextEdit struct {
-	Range   syntax.Range `json:"range"`
-	NewText string       `json:"newText"`
+	Range   Range  `json:"range"`
+	NewText string `json:"newText"`
 }
 
 // SemanticTokensParams carries parameters for textDocument/semanticTokens/full.
@@ -597,7 +627,7 @@ type SemanticTokensDeltaParams struct {
 // SemanticTokensRangeParams carries parameters for textDocument/semanticTokens/range.
 type SemanticTokensRangeParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
-	Range        syntax.Range           `json:"range"`
+	Range        Range                  `json:"range"`
 }
 
 // SemanticTokens represents the LSP SemanticTokens union member (never includes edits).
@@ -608,15 +638,15 @@ type SemanticTokens struct {
 
 // SemanticTokensDelta represents the LSP SemanticTokensDelta union member (never includes data).
 type SemanticTokensDelta struct {
-	ResultID string                        `json:"resultId,omitempty"`
-	Edits    []analysis.SemanticTokensEdit `json:"edits"`
+	ResultID string               `json:"resultId,omitempty"`
+	Edits    []SemanticTokensEdit `json:"edits"`
 }
 
 // PublishDiagnosticsParams carries parameters for textDocument/publishDiagnostics.
 type PublishDiagnosticsParams struct {
-	URI         string                `json:"uri"`
-	Version     *int                  `json:"version,omitempty"`
-	Diagnostics []analysis.Diagnostic `json:"diagnostics"`
+	URI         string       `json:"uri"`
+	Version     *int         `json:"version,omitempty"`
+	Diagnostics []Diagnostic `json:"diagnostics"`
 }
 
 // CancelParams carries parameters for $/cancelRequest.

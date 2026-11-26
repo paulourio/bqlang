@@ -388,7 +388,11 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 	require.NotNil(t, initRes.Capabilities.TextDocumentSync.Save)
 	assert.False(t, initRes.Capabilities.TextDocumentSync.Save.IncludeText)
 	require.NotNil(t, initRes.Capabilities.SemanticTokensProvider)
-	assert.Equal(t, analysis.DefaultSemanticTokensLegend(), initRes.Capabilities.SemanticTokensProvider.Legend)
+	wantLegend := analysis.DefaultSemanticTokensLegend()
+	assert.Equal(t, lsp.SemanticTokensLegend{
+		TokenTypes:     wantLegend.TokenTypes,
+		TokenModifiers: wantLegend.TokenModifiers,
+	}, initRes.Capabilities.SemanticTokensProvider.Legend)
 	assert.True(t, initRes.Capabilities.SemanticTokensProvider.Range)
 	require.NotNil(t, initRes.Capabilities.SemanticTokensProvider.Full)
 	assert.True(t, initRes.Capabilities.SemanticTokensProvider.Full.Delta)
@@ -433,16 +437,16 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 		TextDocument: lsp.VersionedTextDocumentIdentifier{URI: sqlURI, Version: 2},
 		ContentChanges: []lsp.TextDocumentContentChangeEvent{
 			{
-				Range: &syntax.Range{
-					Start: syntax.Position{Line: 0, Character: 0},
-					End:   syntax.Position{Line: 0, Character: len("select")},
+				Range: &lsp.Range{
+					Start: lsp.Position{Line: 0, Character: 0},
+					End:   lsp.Position{Line: 0, Character: len("select")},
 				},
 				Text: "SELECT",
 			},
 			{
-				Range: &syntax.Range{
-					Start: syntax.Position{Line: 0, Character: len("SELECT '") + 2 + len("', tenant_id from events")},
-					End:   syntax.Position{Line: 0, Character: len(prefix) + 1}, // emoji is 2 UTF-16 units vs 4 UTF-8 bytes; use LineIndex below for exactness
+				Range: &lsp.Range{
+					Start: lsp.Position{Line: 0, Character: len("SELECT '") + 2 + len("', tenant_id from events")},
+					End:   lsp.Position{Line: 0, Character: len(prefix) + 1}, // emoji is 2 UTF-16 units vs 4 UTF-8 bytes; use LineIndex below for exactness
 				},
 				Text: " WHERE event_date = '2026-01-01' AND tenant_id = 't1'",
 			},
@@ -491,9 +495,9 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 	c.notify("textDocument/didChange", lsp.DidChangeTextDocumentParams{
 		TextDocument: lsp.VersionedTextDocumentIdentifier{URI: sqlURI, Version: 3},
 		ContentChanges: []lsp.TextDocumentContentChangeEvent{{
-			Range: &syntax.Range{
-				Start: fromPos,
-				End:   syntax.Position{Line: fromPos.Line, Character: fromPos.Character + 4},
+			Range: &lsp.Range{
+				Start: lsp.Position{Line: fromPos.Line, Character: fromPos.Character},
+				End:   lsp.Position{Line: fromPos.Line, Character: fromPos.Character + 4},
 			},
 			Text: "FROM",
 		}},
@@ -513,7 +517,7 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 	// Range semantic tokens.
 	rangeResp := c.call("textDocument/semanticTokens/range", lsp.SemanticTokensRangeParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: sqlURI},
-		Range:        syntax.Range{Start: syntax.Position{Line: 0, Character: 0}, End: syntax.Position{Line: 0, Character: 10}},
+		Range:        lsp.Range{Start: lsp.Position{Line: 0, Character: 0}, End: lsp.Position{Line: 0, Character: 10}},
 	})
 	require.Nil(t, rangeResp.Error)
 	var rangeTok lsp.SemanticTokens
@@ -523,7 +527,8 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 	// 8. Hover (card + null on whitespace).
 	updatedSQL := "SELECT '😀', tenant_id FROM events WHERE event_date = '2026-01-01' AND tenant_id = 't1'"
 	li2 := syntax.NewLineIndex(updatedSQL)
-	colPos := li2.PositionAt(strings.Index(updatedSQL, "tenant_id"))
+	rawColPos := li2.PositionAt(strings.Index(updatedSQL, "tenant_id"))
+	colPos := lsp.Position{Line: rawColPos.Line, Character: rawColPos.Character}
 	hoverResp := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: sqlURI},
 		Position:     colPos,
@@ -535,7 +540,7 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 
 	nullHover := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: sqlURI},
-		Position:     syntax.Position{Line: 0, Character: 6},
+		Position:     lsp.Position{Line: 0, Character: 6},
 	})
 	require.Nil(t, nullHover.Error)
 	assert.Equal(t, "null", strings.TrimSpace(string(nullHover.Result)))
@@ -564,7 +569,7 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 	})
 	cteDef := c.call("textDocument/definition", lsp.DefinitionParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: cteURI},
-		Position:     syntax.Position{Line: 1, Character: len("SELECT tenant_id FROM ")},
+		Position:     lsp.Position{Line: 1, Character: len("SELECT tenant_id FROM ")},
 	})
 	require.Nil(t, cteDef.Error)
 	var locs []analysis.Location
@@ -606,7 +611,11 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 	var edits []lsp.TextEdit
 	require.NoError(t, json.Unmarshal(fmtResp.Result, &edits))
 	require.Len(t, edits, 1)
-	assert.Equal(t, li2.RangeAt(0, len(updatedSQL)), edits[0].Range)
+	wantRange := li2.RangeAt(0, len(updatedSQL))
+	assert.Equal(t, lsp.Range{
+		Start: lsp.Position{Line: wantRange.Start.Line, Character: wantRange.Start.Character},
+		End:   lsp.Position{Line: wantRange.End.Line, Character: wantRange.End.Character},
+	}, edits[0].Range)
 
 	// Syntax error formatting returns [] gracefully.
 	brokenURI := pathToURI(filepath.Join(wsDir, "broken.sql"))
@@ -650,7 +659,7 @@ func TestServerLifecycleAndFeatures(t *testing.T) {
 
 	postShut := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: cteURI},
-		Position:     syntax.Position{},
+		Position:     lsp.Position{},
 	})
 	require.NotNil(t, postShut.Error)
 	assert.Equal(t, lsp.ErrCodeInvalidRequest, postShut.Error.Code)
@@ -702,7 +711,7 @@ func TestServerCancelRequest(t *testing.T) {
 
 	chStr := c.startRequest(json.RawMessage(`"req-cancel-str"`), "textDocument/completion", lsp.CompletionParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uri},
-		Position:     syntax.Position{Line: 0, Character: 7},
+		Position:     lsp.Position{Line: 0, Character: 7},
 	})
 	c.notify("$/cancelRequest", lsp.CancelParams{ID: json.RawMessage(`"req-cancel-str"`)})
 
@@ -721,7 +730,7 @@ func TestServerCancelRequest(t *testing.T) {
 	c.notify("$/cancelRequest", lsp.CancelParams{ID: json.RawMessage("99999")})
 	hResp := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uri},
-		Position:     syntax.Position{Line: 0, Character: 7},
+		Position:     lsp.Position{Line: 0, Character: 7},
 	})
 	assert.Nil(t, hResp.Error)
 }
@@ -985,7 +994,7 @@ func TestServerRefreshDoesNotPublishAfterDidCloseOrDidChange(t *testing.T) {
 
 	_ = c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: changeURI},
-		Position:     syntax.Position{Line: 0, Character: 7},
+		Position:     lsp.Position{Line: 0, Character: 7},
 	})
 
 	c.mu.Lock()
@@ -1164,9 +1173,10 @@ func TestServerSignatureHelpAndCapabilities(t *testing.T) {
 	posIdx := strings.Index(sql, "DAY")
 	require.Positive(t, posIdx)
 
+	rawPos := syntax.NewLineIndex(sql).PositionAt(posIdx)
 	shResp := c.call("textDocument/signatureHelp", lsp.SignatureHelpParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uri},
-		Position:     syntax.NewLineIndex(sql).PositionAt(posIdx),
+		Position:     lsp.Position{Line: rawPos.Line, Character: rawPos.Character},
 	})
 	require.Nil(t, shResp.Error)
 
@@ -1190,7 +1200,7 @@ func TestServerSignatureHelpAndCapabilities(t *testing.T) {
 	// Outside any function call -> JSON null.
 	outsideResp := c.call("textDocument/signatureHelp", lsp.SignatureHelpParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uri},
-		Position:     syntax.Position{Line: 0, Character: 0},
+		Position:     lsp.Position{Line: 0, Character: 0},
 	})
 	require.Nil(t, outsideResp.Error)
 	assert.Equal(t, "null", strings.TrimSpace(string(outsideResp.Result)))
@@ -1257,11 +1267,11 @@ func TestServerExtensionSettingsAndConfigFilePrecedence(t *testing.T) {
 	})
 	diag1 := c.waitDiagnostics(uriNoCfg, cur)
 	require.NotEmpty(t, diag1.Diagnostics, "missing partition filter should trigger diagnostic from extension settings")
-	assert.Equal(t, analysis.SeverityError, diag1.Diagnostics[0].Severity)
+	assert.Equal(t, lsp.SeverityError, diag1.Diagnostics[0].Severity)
 
 	hoverResp := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uriNoCfg},
-		Position:     syntax.Position{Line: 0, Character: strings.Index(sql, "orders")},
+		Position:     lsp.Position{Line: 0, Character: strings.Index(sql, "orders")},
 	})
 	require.Nil(t, hoverResp.Error)
 	var h analysis.Hover
@@ -1287,7 +1297,7 @@ schema_dirs = [%q]
 
 	hoverSubResp := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uriWithCfg},
-		Position:     syntax.Position{Line: 0, Character: strings.Index(sqlSub, "orders")},
+		Position:     lsp.Position{Line: 0, Character: strings.Index(sqlSub, "orders")},
 	})
 	require.Nil(t, hoverSubResp.Error)
 	var hSub analysis.Hover

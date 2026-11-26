@@ -18,7 +18,6 @@ import (
 
 	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/syntax"
 	"github.com/paulourio/bqlang/lsp"
 )
 
@@ -511,7 +510,7 @@ func TestLSPDryRunInfersViewPartitionColumnUpdatesDiagnosticsHoverAndSemanticTok
 	// Hover on event_date must display the [PARTITION] badge.
 	hoverResp := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uri},
-		Position:     syntax.Position{Line: 0, Character: 9},
+		Position:     lsp.Position{Line: 0, Character: 9},
 	})
 	require.Nil(t, hoverResp.Error)
 	var hover analysis.Hover
@@ -684,7 +683,7 @@ func TestLSPViewProbeStage3AuthorizedViewMissingPartitionFilterHoverAndSemanticT
 	// Hover on event_date (col 28..37) must display the [PARTITION] badge.
 	hoverResp := c.call("textDocument/hover", lsp.HoverParams{
 		TextDocument: lsp.TextDocumentIdentifier{URI: uri},
-		Position:     syntax.Position{Line: 0, Character: 30},
+		Position:     lsp.Position{Line: 0, Character: 30},
 	})
 	require.Nil(t, hoverResp.Error)
 	var hover analysis.Hover

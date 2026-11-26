@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
 )
 
@@ -236,4 +237,100 @@ func TestTransportChunkedPayloadAndClosedSendRequest(t *testing.T) {
 	defer cancel()
 	_, timeoutErr := tr.SendRequest(ctx, "workspace/semanticTokens/refresh", nil)
 	require.ErrorIs(t, timeoutErr, context.DeadlineExceeded)
+}
+
+func TestInjectedStoreNotBypassedByCWDBqfmtToml(t *testing.T) {
+	cwdDir := t.TempDir()
+	require.NoError(t, os.WriteFile(
+		filepath.Join(cwdDir, bqconfig.ConfigFileName),
+		[]byte("[lsp]\ndefault_project = \"cwd-proj\"\ndefault_dataset = \"cwd-ds\"\n"),
+		0o600,
+	))
+	t.Chdir(cwdDir)
+
+	prefOpts := bqconfig.DefaultLSPOptions()
+	prefOpts.DefaultProject = "pref-proj"
+	prefOpts.DefaultDataset = "pref-ds"
+	prefOpts.CacheDir = t.TempDir()
+
+	shared, err := catalog.NewStore(prefOpts)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = shared.Close() })
+
+	srv, err := NewServer(ServerOptions{
+		Store:             shared,
+		DefaultLSPOptions: prefOpts,
+	})
+	require.NoError(t, err)
+	defer func() { _ = srv.Close() }()
+
+	// Untitled doc with empty rootDir must resolve to prefOpts and reuse the injected Store.
+	loaded, docCfg := srv.resolveDocConfig(t.Context(), "untitled:scratch.sql")
+	assert.Equal(t, "pref-proj", loaded.LSP.DefaultProject)
+	assert.Same(t, shared, docCfg.Store)
+
+	// File outside cwd with no .bqfmt.toml must also reuse the injected Store.
+	otherDir := t.TempDir()
+	fileLoaded, fileCfg := srv.resolveDocConfig(t.Context(), "file://"+filepath.ToSlash(filepath.Join(otherDir, "q.sql")))
+	assert.Equal(t, "pref-proj", fileLoaded.LSP.DefaultProject)
+	assert.Same(t, shared, fileCfg.Store)
+
+	srv.storesMu.Lock()
+	assert.Empty(t, srv.ownedStores)
+	srv.storesMu.Unlock()
+}
+
+func TestPruneUnusedOwnedStoresOnConfigChange(t *testing.T) {
+	t.Parallel()
+
+	prefOpts := bqconfig.DefaultLSPOptions()
+	prefOpts.DefaultProject = "base-proj"
+	prefOpts.CacheDir = t.TempDir()
+
+	shared, err := catalog.NewStore(prefOpts)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = shared.Close() })
+
+	srv, err := NewServer(ServerOptions{
+		Store:             shared,
+		DefaultLSPOptions: prefOpts,
+	})
+	require.NoError(t, err)
+	defer func() { _ = srv.Close() }()
+
+	var out bytes.Buffer
+	tr := NewTransport(bytes.NewReader(nil), &out)
+
+	uri := "untitled:cfg_churn.sql"
+	openRaw, err := json.Marshal(DidOpenTextDocumentParams{
+		TextDocument: TextDocumentItem{URI: uri, LanguageID: "bqlang", Version: 1, Text: "SELECT 1"},
+	})
+	require.NoError(t, err)
+	srv.handleDidOpen(t.Context(), tr, openRaw)
+
+	// Switch default_project across 5 distinct configs; obsolete server-owned stores must be pruned.
+	for i := range 5 {
+		cfgRaw, mErr := json.Marshal(DidChangeConfigurationParams{
+			Settings: json.RawMessage(`{"default_project":"proj-` + string(rune('a'+i)) + `"}`),
+		})
+		require.NoError(t, mErr)
+		srv.handleDidChangeConfiguration(t.Context(), tr, cfgRaw)
+
+		srv.storesMu.Lock()
+		ownedCount := len(srv.ownedStores)
+		srv.storesMu.Unlock()
+		assert.Equal(t, 1, ownedCount, "only the currently active override store should remain owned")
+	}
+
+	// Closing the document prunes the last override store, leaving the injected Store intact.
+	closeRaw, err := json.Marshal(DidCloseTextDocumentParams{
+		TextDocument: TextDocumentIdentifier{URI: uri},
+	})
+	require.NoError(t, err)
+	srv.handleDidClose(t.Context(), tr, closeRaw)
+
+	srv.storesMu.Lock()
+	assert.Empty(t, srv.ownedStores)
+	assert.Contains(t, srv.storeUnsubs, shared)
+	srv.storesMu.Unlock()
 }

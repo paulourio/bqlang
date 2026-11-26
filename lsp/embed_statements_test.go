@@ -172,6 +172,43 @@ func TestStatementsAllKindsAndEdgeCases(t *testing.T) {
 		assert.JSONEq(t, `{"statements":[]}`, string(resp.Result))
 	})
 
+	t.Run("pipe sinks classify as DML, DDL, EXPORT, or OTHER", func(t *testing.T) {
+		t.Parallel()
+
+		doc := strings.Join([]string{
+			"FROM ds.src |> SELECT id;",
+			"FROM ds.src |> INSERT INTO ds.dst;",
+			"FROM ds.src |> CREATE TABLE ds.out;",
+			"FROM ds.src |> EXPORT DATA OPTIONS(uri='gs://b/*.parquet', format='PARQUET');",
+			"FROM ds.src |> ASSERT id > 0;",
+		}, "\n")
+
+		uri := "untitled:pipe_sinks.sql"
+		c.notify("textDocument/didOpen", lsp.DidOpenTextDocumentParams{
+			TextDocument: lsp.TextDocumentItem{URI: uri, LanguageID: "bqlang", Version: 1, Text: doc},
+		})
+
+		resp := c.call("bqpls/statements", lsp.StatementsParams{
+			TextDocument: lsp.TextDocumentIdentifier{URI: uri},
+		})
+		require.Nil(t, resp.Error)
+
+		var res lsp.StatementsResult
+		require.NoError(t, json.Unmarshal(resp.Result, &res))
+
+		wantKinds := []lsp.StatementKind{
+			lsp.StatementKindQuery,
+			lsp.StatementKindDML,
+			lsp.StatementKindDDL,
+			lsp.StatementKindExport,
+			lsp.StatementKindOther,
+		}
+		require.Len(t, res.Statements, len(wantKinds))
+		for i, wk := range wantKinds {
+			assert.Equal(t, wk, res.Statements[i].Kind, "pipe statement %d: %q", i, res.Statements[i].Text)
+		}
+	})
+
 	t.Run("unopened document returns invalid params", func(t *testing.T) {
 		t.Parallel()
 

@@ -289,11 +289,11 @@ func classifyASTStatement(astStmt googlesql.ASTStatementNode) StatementKind {
 		}
 	}
 
+	if kind, ok := classifyQueryOrPipeStatement(astStmt); ok {
+		return kind
+	}
+
 	switch astStmt.(type) {
-	case *googlesql.ASTQueryStatement,
-		*googlesql.ASTStatementWithPipeOperators,
-		*googlesql.ASTSubpipelineStatement:
-		return StatementKindQuery
 	case *googlesql.ASTInsertStatement,
 		*googlesql.ASTUpdateStatement,
 		*googlesql.ASTDeleteStatement,
@@ -330,6 +330,81 @@ func classifyASTStatement(astStmt googlesql.ASTStatementNode) StatementKind {
 	}
 
 	return StatementKindOther
+}
+
+func classifyQueryOrPipeStatement(astStmt googlesql.ASTStatementNode) (StatementKind, bool) {
+	switch s := astStmt.(type) {
+	case *googlesql.ASTQueryStatement:
+		return classifyQueryWithOptionalPipeSink(s), true
+	case *googlesql.ASTStatementWithPipeOperators:
+		return classifyPipeWrappedStatement(s), true
+	case *googlesql.ASTSubpipelineStatement:
+		if sub, err := s.Subpipeline(); err == nil && !isNilNode(sub) {
+			if sinkKind, ok := classifyTrailingPipeSink(sub); ok {
+				return sinkKind, true
+			}
+		}
+
+		return StatementKindQuery, true
+	default:
+		return "", false
+	}
+}
+
+func classifyQueryWithOptionalPipeSink(s *googlesql.ASTQueryStatement) StatementKind {
+	if q, err := s.Query(); err == nil && !isNilNode(q) {
+		if sinkKind, ok := classifyTrailingPipeSink(q); ok {
+			return sinkKind
+		}
+	}
+
+	return StatementKindQuery
+}
+
+func classifyPipeWrappedStatement(s *googlesql.ASTStatementWithPipeOperators) StatementKind {
+	if suffix, err := s.PipeOperatorSuffix(); err == nil && !isNilNode(suffix) {
+		if sub, subErr := suffix.Subpipeline(); subErr == nil && !isNilNode(sub) {
+			if sinkKind, ok := classifyTrailingPipeSink(sub); ok {
+				return sinkKind
+			}
+		}
+	}
+
+	if inner, err := s.Statement(); err == nil && !isNilNode(inner) {
+		return classifyASTStatement(inner)
+	}
+
+	return StatementKindQuery
+}
+
+func classifyTrailingPipeSink(parent googlesql.ASTNode) (StatementKind, bool) {
+	if isNilNode(parent) {
+		return "", false
+	}
+
+	for i := astNumChildren(parent) - 1; i >= 0; i-- {
+		ch := astChild(parent, i)
+		if isNilNode(ch) {
+			continue
+		}
+
+		switch ch.(type) {
+		case *googlesql.ASTPipeInsert:
+			return StatementKindDML, true
+		case *googlesql.ASTPipeCreateTable:
+			return StatementKindDDL, true
+		case *googlesql.ASTPipeExportData:
+			return StatementKindExport, true
+		case *googlesql.ASTPipeAssert,
+			*googlesql.ASTPipeDescribe,
+			*googlesql.ASTPipeStaticDescribe:
+			return StatementKindOther, true
+		case googlesql.ASTPipeOperatorNode:
+			return "", false
+		}
+	}
+
+	return "", false
 }
 
 func classifyStatementFromTokens(src string, tokens []syntax.Token, start, end int) StatementKind {

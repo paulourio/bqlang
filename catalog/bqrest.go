@@ -545,8 +545,17 @@ type defaultTokenCache struct {
 // NewDefaultTokenProvider returns a cached ADC→gcloud token provider for the
 // given OAuth scopes (default: bigquery.readonly).
 func NewDefaultTokenProvider(scopes ...string) TokenProvider {
+	return NewDefaultTokenProviderWithGcloudPath("", scopes...)
+}
+
+// NewDefaultTokenProviderWithGcloudPath behaves like NewDefaultTokenProvider
+// while using gcloudPath as the explicit gcloud executable path for CLI
+// fallback (empty string auto-detects gcloud via ResolveGcloudBinary).
+func NewDefaultTokenProviderWithGcloudPath(gcloudPath string, scopes ...string) TokenProvider {
 	resolved := normalizeAuthScopes(scopes)
-	cache := &defaultTokenCache{}
+	cache := &defaultTokenCache{
+		gcloudPath: strings.TrimSpace(gcloudPath),
+	}
 
 	return func(ctx context.Context) (string, error) {
 		return cache.TokenForScopes(ctx, resolved...)
@@ -559,8 +568,9 @@ type adcCredentialMetadata struct {
 }
 
 // DescribeCredentials reports, best-effort, which credential the default chain
-// resolves to, for UI display, e.g. "authorized_user (ADC)", "service_account
-// sa@proj.iam (ADC)" or "gcloud". It returns "" if unknown.
+// resolves to, for UI display, e.g. "authorized_user (ADC)",
+// "service_account sa@proj.iam (ADC)", or "gcloud (user@example.com)".
+// It returns "" if unknown.
 func DescribeCredentials(ctx context.Context) (string, error) {
 	if err := ctx.Err(); err != nil {
 		return "", err

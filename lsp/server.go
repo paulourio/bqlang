@@ -183,7 +183,7 @@ type Server struct {
 	storesMu     sync.Mutex
 	stores       map[string]*catalog.Store
 	ownedStores  []*catalog.Store
-	storeUnsubs  []func()
+	storeUnsubs  map[*catalog.Store][]func()
 	defaultStore *catalog.Store
 	storesClosed bool
 
@@ -254,6 +254,7 @@ func NewServer(opts ServerOptions) (*Server, error) {
 		logger:            logger,
 		loader:            loader,
 		stores:            make(map[string]*catalog.Store),
+		storeUnsubs:       make(map[*catalog.Store][]func()),
 		docs:              make(map[string]*openDocState),
 		inflight:          make(map[string]inflightEntry),
 		refreshCh:         make(chan struct{}, 1),
@@ -262,13 +263,17 @@ func NewServer(opts ServerOptions) (*Server, error) {
 	}
 
 	defaultCfg := s.loadInitialDefaultConfig()
+	initLSPOpts := defaultCfg.LSP
+	if opts.Store != nil && opts.ConfigPath == "" {
+		initLSPOpts = s.baseLSPOptions()
+	}
 
-	defaultStore, err := s.initDefaultStore(opts.ConfigPath != "", defaultCfg.LSP)
+	defaultStore, err := s.initDefaultStore(opts.ConfigPath != "", initLSPOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	eng, err := analysis.NewEngine(defaultStore, defaultCfg.LSP)
+	eng, err := analysis.NewEngine(defaultStore, initLSPOpts)
 	if err != nil {
 		_ = s.closeOwnedStores()
 
@@ -342,8 +347,8 @@ func (s *Server) subscribeStoreLocked(st *catalog.Store) {
 		return
 	}
 
-	s.storeUnsubs = append(
-		s.storeUnsubs,
+	s.storeUnsubs[st] = append(
+		s.storeUnsubs[st],
 		st.Subscribe(s.onCatalogUpdate),
 		st.SubscribeDryRun(s.onDryRunUpdate),
 	)
@@ -351,6 +356,7 @@ func (s *Server) subscribeStoreLocked(st *catalog.Store) {
 
 func (s *Server) initDefaultStore(explicit bool, lspOpts *bqconfig.LSPOptions) (*catalog.Store, error) {
 	if s.opts.Store != nil {
+		s.stores[storeCacheKey(s.baseLSPOptions())] = s.opts.Store
 		s.stores[storeCacheKey(lspOpts)] = s.opts.Store
 		s.subscribeStoreLocked(s.opts.Store)
 
@@ -377,7 +383,11 @@ func (s *Server) initDefaultStore(explicit bool, lspOpts *bqconfig.LSPOptions) (
 }
 
 // Serve runs the JSON-RPC 2.0 / LSP 3.17 event loop over r and w until ctx is
-// canceled, EOF is reached, or exit is processed.
+// canceled, Close is called, EOF is reached, or exit is processed.
+//
+// When aborting Serve via context cancellation or Close on a blocking io.Reader
+// such as io.Pipe, callers should also close the write end of the pipe so the
+// internal frame-reader goroutine exits immediately.
 func (s *Server) Serve(ctx context.Context, r io.Reader, w io.Writer) error {
 	serveCtx, serveCancel := context.WithCancel(ctx)
 	refreshCtx, refreshCancel := context.WithCancel(serveCtx)
@@ -488,9 +498,14 @@ func (s *Server) closeOwnedStores() error {
 	}
 
 	s.storesClosed = true
-	unsubs := slices.Clone(s.storeUnsubs)
-	s.storeUnsubs = nil
+	var unsubs []func()
+	for st, list := range s.storeUnsubs {
+		unsubs = append(unsubs, list...)
+		delete(s.storeUnsubs, st)
+	}
 	stores := slices.Clone(s.ownedStores)
+	s.ownedStores = nil
+	clear(s.stores)
 	s.storesMu.Unlock()
 
 	for _, unsub := range unsubs {
@@ -1026,7 +1041,7 @@ func (s *Server) handleInitialize(ctx context.Context, raw json.RawMessage) (any
 			CodeLensProvider:           &CodeLensOptions{ResolveProvider: false},
 			DocumentFormattingProvider: true,
 			SemanticTokensProvider: &SemanticTokensOptions{
-				Legend: analysis.DefaultSemanticTokensLegend(),
+				Legend: fromAnalysisSemanticLegend(analysis.DefaultSemanticTokensLegend()),
 				Range:  true,
 				Full:   &SemanticTokensFullOptions{Delta: true},
 			},
@@ -1178,7 +1193,7 @@ func (s *Server) handleDidChange(ctx context.Context, tr *Transport, raw json.Ra
 	changes := make([]syntax.TextChange, 0, len(params.ContentChanges))
 	for _, ch := range params.ContentChanges {
 		changes = append(changes, syntax.TextChange{
-			Range: ch.Range,
+			Range: toSyntaxRangePtr(ch.Range),
 			Text:  ch.Text,
 		})
 	}
@@ -1292,6 +1307,10 @@ func (s *Server) refreshSingleOpenDocConfig(ctx context.Context, uri string) boo
 		s.logger.WarnContext(ctx, "UpdateDocumentConfig failed", slog.String("uri", uri), slog.Any("error", err))
 	}
 
+	if changed {
+		s.pruneUnusedOwnedStores()
+	}
+
 	return changed
 }
 
@@ -1304,6 +1323,7 @@ func (s *Server) reloadAllOpenDocs(ctx context.Context, tr *Transport) {
 		s.publishDocCost(ctx, tr, uri)
 	}
 
+	s.pruneUnusedOwnedStores()
 	s.triggerSemanticRefresh()
 }
 
@@ -1378,10 +1398,11 @@ func (s *Server) handleDidClose(ctx context.Context, tr *Transport, raw json.Raw
 	s.docsMu.Unlock()
 
 	s.engine.CloseDocument(uri)
+	s.pruneUnusedOwnedStores()
 
 	if err := tr.SendNotification("textDocument/publishDiagnostics", PublishDiagnosticsParams{
 		URI:         uri,
-		Diagnostics: []analysis.Diagnostic{},
+		Diagnostics: []Diagnostic{},
 	}); err != nil {
 		s.logger.DebugContext(ctx, "failed to publish empty diagnostics on close", slog.Any("error", err))
 	}
@@ -1400,10 +1421,9 @@ func (s *Server) publishDocDiagnostics(ctx context.Context, tr *Transport, uri s
 		return
 	}
 
-	diags := []analysis.Diagnostic{}
+	diags := []Diagnostic{}
 	if diagEnabled {
-		var err error
-		diags, err = s.engine.Diagnostics(ctx, uri)
+		rawDiags, err := s.engine.Diagnostics(ctx, uri)
 		if err != nil {
 			if !errors.Is(err, analysis.ErrDocumentNotOpen) && !errors.Is(err, context.Canceled) {
 				s.logger.WarnContext(ctx, "diagnostics computation failed", slog.String("uri", uri), slog.Any("error", err))
@@ -1412,9 +1432,7 @@ func (s *Server) publishDocDiagnostics(ctx context.Context, tr *Transport, uri s
 			return
 		}
 
-		if diags == nil {
-			diags = []analysis.Diagnostic{}
-		}
+		diags = fromAnalysisDiagnostics(rawDiags)
 	}
 
 	if !s.isDocDiagStateCurrent(uri, version, diagEnabled) {
@@ -1485,14 +1503,9 @@ func (s *Server) handleSemanticTokensDelta(ctx context.Context, raw json.RawMess
 	}
 
 	if res.IsDelta {
-		edits := res.Edits
-		if edits == nil {
-			edits = []analysis.SemanticTokensEdit{}
-		}
-
 		return SemanticTokensDelta{
 			ResultID: res.ResultID,
-			Edits:    edits,
+			Edits:    fromAnalysisSemanticEdits(res.Edits),
 		}, nil
 	}
 
@@ -1513,7 +1526,7 @@ func (s *Server) handleSemanticTokensRange(ctx context.Context, raw json.RawMess
 		return nil, rpcErr
 	}
 
-	res, err := s.engine.SemanticTokensRange(ctx, params.TextDocument.URI, params.Range)
+	res, err := s.engine.SemanticTokensRange(ctx, params.TextDocument.URI, toSyntaxRange(params.Range))
 	if err != nil {
 		return nil, mapAnalysisError(err)
 	}
@@ -1535,7 +1548,7 @@ func (s *Server) handleHover(ctx context.Context, raw json.RawMessage) (any, *Re
 		return nil, rpcErr
 	}
 
-	h, err := s.engine.Hover(ctx, params.TextDocument.URI, params.Position)
+	h, err := s.engine.Hover(ctx, params.TextDocument.URI, toSyntaxPosition(params.Position))
 	if err != nil {
 		return nil, mapAnalysisError(err)
 	}
@@ -1553,7 +1566,7 @@ func (s *Server) handleSignatureHelp(ctx context.Context, raw json.RawMessage) (
 		return nil, rpcErr
 	}
 
-	sh, err := s.engine.SignatureHelp(ctx, params.TextDocument.URI, params.Position, s.sigLabelOffsetSupport.Load())
+	sh, err := s.engine.SignatureHelp(ctx, params.TextDocument.URI, toSyntaxPosition(params.Position), s.sigLabelOffsetSupport.Load())
 	if err != nil {
 		return nil, mapAnalysisError(err)
 	}
@@ -1571,7 +1584,7 @@ func (s *Server) handleCompletion(ctx context.Context, raw json.RawMessage) (any
 		return nil, rpcErr
 	}
 
-	list, err := s.engine.Complete(ctx, params.TextDocument.URI, params.Position)
+	list, err := s.engine.Complete(ctx, params.TextDocument.URI, toSyntaxPosition(params.Position))
 	if err != nil {
 		return nil, mapAnalysisError(err)
 	}
@@ -1593,7 +1606,7 @@ func (s *Server) handleDefinition(ctx context.Context, raw json.RawMessage) (any
 		return nil, rpcErr
 	}
 
-	locs, err := s.engine.Definition(ctx, params.TextDocument.URI, params.Position)
+	locs, err := s.engine.Definition(ctx, params.TextDocument.URI, toSyntaxPosition(params.Position))
 	if err != nil {
 		return nil, mapAnalysisError(err)
 	}
@@ -1684,7 +1697,7 @@ func (s *Server) handleFormatting(ctx context.Context, raw json.RawMessage) (any
 	}
 
 	return []TextEdit{{
-		Range:   li.RangeAt(0, len(text)),
+		Range:   fromSyntaxRange(li.RangeAt(0, len(text))),
 		NewText: formatted,
 	}}, nil
 }
@@ -1770,6 +1783,10 @@ func (s *Server) loadRawConfigForURI(ctx context.Context, rawURI string) *bqconf
 		}
 	}
 
+	if s.opts.ConfigPath == "" && (s.defaultLSPOptions != nil || s.opts.Store != nil) {
+		return s.defaultLoadedConfig()
+	}
+
 	loaded, err := s.loader.ConfigFor("", true)
 	if err == nil && loaded != nil {
 		return s.normalizeLoadedConfig(loaded)
@@ -1850,6 +1867,148 @@ func (s *Server) getOrCreateStore(ctx context.Context, lspOpts *bqconfig.LSPOpti
 	s.subscribeStoreLocked(st)
 
 	return st
+}
+
+// pruneUnusedOwnedStores unsubscribes and closes server-owned catalog stores
+// that are no longer referenced by any open document (never touching the
+// default or injected Store).
+func (s *Server) pruneUnusedOwnedStores() {
+	inUse := make(map[*catalog.Store]struct{})
+	if s.defaultStore != nil {
+		inUse[s.defaultStore] = struct{}{}
+	}
+
+	s.docsMu.RLock()
+	for _, doc := range s.docs {
+		if doc.store != nil {
+			inUse[doc.store] = struct{}{}
+		}
+	}
+	s.docsMu.RUnlock()
+
+	s.storesMu.Lock()
+	if s.storesClosed || len(s.ownedStores) == 0 {
+		s.storesMu.Unlock()
+
+		return
+	}
+
+	var (
+		keptStores []*catalog.Store
+		evicted    []*catalog.Store
+		unsubs     []func()
+	)
+	for _, st := range s.ownedStores {
+		if _, active := inUse[st]; active {
+			keptStores = append(keptStores, st)
+			continue
+		}
+
+		evicted = append(evicted, st)
+		if list, ok := s.storeUnsubs[st]; ok {
+			unsubs = append(unsubs, list...)
+			delete(s.storeUnsubs, st)
+		}
+	}
+
+	if len(evicted) == 0 {
+		s.storesMu.Unlock()
+
+		return
+	}
+
+	s.ownedStores = keptStores
+	evictedSet := make(map[*catalog.Store]struct{}, len(evicted))
+	for _, st := range evicted {
+		evictedSet[st] = struct{}{}
+	}
+	for k, st := range s.stores {
+		if _, gone := evictedSet[st]; gone {
+			delete(s.stores, k)
+		}
+	}
+	s.storesMu.Unlock()
+
+	for _, unsub := range unsubs {
+		if unsub != nil {
+			unsub()
+		}
+	}
+
+	for _, st := range evicted {
+		_ = st.Close()
+	}
+}
+
+func toSyntaxPosition(p Position) syntax.Position {
+	return syntax.Position{Line: p.Line, Character: p.Character}
+}
+
+func toSyntaxRange(r Range) syntax.Range {
+	return syntax.Range{
+		Start: toSyntaxPosition(r.Start),
+		End:   toSyntaxPosition(r.End),
+	}
+}
+
+func toSyntaxRangePtr(r *Range) *syntax.Range {
+	if r == nil {
+		return nil
+	}
+
+	sr := toSyntaxRange(*r)
+
+	return &sr
+}
+
+func fromSyntaxRange(r syntax.Range) Range {
+	return Range{
+		Start: Position{Line: r.Start.Line, Character: r.Start.Character},
+		End:   Position{Line: r.End.Line, Character: r.End.Character},
+	}
+}
+
+func fromAnalysisSemanticLegend(l analysis.SemanticTokensLegend) SemanticTokensLegend {
+	return SemanticTokensLegend{
+		TokenTypes:     slices.Clone(l.TokenTypes),
+		TokenModifiers: slices.Clone(l.TokenModifiers),
+	}
+}
+
+func fromAnalysisSemanticEdits(edits []analysis.SemanticTokensEdit) []SemanticTokensEdit {
+	if len(edits) == 0 {
+		return []SemanticTokensEdit{}
+	}
+
+	out := make([]SemanticTokensEdit, len(edits))
+	for i, e := range edits {
+		out[i] = SemanticTokensEdit{
+			Start:       e.Start,
+			DeleteCount: e.DeleteCount,
+			Data:        slices.Clone(e.Data),
+		}
+	}
+
+	return out
+}
+
+func fromAnalysisDiagnostics(diags []analysis.Diagnostic) []Diagnostic {
+	if len(diags) == 0 {
+		return []Diagnostic{}
+	}
+
+	out := make([]Diagnostic, len(diags))
+	for i, d := range diags {
+		out[i] = Diagnostic{
+			Range:    fromSyntaxRange(d.Range),
+			Severity: DiagnosticSeverity(d.Severity),
+			Code:     d.Code,
+			Source:   d.Source,
+			Message:  d.Message,
+		}
+	}
+
+	return out
 }
 
 func (s *Server) snapshotOpenURIs() []string {
