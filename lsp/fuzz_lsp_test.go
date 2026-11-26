@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/paulourio/bqlang"
-	"github.com/paulourio/bqlang/internal/lsp"
+	"github.com/paulourio/bqlang/lsp"
 )
 
 func framePayload(body string) []byte {

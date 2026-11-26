@@ -16,10 +16,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/catalog"
-	"github.com/paulourio/bqlang/internal/lsp"
 	"github.com/paulourio/bqlang/internal/syntax"
+	"github.com/paulourio/bqlang/lsp"
 )
 
 func costFileURI(p string) string {

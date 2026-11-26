@@ -15,10 +15,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/paulourio/bqlang/bqconfig"
 	"github.com/paulourio/bqlang/formatter"
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/lsp"
 	"github.com/paulourio/bqlang/internal/syntax"
+	"github.com/paulourio/bqlang/lsp"
 )
 
 type paritySuiteFile struct {
@@ -41,7 +41,7 @@ type paritySuiteCase struct {
 func TestFormattingParityWithBqfmt(t *testing.T) {
 	t.Parallel()
 
-	testdataDir := filepath.Join("..", "..", "formatter", "testdata")
+	testdataDir := filepath.Join("..", "formatter", "testdata")
 	entries, err := os.ReadDir(testdataDir)
 	require.NoError(t, err)
 	require.NotEmpty(t, entries)

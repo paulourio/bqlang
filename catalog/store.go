@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/paulourio/bqlang/internal/bqconfig"
+	"github.com/paulourio/bqlang/bqconfig"
 )
 
 const (
@@ -45,9 +45,12 @@ type StoreOption func(*Store)
 // The callback runs synchronously on a Store background worker goroutine with
 // Store's internal mutex released, so calling GetTable or IsPending from within
 // fn is safe, but callers must NOT invoke Store.Close synchronously inside fn.
+//
+// For multiple independent listeners (such as an embedded LSP server and a UI
+// dataset browser sharing one Store), prefer Store.Subscribe.
 func WithOnUpdate(fn func(TableRef)) StoreOption {
 	return func(s *Store) {
-		s.onUpdate = fn
+		s.OnUpdate(fn)
 	}
 }
 
@@ -56,6 +59,18 @@ func WithRestClient(client *RestClient) StoreOption {
 	return func(s *Store) {
 		if client != nil {
 			s.rest = client
+		}
+	}
+}
+
+// WithRestOptions appends RestClientOption values applied when Store constructs
+// its default RestClient (ignored when WithRestClient is also provided).
+func WithRestOptions(opts ...RestClientOption) StoreOption {
+	return func(s *Store) {
+		for _, opt := range opts {
+			if opt != nil {
+				s.restOpts = append(s.restOpts, opt)
+			}
 		}
 	}
 }
@@ -81,18 +96,27 @@ func WithLogger(logger *slog.Logger) StoreOption {
 // Store provides non-blocking access to BigQuery table metadata backed by
 // workspace schema_dirs, an in-memory map, a persistent disk TTL cache, and
 // asynchronous BigQuery REST v2 fetches.
+//
+// Store is safe for concurrent use by multiple goroutines, including sharing a
+// single *Store between an embedded lsp.Server and external callers invoking
+// GetTable, WaitForTable, DiscoverDatasets, DiscoverTables, PutTable, and
+// Subscribe concurrently.
 type Store struct {
 	opts                    bqconfig.LSPOptions
 	policy                  cacheTTLPolicy
 	rest                    *RestClient
+	restOpts                []RestClientOption
 	disk                    *diskCache
 	now                     func() time.Time
-	onUpdate                func(TableRef)
-	onDryRunUpdate          func()
 	logger                  *slog.Logger
 	viewProbeThresholdBytes int64
 
 	mu                    sync.RWMutex
+	nextSubID             uint64
+	updateSubs            map[uint64]func(TableRef)
+	legacyUpdateSubID     uint64
+	dryRunSubs            map[uint64]func()
+	legacyDryRunSubID     uint64
 	mem                   map[string]cacheEntry // exact FullName -> entry
 	memLower              map[string]string     // lowercase FullName -> exact FullName
 	pending               map[string]struct{}
@@ -131,6 +155,8 @@ func NewStore(opts *bqconfig.LSPOptions, storeOpts ...StoreOption) (*Store, erro
 		now:                     time.Now,
 		logger:                  slog.New(slog.DiscardHandler),
 		viewProbeThresholdBytes: defaultViewPartitionProbeThresholdBytes,
+		updateSubs:              make(map[uint64]func(TableRef)),
+		dryRunSubs:              make(map[uint64]func()),
 		mem:                     make(map[string]cacheEntry),
 		memLower:                make(map[string]string),
 		pending:                 make(map[string]struct{}),
@@ -159,7 +185,10 @@ func NewStore(opts *bqconfig.LSPOptions, storeOpts ...StoreOption) (*Store, erro
 	}
 
 	if s.rest == nil {
-		s.rest = NewRestClient(WithGcloudPath(s.opts.GcloudPath))
+		restOpts := make([]RestClientOption, 0, len(s.restOpts)+1)
+		restOpts = append(restOpts, WithGcloudPath(s.opts.GcloudPath))
+		restOpts = append(restOpts, s.restOpts...)
+		s.rest = NewRestClient(restOpts...)
 	}
 
 	if s.opts.CacheDir != "" {
@@ -202,13 +231,86 @@ func cloneLSPOptions(opts *bqconfig.LSPOptions) bqconfig.LSPOptions {
 	return cp
 }
 
-// OnUpdate sets or replaces the asynchronous fetch completion callback.
+// Subscribe registers fn to run after each async table fetch completes
+// (success or failure). It returns a function that removes the subscription.
+// fn runs on a background goroutine with the store mutex released; it must
+// not call Close synchronously.
+func (s *Store) Subscribe(fn func(TableRef)) (unsubscribe func()) {
+	if s == nil || fn == nil {
+		return func() {}
+	}
+
+	s.mu.Lock()
+	id := s.addUpdateSubscriberLocked(fn)
+	s.mu.Unlock()
+
+	var once sync.Once
+
+	return func() {
+		once.Do(func() {
+			s.mu.Lock()
+			delete(s.updateSubs, id)
+			s.mu.Unlock()
+		})
+	}
+}
+
+// OnUpdate sets or replaces the legacy single asynchronous fetch completion
+// callback. Prefer Subscribe when multiple listeners share one Store.
 // Callers must NOT invoke Store.Close synchronously from within fn, as fn runs
 // on a background worker goroutine tracked by Close.
 func (s *Store) OnUpdate(fn func(TableRef)) {
+	if s == nil {
+		return
+	}
+
 	s.mu.Lock()
-	s.onUpdate = fn
+	if s.legacyUpdateSubID != 0 {
+		delete(s.updateSubs, s.legacyUpdateSubID)
+		s.legacyUpdateSubID = 0
+	}
+
+	if fn != nil {
+		s.legacyUpdateSubID = s.addUpdateSubscriberLocked(fn)
+	}
 	s.mu.Unlock()
+}
+
+func (s *Store) addUpdateSubscriberLocked(fn func(TableRef)) uint64 {
+	if s.updateSubs == nil {
+		s.updateSubs = make(map[uint64]func(TableRef))
+	}
+
+	s.nextSubID++
+	id := s.nextSubID
+	s.updateSubs[id] = fn
+
+	return id
+}
+
+func (s *Store) snapshotUpdateSubscribersLocked() []func(TableRef) {
+	if len(s.updateSubs) == 0 {
+		return nil
+	}
+
+	ids := make([]uint64, 0, len(s.updateSubs))
+	for id := range s.updateSubs {
+		ids = append(ids, id)
+	}
+	slices.Sort(ids)
+
+	subs := make([]func(TableRef), 0, len(ids))
+	for _, id := range ids {
+		subs = append(subs, s.updateSubs[id])
+	}
+
+	return subs
+}
+
+func notifyUpdateSubscribers(subs []func(TableRef), ref TableRef) {
+	for _, fn := range subs {
+		fn(ref)
+	}
 }
 
 // Close cancels background workers and waits for in-flight fetches to exit.
@@ -531,7 +633,7 @@ func (s *Store) processFetch(ref TableRef) {
 		enriched = s.applyPendingPartitionHintsLocked(now)
 	}
 
-	cb := s.onUpdate
+	subs := s.snapshotUpdateSubscribersLocked()
 	closed := s.closed
 	s.broadcastFetchDoneLocked()
 	s.mu.Unlock()
@@ -542,11 +644,11 @@ func (s *Store) processFetch(ref TableRef) {
 		}
 	}
 
-	if !closed && s.ctx.Err() == nil && cb != nil {
-		cb(ref)
+	if !closed && s.ctx.Err() == nil && len(subs) > 0 {
+		notifyUpdateSubscribers(subs, ref)
 		for _, upd := range enriched {
 			if upd.meta.Ref.NormalizedKey() != ref.NormalizedKey() {
-				cb(upd.meta.Ref)
+				notifyUpdateSubscribers(subs, upd.meta.Ref)
 			}
 		}
 	}
@@ -605,13 +707,13 @@ func (s *Store) processWildcardFetch(wildcardRef TableRef) {
 		s.recordNegativeLocked(key)
 	}
 
-	cb := s.onUpdate
+	subs := s.snapshotUpdateSubscribersLocked()
 	closed := s.closed
 	s.broadcastFetchDoneLocked()
 	s.mu.Unlock()
 
-	if !closed && s.ctx.Err() == nil && cb != nil {
-		cb(wildcardRef)
+	if !closed && s.ctx.Err() == nil && len(subs) > 0 {
+		notifyUpdateSubscribers(subs, wildcardRef)
 	}
 }
 

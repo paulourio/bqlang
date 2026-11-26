@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/paulourio/bqlang"
+	"github.com/paulourio/bqlang/bqconfig"
 	"github.com/paulourio/bqlang/formatter"
-	"github.com/paulourio/bqlang/internal/bqconfig"
 )
 
 var version = "dev"

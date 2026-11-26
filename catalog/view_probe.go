@@ -401,7 +401,7 @@ func (s *Store) commitViewProbePartition(
 		diskMeta      *TableMeta
 		diskFetchedAt time.Time
 		changed       bool
-		cb            func(TableRef)
+		subs          []func(TableRef)
 		closed        bool
 	)
 
@@ -429,7 +429,7 @@ func (s *Store) commitViewProbePartition(
 		}
 	}
 
-	cb = s.onUpdate
+	subs = s.snapshotUpdateSubscribersLocked()
 	closed = s.closed
 	s.mu.Unlock()
 
@@ -437,8 +437,8 @@ func (s *Store) commitViewProbePartition(
 		s.writeDiskCache(diskMeta, diskFetchedAt)
 	}
 
-	if changed && diskMeta != nil && !closed && s.ctx.Err() == nil && cb != nil {
-		cb(diskMeta.Ref)
+	if changed && diskMeta != nil && !closed && s.ctx.Err() == nil && len(subs) > 0 {
+		notifyUpdateSubscribers(subs, diskMeta.Ref)
 	}
 }
 

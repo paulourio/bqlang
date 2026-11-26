@@ -353,9 +353,25 @@ func MergeLSPOptions(
 		return cloneLSPOptions(fileOpts)
 	}
 
-	out := DefaultLSPOptions()
-	applyDefinedLSPOptions(out, clientOpts, clientDefined)
-	if fileOpts != nil {
+	return MergeLSPOptionsOver(DefaultLSPOptions(), fileOpts, fileDefined, clientOpts, clientDefined)
+}
+
+// MergeLSPOptionsOver layers fileOpts (highest priority, per fileDefined) over
+// clientOpts (editor/extension settings, per clientDefined) over base instead of
+// DefaultLSPOptions.
+func MergeLSPOptionsOver(
+	base *LSPOptions,
+	fileOpts *LSPOptions,
+	fileDefined LSPDefinedFields,
+	clientOpts *LSPOptions,
+	clientDefined LSPDefinedFields,
+) *LSPOptions {
+	out := cloneLSPOptions(base)
+	if clientOpts != nil && clientDefined.Any() {
+		applyDefinedLSPOptions(out, clientOpts, clientDefined)
+	}
+
+	if fileOpts != nil && fileDefined.Any() {
 		applyDefinedLSPOptions(out, fileOpts, fileDefined)
 	}
 

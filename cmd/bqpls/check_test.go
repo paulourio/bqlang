@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/catalog"
 )
 
 func setupCheckWorkspace(t *testing.T) string {

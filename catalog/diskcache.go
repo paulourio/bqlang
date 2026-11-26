@@ -21,7 +21,7 @@ import (
 
 	_ "modernc.org/sqlite" // Pure-Go (CGo-free) SQLite driver for multi-process WAL disk cache.
 
-	"github.com/paulourio/bqlang/internal/bqconfig"
+	"github.com/paulourio/bqlang/bqconfig"
 )
 
 // DiskCacheFilename is the SQLite database file stored inside CacheDir.

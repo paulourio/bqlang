@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/paulourio/bqlang"
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/catalog"
 	"github.com/paulourio/bqlang/internal/syntax"
 )
 

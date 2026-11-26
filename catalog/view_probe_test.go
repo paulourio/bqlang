@@ -15,8 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/catalog"
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 )
 
 const giB int64 = 1 << 30

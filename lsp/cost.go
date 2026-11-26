@@ -8,9 +8,9 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/catalog"
 )
 
 const queryCostNotificationMethod = "bqpls/queryCost"

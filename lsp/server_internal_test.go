@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/paulourio/bqlang/bqconfig"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/bqconfig"
 )
 
 func TestCancelQueuedRequestDeterministic(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 
 	"github.com/goccy/go-googlesql"
 
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/formatter"
-	"github.com/paulourio/bqlang/internal/catalog"
 	"github.com/paulourio/bqlang/internal/funcdocs"
 	"github.com/paulourio/bqlang/internal/syntax"
 )

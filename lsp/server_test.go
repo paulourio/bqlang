@@ -21,14 +21,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/catalog"
-	"github.com/paulourio/bqlang/internal/lsp"
 	"github.com/paulourio/bqlang/internal/syntax"
+	"github.com/paulourio/bqlang/lsp"
 )
 
 type testClient struct {
 	t      *testing.T
+	srv    *lsp.Server
 	tr     *lsp.Transport
 	inW    *io.PipeWriter
 	outR   *io.PipeReader
@@ -61,6 +62,7 @@ func startTestServer(t *testing.T, opts lsp.ServerOptions) *testClient {
 
 	c := &testClient{
 		t:           t,
+		srv:         srv,
 		tr:          lsp.NewTransport(outR, inW),
 		inW:         inW,
 		outR:        outR,

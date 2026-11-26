@@ -15,8 +15,8 @@ import (
 	"github.com/goccy/go-googlesql"
 
 	"github.com/paulourio/bqlang"
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/catalog"
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/syntax"
 )
 
@@ -82,6 +82,7 @@ type cachedAST struct {
 	errMsg         string
 	parserTokens   []ByteSemanticToken
 	dryRunEligible bool
+	stmtKind       StatementKind
 	astTableRefs   [][]string
 }
 
@@ -175,6 +176,7 @@ type AnalyzedStatement struct {
 	ScannedTables      []TableCostBreakdown
 	ASTTableRefs       [][]string
 	DryRunEligible     bool
+	StmtKind           StatementKind
 	UnresolvedRefs     []catalog.TableRef
 	PendingRefs        []catalog.TableRef
 	DeclaredVars       []DeclaredVarInfo
@@ -734,6 +736,7 @@ func (e *Engine) analyzeStatementsLocked(
 			ParseErrMsg:    cachedAST.errMsg,
 			ParserTokens:   cachedAST.parserTokens,
 			DryRunEligible: cachedAST.dryRunEligible,
+			StmtKind:       cachedAST.stmtKind,
 			ASTTableRefs:   cachedAST.astTableRefs,
 		}
 
@@ -772,6 +775,7 @@ func (e *Engine) getOrParseASTLocked(entry *docEntry, stmtSQL string, stmtHash [
 		errMsg          string
 		parserTokens    []ByteSemanticToken
 		dryRunEligible  bool
+		stmtKind        StatementKind
 		astTableRefs    [][]string
 	)
 
@@ -780,6 +784,7 @@ func (e *Engine) getOrParseASTLocked(entry *docEntry, stmtSQL string, stmtHash [
 	} else if !isNilNode(astStmt) {
 		parserTokens = extractASTTokens(stmtSQL, astStmt)
 		dryRunEligible = isDryRunEligibleAST(astStmt)
+		stmtKind = classifyASTStatement(astStmt)
 		astTableRefs = collectASTTablePartsList(astStmt)
 	}
 
@@ -793,6 +798,7 @@ func (e *Engine) getOrParseASTLocked(entry *docEntry, stmtSQL string, stmtHash [
 		errMsg:         errMsg,
 		parserTokens:   parserTokens,
 		dryRunEligible: dryRunEligible,
+		stmtKind:       stmtKind,
 		astTableRefs:   astTableRefs,
 	}
 

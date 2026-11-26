@@ -17,10 +17,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/formatter"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/catalog"
 	"github.com/paulourio/bqlang/internal/syntax"
 )
 
@@ -42,10 +42,32 @@ const (
 
 // ServerOptions configures a bqpls LSP Server instance.
 type ServerOptions struct {
-	ConfigPath   string
-	Logger       *slog.Logger
-	Version      string
+	// ConfigPath points to an explicit .bqfmt.toml file. When empty, the server
+	// discovers .bqfmt.toml upward from each document's directory.
+	ConfigPath string
+
+	// Logger receives structured server logs. When nil, logs are discarded.
+	Logger *slog.Logger
+
+	// Version is reported in InitializeResult.ServerInfo.Version (default "dev").
+	Version string
+
+	// StoreOptions are appended when the server creates catalog stores.
 	StoreOptions []catalog.StoreOption
+
+	// Store, when non-nil, is used as the default catalog store instead of
+	// creating one. The server does not Close an injected Store; documents whose
+	// directory resolves to a different .bqfmt.toml may still get their own
+	// server-owned stores.
+	Store *catalog.Store
+
+	// TokenProvider, when non-nil, replaces the default ADC→gcloud chain for
+	// every RestClient the server creates (metadata fetches and dry runs).
+	TokenProvider catalog.TokenProvider
+
+	// DefaultLSPOptions, when non-nil, replaces bqconfig.DefaultLSPOptions()
+	// as the base configuration when no .bqfmt.toml is found.
+	DefaultLSPOptions *bqconfig.LSPOptions
 }
 
 type openDocState struct {
@@ -150,16 +172,18 @@ func (q *commandQueue) DrainAndClose() []queuedMessage {
 	return rem
 }
 
-// Server implements a concurrent stdio LSP 3.17 language server for BigQuery SQL and Jinja2/dbt.
+// Server implements a concurrent JSON-RPC 2.0 / LSP 3.17 language server for BigQuery SQL and Jinja2/dbt.
 type Server struct {
-	opts   ServerOptions
-	logger *slog.Logger
-	loader *bqconfig.Loader
-	engine *analysis.Engine
+	opts              ServerOptions
+	defaultLSPOptions *bqconfig.LSPOptions
+	logger            *slog.Logger
+	loader            *bqconfig.Loader
+	engine            *analysis.Engine
 
 	storesMu     sync.Mutex
 	stores       map[string]*catalog.Store
 	ownedStores  []*catalog.Store
+	storeUnsubs  []func()
 	defaultStore *catalog.Store
 	storesClosed bool
 
@@ -210,33 +234,43 @@ func NewServer(opts ServerOptions) (*Server, error) {
 
 	opts.Logger = logger
 
+	var defaultLSPOpts *bqconfig.LSPOptions
+	if opts.DefaultLSPOptions != nil {
+		if err := opts.DefaultLSPOptions.Validate(); err != nil {
+			return nil, fmt.Errorf("NewServer default LSP options: %w", err)
+		}
+
+		defaultLSPOpts = cloneLSPOptions(opts.DefaultLSPOptions)
+	}
+
 	loader, err := bqconfig.NewLoader(opts.ConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("NewServer config loader: %w", err)
 	}
 
-	defaultCfg := loadInitialDefaultConfig(loader, logger)
-
 	s := &Server{
-		opts:          opts,
-		logger:        logger,
-		loader:        loader,
-		stores:        make(map[string]*catalog.Store),
-		docs:          make(map[string]*openDocState),
-		inflight:      make(map[string]inflightEntry),
-		refreshCh:     make(chan struct{}, 1),
-		costRefreshCh: make(chan struct{}, 1),
-		dryRunTimers:  make(map[string]*time.Timer),
+		opts:              opts,
+		defaultLSPOptions: defaultLSPOpts,
+		logger:            logger,
+		loader:            loader,
+		stores:            make(map[string]*catalog.Store),
+		docs:              make(map[string]*openDocState),
+		inflight:          make(map[string]inflightEntry),
+		refreshCh:         make(chan struct{}, 1),
+		costRefreshCh:     make(chan struct{}, 1),
+		dryRunTimers:      make(map[string]*time.Timer),
 	}
 
-	defaultStore, err := s.createDefaultStore(opts.ConfigPath != "", defaultCfg.LSP)
+	defaultCfg := s.loadInitialDefaultConfig()
+
+	defaultStore, err := s.initDefaultStore(opts.ConfigPath != "", defaultCfg.LSP)
 	if err != nil {
 		return nil, err
 	}
 
 	eng, err := analysis.NewEngine(defaultStore, defaultCfg.LSP)
 	if err != nil {
-		_ = defaultStore.Close()
+		_ = s.closeOwnedStores()
 
 		return nil, fmt.Errorf("NewServer analysis engine: %w", err)
 	}
@@ -245,6 +279,30 @@ func NewServer(opts ServerOptions) (*Server, error) {
 	s.engine = eng
 
 	return s, nil
+}
+
+func cloneLSPOptions(opts *bqconfig.LSPOptions) *bqconfig.LSPOptions {
+	if opts == nil {
+		return bqconfig.DefaultLSPOptions()
+	}
+
+	cp := *opts
+	cp.SchemaDirs = slices.Clone(opts.SchemaDirs)
+	cp.ProjectCacheTTLSeconds = bqconfig.NormalizeProjectCacheTTLs(opts.ProjectCacheTTLSeconds)
+
+	return &cp
+}
+
+func (s *Server) baseLSPOptions() *bqconfig.LSPOptions {
+	if s.defaultLSPOptions != nil {
+		return cloneLSPOptions(s.defaultLSPOptions)
+	}
+
+	return bqconfig.DefaultLSPOptions()
+}
+
+func (s *Server) loadInitialDefaultConfig() *bqconfig.LoadedConfig {
+	return s.normalizeLoadedConfig(loadInitialDefaultConfig(s.loader, s.logger))
 }
 
 func loadInitialDefaultConfig(loader *bqconfig.Loader, logger *slog.Logger) *bqconfig.LoadedConfig {
@@ -263,16 +321,47 @@ func loadInitialDefaultConfig(loader *bqconfig.Loader, logger *slog.Logger) *bqc
 	}
 }
 
-func (s *Server) createDefaultStore(explicit bool, lspOpts *bqconfig.LSPOptions) (*catalog.Store, error) {
-	storeOpts := make([]catalog.StoreOption, 0, len(s.opts.StoreOptions)+3)
+func (s *Server) buildStoreOptions() []catalog.StoreOption {
+	extra := 1
+	if s.opts.TokenProvider != nil {
+		extra++
+	}
+
+	storeOpts := make([]catalog.StoreOption, 0, len(s.opts.StoreOptions)+extra)
 	storeOpts = append(storeOpts, catalog.WithLogger(s.logger))
+	if s.opts.TokenProvider != nil {
+		storeOpts = append(storeOpts, catalog.WithRestOptions(catalog.WithTokenProvider(s.opts.TokenProvider)))
+	}
 	storeOpts = append(storeOpts, s.opts.StoreOptions...)
-	storeOpts = append(storeOpts, catalog.WithOnUpdate(s.onCatalogUpdate))
-	storeOpts = append(storeOpts, catalog.WithOnDryRunUpdate(s.onDryRunUpdate))
+
+	return storeOpts
+}
+
+func (s *Server) subscribeStoreLocked(st *catalog.Store) {
+	if st == nil {
+		return
+	}
+
+	s.storeUnsubs = append(
+		s.storeUnsubs,
+		st.Subscribe(s.onCatalogUpdate),
+		st.SubscribeDryRun(s.onDryRunUpdate),
+	)
+}
+
+func (s *Server) initDefaultStore(explicit bool, lspOpts *bqconfig.LSPOptions) (*catalog.Store, error) {
+	if s.opts.Store != nil {
+		s.stores[storeCacheKey(lspOpts)] = s.opts.Store
+		s.subscribeStoreLocked(s.opts.Store)
+
+		return s.opts.Store, nil
+	}
+
+	storeOpts := s.buildStoreOptions()
 	store, err := catalog.NewStore(lspOpts, storeOpts...)
 	if err != nil && !explicit {
 		s.logger.Warn("failed to create initial catalog store; falling back to defaults", slog.Any("error", err))
-		lspOpts = bqconfig.DefaultLSPOptions()
+		lspOpts = s.baseLSPOptions()
 		store, err = catalog.NewStore(lspOpts, storeOpts...)
 	}
 
@@ -282,6 +371,7 @@ func (s *Server) createDefaultStore(explicit bool, lspOpts *bqconfig.LSPOptions)
 
 	s.stores[storeCacheKey(lspOpts)] = store
 	s.ownedStores = append(s.ownedStores, store)
+	s.subscribeStoreLocked(store)
 
 	return store, nil
 }
@@ -346,14 +436,27 @@ func (s *Server) Serve(ctx context.Context, r io.Reader, w io.Writer) error {
 	_ = s.closeOwnedStores()
 
 	if readErr != nil && !errors.Is(readErr, io.EOF) {
+		if errors.Is(readErr, context.Canceled) && ctx.Err() == nil && s.isClosed() {
+			return nil
+		}
+
 		return readErr
 	}
 
 	return ctx.Err()
 }
 
-// Close cancels active serving and closes all owned catalog stores.
-// It is safe to call multiple times and must not be called from Store onUpdate callbacks.
+func (s *Server) isClosed() bool {
+	s.closeMu.Lock()
+	closed := s.closed
+	s.closeMu.Unlock()
+
+	return closed
+}
+
+// Close cancels active serving, unsubscribes from all catalog stores, and closes
+// all server-owned catalog stores (leaving any injected ServerOptions.Store open).
+// It is safe to call multiple times and must not be called from Store callbacks.
 func (s *Server) Close() error {
 	s.closeMu.Lock()
 	if s.closed {
@@ -385,8 +488,16 @@ func (s *Server) closeOwnedStores() error {
 	}
 
 	s.storesClosed = true
-	stores := append([]*catalog.Store(nil), s.ownedStores...)
+	unsubs := slices.Clone(s.storeUnsubs)
+	s.storeUnsubs = nil
+	stores := slices.Clone(s.ownedStores)
 	s.storesMu.Unlock()
+
+	for _, unsub := range unsubs {
+		if unsub != nil {
+			unsub()
+		}
+	}
 
 	var firstErr error
 	for _, st := range stores {
@@ -394,8 +505,6 @@ func (s *Server) closeOwnedStores() error {
 			continue
 		}
 
-		st.OnUpdate(nil)
-		st.OnDryRunUpdate(nil)
 		if err := st.Close(); err != nil && firstErr == nil {
 			firstErr = err
 		}
@@ -485,6 +594,11 @@ func (s *Server) refreshOpenDocDiagnostics(ctx context.Context, tr *Transport) {
 	}
 }
 
+type frameReadResult struct {
+	frame []byte
+	err   error
+}
+
 func (s *Server) runReadLoop(
 	ctx context.Context,
 	tr *Transport,
@@ -492,17 +606,39 @@ func (s *Server) runReadLoop(
 	serveCancel context.CancelFunc,
 	activeCancel context.CancelFunc,
 ) error {
+	nextCh := make(chan struct{})
+	resCh := make(chan frameReadResult, 1)
+
+	go func() {
+		for range nextCh {
+			frame, err := tr.ReadFrame()
+			resCh <- frameReadResult{frame: frame, err: err}
+			if err != nil {
+				return
+			}
+		}
+	}()
+	defer close(nextCh)
+
 	for {
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
 
-		frame, err := tr.ReadFrame()
-		if err != nil {
-			return err
+		nextCh <- struct{}{}
+
+		var res frameReadResult
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case res = <-resCh:
 		}
 
-		msg, kind, rpcErr := DecodeRPCMessage(frame)
+		if res.err != nil {
+			return res.err
+		}
+
+		msg, kind, rpcErr := DecodeRPCMessage(res.frame)
 		if rpcErr != nil {
 			replyID := errorReplyID(msg.ID)
 			if sendErr := tr.SendError(replyID, rpcErr); sendErr != nil {
@@ -894,6 +1030,9 @@ func (s *Server) handleInitialize(ctx context.Context, raw json.RawMessage) (any
 				Range:  true,
 				Full:   &SemanticTokensFullOptions{Delta: true},
 			},
+			Experimental: &ExperimentalCapabilities{
+				BQPLSStatements: true,
+			},
 		},
 		ServerInfo: &ServerInfo{
 			Name:    serverName,
@@ -985,6 +1124,8 @@ func (s *Server) handleFeatureRequest(ctx context.Context, msg RPCMessage) (any,
 		return s.handleCodeLens(ctx, msg.Params)
 	case "bqpls/refreshCost":
 		return s.handleRefreshCost(ctx, msg.Params)
+	case "bqpls/statements":
+		return s.handleStatements(ctx, msg.Params)
 	case "textDocument/formatting":
 		return s.handleFormatting(ctx, msg.Params)
 	default:
@@ -1482,6 +1623,32 @@ func (s *Server) handleDocumentSymbol(ctx context.Context, raw json.RawMessage) 
 	return syms, nil
 }
 
+func (s *Server) handleStatements(ctx context.Context, raw json.RawMessage) (any, *ResponseError) {
+	params, rpcErr := decodeParams[StatementsParams](raw)
+	if rpcErr != nil {
+		return nil, rpcErr
+	}
+
+	stmts, err := s.engine.Statements(ctx, params.TextDocument.URI)
+	if err != nil {
+		return nil, mapAnalysisError(err)
+	}
+
+	out := make([]StatementInfo, 0, len(stmts))
+	for _, st := range stmts {
+		out = append(out, StatementInfo{
+			Range: Range{
+				Start: Position{Line: st.Range.Start.Line, Character: st.Range.Start.Character},
+				End:   Position{Line: st.Range.End.Line, Character: st.Range.End.Character},
+			},
+			Kind: StatementKind(st.Kind),
+			Text: st.Text,
+		})
+	}
+
+	return StatementsResult{Statements: out}, nil
+}
+
 func (s *Server) handleFormatting(ctx context.Context, raw json.RawMessage) (any, *ResponseError) {
 	params, rpcErr := decodeParams[DocumentFormattingParams](raw)
 	if rpcErr != nil {
@@ -1585,11 +1752,11 @@ func (s *Server) loadRawConfigForURI(ctx context.Context, rawURI string) *bqconf
 	if isFile {
 		loaded, err := s.loader.ConfigFor(fsPath, false)
 		if err == nil && loaded != nil {
-			return normalizeLoadedConfig(loaded)
+			return s.normalizeLoadedConfig(loaded)
 		}
 
 		s.logger.WarnContext(ctx, "failed to load config for URI; using defaults", slog.String("uri", rawURI), slog.Any("error", err))
-		return defaultLoadedConfig()
+		return s.defaultLoadedConfig()
 	}
 
 	s.docsMu.RLock()
@@ -1599,20 +1766,20 @@ func (s *Server) loadRawConfigForURI(ctx context.Context, rawURI string) *bqconf
 	if rootDir != "" {
 		loaded, err := s.loader.ConfigFor(filepath.Join(rootDir, "untitled.sql"), false)
 		if err == nil && loaded != nil {
-			return normalizeLoadedConfig(loaded)
+			return s.normalizeLoadedConfig(loaded)
 		}
 	}
 
 	loaded, err := s.loader.ConfigFor("", true)
 	if err == nil && loaded != nil {
-		return normalizeLoadedConfig(loaded)
+		return s.normalizeLoadedConfig(loaded)
 	}
 
 	if err != nil {
 		s.logger.WarnContext(ctx, "failed to load fallback config; using defaults", slog.String("uri", rawURI), slog.Any("error", err))
 	}
 
-	return defaultLoadedConfig()
+	return s.defaultLoadedConfig()
 }
 
 func (s *Server) applyClientLSPFallback(loaded *bqconfig.LoadedConfig) {
@@ -1629,25 +1796,27 @@ func (s *Server) applyClientLSPFallback(loaded *bqconfig.LoadedConfig) {
 		return
 	}
 
-	loaded.LSP = bqconfig.MergeLSPOptions(loaded.LSP, loaded.LSPDefined, clientLSP, clientDef)
+	loaded.LSP = bqconfig.MergeLSPOptionsOver(s.baseLSPOptions(), loaded.LSP, loaded.LSPDefined, clientLSP, clientDef)
 }
 
-func normalizeLoadedConfig(cfg *bqconfig.LoadedConfig) *bqconfig.LoadedConfig {
+func (s *Server) normalizeLoadedConfig(cfg *bqconfig.LoadedConfig) *bqconfig.LoadedConfig {
 	if cfg.PrintOptions == nil {
 		cfg.PrintOptions = formatter.DefaultPrintOptions()
 	}
 
-	if cfg.LSP == nil {
-		cfg.LSP = bqconfig.DefaultLSPOptions()
+	if cfg.LSP == nil || (cfg.ConfigPath == "" && !cfg.LSPDefined.Any()) {
+		cfg.LSP = s.baseLSPOptions()
+	} else if s.defaultLSPOptions != nil {
+		cfg.LSP = bqconfig.MergeLSPOptionsOver(s.baseLSPOptions(), cfg.LSP, cfg.LSPDefined, nil, bqconfig.LSPDefinedFields{})
 	}
 
 	return cfg
 }
 
-func defaultLoadedConfig() *bqconfig.LoadedConfig {
+func (s *Server) defaultLoadedConfig() *bqconfig.LoadedConfig {
 	return &bqconfig.LoadedConfig{
 		PrintOptions: formatter.DefaultPrintOptions(),
-		LSP:          bqconfig.DefaultLSPOptions(),
+		LSP:          s.baseLSPOptions(),
 	}
 }
 
@@ -1669,11 +1838,7 @@ func (s *Server) getOrCreateStore(ctx context.Context, lspOpts *bqconfig.LSPOpti
 		return s.defaultStore
 	}
 
-	storeOpts := make([]catalog.StoreOption, 0, len(s.opts.StoreOptions)+3)
-	storeOpts = append(storeOpts, catalog.WithLogger(s.logger))
-	storeOpts = append(storeOpts, s.opts.StoreOptions...)
-	storeOpts = append(storeOpts, catalog.WithOnUpdate(s.onCatalogUpdate))
-	storeOpts = append(storeOpts, catalog.WithOnDryRunUpdate(s.onDryRunUpdate))
+	storeOpts := s.buildStoreOptions()
 	st, err := catalog.NewStore(lspOpts, storeOpts...)
 	if err != nil {
 		s.logger.WarnContext(ctx, "failed to create catalog store for document; using default store", slog.Any("error", err))
@@ -1682,6 +1847,7 @@ func (s *Server) getOrCreateStore(ctx context.Context, lspOpts *bqconfig.LSPOpti
 
 	s.stores[key] = st
 	s.ownedStores = append(s.ownedStores, st)
+	s.subscribeStoreLocked(st)
 
 	return st
 }

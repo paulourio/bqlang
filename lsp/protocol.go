@@ -1,4 +1,53 @@
-// Package lsp implements a pure-Go stdio JSON-RPC 2.0 / LSP 3.17 server for BigQuery SQL and Jinja2/dbt templates.
+// Package lsp implements a pure-Go JSON-RPC 2.0 / LSP 3.17 language server for
+// BigQuery SQL and Jinja2/dbt templates.
+//
+// # Embedding
+//
+// Callers can run a Server in-process over any io.Reader / io.Writer pair
+// (such as io.Pipe) without spawning a subprocess:
+//
+//	cr, sw := io.Pipe()
+//	sr, cw := io.Pipe()
+//	srv, err := lsp.NewServer(lsp.ServerOptions{
+//		Store:             sharedStore,
+//		TokenProvider:     tokenProvider,
+//		DefaultLSPOptions: opts,
+//		Logger:            logger,
+//	})
+//	if err != nil {
+//		return err
+//	}
+//	defer srv.Close()
+//	go srv.Serve(ctx, sr, sw)
+//	// Speak Content-Length framed JSON-RPC 2.0 over (cr, cw).
+//
+// Serve returns on the LSP exit notification, on context cancellation, on
+// Server.Close, or on reader EOF. It never calls os.Exit and never writes to
+// os.Stdout or os.Stderr.
+//
+// # Client Settings Shape
+//
+// Both initialize.initializationOptions and workspace/didChangeConfiguration
+// settings accept a JSON object with the same keys as the [lsp] table in
+// .bqfmt.toml, in either snake_case (default_project, default_dataset,
+// schema_dirs, bigquery_api_enabled, gcloud_path, cache_dir,
+// cache_ttl_seconds, project_cache_ttl_seconds, diagnostics_enabled,
+// require_partition_filter_severity, missing_partition_filter_severity,
+// clustering_filter_severity, cost_estimation_enabled, cost_codelens_enabled,
+// cost_status_bar_enabled, cost_hover_enabled, cost_diagnostic_severity,
+// cost_warning_threshold_bytes, cost_warning_threshold_usd,
+// cost_price_per_tib_usd, cost_dry_run_debounce_ms) or camelCase
+// (defaultProject, defaultDataset, bigqueryApiEnabled, ...). The object may
+// optionally be wrapped under a top-level "bqpls" or "lsp" key.
+//
+// # Custom Protocol Extensions
+//
+// In addition to standard LSP 3.17 methods, bqpls provides:
+//   - bqpls/statements (request): top-level statement boundaries, kinds, and source slices.
+//   - bqpls/queryCost (server-to-client notification): per-document dry-run / offline cost summary.
+//   - bqpls/refreshCost (request): force a fresh dry-run cost estimate for an open document.
+//
+// See PROTOCOL.md in this package for full wire schemas and the semantic token legend.
 package lsp
 
 import (
@@ -342,17 +391,23 @@ type CodeLensOptions struct {
 	ResolveProvider bool `json:"resolveProvider,omitempty"`
 }
 
+// ExperimentalCapabilities declares custom server protocol extensions.
+type ExperimentalCapabilities struct {
+	BQPLSStatements bool `json:"bqplsStatements,omitempty"`
+}
+
 // ServerCapabilities declares supported LSP 3.17 capabilities.
 type ServerCapabilities struct {
-	TextDocumentSync           *TextDocumentSyncOptions `json:"textDocumentSync,omitempty"`
-	CompletionProvider         *CompletionOptions       `json:"completionProvider,omitempty"`
-	HoverProvider              bool                     `json:"hoverProvider,omitempty"`
-	SignatureHelpProvider      *SignatureHelpOptions    `json:"signatureHelpProvider,omitempty"`
-	DefinitionProvider         bool                     `json:"definitionProvider,omitempty"`
-	DocumentSymbolProvider     bool                     `json:"documentSymbolProvider,omitempty"`
-	CodeLensProvider           *CodeLensOptions         `json:"codeLensProvider,omitempty"`
-	DocumentFormattingProvider bool                     `json:"documentFormattingProvider,omitempty"`
-	SemanticTokensProvider     *SemanticTokensOptions   `json:"semanticTokensProvider,omitempty"`
+	TextDocumentSync           *TextDocumentSyncOptions  `json:"textDocumentSync,omitempty"`
+	CompletionProvider         *CompletionOptions        `json:"completionProvider,omitempty"`
+	HoverProvider              bool                      `json:"hoverProvider,omitempty"`
+	SignatureHelpProvider      *SignatureHelpOptions     `json:"signatureHelpProvider,omitempty"`
+	DefinitionProvider         bool                      `json:"definitionProvider,omitempty"`
+	DocumentSymbolProvider     bool                      `json:"documentSymbolProvider,omitempty"`
+	CodeLensProvider           *CodeLensOptions          `json:"codeLensProvider,omitempty"`
+	DocumentFormattingProvider bool                      `json:"documentFormattingProvider,omitempty"`
+	SemanticTokensProvider     *SemanticTokensOptions    `json:"semanticTokensProvider,omitempty"`
+	Experimental               *ExperimentalCapabilities `json:"experimental,omitempty"`
 }
 
 // InitializeResult is returned by initialize.
@@ -461,6 +516,50 @@ type CodeLensParams struct {
 // RefreshCostParams carries parameters for the custom bqpls/refreshCost request.
 type RefreshCostParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
+}
+
+// Position represents a 0-based UTF-16 line and character offset in a text document.
+type Position struct {
+	Line      int `json:"line"`
+	Character int `json:"character"`
+}
+
+// Range represents a half-open UTF-16 text range [Start, End) in a text document.
+type Range struct {
+	Start Position `json:"start"`
+	End   Position `json:"end"`
+}
+
+// StatementsParams carries parameters for the custom bqpls/statements request.
+type StatementsParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+}
+
+// StatementKind classifies a top-level BigQuery SQL statement into a coarse category.
+type StatementKind string
+
+// Supported StatementKind values returned by bqpls/statements.
+const (
+	StatementKindQuery  StatementKind = "QUERY"
+	StatementKindDML    StatementKind = "DML"
+	StatementKindDDL    StatementKind = "DDL"
+	StatementKindScript StatementKind = "SCRIPT"
+	StatementKindCall   StatementKind = "CALL"
+	StatementKindExport StatementKind = "EXPORT"
+	StatementKindLoad   StatementKind = "LOAD"
+	StatementKindOther  StatementKind = "OTHER"
+)
+
+// StatementInfo describes one top-level SQL statement returned by bqpls/statements.
+type StatementInfo struct {
+	Range Range         `json:"range"`
+	Kind  StatementKind `json:"kind"`
+	Text  string        `json:"text"`
+}
+
+// StatementsResult is returned by the custom bqpls/statements request.
+type StatementsResult struct {
+	Statements []StatementInfo `json:"statements"`
 }
 
 // FormattingOptions configures textDocument/formatting behavior.

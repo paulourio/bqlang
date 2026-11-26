@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/lsp"
+	"github.com/paulourio/bqlang/lsp"
 )
 
 func TestLSPLintDiagnosticsAndSettingsIntegration(t *testing.T) {

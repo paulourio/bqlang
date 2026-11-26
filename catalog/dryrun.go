@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -354,17 +355,85 @@ func dryRunCacheKey(project, dataset, querySQL string) string {
 }
 
 // WithOnDryRunUpdate registers a callback invoked after an async dry-run job completes.
+//
+// For multiple independent listeners sharing one Store, prefer Store.SubscribeDryRun.
 func WithOnDryRunUpdate(fn func()) StoreOption {
 	return func(s *Store) {
-		s.onDryRunUpdate = fn
+		s.OnDryRunUpdate(fn)
 	}
 }
 
-// OnDryRunUpdate sets or replaces the asynchronous dry-run completion callback.
-func (s *Store) OnDryRunUpdate(fn func()) {
+// SubscribeDryRun registers fn to run after each async dry-run job completes
+// (success or failure). It returns an idempotent function that removes the
+// subscription. fn runs on a background goroutine with the store mutex released;
+// it must not call Close synchronously.
+func (s *Store) SubscribeDryRun(fn func()) (unsubscribe func()) {
+	if s == nil || fn == nil {
+		return func() {}
+	}
+
 	s.mu.Lock()
-	s.onDryRunUpdate = fn
+	id := s.addDryRunSubscriberLocked(fn)
 	s.mu.Unlock()
+
+	var once sync.Once
+
+	return func() {
+		once.Do(func() {
+			s.mu.Lock()
+			delete(s.dryRunSubs, id)
+			s.mu.Unlock()
+		})
+	}
+}
+
+// OnDryRunUpdate sets or replaces the legacy single asynchronous dry-run completion callback.
+func (s *Store) OnDryRunUpdate(fn func()) {
+	if s == nil {
+		return
+	}
+
+	s.mu.Lock()
+	if s.legacyDryRunSubID != 0 {
+		delete(s.dryRunSubs, s.legacyDryRunSubID)
+		s.legacyDryRunSubID = 0
+	}
+
+	if fn != nil {
+		s.legacyDryRunSubID = s.addDryRunSubscriberLocked(fn)
+	}
+	s.mu.Unlock()
+}
+
+func (s *Store) addDryRunSubscriberLocked(fn func()) uint64 {
+	if s.dryRunSubs == nil {
+		s.dryRunSubs = make(map[uint64]func())
+	}
+
+	s.nextSubID++
+	id := s.nextSubID
+	s.dryRunSubs[id] = fn
+
+	return id
+}
+
+func (s *Store) snapshotDryRunSubscribersLocked() []func() {
+	if len(s.dryRunSubs) == 0 {
+		return nil
+	}
+
+	ids := make([]uint64, 0, len(s.dryRunSubs))
+	for id := range s.dryRunSubs {
+		ids = append(ids, id)
+	}
+	slices.Sort(ids)
+
+	subs := make([]func(), 0, len(ids))
+	for _, id := range ids {
+		subs = append(subs, s.dryRunSubs[id])
+	}
+
+	return subs
 }
 
 // EffectiveBillingProject returns the GCP project ID used for BigQuery dry-run
@@ -694,8 +763,8 @@ func (s *Store) processDryRun(item dryRunRequestItem) {
 		updated = true
 	}
 
-	cb := s.onDryRunUpdate
-	onUpdate := s.onUpdate
+	dryRunSubs := s.snapshotDryRunSubscribersLocked()
+	updateSubs := s.snapshotUpdateSubscribersLocked()
 	closed := s.closed
 	s.mu.Unlock()
 
@@ -706,13 +775,13 @@ func (s *Store) processDryRun(item dryRunRequestItem) {
 	}
 
 	if updated && !closed && s.ctx.Err() == nil {
-		if onUpdate != nil {
+		if len(updateSubs) > 0 {
 			for _, upd := range enriched {
-				onUpdate(upd.meta.Ref)
+				notifyUpdateSubscribers(updateSubs, upd.meta.Ref)
 			}
 		}
 
-		if cb != nil {
+		for _, cb := range dryRunSubs {
 			cb()
 		}
 	}

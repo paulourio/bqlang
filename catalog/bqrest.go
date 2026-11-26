@@ -527,17 +527,150 @@ func mapHTTPStatus(statusCode int, body []byte) error {
 	}
 }
 
+type adcScopeState struct {
+	source  oauth2.TokenSource
+	retryAt time.Time
+}
+
 type defaultTokenCache struct {
 	httpTimeout      time.Duration
 	gcloudPath       string
 	mu               sync.Mutex
-	adcSource        oauth2.TokenSource
-	adcRetryAt       time.Time
-	adcFullSource    oauth2.TokenSource
-	adcFullRetryAt   time.Time
+	adcByScope       map[string]*adcScopeState
 	gcloudToken      string
 	gcloudExp        time.Time
 	preferUserGcloud bool
+}
+
+// NewDefaultTokenProvider returns a cached ADC→gcloud token provider for the
+// given OAuth scopes (default: bigquery.readonly).
+func NewDefaultTokenProvider(scopes ...string) TokenProvider {
+	resolved := normalizeAuthScopes(scopes)
+	cache := &defaultTokenCache{}
+
+	return func(ctx context.Context) (string, error) {
+		return cache.TokenForScopes(ctx, resolved...)
+	}
+}
+
+type adcCredentialMetadata struct {
+	Type        string `json:"type"`
+	ClientEmail string `json:"client_email"`
+}
+
+// DescribeCredentials reports, best-effort, which credential the default chain
+// resolves to, for UI display, e.g. "authorized_user (ADC)", "service_account
+// sa@proj.iam (ADC)" or "gcloud". It returns "" if unknown.
+func DescribeCredentials(ctx context.Context) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+
+	adcClient := &http.Client{Timeout: defaultHTTPTimeout}
+	adcCtx := context.WithValue(ctx, oauth2.HTTPClient, adcClient)
+	creds, err := google.FindDefaultCredentials(adcCtx, bigqueryReadonlyScope)
+	if err == nil && creds != nil {
+		return describeADCCredentials(creds), nil
+	}
+
+	if ctx.Err() != nil {
+		return "", ctx.Err()
+	}
+
+	return describeGcloudCredentials(ctx)
+}
+
+func describeADCCredentials(creds *google.Credentials) string {
+	if len(creds.JSON) == 0 {
+		return "metadata_server (ADC)"
+	}
+
+	var meta adcCredentialMetadata
+	if err := json.Unmarshal(creds.JSON, &meta); err != nil {
+		return "ADC"
+	}
+
+	credType := strings.TrimSpace(meta.Type)
+	switch credType {
+	case "service_account":
+		if email := strings.TrimSpace(meta.ClientEmail); email != "" {
+			return fmt.Sprintf("service_account %s (ADC)", email)
+		}
+
+		return "service_account (ADC)"
+	case "authorized_user":
+		return "authorized_user (ADC)"
+	case "":
+		return "ADC"
+	default:
+		return credType + " (ADC)"
+	}
+}
+
+func describeGcloudCredentials(ctx context.Context) (string, error) {
+	bin := ResolveGcloudBinary("")
+	if !isExecutableFile(bin) {
+		if _, err := exec.LookPath(bin); err != nil {
+			return "", nil
+		}
+	}
+
+	cmdCtx, cancel := context.WithTimeout(ctx, gcloudCommandTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(cmdCtx, bin, "auth", "list", "--filter=status:ACTIVE", "--format=value(account)")
+	out, err := cmd.Output()
+	if err != nil {
+		if ctx.Err() != nil {
+			return "", ctx.Err()
+		}
+
+		return "", nil
+	}
+
+	for line := range strings.SplitSeq(string(out), "\n") {
+		if acct := strings.TrimSpace(line); acct != "" {
+			return fmt.Sprintf("gcloud (%s)", acct), nil
+		}
+	}
+
+	return "", nil
+}
+
+func normalizeAuthScopes(scopes []string) []string {
+	out := make([]string, 0, max(1, len(scopes)))
+	for _, s := range scopes {
+		trimmed := strings.TrimSpace(s)
+		if trimmed == "" || slices.Contains(out, trimmed) {
+			continue
+		}
+
+		out = append(out, trimmed)
+	}
+
+	if len(out) == 0 {
+		return []string{bigqueryReadonlyScope}
+	}
+
+	return out
+}
+
+func scopeCacheKey(scopes []string) string {
+	return strings.Join(scopes, "\x00")
+}
+
+func (d *defaultTokenCache) scopeStateLocked(key string) *adcScopeState {
+	if d.adcByScope == nil {
+		d.adcByScope = make(map[string]*adcScopeState)
+	}
+
+	st, ok := d.adcByScope[key]
+	if !ok {
+		st = &adcScopeState{}
+		d.adcByScope[key] = st
+	}
+
+	return st
 }
 
 func (d *defaultTokenCache) timeout() time.Duration {
@@ -571,20 +704,22 @@ func (c *RestClient) WarmAuth(ctx context.Context) {
 }
 
 func (d *defaultTokenCache) Token(ctx context.Context) (string, error) {
-	return d.tokenForScope(ctx, false)
+	return d.TokenForScopes(ctx, bigqueryReadonlyScope)
 }
 
 func (d *defaultTokenCache) DryRunToken(ctx context.Context) (string, error) {
-	return d.tokenForScope(ctx, true)
+	return d.TokenForScopes(ctx, bigqueryScope)
 }
 
-func (d *defaultTokenCache) tokenForScope(ctx context.Context, fullScope bool) (string, error) {
+func (d *defaultTokenCache) TokenForScopes(ctx context.Context, scopes ...string) (string, error) {
+	norm := normalizeAuthScopes(scopes)
+	key := scopeCacheKey(norm)
 	now := time.Now()
 
-	if tok, skipADC, ok := d.cachedOrSkipADC(now, fullScope); ok {
+	if tok, skipADC, ok := d.cachedOrSkipADC(now, key); ok {
 		return tok, nil
 	} else if !skipADC {
-		tok, adcErr := d.tryADCToken(fullScope)
+		tok, adcErr := d.tryADCToken(norm, key)
 		if adcErr == nil {
 			return tok, nil
 		}
@@ -602,15 +737,14 @@ func (d *defaultTokenCache) tokenForScope(ctx context.Context, fullScope bool) (
 
 func (d *defaultTokenCache) fallbackAfterUnauthorized(ctx context.Context, fullScope bool) (string, bool) {
 	now := time.Now()
+	key := bigqueryReadonlyScope
+	if fullScope {
+		key = bigqueryScope
+	}
 
 	d.mu.Lock()
 	alreadyUsingGcloud := d.gcloudToken != "" && now.Before(d.gcloudExp) && d.preferUserGcloud
-	nextRetry := now.Add(gcloudTokenTTL)
-	if fullScope {
-		d.adcFullRetryAt = nextRetry
-	} else {
-		d.adcRetryAt = nextRetry
-	}
+	d.scopeStateLocked(key).retryAt = now.Add(gcloudTokenTTL)
 	d.mu.Unlock()
 
 	if alreadyUsingGcloud {
@@ -630,7 +764,7 @@ func (d *defaultTokenCache) fallbackAfterUnauthorized(ctx context.Context, fullS
 	return tok, true
 }
 
-func (d *defaultTokenCache) cachedOrSkipADC(now time.Time, fullScope bool) (tok string, skipADC, hit bool) {
+func (d *defaultTokenCache) cachedOrSkipADC(now time.Time, key string) (tok string, skipADC, hit bool) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
@@ -638,16 +772,15 @@ func (d *defaultTokenCache) cachedOrSkipADC(now time.Time, fullScope bool) (tok 
 		return d.gcloudToken, false, true
 	}
 
-	retryAt := d.adcRetryAt
-	if fullScope {
-		retryAt = d.adcFullRetryAt
+	if st, ok := d.adcByScope[key]; ok {
+		return "", now.Before(st.retryAt), false
 	}
 
-	return "", now.Before(retryAt), false
+	return "", false, false
 }
 
-func (d *defaultTokenCache) tryADCToken(fullScope bool) (string, error) {
-	src, err := d.getOrInitADC(fullScope)
+func (d *defaultTokenCache) tryADCToken(scopes []string, key string) (string, error) {
+	src, err := d.getOrInitADC(scopes, key)
 	if err == nil && src != nil {
 		tok, tokErr := src.Token()
 		if tokErr == nil && tok.AccessToken != "" {
@@ -662,22 +795,17 @@ func (d *defaultTokenCache) tryADCToken(fullScope bool) (string, error) {
 	}
 
 	d.mu.Lock()
-	nextRetry := time.Now().Add(gcloudTokenTTL)
-	if fullScope {
-		d.adcFullRetryAt = nextRetry
-	} else {
-		d.adcRetryAt = nextRetry
-	}
+	d.scopeStateLocked(key).retryAt = time.Now().Add(gcloudTokenTTL)
 	d.mu.Unlock()
 
 	return "", err
 }
 
-func (d *defaultTokenCache) getOrInitADC(fullScope bool) (oauth2.TokenSource, error) {
+func (d *defaultTokenCache) getOrInitADC(scopes []string, key string) (oauth2.TokenSource, error) {
 	d.mu.Lock()
-	src := d.adcSource
-	if fullScope {
-		src = d.adcFullSource
+	var src oauth2.TokenSource
+	if st, ok := d.adcByScope[key]; ok {
+		src = st.source
 	}
 	d.mu.Unlock()
 
@@ -685,17 +813,12 @@ func (d *defaultTokenCache) getOrInitADC(fullScope bool) (oauth2.TokenSource, er
 		return src, nil
 	}
 
-	scope := bigqueryReadonlyScope
-	if fullScope {
-		scope = bigqueryScope
-	}
-
 	// Bind a long-lived background context with a bounded HTTP client timeout so
 	// future OAuth2 token refreshes never inherit a canceled per-request context.
 	adcClient := &http.Client{Timeout: d.timeout()}
 	adcCtx := context.WithValue(context.Background(), oauth2.HTTPClient, adcClient)
 
-	creds, err := google.FindDefaultCredentials(adcCtx, scope)
+	creds, err := google.FindDefaultCredentials(adcCtx, scopes...)
 	if err != nil {
 		return nil, fmt.Errorf("find default credentials: %w", err)
 	}
@@ -705,17 +828,11 @@ func (d *defaultTokenCache) getOrInitADC(fullScope bool) (oauth2.TokenSource, er
 	}
 
 	d.mu.Lock()
-	if fullScope {
-		if d.adcFullSource == nil {
-			d.adcFullSource = creds.TokenSource
-		}
-		src = d.adcFullSource
-	} else {
-		if d.adcSource == nil {
-			d.adcSource = creds.TokenSource
-		}
-		src = d.adcSource
+	st := d.scopeStateLocked(key)
+	if st.source == nil {
+		st.source = creds.TokenSource
 	}
+	src = st.source
 	d.mu.Unlock()
 
 	return src, nil

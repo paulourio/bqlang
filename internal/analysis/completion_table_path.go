@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/paulourio/bqlang/internal/catalog"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/syntax"
 )
 

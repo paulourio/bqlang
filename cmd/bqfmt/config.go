@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/paulourio/bqlang/bqconfig"
 	"github.com/paulourio/bqlang/formatter"
-	"github.com/paulourio/bqlang/internal/bqconfig"
 )
 
 type configLoader struct {

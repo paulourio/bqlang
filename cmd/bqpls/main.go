@@ -15,7 +15,7 @@ import (
 	"syscall"
 
 	"github.com/paulourio/bqlang/internal/editors"
-	"github.com/paulourio/bqlang/internal/lsp"
+	"github.com/paulourio/bqlang/lsp"
 )
 
 const (

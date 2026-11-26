@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/paulourio/bqlang/internal/bqconfig"
+	"github.com/paulourio/bqlang/bqconfig"
 )
 
 func TestLintSeverityDefaultsValidationAndMerge(t *testing.T) {

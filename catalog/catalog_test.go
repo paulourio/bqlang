@@ -31,9 +31,9 @@ import (
 	_ "modernc.org/sqlite"
 
 	"github.com/paulourio/bqlang"
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/formatter"
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/catalog"
 )
 
 func TestFlexInt64JSON(t *testing.T) {

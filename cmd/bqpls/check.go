@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/paulourio/bqlang/bqconfig"
+	"github.com/paulourio/bqlang/catalog"
 	"github.com/paulourio/bqlang/internal/analysis"
-	"github.com/paulourio/bqlang/internal/bqconfig"
-	"github.com/paulourio/bqlang/internal/catalog"
 )
 
 const defaultCheckFetchTimeout = 15 * time.Second

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/paulourio/bqlang/internal/bqconfig"
+	"github.com/paulourio/bqlang/bqconfig"
 )
 
 type rawClientLSPSettings struct {
