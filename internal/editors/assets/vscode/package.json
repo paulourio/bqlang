@@ -1,0 +1,277 @@
+{
+  "name": "bqlang",
+  "displayName": "BigQuery SQL (bqlang)",
+  "description": "GoogleSQL, BigQuery, and Jinja2/dbt language server and syntax support.",
+  "version": "0.1.0",
+  "publisher": "paulourio",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters"
+  ],
+  "keywords": [
+    "bigquery",
+    "googlesql",
+    "sql",
+    "dbt",
+    "jinja2",
+    "bqlang"
+  ],
+  "activationEvents": [
+    "onLanguage:bqlang"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "bqlang",
+        "aliases": [
+          "BigQuery SQL",
+          "bqlang"
+        ],
+        "extensions": [
+          ".bql",
+          ".sql",
+          ".bql.j2",
+          ".sql.j2",
+          ".bql.tpl",
+          ".sql.tpl"
+        ],
+        "filenamePatterns": [
+          "*.bql",
+          "*.sql",
+          "*.bql.j2",
+          "*.sql.j2",
+          "*.bql.tpl",
+          "*.sql.tpl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bqlang",
+        "scopeName": "source.bqlang",
+        "path": "./syntaxes/bqlang.tmLanguage.json"
+      }
+    ],
+    "semanticTokenModifiers": [
+      {
+        "id": "partitioned",
+        "description": "BigQuery table partitioning column"
+      },
+      {
+        "id": "clustered",
+        "description": "BigQuery table clustering column"
+      },
+      {
+        "id": "pseudo",
+        "description": "BigQuery pseudo-column such as _PARTITIONTIME, _PARTITIONDATE, or _TABLE_SUFFIX"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "bqlang",
+        "scopes": {
+          "property.partitioned": [
+            "constant.other.caps.partition.bqlang",
+            "markup.bold"
+          ],
+          "variable.partitioned": [
+            "constant.other.caps.partition.bqlang",
+            "markup.bold"
+          ],
+          "property.clustered": [
+            "entity.other.attribute-name.cluster.bqlang",
+            "markup.italic"
+          ],
+          "variable.clustered": [
+            "entity.other.attribute-name.cluster.bqlang",
+            "markup.italic"
+          ],
+          "property.pseudo": [
+            "variable.language.pseudo.bqlang"
+          ],
+          "variable.pseudo": [
+            "variable.language.pseudo.bqlang"
+          ]
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "bqpls.refreshCost",
+        "title": "BigQuery SQL: Refresh Estimated Query Cost"
+      }
+    ],
+    "configuration": {
+      "title": "BigQuery SQL (bqpls)",
+      "properties": {
+        "bqpls.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the bqpls language server executable. Leave empty to use the bundled or PATH executable."
+        },
+        "bqpls.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the bqpls language server."
+        },
+        "bqpls.defaultProject": {
+          "type": "string",
+          "default": "",
+          "description": "Default GCP project ID used to qualify 1- or 2-part BigQuery table names. Overridden by [lsp].default_project in .bqfmt.toml."
+        },
+        "bqpls.defaultDataset": {
+          "type": "string",
+          "default": "",
+          "description": "Default BigQuery dataset ID used to qualify 1-part table names. Overridden by [lsp].default_dataset in .bqfmt.toml."
+        },
+        "bqpls.schemaDirs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Directories containing static BigQuery table or schema JSON files. Relative paths resolve from the workspace root. Overridden by [lsp].schema_dirs in .bqfmt.toml."
+        },
+        "bqpls.bigqueryApiEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable asynchronous BigQuery REST v2 metadata fetching for table/column hover and completion (uses ADC / gcloud auth). Overridden by [lsp].bigquery_api_enabled in .bqfmt.toml."
+        },
+        "bqpls.gcloudPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the gcloud CLI executable used for BigQuery authentication fallback (supports leading ~/). Leave empty to auto-detect from PATH and standard Google Cloud SDK directories. Overridden by [lsp].gcloud_path in .bqfmt.toml."
+        },
+        "bqpls.cacheDir": {
+          "type": "string",
+          "default": "",
+          "description": "Directory for persistent BigQuery metadata disk cache. Leave empty to use the OS user cache directory. Overridden by [lsp].cache_dir in .bqfmt.toml."
+        },
+        "bqpls.cacheTtlSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 86400,
+          "description": "Disk metadata cache TTL in seconds (0 disables default disk cache reads). Overridden by [lsp].cache_ttl_seconds in .bqfmt.toml."
+        },
+        "bqpls.projectCacheTtlSeconds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "default": {},
+          "description": "Per-project BigQuery metadata cache TTL extensions in seconds (project ID to seconds). Extends bqpls.cacheTtlSeconds and merges additively across User/Workspace settings and [lsp.project_cache_ttl_seconds] in .bqfmt.toml."
+        },
+        "bqpls.diagnosticsEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable syntax, semantic, and BigQuery diagnostics. Overridden by [lsp].diagnostics_enabled in .bqfmt.toml."
+        },
+        "bqpls.requirePartitionFilterSeverity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info",
+            "hint",
+            "off"
+          ],
+          "default": "warning",
+          "description": "Diagnostic severity when querying a table with requirePartitionFilter without filtering its partition column. Overridden by [lsp].require_partition_filter_severity in .bqfmt.toml."
+        },
+        "bqpls.missingPartitionFilterSeverity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info",
+            "hint",
+            "off"
+          ],
+          "default": "warning",
+          "description": "Diagnostic severity when querying a partitioned table without a sargable filter on its partition column in WHERE or JOIN. Overridden by [lsp].missing_partition_filter_severity in .bqfmt.toml."
+        },
+        "bqpls.clusteringFilterSeverity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info",
+            "hint",
+            "off"
+          ],
+          "default": "warning",
+          "description": "Diagnostic severity when querying a clustered table without filtering or joining on its leading clustering column. Overridden by [lsp].clustering_filter_severity in .bqfmt.toml."
+        },
+        "bqpls.costEstimationEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable estimated query cost reporting (BigQuery dry-run when bigqueryApiEnabled is true, with offline fallback from cached table sizes). Overridden by [lsp].cost_estimation_enabled in .bqfmt.toml."
+        },
+        "bqpls.costCodeLensEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show estimated query bytes and cost as a CodeLens above each SQL statement. Overridden by [lsp].cost_codelens_enabled in .bqfmt.toml."
+        },
+        "bqpls.costStatusBarEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show estimated query bytes and cost in the editor status bar. Overridden by [lsp].cost_status_bar_enabled in .bqfmt.toml."
+        },
+        "bqpls.costHoverEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show humanized table size and full-table scan cost in table hover cards. Overridden by [lsp].cost_hover_enabled in .bqfmt.toml."
+        },
+        "bqpls.costDiagnosticSeverity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info",
+            "hint",
+            "off"
+          ],
+          "default": "warning",
+          "description": "Diagnostic severity when a query's estimated scan exceeds a configured cost threshold. Overridden by [lsp].cost_diagnostic_severity in .bqfmt.toml."
+        },
+        "bqpls.costWarningThresholdBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Emit a diagnostic when a statement's estimated bytes processed exceeds this limit (0 disables byte threshold). Overridden by [lsp].cost_warning_threshold_bytes in .bqfmt.toml."
+        },
+        "bqpls.costWarningThresholdUsd": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Emit a diagnostic when a statement's estimated USD cost exceeds this limit (0 disables USD threshold). Overridden by [lsp].cost_warning_threshold_usd in .bqfmt.toml."
+        },
+        "bqpls.costPricePerTibUsd": {
+          "type": "number",
+          "minimum": 0,
+          "default": 6.25,
+          "description": "BigQuery on-demand query price in USD per TiB used for cost calculations. Overridden by [lsp].cost_price_per_tib_usd in .bqfmt.toml."
+        },
+        "bqpls.costDryRunDebounceMs": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 800,
+          "description": "Debounce delay in milliseconds after edits before triggering an asynchronous BigQuery dry-run (0 = immediate). Overridden by [lsp].cost_dry_run_debounce_ms in .bqfmt.toml."
+        }
+      }
+    }
+  }
+}
