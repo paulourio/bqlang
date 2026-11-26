@@ -16,6 +16,7 @@ import (
 
 	"github.com/paulourio/bqlang"
 	"github.com/paulourio/bqlang/formatter"
+	"github.com/paulourio/bqlang/internal/bqconfig"
 )
 
 var version = "dev"
@@ -271,12 +272,8 @@ func isSkippedDir(name string) bool {
 
 func isBQLFile(f fs.DirEntry) bool {
 	name := f.Name()
-	validSuffix := strings.HasSuffix(name, ".bql") ||
-		strings.HasSuffix(name, ".sql") ||
-		strings.HasSuffix(name, ".bql.j2") ||
-		strings.HasSuffix(name, ".sql.j2")
 
-	return !strings.HasPrefix(name, ".") && !f.IsDir() && validSuffix
+	return !strings.HasPrefix(name, ".") && !f.IsDir() && bqconfig.IsBQLFilename(name)
 }
 
 // processFile formats a single file or standard input (when info == nil).

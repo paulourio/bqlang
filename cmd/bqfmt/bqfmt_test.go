@@ -408,6 +408,56 @@ func TestBqfmtWalkSymlinksAndWriteSafety(t *testing.T) {
 		assert.Len(t, entries, 4)
 	})
 
+	t.Run("-l -w walks .sql.tpl and .bql.tpl while skipping dotfiles and unsupported extensions", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		bql := filepath.Join(dir, "a.bql")
+		sql := filepath.Join(dir, "b.sql")
+		bqlJ2 := filepath.Join(dir, "c.bql.j2")
+		sqlJ2 := filepath.Join(dir, "d.sql.j2")
+		bqlTpl := filepath.Join(dir, "e.bql.tpl")
+		sqlTpl := filepath.Join(dir, "f.sql.tpl")
+		hiddenTpl := filepath.Join(dir, ".hidden.sql.tpl")
+		ignoredTpl := filepath.Join(dir, "ignored.tpl")
+		backupBak := filepath.Join(dir, "backup.sql.bak")
+		notesTxt := filepath.Join(dir, "notes.txt")
+
+		require.NoError(t, os.WriteFile(bql, []byte("select 1"), 0o600))
+		require.NoError(t, os.WriteFile(sql, []byte("SELECT 2\n"), 0o600))
+		require.NoError(t, os.WriteFile(bqlJ2, []byte("select {{ a }}"), 0o600))
+		require.NoError(t, os.WriteFile(sqlJ2, []byte("select {{ b }}"), 0o600))
+		require.NoError(t, os.WriteFile(bqlTpl, []byte("select {{ c }}"), 0o600))
+		require.NoError(t, os.WriteFile(sqlTpl, []byte("select {{ d }} from {{ tbl }}"), 0o600))
+		require.NoError(t, os.WriteFile(hiddenTpl, []byte("select 7"), 0o600))
+		require.NoError(t, os.WriteFile(ignoredTpl, []byte("not sql {{{{"), 0o600))
+		require.NoError(t, os.WriteFile(backupBak, []byte("not sql {{{{"), 0o600))
+		require.NoError(t, os.WriteFile(notesTxt, []byte("not sql {{{{"), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{"-l", "-w", dir}, strings.NewReader(""), &stdout, &stderr)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Empty(t, stderr.String())
+		assert.Equal(t, bql+"\n"+bqlJ2+"\n"+sqlJ2+"\n"+bqlTpl+"\n"+sqlTpl+"\n", stdout.String())
+
+		tplContent, err := os.ReadFile(sqlTpl)
+		require.NoError(t, err)
+		assert.Equal(t, "SELECT {{ d }}\n  FROM {{ tbl }}\n", string(tplContent))
+
+		hiddenAfter, err := os.ReadFile(hiddenTpl)
+		require.NoError(t, err)
+		assert.Equal(t, "select 7", string(hiddenAfter))
+
+		ignoredAfter, err := os.ReadFile(ignoredTpl)
+		require.NoError(t, err)
+		assert.Equal(t, "not sql {{{{", string(ignoredAfter))
+
+		bakAfter, err := os.ReadFile(backupBak)
+		require.NoError(t, err)
+		assert.Equal(t, "not sql {{{{", string(bakAfter))
+	})
+
 	t.Run("symlinked .sql file under -w truncates target cleanly without stale bytes", func(t *testing.T) {
 		t.Parallel()
 
@@ -847,5 +897,130 @@ keyword_style = "UPPER_CASE"
 		assert.Contains(t, diff, "@@ -1,4 +1,4 @@\n-l1\n+L1\n")
 		assert.Contains(t, diff, "@@ -7,4 +7,4 @@\n l7\n l8\n l9\n-l10\n+L10\n")
 		assert.Empty(t, unifiedDiff("q.sql", oldText, oldText))
+	})
+
+	t.Run("-stdin-filename matches .sql.tpl style rules", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		cfgContent := `
+default_style = "upper"
+
+[[styles]]
+name = "tpl_lower"
+include = "*.sql.tpl"
+[styles.options]
+keyword_style = "LOWER_CASE"
+
+[[styles]]
+name = "upper"
+[styles.options]
+keyword_style = "UPPER_CASE"
+`
+		require.NoError(t, os.WriteFile(filepath.Join(dir, ".bqfmt.toml"), []byte(cfgContent), 0o600))
+
+		var stdout, stderr bytes.Buffer
+
+		code := run(
+			[]string{"-stdin-filename", filepath.Join(dir, "model.sql.tpl")},
+			strings.NewReader("SELECT 1 AS x"),
+			&stdout,
+			&stderr,
+		)
+		require.Equal(t, 0, code, stderr.String())
+		assert.Empty(t, stderr.String())
+		assert.Equal(t, "select 1 as x\n", stdout.String())
+	})
+
+	t.Run("[lsp] section coexists across all layouts and rejects invalid [lsp] options with exit 2", func(t *testing.T) {
+		t.Parallel()
+
+		validCases := []struct {
+			name string
+			toml string
+			want string
+		}{
+			{
+				name: "flat + lsp",
+				toml: "keyword_style = \"LOWER_CASE\"\n[lsp]\ndefault_project = \"proj\"\n",
+				want: "select 1 as x\n",
+			},
+			{
+				name: "options + lsp",
+				toml: "[options]\nkeyword_style = \"LOWER_CASE\"\n[lsp]\ndefault_dataset = \"ds\"\n",
+				want: "select 1 as x\n",
+			},
+			{
+				name: "print_options + lsp",
+				toml: "[print_options]\nkeyword_style = \"LOWER_CASE\"\n[lsp]\nbigquery_api_enabled = true\n",
+				want: "select 1 as x\n",
+			},
+			{
+				name: "styles + lsp",
+				toml: "[[styles]]\nname = \"s\"\n[styles.options]\nkeyword_style = \"LOWER_CASE\"\n[lsp]\ncache_ttl_seconds = 60\n",
+				want: "select 1 as x\n",
+			},
+			{
+				name: "lsp only",
+				toml: "[lsp]\nrequire_partition_filter_severity = \"error\"\n",
+				want: "SELECT 1 AS x\n",
+			},
+		}
+
+		for _, tc := range validCases {
+			t.Run(tc.name, func(t *testing.T) {
+				t.Parallel()
+
+				dir := t.TempDir()
+				cfgPath := filepath.Join(dir, ".bqfmt.toml")
+				require.NoError(t, os.WriteFile(cfgPath, []byte(tc.toml), 0o600))
+
+				var stdout, stderr bytes.Buffer
+
+				code := run([]string{"-config", cfgPath}, strings.NewReader("SELECT 1 AS x"), &stdout, &stderr)
+				require.Equal(t, 0, code, stderr.String())
+				assert.Empty(t, stderr.String())
+				assert.Equal(t, tc.want, stdout.String())
+			})
+		}
+
+		invalidCases := []struct {
+			name    string
+			toml    string
+			wantErr string
+		}{
+			{
+				name:    "unknown lsp key",
+				toml:    "[lsp]\nbad_key = true\n",
+				wantErr: `unknown option "lsp.bad_key"`,
+			},
+			{
+				name:    "negative cache_ttl_seconds",
+				toml:    "[lsp]\ncache_ttl_seconds = -1\n",
+				wantErr: "invalid lsp option",
+			},
+			{
+				name:    "invalid severity",
+				toml:    "[lsp]\nrequire_partition_filter_severity = \"fatal\"\n",
+				wantErr: "invalid lsp option",
+			},
+		}
+
+		for _, tc := range invalidCases {
+			t.Run(tc.name, func(t *testing.T) {
+				t.Parallel()
+
+				dir := t.TempDir()
+				cfgPath := filepath.Join(dir, ".bqfmt.toml")
+				require.NoError(t, os.WriteFile(cfgPath, []byte(tc.toml), 0o600))
+
+				var stdout, stderr bytes.Buffer
+
+				code := run([]string{"-config", cfgPath}, strings.NewReader("SELECT 1"), &stdout, &stderr)
+				assert.Equal(t, 2, code)
+				assert.Empty(t, stdout.String())
+				assert.Contains(t, stderr.String(), tc.wantErr)
+			})
+		}
 	})
 }
